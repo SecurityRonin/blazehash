@@ -19,21 +19,17 @@ pub struct WalkOutput {
     pub errors: Vec<WalkError>,
 }
 
-/// Walk a directory, hash all files, return results and errors.
-/// Uses rayon for parallel file hashing.
-pub fn walk_and_hash(
-    root: &Path,
-    algorithms: &[Algorithm],
-    recursive: bool,
-) -> Result<WalkOutput> {
+/// Walk a directory and collect file paths (no hashing).
+/// Returns file paths and any walk errors encountered.
+pub fn walk_paths(root: &Path, recursive: bool) -> (Vec<PathBuf>, Vec<WalkError>) {
     let walker = if recursive {
         WalkDir::new(root)
     } else {
         WalkDir::new(root).max_depth(1)
     };
 
-    let mut walk_errors = Vec::new();
     let mut paths = Vec::new();
+    let mut errors = Vec::new();
 
     for entry in walker {
         match entry {
@@ -44,13 +40,25 @@ pub fn walk_and_hash(
             }
             Err(err) => {
                 let path = err.path().map(|p| p.to_path_buf()).unwrap_or_default();
-                walk_errors.push(WalkError {
+                errors.push(WalkError {
                     path,
                     error: err.to_string(),
                 });
             }
         }
     }
+
+    (paths, errors)
+}
+
+/// Walk a directory, hash all files, return results and errors.
+/// Uses rayon for parallel file hashing.
+pub fn walk_and_hash(
+    root: &Path,
+    algorithms: &[Algorithm],
+    recursive: bool,
+) -> Result<WalkOutput> {
+    let (paths, walk_errors) = walk_paths(root, recursive);
 
     let hash_errors = Mutex::new(Vec::new());
     let results: Vec<FileHashResult> = paths

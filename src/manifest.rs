@@ -1,7 +1,9 @@
 use crate::algorithm::Algorithm;
 use crate::hash::FileHashResult;
 use anyhow::{bail, Result};
+use std::collections::HashMap;
 use std::io::Write;
+use std::path::PathBuf;
 use std::str::FromStr;
 
 /// Write the hashdeep-format header.
@@ -64,4 +66,38 @@ pub fn parse_header(input: &str) -> Result<Vec<Algorithm>> {
     }
 
     Ok(algorithms)
+}
+
+/// A single parsed record from a hashdeep manifest.
+#[derive(Debug, Clone)]
+pub struct ManifestRecord {
+    pub size: u64,
+    pub hashes: HashMap<Algorithm, String>,
+    pub path: PathBuf,
+}
+
+/// Parse all data records from a hashdeep manifest.
+/// Skips headers (%%%%), comments (#), empty lines, and malformed entries.
+pub fn parse_records(content: &str, algorithms: &[Algorithm]) -> Vec<ManifestRecord> {
+    let expected_fields = algorithms.len() + 2; // size + N hashes + filename
+
+    content
+        .lines()
+        .filter(|line| !line.starts_with("%%%%") && !line.starts_with('#') && !line.is_empty())
+        .filter_map(|line| {
+            let parts: Vec<&str> = line.splitn(expected_fields, ',').collect();
+            if parts.len() < expected_fields {
+                return None;
+            }
+
+            let size: u64 = parts[0].parse().ok()?;
+            let mut hashes = HashMap::new();
+            for (i, algo) in algorithms.iter().enumerate() {
+                hashes.insert(*algo, parts[i + 1].to_string());
+            }
+            let path = PathBuf::from(parts[algorithms.len() + 1]);
+
+            Some(ManifestRecord { size, hashes, path })
+        })
+        .collect()
 }
