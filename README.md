@@ -56,7 +56,26 @@ All hashes are bit-identical to hashdeep for shared algorithms (MD5, SHA-1, SHA-
 
 ## Install
 
-### Pre-built binaries (recommended)
+### Homebrew (macOS)
+
+```bash
+brew tap SecurityRonin/blazehash
+brew install blazehash
+```
+
+### Windows (winget)
+
+```powershell
+winget install SecurityRonin.blazehash
+```
+
+### Cargo (all platforms)
+
+```bash
+cargo install blazehash
+```
+
+### Pre-built binaries
 
 Download from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases) — pre-built for:
 
@@ -69,19 +88,6 @@ Download from [GitHub Releases](https://github.com/SecurityRonin/blazehash/relea
 | Windows | x86_64 | `blazehash-x86_64-pc-windows-msvc.exe` |
 
 Linux binaries are fully static (musl) — no glibc dependency. Drop them on a SIFT workstation, a cloud instance, or an air-gapped forensic box and they just work.
-
-### Cargo
-
-```bash
-cargo install blazehash
-```
-
-### Homebrew
-
-```bash
-brew tap SecurityRonin/blazehash
-brew install blazehash
-```
 
 ### Build from source
 
