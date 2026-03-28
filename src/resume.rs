@@ -32,6 +32,12 @@ impl ResumeState {
         Ok(Self { completed })
     }
 
+    /// Create resume state from pre-parsed manifest records.
+    pub fn from_records(records: &[crate::manifest::ManifestRecord]) -> Self {
+        let completed: HashSet<PathBuf> = records.iter().map(|r| r.path.clone()).collect();
+        Self { completed }
+    }
+
     pub fn is_done(&self, path: &Path) -> bool {
         self.completed.contains(path)
     }

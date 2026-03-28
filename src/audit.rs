@@ -1,6 +1,5 @@
-use crate::algorithm::Algorithm;
 use crate::hash::hash_file;
-use crate::manifest::parse_header;
+use crate::manifest::{parse_header, parse_records, ManifestRecord};
 use anyhow::Result;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -24,20 +23,14 @@ pub enum AuditStatus {
     Missing(PathBuf),
 }
 
-struct KnownEntry {
-    size: u64,
-    hashes: HashMap<Algorithm, String>,
-    path: PathBuf,
-}
-
 pub fn audit(
     paths: &[PathBuf],
     known_content: &str,
 ) -> Result<AuditResult> {
     let known_algos = parse_header(known_content)?;
-    let known_entries = parse_known_entries(known_content, &known_algos)?;
+    let known_entries = parse_records(known_content, &known_algos);
 
-    let known_by_path: HashMap<&Path, &KnownEntry> = known_entries
+    let known_by_path: HashMap<&Path, &ManifestRecord> = known_entries
         .iter()
         .map(|e| (e.path.as_path(), e))
         .collect();
@@ -101,35 +94,3 @@ pub fn audit(
     Ok(result)
 }
 
-fn parse_known_entries(content: &str, algorithms: &[Algorithm]) -> Result<Vec<KnownEntry>> {
-    let mut entries = Vec::new();
-
-    for line in content.lines() {
-        if line.starts_with("%%%%") || line.starts_with('#') || line.is_empty() {
-            continue;
-        }
-
-        let parts: Vec<&str> = line.splitn(algorithms.len() + 2, ',').collect();
-        if parts.len() < algorithms.len() + 2 {
-            continue;
-        }
-
-        let size: u64 = match parts[0].parse() {
-            Ok(s) => s,
-            Err(_) => continue,
-        };
-        let mut hashes = HashMap::new();
-        for (i, algo) in algorithms.iter().enumerate() {
-            hashes.insert(*algo, parts[i + 1].to_string());
-        }
-        let path = PathBuf::from(parts[algorithms.len() + 1]);
-
-        entries.push(KnownEntry {
-            size,
-            hashes,
-            path,
-        });
-    }
-
-    Ok(entries)
-}
