@@ -25,6 +25,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set version
+        id: version
+        shell: bash
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
         with:
           targets: ${{ matrix.target }}
@@ -46,7 +52,7 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           cd target/${{ matrix.target }}/release
-          tar czf ../../../blazehash-${{ matrix.target }}.tar.gz blazehash
+          tar czf ../../../blazehash-${{ steps.version.outputs.version }}-${{ matrix.target }}.tar.gz blazehash
           cd ../../..
 
       - name: Install cargo-wix (Windows)
@@ -55,12 +61,12 @@ jobs:
 
       - name: Build MSI (Windows)
         if: runner.os == 'Windows'
-        run: cargo wix --no-build --target ${{ matrix.target }} --output blazehash-${{ matrix.target }}.msi
+        run: cargo wix --no-build --target ${{ matrix.target }} --output blazehash-${{ steps.version.outputs.version }}-${{ matrix.target }}.msi
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: blazehash-${{ matrix.target }}
-          path: blazehash-${{ matrix.target }}.*
+          name: blazehash-${{ steps.version.outputs.version }}-${{ matrix.target }}
+          path: blazehash-${{ steps.version.outputs.version }}-${{ matrix.target }}.*
 
   release:
     needs: build
