@@ -59,7 +59,7 @@ All hashes are bit-identical to hashdeep for shared algorithms (MD5, SHA-1, SHA-
 ### Homebrew (macOS)
 
 ```bash
-brew tap SecurityRonin/blazehash
+brew tap SecurityRonin/tap
 brew install blazehash
 ```
 

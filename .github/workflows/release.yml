@@ -88,7 +88,7 @@ jobs:
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
         with:
           token: ${{ secrets.TAP_GITHUB_TOKEN }}
-          repository: SecurityRonin/homebrew-blazehash
+          repository: SecurityRonin/homebrew-tap
           event-type: update-formula
           client-payload: '{"version": "${{ github.ref_name }}"}'
 
