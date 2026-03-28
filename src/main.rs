@@ -59,12 +59,13 @@ fn main() -> Result<()> {
                     }
                 }
             }
-            let result = audit::audit(&all_paths, &known_content, &algorithms, cli.recursive)?;
+            let result = audit::audit(&all_paths, &known_content)?;
             writeln!(writer, "blazehash audit summary:")?;
             writeln!(writer, "  Files matched: {}", result.matched)?;
             writeln!(writer, "  Files changed: {}", result.changed)?;
             writeln!(writer, "  Files new: {}", result.new_files)?;
             writeln!(writer, "  Files moved: {}", result.moved)?;
+            writeln!(writer, "  Files missing: {}", result.missing)?;
         }
         writer.flush()?;
         return Ok(());

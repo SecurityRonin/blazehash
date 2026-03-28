@@ -2,7 +2,7 @@ use crate::algorithm::Algorithm;
 use crate::hash::hash_file;
 use crate::manifest::parse_header;
 use anyhow::Result;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Default)]
@@ -11,6 +11,7 @@ pub struct AuditResult {
     pub changed: usize,
     pub new_files: usize,
     pub moved: usize,
+    pub missing: usize,
     pub details: Vec<AuditStatus>,
 }
 
@@ -20,6 +21,7 @@ pub enum AuditStatus {
     Changed(PathBuf),
     New(PathBuf),
     Moved { path: PathBuf, original: PathBuf },
+    Missing(PathBuf),
 }
 
 struct KnownEntry {
@@ -31,8 +33,6 @@ struct KnownEntry {
 pub fn audit(
     paths: &[PathBuf],
     known_content: &str,
-    _algorithms: &[Algorithm],
-    _recursive: bool,
 ) -> Result<AuditResult> {
     let known_algos = parse_header(known_content)?;
     let known_entries = parse_known_entries(known_content, &known_algos)?;
@@ -42,22 +42,14 @@ pub fn audit(
         .map(|e| (e.path.as_path(), e))
         .collect();
 
-    let known_by_hash: HashMap<&str, &KnownEntry> = known_entries
-        .iter()
-        .filter_map(|e| {
-            known_algos
-                .first()
-                .and_then(|a| e.hashes.get(a))
-                .map(|h| (h.as_str(), e))
-        })
-        .collect();
-
     let mut result = AuditResult::default();
+    let mut seen_known_paths: HashSet<&Path> = HashSet::new();
 
     for path in paths {
         let file_result = hash_file(path, &known_algos)?;
 
         if let Some(known) = known_by_path.get(path.as_path()) {
+            seen_known_paths.insert(path.as_path());
             let hashes_match = known_algos
                 .iter()
                 .all(|a| file_result.hashes.get(a) == known.hashes.get(a));
@@ -70,23 +62,39 @@ pub fn audit(
                 result.details.push(AuditStatus::Changed(path.clone()));
             }
         } else {
-            let first_hash = known_algos
-                .first()
-                .and_then(|a| file_result.hashes.get(a));
-
-            if let Some(hash) = first_hash {
-                if let Some(original) = known_by_hash.get(hash.as_str()) {
+            // Check if file moved (same hashes for ALL algorithms, different path)
+            let mut found_move = false;
+            for known in &known_entries {
+                if known.size != file_result.size {
+                    continue;
+                }
+                let all_match = known_algos.iter().all(|a| {
+                    file_result.hashes.get(a) == known.hashes.get(a)
+                });
+                if all_match {
                     result.moved += 1;
                     result.details.push(AuditStatus::Moved {
                         path: path.clone(),
-                        original: original.path.clone(),
+                        original: known.path.clone(),
                     });
-                    continue;
+                    seen_known_paths.insert(known.path.as_path());
+                    found_move = true;
+                    break;
                 }
             }
 
-            result.new_files += 1;
-            result.details.push(AuditStatus::New(path.clone()));
+            if !found_move {
+                result.new_files += 1;
+                result.details.push(AuditStatus::New(path.clone()));
+            }
+        }
+    }
+
+    // Report files in manifest but not found in provided paths
+    for known in &known_entries {
+        if !seen_known_paths.contains(known.path.as_path()) {
+            result.missing += 1;
+            result.details.push(AuditStatus::Missing(known.path.clone()));
         }
     }
 
