@@ -72,6 +72,14 @@ fn parse_algorithms(s: &str) -> Result<Vec<Algorithm>, String> {
         .collect()
 }
 
+#[derive(Debug)]
+pub enum Mode {
+    SizeOnly,
+    Audit,
+    Piecewise,
+    Hash,
+}
+
 impl Cli {
     pub fn flat_algorithms(&self) -> Vec<Algorithm> {
         let flat: Vec<Algorithm> = self.algorithms.iter().flatten().copied().collect();
@@ -79,6 +87,18 @@ impl Cli {
             vec![Algorithm::Blake3]
         } else {
             flat
+        }
+    }
+
+    pub fn mode(&self) -> Mode {
+        if self.size_only {
+            Mode::SizeOnly
+        } else if self.audit {
+            Mode::Audit
+        } else if self.piecewise.is_some() {
+            Mode::Piecewise
+        } else {
+            Mode::Hash
         }
     }
 }
