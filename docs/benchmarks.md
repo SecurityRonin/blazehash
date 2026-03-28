@@ -152,7 +152,7 @@ BLAKE3 was designed from the ground up for modern hardware: internal tree parall
 
 The chart below compares all blazehash algorithms against hashdeep's SHA-256 (the most common forensic algorithm and hashdeep's best-performing secure hash) as a reference baseline:
 
-> Bars = **blazehash**, line = **hashdeep** — only the 5 algorithms both tools support.
+> Back bar = **hashdeep** (absent where unsupported), front bar = **blazehash**
 
 ```mermaid
 ---
@@ -161,29 +161,14 @@ config:
         width: 1000
 ---
 xychart-beta
-    title "256 MiB — shared algorithms, blazehash vs hashdeep (lower is better)"
-    x-axis ["MD5", "SHA-1", "SHA-256", "Tiger", "Whirlpool"]
-    y-axis "Time (ms)" 0 --> 1300
-    bar "blazehash" [587, 275, 854, 692, 1117]
-    line "hashdeep" [678, 572, 930, 968, 1206]
-```
-
-blazehash is faster on every shared algorithm. Now consider BLAKE3 — which hashdeep does not support at all:
-
-```mermaid
----
-config:
-    xyChart:
-        width: 1000
----
-xychart-beta
-    title "256 MiB — all blazehash algorithms, ranked (lower is better)"
+    title "256 MiB — all algorithms, blazehash vs hashdeep (lower is better)"
     x-axis ["BLAKE3", "SHA-1", "SHA3-256", "Tiger", "SHA-512", "MD5", "SHA-256", "Whirlpool"]
-    y-axis "Time (ms)" 0 --> 850
+    y-axis "Time (ms)" 0 --> 1300
+    bar "hashdeep" [0, 572, 0, 968, 0, 678, 930, 1206]
     bar "blazehash" [187, 275, 376, 388, 407, 419, 672, 808]
 ```
 
-BLAKE3 at **187 ms** (1.37 GB/s) is faster than every algorithm in either tool. hashdeep's fastest secure hash (SHA-256 at 930 ms) is **5x slower**.
+hashdeep does not support BLAKE3, SHA3-256, or SHA-512 — no bar is shown for those. Where both tools support the algorithm, blazehash is faster in every case. BLAKE3 at **187 ms** (1.37 GB/s) has no hashdeep equivalent — it is unique to blazehash and faster than everything else on the chart.
 
 | Algorithm | Time (256 MiB) | Throughput | vs hashdeep SHA-256 |
 |-----------|---------------:|-----------:|--------------------:|
