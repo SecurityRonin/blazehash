@@ -111,3 +111,69 @@ fn write_record_missing_algorithm_returns_error() {
     let err = write_record(&mut buf, &result, &[Algorithm::Blake3, Algorithm::Sha256]);
     assert!(err.is_err(), "should error when algorithm hash is missing");
 }
+
+#[test]
+fn parse_header_empty_string_returns_error() {
+    let err = parse_header("");
+    assert!(err.is_err());
+    assert!(err.unwrap_err().to_string().contains("missing header"));
+}
+
+#[test]
+fn parse_header_missing_column_line() {
+    let err = parse_header("%%%% HASHDEEP-1.0\n");
+    assert!(err.is_err());
+    assert!(err.unwrap_err().to_string().contains("missing column line"));
+}
+
+#[test]
+fn parse_header_missing_filename_column() {
+    let err = parse_header("%%%% HASHDEEP-1.0\n%%%% size,blake3\n");
+    assert!(err.is_err());
+    assert!(err.unwrap_err().to_string().contains("missing filename column"));
+}
+
+#[test]
+fn parse_header_unknown_algorithm_returns_error() {
+    let err = parse_header("%%%% HASHDEEP-1.0\n%%%% size,xxhash,filename\n");
+    assert!(err.is_err());
+}
+
+#[test]
+fn parse_header_many_algorithms() {
+    let input = "%%%% HASHDEEP-1.0\n%%%% size,blake3,sha256,md5,sha1,filename\n";
+    let algos = parse_header(input).unwrap();
+    assert_eq!(algos, vec![Algorithm::Blake3, Algorithm::Sha256, Algorithm::Md5, Algorithm::Sha1]);
+}
+
+#[test]
+fn write_header_contains_version_comment() {
+    let mut buf = Vec::new();
+    write_header(&mut buf, &[Algorithm::Blake3]).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    assert!(output.contains("## Invoked from: blazehash v"));
+    assert!(output.contains("##\n"));
+}
+
+#[test]
+fn write_record_zero_size_file() {
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Blake3, "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262".to_string());
+    let result = FileHashResult {
+        path: PathBuf::from("/empty.txt"),
+        size: 0,
+        hashes,
+    };
+
+    let mut buf = Vec::new();
+    write_record(&mut buf, &result, &[Algorithm::Blake3]).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    assert!(output.starts_with("0,"));
+}
+
+#[test]
+fn parse_header_not_hashdeep_file() {
+    let err = parse_header("this is not a hashdeep file\nsome other content\n");
+    assert!(err.is_err());
+    assert!(err.unwrap_err().to_string().contains("not a hashdeep file"));
+}
