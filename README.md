@@ -82,20 +82,6 @@ Download the `.msi` installer from [GitHub Releases](https://github.com/Security
 cargo install blazehash
 ```
 
-### Pre-built binaries
-
-Download from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases) — pre-built for:
-
-| Platform | Architecture | Binary |
-|----------|-------------|--------|
-| macOS | Apple Silicon (M1/M2/M3/M4) | `blazehash-aarch64-apple-darwin` |
-| macOS | Intel | `blazehash-x86_64-apple-darwin` |
-| Linux | x86_64 (static, musl) | `blazehash-x86_64-unknown-linux-musl` |
-| Linux | ARM64 (static, musl) | `blazehash-aarch64-unknown-linux-musl` |
-| Windows | x86_64 | `blazehash-x86_64-pc-windows-msvc.msi` |
-
-Linux binaries are fully static (musl) — no glibc dependency. Drop them on a SIFT workstation, a cloud instance, or an air-gapped forensic box and they just work.
-
 ### Build from source
 
 ```bash
@@ -106,10 +92,14 @@ cargo build --release
 
 ### As a library
 
+blazehash is also available as a Rust library for embedding hashing capabilities into your own tools:
+
 ```toml
 [dependencies]
 blazehash = "0.1"
 ```
+
+See [crates.io](https://crates.io/crates/blazehash) for API documentation.
 
 ## Usage
 
