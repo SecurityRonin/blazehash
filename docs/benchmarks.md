@@ -50,6 +50,11 @@ xychart-beta
 ```
 
 ```mermaid
+---
+config:
+    xyChart:
+        width: 1000
+---
 xychart-beta
     title "256 MiB — All 5 Algorithms Combined (lower is better)"
     x-axis ["blazehash", "hashdeep"]
@@ -83,6 +88,11 @@ SHA-1 shows the largest single-algorithm gain (2.08x) because the Rust `sha1` cr
 Small-file workloads measure per-file overhead: directory traversal, file open/close, and thread scheduling. This is the typical forensic workload — thousands of documents, images, and logs.
 
 ```mermaid
+---
+config:
+    xyChart:
+        width: 1000
+---
 xychart-beta
     title "1000 Small Files (4 KiB each) — Time in ms (lower is better)"
     x-axis ["BH SHA-256", "HD SHA-256", "BH 5 algos", "HD 5 algos"]
@@ -102,6 +112,11 @@ blazehash's rayon thread pool hashes multiple files in parallel, while hashdeep 
 Simulates a forensic image with nested directory structure: 5 directories x 5 subdirectories x 20 files (16 KiB each, 8 MiB total).
 
 ```mermaid
+---
+config:
+    xyChart:
+        width: 1000
+---
 xychart-beta
     title "Recursive Walk — 500 files, 8 MiB (lower is better)"
     x-axis ["BH SHA-256", "HD SHA-256", "BH 5 algos", "HD 5 algos"]
@@ -121,6 +136,11 @@ Note that blazehash's time barely increases when adding more algorithms — para
 Piecewise hashing (`-p`) splits each file into fixed-size chunks and hashes each independently. Used for verifying partial transfers and detecting targeted modifications within large files.
 
 ```mermaid
+---
+config:
+    xyChart:
+        width: 1000
+---
 xychart-beta
     title "Piecewise Hashing — 64 MiB, 1M chunks (lower is better)"
     x-axis ["BH SHA-256", "HD SHA-256", "BH 5 algos", "HD 5 algos"]
