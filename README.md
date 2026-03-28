@@ -58,14 +58,11 @@ All hashes are bit-identical to hashdeep for shared algorithms (MD5, SHA-1, SHA-
 
 ### Debian / Ubuntu / Kali
 
-```bash
-# amd64
-curl -LO https://github.com/SecurityRonin/blazehash/releases/latest/download/blazehash_amd64.deb
-sudo apt install ./blazehash_amd64.deb
+Download the `.deb` for your architecture from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases):
 
-# arm64
-curl -LO https://github.com/SecurityRonin/blazehash/releases/latest/download/blazehash_arm64.deb
-sudo apt install ./blazehash_arm64.deb
+```bash
+sudo apt install ./blazehash_*_amd64.deb     # x86_64
+sudo apt install ./blazehash_*_arm64.deb     # ARM64
 ```
 
 ### macOS (Homebrew)

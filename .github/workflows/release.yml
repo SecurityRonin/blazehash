@@ -167,13 +167,6 @@ jobs:
           path: debs
           merge-multiple: true
 
-      - name: Rename .deb files to predictable names
-        run: |
-          cd debs
-          for f in *amd64*.deb; do [ -f "$f" ] && mv "$f" blazehash_amd64.deb; done
-          for f in *arm64*.deb; do [ -f "$f" ] && mv "$f" blazehash_arm64.deb; done
-          ls -la
-
       - name: Upload .deb to release
         uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
