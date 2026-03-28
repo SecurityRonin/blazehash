@@ -95,3 +95,19 @@ fn filename_with_comma_preserved() {
     let output = String::from_utf8(buf).unwrap();
     assert_eq!(output, "42,abcd1234,/home/user/file,with,commas.txt\n");
 }
+
+#[test]
+fn write_record_missing_algorithm_returns_error() {
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Blake3, "abcd1234".to_string());
+    // Sha256 is NOT in the hashes map
+    let result = FileHashResult {
+        path: PathBuf::from("/test.txt"),
+        size: 11,
+        hashes,
+    };
+
+    let mut buf = Vec::new();
+    let err = write_record(&mut buf, &result, &[Algorithm::Blake3, Algorithm::Sha256]);
+    assert!(err.is_err(), "should error when algorithm hash is missing");
+}
