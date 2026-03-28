@@ -1,5 +1,5 @@
 use crate::algorithm::{hash_bytes, Algorithm};
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::collections::HashMap;
 use std::fs;
 use std::io::Read;
@@ -17,7 +17,8 @@ pub fn hash_file_piecewise(
     algorithms: &[Algorithm],
     chunk_size: usize,
 ) -> Result<Vec<PiecewiseResult>> {
-    let mut file = fs::File::open(path)?;
+    let mut file = fs::File::open(path)
+        .with_context(|| format!("failed to open {}", path.display()))?;
     let mut buf = vec![0u8; chunk_size];
     let mut offset: u64 = 0;
     let mut results = Vec::new();

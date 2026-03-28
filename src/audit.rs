@@ -1,6 +1,6 @@
 use crate::hash::hash_file;
 use crate::manifest::{parse_header, parse_records, ManifestRecord};
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
@@ -39,7 +39,8 @@ pub fn audit(
     let mut seen_known_paths: HashSet<&Path> = HashSet::new();
 
     for path in paths {
-        let file_result = hash_file(path, &known_algos)?;
+        let file_result = hash_file(path, &known_algos)
+            .with_context(|| format!("failed to hash {} during audit", path.display()))?;
 
         if let Some(known) = known_by_path.get(path.as_path()) {
             seen_known_paths.insert(path.as_path());

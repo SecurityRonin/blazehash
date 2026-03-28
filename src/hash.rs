@@ -1,5 +1,5 @@
 use crate::algorithm::Algorithm;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use digest::Digest;
 use std::collections::HashMap;
 use std::fs;
@@ -19,7 +19,8 @@ const MMAP_THRESHOLD: u64 = 1024 * 1024;
 
 /// Hash a file with one or more algorithms simultaneously.
 pub fn hash_file(path: &Path, algorithms: &[Algorithm]) -> Result<FileHashResult> {
-    let metadata = fs::metadata(path)?;
+    let metadata = fs::metadata(path)
+        .with_context(|| format!("failed to read metadata for {}", path.display()))?;
     let size = metadata.len();
 
     let hashes = if size >= MMAP_THRESHOLD {
@@ -40,8 +41,12 @@ fn hash_file_mmap(
     algorithms: &[Algorithm],
     _size: u64,
 ) -> Result<HashMap<Algorithm, String>> {
-    let file = fs::File::open(path)?;
-    let mmap = unsafe { memmap2::Mmap::map(&file)? };
+    let file = fs::File::open(path)
+        .with_context(|| format!("failed to open {}", path.display()))?;
+    let mmap = unsafe {
+        memmap2::Mmap::map(&file)
+            .with_context(|| format!("failed to memory-map {}", path.display()))?
+    };
     let data = &mmap[..];
 
     let mut hashes = HashMap::new();
@@ -55,7 +60,8 @@ fn hash_file_streaming(
     path: &Path,
     algorithms: &[Algorithm],
 ) -> Result<HashMap<Algorithm, String>> {
-    let mut file = fs::File::open(path)?;
+    let mut file = fs::File::open(path)
+        .with_context(|| format!("failed to open {}", path.display()))?;
     let mut buf = vec![0u8; 64 * 1024]; // 64 KiB read buffer
 
     // Build a hasher for each algorithm
