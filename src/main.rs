@@ -5,11 +5,17 @@ use blazehash::audit;
 use blazehash::format::{write_csv, write_json, write_jsonl};
 use blazehash::hash::hash_file;
 use blazehash::manifest::{write_header, write_record};
-use blazehash::walk::walk_and_hash;
+use blazehash::walk::{walk_and_hash, WalkOutput};
 use clap::Parser;
 use cli::Cli;
 use std::fs::{self, File};
 use std::io::{self, BufWriter, Write};
+
+fn report_walk_errors(output: &WalkOutput) {
+    for err in &output.errors {
+        eprintln!("blazehash: warning: {}: {}", err.path.display(), err.error);
+    }
+}
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -27,8 +33,9 @@ fn main() -> Result<()> {
                 let meta = fs::metadata(path)?;
                 writeln!(writer, "{}\t{}", meta.len(), path.display())?;
             } else if path.is_dir() {
-                let results = walk_and_hash(path, &algorithms, cli.recursive)?;
-                for r in &results {
+                let output = walk_and_hash(path, &algorithms, cli.recursive)?;
+                report_walk_errors(&output);
+                for r in &output.results {
                     writeln!(writer, "{}\t{}", r.size, r.path.display())?;
                 }
             }
@@ -45,8 +52,9 @@ fn main() -> Result<()> {
                 if path.is_file() {
                     all_paths.push(path.clone());
                 } else if path.is_dir() {
-                    let results = walk_and_hash(path, &algorithms, cli.recursive)?;
-                    for r in results {
+                    let output = walk_and_hash(path, &algorithms, cli.recursive)?;
+                    report_walk_errors(&output);
+                    for r in output.results {
                         all_paths.push(r.path);
                     }
                 }
@@ -68,8 +76,9 @@ fn main() -> Result<()> {
         if path.is_file() {
             all_results.push(hash_file(path, &algorithms)?);
         } else if path.is_dir() {
-            let mut results = walk_and_hash(path, &algorithms, cli.recursive)?;
-            all_results.append(&mut results);
+            let mut output = walk_and_hash(path, &algorithms, cli.recursive)?;
+            report_walk_errors(&output);
+            all_results.append(&mut output.results);
         }
     }
 
