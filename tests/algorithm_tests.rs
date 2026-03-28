@@ -111,3 +111,62 @@ fn hash_bytes_empty_input() {
         assert!(!hash.is_empty(), "empty hash for {:?}", algo);
     }
 }
+
+#[test]
+fn hash_bytes_sha3_256_known_vector() {
+    let hash = hash_bytes(Algorithm::Sha3_256, b"hello world");
+    // SHA3-256 of "hello world"
+    assert_eq!(hash, "644bcc7e564373040999aac89e7622f3ca71fba1d972fd94a31c3bfbf24e3938");
+}
+
+#[test]
+fn hash_bytes_tiger_known_vector() {
+    let hash = hash_bytes(Algorithm::Tiger, b"hello world");
+    assert!(!hash.is_empty());
+    assert_eq!(hash.len(), 48); // Tiger produces 192-bit (24 byte = 48 hex chars)
+}
+
+#[test]
+fn hash_bytes_whirlpool_known_vector() {
+    let hash = hash_bytes(Algorithm::Whirlpool, b"hello world");
+    assert!(!hash.is_empty());
+    assert_eq!(hash.len(), 128); // Whirlpool produces 512-bit (64 byte = 128 hex chars)
+}
+
+#[test]
+fn parse_algorithm_case_insensitive() {
+    assert_eq!(Algorithm::from_str("BLAKE3").unwrap(), Algorithm::Blake3);
+    assert_eq!(Algorithm::from_str("SHA256").unwrap(), Algorithm::Sha256);
+    assert_eq!(Algorithm::from_str("Sha-256").unwrap(), Algorithm::Sha256);
+    assert_eq!(Algorithm::from_str("MD5").unwrap(), Algorithm::Md5);
+    assert_eq!(Algorithm::from_str("SHA3-256").unwrap(), Algorithm::Sha3_256);
+    assert_eq!(Algorithm::from_str("SHA3_256").unwrap(), Algorithm::Sha3_256);
+    assert_eq!(Algorithm::from_str("TIGER").unwrap(), Algorithm::Tiger);
+    assert_eq!(Algorithm::from_str("WHIRLPOOL").unwrap(), Algorithm::Whirlpool);
+    assert_eq!(Algorithm::from_str("SHA512").unwrap(), Algorithm::Sha512);
+    assert_eq!(Algorithm::from_str("SHA-1").unwrap(), Algorithm::Sha1);
+}
+
+#[test]
+fn parse_algorithm_error_message_contains_name() {
+    let err = Algorithm::from_str("xxhash").unwrap_err();
+    assert!(err.to_string().contains("xxhash"));
+}
+
+#[test]
+fn hashdeep_name_matches_display() {
+    for algo in Algorithm::all() {
+        assert_eq!(algo.hashdeep_name(), &algo.to_string());
+    }
+}
+
+#[test]
+fn algorithm_all_returns_all_variants() {
+    let all = Algorithm::all();
+    assert_eq!(all.len(), 8);
+    // Check all unique
+    let mut seen = std::collections::HashSet::new();
+    for algo in all {
+        assert!(seen.insert(algo));
+    }
+}
