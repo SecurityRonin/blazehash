@@ -59,9 +59,7 @@ All hashes are bit-identical to hashdeep for shared algorithms (MD5, SHA-1, SHA-
 ### Debian / Ubuntu / Kali
 
 ```bash
-curl -fsSL https://pkg.securityronin.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/securityronin.gpg
-echo "deb [signed-by=/usr/share/keyrings/securityronin.gpg] https://pkg.securityronin.com/apt stable main" | sudo tee /etc/apt/sources.list.d/securityronin.list
-sudo apt update && sudo apt install blazehash
+sudo apt install blazehash
 ```
 
 ### macOS (Homebrew)
