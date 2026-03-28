@@ -37,6 +37,11 @@ Single-file hashing measures raw algorithm throughput, where process startup ove
 > **BH** = blazehash, **HD** = hashdeep v4.4
 
 ```mermaid
+---
+config:
+    xyChart:
+        width: 1000
+---
 xychart-beta
     title "256 MiB Single File — Time in ms (lower is better)"
     x-axis ["BH MD5", "HD MD5", "BH SHA-1", "HD SHA-1", "BH SHA-256", "HD SHA-256", "BH Tiger", "HD Tiger", "BH Whirlpool", "HD Whirlpool"]
@@ -139,6 +144,11 @@ The chart below compares all blazehash algorithms against hashdeep's SHA-256 (th
 > **BH** = blazehash, **HD** = hashdeep v4.4
 
 ```mermaid
+---
+config:
+    xyChart:
+        width: 1000
+---
 xychart-beta
     title "256 MiB — All algorithms vs hashdeep SHA-256 baseline (lower is better)"
     x-axis ["BH BLAKE3", "BH SHA-1", "BH SHA3-256", "BH Tiger", "BH SHA-512", "BH MD5", "BH SHA-256", "BH Whirlpool", "HD SHA-256"]
