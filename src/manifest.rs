@@ -26,8 +26,8 @@ pub fn write_record<W: Write>(
     write!(w, "{}", result.size)?;
     for algo in algorithms {
         let hash = result.hashes.get(algo)
-            .ok_or_else(|| anyhow::anyhow!("missing hash for algorithm {}", algo))?;
-        write!(w, ",{}", hash)?;
+            .ok_or_else(|| anyhow::anyhow!("missing hash for algorithm {algo}"))?;
+        write!(w, ",{hash}")?;
     }
     writeln!(w, ",{}", result.path.display())?;
     Ok(())

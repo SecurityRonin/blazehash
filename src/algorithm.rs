@@ -2,8 +2,9 @@ use std::fmt;
 use std::str::FromStr;
 use digest::Digest;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum Algorithm {
+    #[default]
     Blake3,
     Sha256,
     Sha512,
@@ -37,10 +38,6 @@ impl Algorithm {
     }
 }
 
-impl Default for Algorithm {
-    fn default() -> Self { Algorithm::Blake3 }
-}
-
 impl fmt::Display for Algorithm {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.hashdeep_name())
@@ -59,7 +56,7 @@ impl FromStr for Algorithm {
             "md5" => Ok(Algorithm::Md5),
             "tiger" => Ok(Algorithm::Tiger),
             "whirlpool" => Ok(Algorithm::Whirlpool),
-            other => anyhow::bail!("unknown algorithm: {}", other),
+            other => anyhow::bail!("unknown algorithm: {other}"),
         }
     }
 }

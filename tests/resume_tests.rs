@@ -1,5 +1,5 @@
 use blazehash::resume::ResumeState;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[test]
 fn resume_state_empty_initially() {
@@ -24,4 +24,12 @@ fn resume_state_mark_done() {
     state.mark_done(PathBuf::from("/file.txt"));
     assert!(state.is_done(&PathBuf::from("/file.txt")));
     assert_eq!(state.completed_count(), 1);
+}
+
+#[test]
+fn resume_state_is_done_accepts_path_ref() {
+    let mut state = ResumeState::new();
+    state.mark_done(PathBuf::from("/file.txt"));
+    // Should accept &Path, not just &PathBuf
+    assert!(state.is_done(Path::new("/file.txt")));
 }

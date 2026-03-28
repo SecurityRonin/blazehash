@@ -1,8 +1,8 @@
 use anyhow::Result;
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ResumeState {
     completed: HashSet<PathBuf>,
 }
@@ -32,7 +32,7 @@ impl ResumeState {
         Ok(Self { completed })
     }
 
-    pub fn is_done(&self, path: &PathBuf) -> bool {
+    pub fn is_done(&self, path: &Path) -> bool {
         self.completed.contains(path)
     }
 

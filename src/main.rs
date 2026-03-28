@@ -104,7 +104,7 @@ fn main() -> Result<()> {
     // Piecewise mode
     if let Some(ref chunk_str) = cli.piecewise {
         let chunk_size = cli::parse_chunk_size(chunk_str)
-            .map_err(|e| anyhow::anyhow!("invalid chunk size: {}", e))?;
+            .map_err(|e| anyhow::anyhow!("invalid chunk size: {e}"))?;
 
         if !cli.bare {
             write_header(&mut writer, &algorithms)?;
@@ -118,7 +118,7 @@ fn main() -> Result<()> {
                     for algo in &algorithms {
                         let hash = chunk.hashes.get(algo)
                             .ok_or_else(|| anyhow::anyhow!("missing hash"))?;
-                        write!(writer, ",{}", hash)?;
+                        write!(writer, ",{hash}")?;
                     }
                     writeln!(writer, ",{}:{}-{}",
                         path.display(),
@@ -156,7 +156,7 @@ fn main() -> Result<()> {
     }
 
     // Write header (only if not resuming an existing file)
-    let needs_header = !cli.bare && !(cli.resume && cli.output.as_ref().map_or(false, |p| p.exists()));
+    let needs_header = !(cli.bare || cli.resume && cli.output.as_ref().is_some_and(|p| p.exists()));
 
     // Write output in requested format
     match cli.format.as_str() {

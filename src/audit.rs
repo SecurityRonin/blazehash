@@ -114,7 +114,10 @@ fn parse_known_entries(content: &str, algorithms: &[Algorithm]) -> Result<Vec<Kn
             continue;
         }
 
-        let size: u64 = parts[0].parse()?;
+        let size: u64 = match parts[0].parse() {
+            Ok(s) => s,
+            Err(_) => continue,
+        };
         let mut hashes = HashMap::new();
         for (i, algo) in algorithms.iter().enumerate() {
             hashes.insert(*algo, parts[i + 1].to_string());

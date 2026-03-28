@@ -88,6 +88,24 @@ fn audit_detects_missing_file() {
 }
 
 #[test]
+fn audit_skips_malformed_manifest_lines() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("test.txt");
+    fs::write(&file, b"hello world").unwrap();
+    let hash_result = hash_file(&file, &[Algorithm::Blake3]).unwrap();
+    let hash = hash_result.hashes[&Algorithm::Blake3].clone();
+
+    // Manifest with a malformed line (bad size field)
+    let known = format!(
+        "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\nBADSIZE,badhash,/bad/path\n{},{},{}\n",
+        hash_result.size, hash, file.display()
+    );
+
+    let result = audit(&[file], &known).unwrap();
+    assert_eq!(result.matched, 1, "should match the valid entry and skip the malformed one");
+}
+
+#[test]
 fn audit_moved_checks_all_algorithms() {
     let dir = TempDir::new().unwrap();
 
