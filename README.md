@@ -82,14 +82,6 @@ Download the `.msi` installer from [GitHub Releases](https://github.com/Security
 cargo install blazehash
 ```
 
-### Build from source
-
-```bash
-git clone https://github.com/SecurityRonin/blazehash
-cd blazehash
-cargo build --release
-```
-
 ### As a library
 
 blazehash is also available as a Rust library for embedding hashing capabilities into your own tools:
@@ -121,9 +113,14 @@ blazehash -r /mnt/evidence -c blake3,sha256,md5
 
 ```bash
 blazehash -r /mnt/evidence -a -k known_hashes.txt
+blazehash -r /mnt/evidence -a -k hashdeep_manifest.txt      # hashdeep format
+blazehash -r /mnt/evidence -a -k hashes.csv                  # CSV
+blazehash -r /mnt/evidence -a -k hashes.json                 # JSON / JSONL
+blazehash -r /mnt/evidence -a -k hashes.b3                   # b3sum format
+blazehash -r /mnt/evidence -a -k hashes.sha256               # sha256sum format
 ```
 
-Audit reports match hashdeep output exactly: files matched, files not matched, files moved, files new.
+Accepts known-hash files in any format blazehash can export: hashdeep, CSV, JSON, JSONL, b3sum, and sha256sum. Audit reports match hashdeep output exactly: files matched, files not matched, files moved, files new.
 
 ### Export formats
 
@@ -169,14 +166,14 @@ blazehash -r /mnt/evidence -s         # list files with sizes, no hashing
 
 | Algorithm | Flag | Default | Apple Silicon (M4) | x86_64 | Quantum Resilient | Notes |
 |-----------|------|---------|-------------------|--------|-------------------|-------|
-| BLAKE3 | `blake3` | Yes | NEON, internal tree parallelism | AVX-512, AVX2, SSE4.1 | Pre-quantum | 4x faster than SHA-256, designed for parallelism |
-| SHA-256 | `sha256` | No | ARM SHA2 extensions (`sha256h/h2/su0/su1`) | SHA-NI | Pre-quantum | NIST standard, court-accepted everywhere |
-| SHA-3-256 | `sha3-256` | No | NEON Keccak-f[1600] | AVX2 lane-parallel | Post-quantum candidate basis | Keccak sponge, different construction from SHA-2 |
-| SHA-512 | `sha512` | No | Native 64-bit, NEON 2x interleave | AVX2 | Pre-quantum | Faster than SHA-256 on 64-bit CPUs |
-| SHA-1 | `sha1` | No | ARM SHA1 extensions (`sha1c/p/m/h/su0/su1`) | SHA-NI | Broken | Legacy only, collision attacks published (SHAttered, 2017) |
-| MD5 | `md5` | No | NEON vectorized | SSE2/AVX2 multi-buffer | Broken | Legacy only, collision attacks trivial since 2004 |
-| Tiger | `tiger` | No | 64-bit optimized lookup tables | 64-bit optimized | Pre-quantum | hashdeep compatibility, 192-bit output |
-| Whirlpool | `whirlpool` | No | Table-based, 64-bit native | Table-based, 64-bit native | Pre-quantum | hashdeep compatibility, 512-bit output |
+| BLAKE3 | `blake3` | **Y** | NEON, internal tree parallelism | AVX-512, AVX2, SSE4.1 | Pre-quantum | 4x faster than SHA-256, designed for parallelism |
+| SHA-256 | `sha256` | -- | ARM SHA2 extensions (`sha256h/h2/su0/su1`) | SHA-NI | Pre-quantum | NIST standard, court-accepted everywhere |
+| SHA-3-256 | `sha3-256` | -- | NEON Keccak-f[1600] | AVX2 lane-parallel | Post-quantum candidate basis | Keccak sponge, different construction from SHA-2 |
+| SHA-512 | `sha512` | -- | Native 64-bit, NEON 2x interleave | AVX2 | Pre-quantum | Faster than SHA-256 on 64-bit CPUs |
+| SHA-1 | `sha1` | -- | ARM SHA1 extensions (`sha1c/p/m/h/su0/su1`) | SHA-NI | Broken | Legacy only, collision attacks published (SHAttered, 2017) |
+| MD5 | `md5` | -- | NEON vectorized | SSE2/AVX2 multi-buffer | Broken | Legacy only, collision attacks trivial since 2004 |
+| Tiger | `tiger` | -- | 64-bit optimized lookup tables | 64-bit optimized | Pre-quantum | hashdeep compatibility, 192-bit output |
+| Whirlpool | `whirlpool` | -- | Table-based, 64-bit native | Table-based, 64-bit native | Pre-quantum | hashdeep compatibility, 512-bit output |
 
 BLAKE3 is the default because it is the fastest cryptographic hash on modern hardware while maintaining a 256-bit security level. For court submissions where opposing counsel may challenge algorithm choice, `sha256` remains the safe bet.
 
@@ -198,82 +195,72 @@ How blazehash compares to hashdeep, b3sum, sha256sum, and other forensic hashing
 
 | Feature | blazehash | hashdeep | b3sum | sha256sum | md5deep |
 |---------|:---------:|:--------:|:-----:|:---------:|:-------:|
-| BLAKE3 | Yes | No | Yes | No | No |
-| SHA-256 | Yes | Yes | No | Yes | No |
-| SHA-3-256 | Yes | No | No | No | No |
-| SHA-512 | Yes | Yes | No | No | No |
-| SHA-1 | Yes | Yes | No | No | No |
-| MD5 | Yes | Yes | No | No | Yes |
-| Tiger | Yes | Yes | No | No | No |
-| Whirlpool | Yes | Yes | No | No | No |
-| Multiple simultaneous | Yes | Yes | No | No | No |
+| BLAKE3 | **Y** | -- | **Y** | -- | -- |
+| SHA-256 | **Y** | **Y** | -- | **Y** | -- |
+| SHA-3-256 | **Y** | -- | -- | -- | -- |
+| SHA-512 | **Y** | **Y** | -- | -- | -- |
+| SHA-1 | **Y** | **Y** | -- | -- | -- |
+| MD5 | **Y** | **Y** | -- | -- | **Y** |
+| Tiger | **Y** | **Y** | -- | -- | -- |
+| Whirlpool | **Y** | **Y** | -- | -- | -- |
+| Multiple simultaneous | **Y** | **Y** | -- | -- | -- |
 
 ### Performance
 
 | Feature | blazehash | hashdeep | b3sum | sha256sum | md5deep |
 |---------|:---------:|:--------:|:-----:|:---------:|:-------:|
-| Multithreaded hashing | Yes | No | Yes | No | No |
-| Memory-mapped I/O | Yes | No | Yes | No | No |
-| SIMD / HW acceleration | Yes | No | Yes | No | No |
-| Parallel file walking | Yes | No | No | No | No |
+| Multithreaded hashing | **Y** | -- | **Y** | -- | -- |
+| Memory-mapped I/O | **Y** | -- | **Y** | -- | -- |
+| SIMD / HW acceleration | **Y** | -- | **Y** | -- | -- |
+| Parallel file walking | **Y** | -- | -- | -- | -- |
 
 ### Forensic Features
 
 | Feature | blazehash | hashdeep | b3sum | sha256sum | md5deep |
 |---------|:---------:|:--------:|:-----:|:---------:|:-------:|
-| Audit mode | Yes | Yes | No | `-c` flag | No |
-| Piecewise hashing | Yes | Yes | No | No | No |
-| NSRL import | Yes | No | No | No | No |
-| Resume interrupted | Yes | No | No | No | No |
-| Known-hash matching | Yes | Yes | No | No | Yes |
-| Recursive hashing | Yes | Yes | No | No | Yes |
+| Audit mode | **Y** | **Y** | -- | `-c` flag | -- |
+| Piecewise hashing | **Y** | **Y** | -- | -- | -- |
+| NSRL import | **Y** | -- | -- | -- | -- |
+| Resume interrupted | **Y** | -- | -- | -- | -- |
+| Known-hash matching | **Y** | **Y** | -- | -- | **Y** |
+| Recursive hashing | **Y** | **Y** | -- | -- | **Y** |
 
 ### Output Formats
 
 | Feature | blazehash | hashdeep | b3sum | sha256sum | md5deep |
 |---------|:---------:|:--------:|:-----:|:---------:|:-------:|
-| hashdeep format | Yes | Yes | No | No | No |
-| DFXML | Yes | No | No | No | No |
-| CSV | Yes | No | No | No | No |
-| JSON / JSONL | Yes | No | No | No | No |
-| b3sum format | Yes | No | Yes | No | No |
-| sha256sum format | Yes | No | No | Yes | No |
+| hashdeep format | **Y** | **Y** | -- | -- | -- |
+| DFXML | **Y** | -- | -- | -- | -- |
+| CSV | **Y** | -- | -- | -- | -- |
+| JSON / JSONL | **Y** | -- | -- | -- | -- |
+| b3sum format | **Y** | -- | **Y** | -- | -- |
+| sha256sum format | **Y** | -- | -- | **Y** | -- |
 
 ### Platform & Implementation
 
 | | blazehash | hashdeep | b3sum | sha256sum | md5deep |
 |---------|:---------:|:--------:|:-----:|:---------:|:-------:|
-| Cross-platform | Yes | Yes | Yes | Yes | Yes |
+| Cross-platform | **Y** | **Y** | **Y** | **Y** | **Y** |
 | Language | Rust | C++ | Rust | C (coreutils) | C++ |
-| Maintained (2025+) | Yes | No (v4.4, 2014) | Yes | Yes | No |
-| Static Linux binary | Yes | No | Yes | No | No |
+| Maintained (2025+) | **Y** | -- (v4.4, 2014) | **Y** | **Y** | -- |
+| Static Linux binary | **Y** | -- | **Y** | -- | -- |
 
 ## Architecture
 
-```mermaid
-graph LR
-    CLI["CLI<br/>hashdeep-compatible<br/>flags + extensions"] --> Engine
-
-    subgraph Engine["Hashing Engine"]
-        Walker["File Walker<br/>parallel, recursive"] --> Pool["Thread Pool<br/>rayon"]
-        Pool --> Hasher["Hasher<br/>BLAKE3 · SHA-256<br/>SHA-3 · SHA-512<br/>SHA-1 · MD5"]
-        Hasher --> Mmap["mmap I/O"]
-    end
-
-    Engine --> Manifest["Manifest Builder"]
-    Manifest --> Formats["Output Formats<br/>hashdeep · DFXML<br/>CSV · JSON · JSONL"]
-
-    Engine --> Audit["Audit Engine"]
-    KnownDB["Known Hashes<br/>hashdeep files<br/>NSRL import"] --> Audit
-    Audit --> Report["Audit Report<br/>matched · moved<br/>new · changed"]
-
-    Resume["Resume State<br/>partial manifest"] --> Walker
-
-    subgraph Library["blazehash (library)"]
-        Engine
-        Manifest
-        Audit
-    end
+```
+CLI (hashdeep-compatible flags + extensions)
+ |
+ v
+Hashing Engine
+ |- File Walker (parallel, recursive, resume-aware)
+ |- Thread Pool (rayon)
+ |- Hasher (BLAKE3, SHA-256, SHA-3, SHA-512, SHA-1, MD5, Tiger, Whirlpool)
+ |- mmap I/O
+ |
+ +--> Manifest Builder --> hashdeep / DFXML / CSV / JSON / JSONL
+ |
+ +--> Audit Engine <-- Known Hashes (hashdeep files, NSRL import)
+       +--> Report: matched / moved / new / changed
 ```
 
 Modules:
