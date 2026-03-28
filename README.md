@@ -74,11 +74,7 @@ brew install blazehash
 
 ### Windows
 
-```powershell
-winget install SecurityRonin.blazehash
-```
-
-Or download the `.msi` installer from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases).
+Download the `.msi` installer from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases). The installer adds `blazehash` to your system PATH automatically.
 
 ### Cargo (all platforms)
 
