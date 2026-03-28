@@ -34,20 +34,7 @@ When you switch from SHA-256 to BLAKE3 (blazehash's default), throughput improve
 
 Single-file hashing measures raw algorithm throughput, where process startup overhead is negligible.
 
-> **HD** = hashdeep v4.4, **BH** = blazehash — paired per algorithm.
-
-```mermaid
----
-config:
-    xyChart:
-        width: 1000
----
-xychart-beta
-    title "256 MiB Single File — Time in ms (lower is better)"
-    x-axis ["HD MD5", "BH MD5", "HD SHA-1", "BH SHA-1", "HD SHA-256", "BH SHA-256", "HD Tiger", "BH Tiger", "HD Whirl", "BH Whirl", "HD All 5", "BH All 5"]
-    y-axis "Time (ms)" 0 --> 4000
-    bar [678, 587, 572, 275, 930, 854, 968, 692, 1206, 1117, 3521, 3092]
-```
+![256 MiB single file — time comparison](charts/large_file.png)
 
 | Algorithm | blazehash | hashdeep | Speedup |
 |-----------|----------:|----------:|--------:|
@@ -62,6 +49,8 @@ SHA-1 shows the largest single-algorithm gain (2.08x) because the Rust `sha1` cr
 
 ### Throughput (MB/s)
 
+![256 MiB single file — throughput comparison](charts/throughput.png)
+
 | Algorithm | blazehash | hashdeep |
 |-----------|----------:|----------:|
 | MD5 | 436 MB/s | 378 MB/s |
@@ -74,18 +63,7 @@ SHA-1 shows the largest single-algorithm gain (2.08x) because the Rust `sha1` cr
 
 Small-file workloads measure per-file overhead: directory traversal, file open/close, and thread scheduling. This is the typical forensic workload — thousands of documents, images, and logs.
 
-```mermaid
----
-config:
-    xyChart:
-        width: 1000
----
-xychart-beta
-    title "1000 Small Files (4 KiB each) — Time in ms (lower is better)"
-    x-axis ["HD SHA-256", "BH SHA-256", "HD All 5", "BH All 5"]
-    y-axis "Time (ms)" 0 --> 80
-    bar [69, 20, 76, 28]
-```
+![1,000 small files — time comparison](charts/small_files.png)
 
 | Scenario | blazehash | hashdeep | Speedup |
 |----------|----------:|----------:|--------:|
@@ -98,18 +76,7 @@ blazehash's rayon thread pool hashes multiple files in parallel, while hashdeep 
 
 Simulates a forensic image with nested directory structure: 5 directories x 5 subdirectories x 20 files (16 KiB each, 8 MiB total).
 
-```mermaid
----
-config:
-    xyChart:
-        width: 1000
----
-xychart-beta
-    title "Recursive Walk — 500 files, 8 MiB (lower is better)"
-    x-axis ["HD SHA-256", "BH SHA-256", "HD All 5", "BH All 5"]
-    y-axis "Time (ms)" 0 --> 50
-    bar [45, 27, 47, 28]
-```
+![Recursive walk — time comparison](charts/recursive_walk.png)
 
 | Scenario | blazehash | hashdeep | Speedup |
 |----------|----------:|----------:|--------:|
@@ -122,18 +89,7 @@ Note that blazehash's time barely increases when adding more algorithms — para
 
 Piecewise hashing (`-p`) splits each file into fixed-size chunks and hashes each independently. Used for verifying partial transfers and detecting targeted modifications within large files.
 
-```mermaid
----
-config:
-    xyChart:
-        width: 1000
----
-xychart-beta
-    title "Piecewise Hashing — 64 MiB, 1M chunks (lower is better)"
-    x-axis ["HD SHA-256", "BH SHA-256", "HD All 5", "BH All 5"]
-    y-axis "Time (ms)" 0 --> 1800
-    bar [339, 163, 1775, 825]
-```
+![Piecewise hashing — time comparison](charts/piecewise.png)
 
 | Scenario | blazehash | hashdeep | Speedup |
 |----------|----------:|----------:|--------:|
@@ -148,22 +104,9 @@ BLAKE3 was designed from the ground up for modern hardware: internal tree parall
 
 The chart below compares all blazehash algorithms against hashdeep where both tools support the algorithm. Algorithms only available in blazehash (BLAKE3, SHA3-256, SHA-512) show a single bar.
 
-> **HD** = hashdeep, **BH** = blazehash — paired per algorithm. Algorithms without an HD bar are blazehash-only.
+![All algorithms — blazehash vs hashdeep](charts/blake3_advantage.png)
 
-```mermaid
----
-config:
-    xyChart:
-        width: 1000
----
-xychart-beta
-    title "256 MiB — all algorithms, blazehash vs hashdeep (lower is better)"
-    x-axis ["BH BLAKE3", "HD SHA-1", "BH SHA-1", "BH SHA3-256", "HD Tiger", "BH Tiger", "BH SHA-512", "HD MD5", "BH MD5", "HD SHA-256", "BH SHA-256", "HD Whirl", "BH Whirl"]
-    y-axis "Time (ms)" 0 --> 1300
-    bar [187, 572, 275, 376, 968, 388, 407, 678, 419, 930, 672, 1206, 808]
-```
-
-Algorithms supported by both tools show paired HD/BH bars. BLAKE3, SHA3-256, and SHA-512 are blazehash-only (single BH bar). Where both tools support the algorithm, blazehash is faster in every case. BLAKE3 at **187 ms** (1.37 GB/s) is unique to blazehash and faster than everything else on the chart.
+Where both tools support the algorithm, blazehash is faster in every case. BLAKE3 at **187 ms** (1.37 GB/s) is unique to blazehash and faster than everything else on the chart.
 
 | Algorithm | Time (256 MiB) | Throughput | vs hashdeep SHA-256 |
 |-----------|---------------:|-----------:|--------------------:|
@@ -206,6 +149,14 @@ The benchmark test suite verifies this with 25 cross-tool comparisons:
 - **Deterministic data:** Test files use a seeded pseudo-random generator (LCG) for reproducibility across runs and machines.
 - **Single-threaded execution:** Benchmarks run with `--test-threads=1` to prevent interference between tests.
 - **Release builds:** blazehash is compiled with `--release` (full optimizations, LTO).
+
+### Charts
+
+Charts are generated with matplotlib from [`docs/generate_charts.py`](generate_charts.py):
+
+```bash
+python3 docs/generate_charts.py    # outputs docs/charts/*.png
+```
 
 ### Source
 
