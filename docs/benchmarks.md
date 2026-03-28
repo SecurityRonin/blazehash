@@ -36,11 +36,18 @@ Single-file hashing measures raw algorithm throughput, where process startup ove
 
 ```mermaid
 xychart-beta
-    title "256 MiB Single File — Time (ms, lower is better)"
-    x-axis ["MD5", "SHA-1", "SHA-256", "Tiger", "Whirlpool", "All 5"]
+    title "256 MiB Single File — Time in ms (lower is better)"
+    x-axis ["blazehash MD5", "hashdeep MD5", "blazehash SHA-1", "hashdeep SHA-1", "blazehash SHA-256", "hashdeep SHA-256", "blazehash Tiger", "hashdeep Tiger", "blazehash Whirlpool", "hashdeep Whirlpool"]
+    y-axis "Time (ms)" 0 --> 1300
+    bar [587, 678, 275, 572, 854, 930, 692, 968, 1117, 1206]
+```
+
+```mermaid
+xychart-beta
+    title "256 MiB — All 5 Algorithms Combined (lower is better)"
+    x-axis ["blazehash", "hashdeep"]
     y-axis "Time (ms)" 0 --> 4000
-    bar [587, 275, 854, 692, 1117, 3092]
-    bar [678, 572, 930, 968, 1206, 3521]
+    bar [3092, 3521]
 ```
 
 | Algorithm | blazehash | hashdeep | Speedup |
@@ -70,11 +77,10 @@ Small-file workloads measure per-file overhead: directory traversal, file open/c
 
 ```mermaid
 xychart-beta
-    title "1000 Small Files (4 KiB each) — Time (ms, lower is better)"
-    x-axis ["SHA-256 only", "All 5 algos"]
+    title "1000 Small Files (4 KiB each) — Time in ms (lower is better)"
+    x-axis ["blazehash SHA-256", "hashdeep SHA-256", "blazehash 5 algos", "hashdeep 5 algos"]
     y-axis "Time (ms)" 0 --> 80
-    bar [20, 28]
-    bar [69, 76]
+    bar [20, 69, 28, 76]
 ```
 
 | Scenario | blazehash | hashdeep | Speedup |
@@ -90,11 +96,10 @@ Simulates a forensic image with nested directory structure: 5 directories x 5 su
 
 ```mermaid
 xychart-beta
-    title "Recursive Walk (500 files, 8 MiB) — Time (ms, lower is better)"
-    x-axis ["SHA-256 only", "All 5 algos"]
+    title "Recursive Walk — 500 files, 8 MiB (lower is better)"
+    x-axis ["blazehash SHA-256", "hashdeep SHA-256", "blazehash 5 algos", "hashdeep 5 algos"]
     y-axis "Time (ms)" 0 --> 50
-    bar [27, 28]
-    bar [45, 47]
+    bar [27, 45, 28, 47]
 ```
 
 | Scenario | blazehash | hashdeep | Speedup |
@@ -110,11 +115,10 @@ Piecewise hashing (`-p`) splits each file into fixed-size chunks and hashes each
 
 ```mermaid
 xychart-beta
-    title "Piecewise Hashing (64 MiB, 1M chunks) — Time (ms, lower is better)"
-    x-axis ["SHA-256 only", "All 5 algos"]
+    title "Piecewise Hashing — 64 MiB, 1M chunks (lower is better)"
+    x-axis ["blazehash SHA-256", "hashdeep SHA-256", "blazehash 5 algos", "hashdeep 5 algos"]
     y-axis "Time (ms)" 0 --> 1800
-    bar [163, 825]
-    bar [339, 1775]
+    bar [163, 339, 825, 1775]
 ```
 
 | Scenario | blazehash | hashdeep | Speedup |
@@ -128,26 +132,31 @@ hashdeep does not support BLAKE3. blazehash does — and it's the default for go
 
 BLAKE3 was designed from the ground up for modern hardware: internal tree parallelism, SIMD acceleration (NEON on ARM, AVX-512/AVX2/SSE4.1 on x86), and a 1 KiB internal chunk size that maps naturally to CPU cache lines.
 
+The chart below compares all blazehash algorithms against hashdeep's SHA-256 (the most common forensic algorithm and hashdeep's best-performing secure hash) as a reference baseline:
+
 ```mermaid
 xychart-beta
-    title "blazehash Algorithm Comparison (256 MiB, lower is better)"
-    x-axis ["BLAKE3", "SHA-1", "SHA3-256", "Tiger", "SHA-512", "MD5", "SHA-256", "Whirlpool"]
-    y-axis "Time (ms)" 0 --> 850
-    bar [187, 275, 376, 388, 407, 419, 672, 808]
+    title "256 MiB — blazehash algorithms vs hashdeep SHA-256 baseline (lower is better)"
+    x-axis ["blazehash BLAKE3", "blazehash SHA-1", "blazehash SHA3-256", "blazehash Tiger", "blazehash SHA-512", "blazehash MD5", "blazehash SHA-256", "blazehash Whirlpool", "hashdeep SHA-256"]
+    y-axis "Time (ms)" 0 --> 1000
+    bar [187, 275, 376, 388, 407, 419, 672, 808, 930]
 ```
 
-| Algorithm | Time (256 MiB) | Throughput | vs BLAKE3 |
-|-----------|---------------:|-----------:|----------:|
-| **BLAKE3** | **187 ms** | **1369 MB/s** | **1.0x** |
-| SHA-1 | 275 ms | 931 MB/s | 1.5x slower |
-| SHA3-256 | 376 ms | 681 MB/s | 2.0x slower |
-| Tiger | 388 ms | 660 MB/s | 2.1x slower |
-| SHA-512 | 407 ms | 629 MB/s | 2.2x slower |
-| MD5 | 419 ms | 611 MB/s | 2.2x slower |
-| SHA-256 | 672 ms | 381 MB/s | 3.6x slower |
-| Whirlpool | 808 ms | 317 MB/s | 4.3x slower |
+| Algorithm | Time (256 MiB) | Throughput | vs hashdeep SHA-256 |
+|-----------|---------------:|-----------:|--------------------:|
+| **blazehash BLAKE3** | **187 ms** | **1369 MB/s** | **4.97x faster** |
+| blazehash SHA-1 | 275 ms | 931 MB/s | 3.38x faster |
+| blazehash SHA3-256 | 376 ms | 681 MB/s | 2.47x faster |
+| blazehash Tiger | 388 ms | 660 MB/s | 2.40x faster |
+| blazehash SHA-512 | 407 ms | 629 MB/s | 2.29x faster |
+| blazehash MD5 | 419 ms | 611 MB/s | 2.22x faster |
+| blazehash SHA-256 | 672 ms | 381 MB/s | 1.38x faster |
+| blazehash Whirlpool | 808 ms | 317 MB/s | 1.15x faster |
+| hashdeep SHA-256 | 930 ms | 275 MB/s | *baseline* |
 
-BLAKE3 at **1.37 GB/s** is fast enough to saturate many NVMe drives. For forensic practitioners: switching from `hashdeep -c sha256` to `blazehash` (BLAKE3 default) delivers a combined **3.6x algorithm speedup** on top of the **1.09x implementation speedup** — roughly **4x faster** end-to-end.
+BLAKE3 at **1.37 GB/s** is fast enough to saturate many NVMe drives. For forensic practitioners: switching from `hashdeep -c sha256` to `blazehash` (BLAKE3 default) delivers nearly **5x** end-to-end speedup — the combined benefit of a faster algorithm *and* a faster implementation.
+
+Even using the *same* algorithm (SHA-256), blazehash is **1.38x faster** than hashdeep due to memory-mapped I/O and hardware-accelerated crypto.
 
 ## Correctness
 
