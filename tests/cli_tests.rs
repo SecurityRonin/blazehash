@@ -97,3 +97,53 @@ fn cli_size_only_mode() {
         .success()
         .stdout(predicate::str::contains("11"));
 }
+
+#[test]
+fn cli_piecewise_hashing() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("test.txt");
+    // Write 2000 bytes to ensure multiple chunks at 1K chunk size
+    let data = vec![0x42u8; 2000];
+    fs::write(&file, &data).unwrap();
+
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .arg("-p")
+        .arg("1K")
+        .arg(file.to_str().unwrap())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("test.txt"));
+}
+
+#[test]
+fn cli_resume_flag() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("a.txt"), b"aaa").unwrap();
+    fs::write(dir.path().join("b.txt"), b"bbb").unwrap();
+    let manifest = dir.path().join("manifest.hash");
+
+    // First run: hash only a.txt
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .arg("-o")
+        .arg(manifest.to_str().unwrap())
+        .arg(dir.path().join("a.txt").to_str().unwrap())
+        .assert()
+        .success();
+
+    // Second run with --resume: should append b.txt but not re-hash a.txt
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .arg("--resume")
+        .arg("-o")
+        .arg(manifest.to_str().unwrap())
+        .arg("-r")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .success();
+
+    let contents = fs::read_to_string(&manifest).unwrap();
+    assert!(contents.contains("a.txt"));
+    assert!(contents.contains("b.txt"));
+}

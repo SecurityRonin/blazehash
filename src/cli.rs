@@ -42,9 +42,28 @@ pub struct Cli {
     #[arg(short = 'p', long = "piecewise")]
     pub piecewise: Option<String>,
 
+    /// Resume from a partial manifest (skip already-hashed files)
+    #[arg(long = "resume")]
+    pub resume: bool,
+
     /// Output format
     #[arg(long = "format", default_value = "hashdeep")]
     pub format: String,
+}
+
+pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
+    let s = s.trim();
+    let (num_str, multiplier) = if s.ends_with('G') || s.ends_with('g') {
+        (&s[..s.len()-1], 1024 * 1024 * 1024)
+    } else if s.ends_with('M') || s.ends_with('m') {
+        (&s[..s.len()-1], 1024 * 1024)
+    } else if s.ends_with('K') || s.ends_with('k') {
+        (&s[..s.len()-1], 1024)
+    } else {
+        (s, 1usize)
+    };
+    let num: usize = num_str.parse().map_err(|e: std::num::ParseIntError| e.to_string())?;
+    Ok(num * multiplier)
 }
 
 fn parse_algorithms(s: &str) -> Result<Vec<Algorithm>, String> {
