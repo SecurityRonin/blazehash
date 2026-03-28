@@ -245,39 +245,6 @@ How blazehash compares to hashdeep, b3sum, sha256sum, and other forensic hashing
 | Maintained (2025+) | **Y** | -- (v4.4, 2014) | **Y** | **Y** | -- |
 | Static Linux binary | **Y** | -- | **Y** | -- | -- |
 
-## Architecture
-
-```
-CLI (hashdeep-compatible flags + extensions)
- |
- v
-Hashing Engine
- |- File Walker (parallel, recursive, resume-aware)
- |- Thread Pool (rayon)
- |- Hasher (BLAKE3, SHA-256, SHA-3, SHA-512, SHA-1, MD5, Tiger, Whirlpool)
- |- mmap I/O
- |
- +--> Manifest Builder --> hashdeep / DFXML / CSV / JSON / JSONL
- |
- +--> Audit Engine <-- Known Hashes (hashdeep files, NSRL import)
-       +--> Report: matched / moved / new / changed
-```
-
-Modules:
-- `hash`: Streaming hash computation with multi-algorithm support and hardware dispatch
-- `walk`: Parallel recursive directory traversal with symlink handling and error recovery
-- `audit`: hashdeep-compatible audit mode with match/move/new/changed classification
-- `manifest`: Manifest generation and parsing for hashdeep, DFXML, CSV, JSON, JSONL formats
-- `nsrl`: NIST NSRL dataset import and bloom filter lookup
-- `resume`: Checkpoint and resume state for interrupted hashing runs
-- `piecewise`: Chunk-level hashing for large file verification
-
-## Testing
-
-```bash
-cargo test
-```
-
 ## References
 
 - [hashdeep](https://github.com/jessek/hashdeep) (Jesse Kornblum & Simson Garfinkel, forensic hashing and audit)
