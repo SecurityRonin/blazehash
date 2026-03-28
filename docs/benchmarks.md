@@ -34,10 +34,12 @@ When you switch from SHA-256 to BLAKE3 (blazehash's default), throughput improve
 
 Single-file hashing measures raw algorithm throughput, where process startup overhead is negligible.
 
+> **BH** = blazehash, **HD** = hashdeep v4.4
+
 ```mermaid
 xychart-beta
     title "256 MiB Single File — Time in ms (lower is better)"
-    x-axis ["blazehash MD5", "hashdeep MD5", "blazehash SHA-1", "hashdeep SHA-1", "blazehash SHA-256", "hashdeep SHA-256", "blazehash Tiger", "hashdeep Tiger", "blazehash Whirlpool", "hashdeep Whirlpool"]
+    x-axis ["BH MD5", "HD MD5", "BH SHA-1", "HD SHA-1", "BH SHA-256", "HD SHA-256", "BH Tiger", "HD Tiger", "BH Whirlpool", "HD Whirlpool"]
     y-axis "Time (ms)" 0 --> 1300
     bar [587, 678, 275, 572, 854, 930, 692, 968, 1117, 1206]
 ```
@@ -78,7 +80,7 @@ Small-file workloads measure per-file overhead: directory traversal, file open/c
 ```mermaid
 xychart-beta
     title "1000 Small Files (4 KiB each) — Time in ms (lower is better)"
-    x-axis ["blazehash SHA-256", "hashdeep SHA-256", "blazehash 5 algos", "hashdeep 5 algos"]
+    x-axis ["BH SHA-256", "HD SHA-256", "BH 5 algos", "HD 5 algos"]
     y-axis "Time (ms)" 0 --> 80
     bar [20, 69, 28, 76]
 ```
@@ -97,7 +99,7 @@ Simulates a forensic image with nested directory structure: 5 directories x 5 su
 ```mermaid
 xychart-beta
     title "Recursive Walk — 500 files, 8 MiB (lower is better)"
-    x-axis ["blazehash SHA-256", "hashdeep SHA-256", "blazehash 5 algos", "hashdeep 5 algos"]
+    x-axis ["BH SHA-256", "HD SHA-256", "BH 5 algos", "HD 5 algos"]
     y-axis "Time (ms)" 0 --> 50
     bar [27, 45, 28, 47]
 ```
@@ -116,7 +118,7 @@ Piecewise hashing (`-p`) splits each file into fixed-size chunks and hashes each
 ```mermaid
 xychart-beta
     title "Piecewise Hashing — 64 MiB, 1M chunks (lower is better)"
-    x-axis ["blazehash SHA-256", "hashdeep SHA-256", "blazehash 5 algos", "hashdeep 5 algos"]
+    x-axis ["BH SHA-256", "HD SHA-256", "BH 5 algos", "HD 5 algos"]
     y-axis "Time (ms)" 0 --> 1800
     bar [163, 339, 825, 1775]
 ```
@@ -134,10 +136,12 @@ BLAKE3 was designed from the ground up for modern hardware: internal tree parall
 
 The chart below compares all blazehash algorithms against hashdeep's SHA-256 (the most common forensic algorithm and hashdeep's best-performing secure hash) as a reference baseline:
 
+> **BH** = blazehash, **HD** = hashdeep v4.4
+
 ```mermaid
 xychart-beta
-    title "256 MiB — blazehash algorithms vs hashdeep SHA-256 baseline (lower is better)"
-    x-axis ["blazehash BLAKE3", "blazehash SHA-1", "blazehash SHA3-256", "blazehash Tiger", "blazehash SHA-512", "blazehash MD5", "blazehash SHA-256", "blazehash Whirlpool", "hashdeep SHA-256"]
+    title "256 MiB — All algorithms vs hashdeep SHA-256 baseline (lower is better)"
+    x-axis ["BH BLAKE3", "BH SHA-1", "BH SHA3-256", "BH Tiger", "BH SHA-512", "BH MD5", "BH SHA-256", "BH Whirlpool", "HD SHA-256"]
     y-axis "Time (ms)" 0 --> 1000
     bar [187, 275, 376, 388, 407, 419, 672, 808, 930]
 ```
