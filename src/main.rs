@@ -1,17 +1,18 @@
 mod cli;
 
 use anyhow::Result;
+use blazehash::audit;
+use blazehash::format::{write_csv, write_json, write_jsonl};
 use blazehash::hash::hash_file;
 use blazehash::manifest::{write_header, write_record};
 use blazehash::walk::walk_and_hash;
 use clap::Parser;
 use cli::Cli;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{self, BufWriter, Write};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-
     let algorithms = cli.flat_algorithms();
 
     let mut writer: Box<dyn Write> = match &cli.output {
@@ -19,10 +20,11 @@ fn main() -> Result<()> {
         None => Box::new(BufWriter::new(io::stdout().lock())),
     };
 
+    // Size-only mode
     if cli.size_only {
         for path in &cli.paths {
             if path.is_file() {
-                let meta = std::fs::metadata(path)?;
+                let meta = fs::metadata(path)?;
                 writeln!(writer, "{}\t{}", meta.len(), path.display())?;
             } else if path.is_dir() {
                 let results = walk_and_hash(path, &algorithms, cli.recursive)?;
@@ -34,21 +36,58 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    if !cli.bare {
-        write_header(&mut writer, &algorithms)?;
+    // Audit mode
+    if cli.audit {
+        for known_path in &cli.known {
+            let known_content = fs::read_to_string(known_path)?;
+            let mut all_paths = Vec::new();
+            for path in &cli.paths {
+                if path.is_file() {
+                    all_paths.push(path.clone());
+                } else if path.is_dir() {
+                    let results = walk_and_hash(path, &algorithms, cli.recursive)?;
+                    for r in results {
+                        all_paths.push(r.path);
+                    }
+                }
+            }
+            let result = audit::audit(&all_paths, &known_content, &algorithms, cli.recursive)?;
+            writeln!(writer, "blazehash audit summary:")?;
+            writeln!(writer, "  Files matched: {}", result.matched)?;
+            writeln!(writer, "  Files changed: {}", result.changed)?;
+            writeln!(writer, "  Files new: {}", result.new_files)?;
+            writeln!(writer, "  Files moved: {}", result.moved)?;
+        }
+        writer.flush()?;
+        return Ok(());
     }
 
+    // Collect all results
+    let mut all_results = Vec::new();
     for path in &cli.paths {
         if path.is_file() {
-            let result = hash_file(path, &algorithms)?;
-            write_record(&mut writer, &result, &algorithms)?;
+            all_results.push(hash_file(path, &algorithms)?);
         } else if path.is_dir() {
-            let results = walk_and_hash(path, &algorithms, cli.recursive)?;
-            for result in &results {
+            let mut results = walk_and_hash(path, &algorithms, cli.recursive)?;
+            all_results.append(&mut results);
+        }
+    }
+
+    // Write output in requested format
+    match cli.format.as_str() {
+        "csv" => write_csv(&mut writer, &all_results, &algorithms)?,
+        "json" => write_json(&mut writer, &all_results, &algorithms)?,
+        "jsonl" => write_jsonl(&mut writer, &all_results, &algorithms)?,
+        _ => {
+            // hashdeep format (default)
+            if !cli.bare {
+                write_header(&mut writer, &algorithms)?;
+            }
+            for result in &all_results {
                 write_record(&mut writer, result, &algorithms)?;
             }
         }
-    }
+    };
 
     writer.flush()?;
     Ok(())
