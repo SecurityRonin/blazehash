@@ -34,7 +34,7 @@ When you switch from SHA-256 to BLAKE3 (blazehash's default), throughput improve
 
 Single-file hashing measures raw algorithm throughput, where process startup overhead is negligible.
 
-> First bar = **blazehash**, second bar = **hashdeep** v4.4
+> Back bar = **hashdeep**, front bar = **blazehash**
 
 ```mermaid
 ---
@@ -46,8 +46,8 @@ xychart-beta
     title "256 MiB Single File — Time in ms (lower is better)"
     x-axis ["MD5", "SHA-1", "SHA-256", "Tiger", "Whirlpool", "All 5"]
     y-axis "Time (ms)" 0 --> 4000
-    bar "blazehash" [587, 275, 854, 692, 1117, 3092]
     bar "hashdeep" [678, 572, 930, 968, 1206, 3521]
+    bar "blazehash" [587, 275, 854, 692, 1117, 3092]
 ```
 
 | Algorithm | blazehash | hashdeep | Speedup |
@@ -85,8 +85,8 @@ xychart-beta
     title "1000 Small Files (4 KiB each) — Time in ms (lower is better)"
     x-axis ["SHA-256", "All 5 algos"]
     y-axis "Time (ms)" 0 --> 80
-    bar "blazehash" [20, 28]
     bar "hashdeep" [69, 76]
+    bar "blazehash" [20, 28]
 ```
 
 | Scenario | blazehash | hashdeep | Speedup |
@@ -110,8 +110,8 @@ xychart-beta
     title "Recursive Walk — 500 files, 8 MiB (lower is better)"
     x-axis ["SHA-256", "All 5 algos"]
     y-axis "Time (ms)" 0 --> 50
-    bar "blazehash" [27, 28]
     bar "hashdeep" [45, 47]
+    bar "blazehash" [27, 28]
 ```
 
 | Scenario | blazehash | hashdeep | Speedup |
@@ -135,8 +135,8 @@ xychart-beta
     title "Piecewise Hashing — 64 MiB, 1M chunks (lower is better)"
     x-axis ["SHA-256", "All 5 algos"]
     y-axis "Time (ms)" 0 --> 1800
-    bar "blazehash" [163, 825]
     bar "hashdeep" [339, 1775]
+    bar "blazehash" [163, 825]
 ```
 
 | Scenario | blazehash | hashdeep | Speedup |
