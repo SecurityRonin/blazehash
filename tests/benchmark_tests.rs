@@ -1,10 +1,16 @@
 //! Performance benchmark tests: blazehash vs hashdeep.
 //!
 //! All tests are `#[ignore]` — run with:
-//!   cargo test --test benchmark_tests -- --ignored
+//!   cargo test --release --test benchmark_tests -- --ignored --nocapture --test-threads=1
 //!
 //! Requires `hashdeep` to be installed (brew install md5deep / apt install hashdeep).
 //! Tests skip gracefully if hashdeep is not found.
+//!
+//! Methodology:
+//! - All benchmarks include a warmup pass to eliminate filesystem cache bias
+//! - Each timed scenario runs both tools on warm cache for fair comparison
+//! - Large file tests use 256 MiB to amortize process startup overhead
+//! - Results report wall-clock time including process spawn
 
 use assert_cmd::Command;
 use std::collections::HashMap;
@@ -63,6 +69,17 @@ fn run_hashdeep(args: &[&str]) -> (String, std::time::Duration) {
     (stdout, elapsed)
 }
 
+/// Warmup: run both tools once (discard results) to populate page cache.
+fn warmup(blazehash_args: &[&str], hashdeep_args: &[&str]) {
+    let _ = run_hashdeep(hashdeep_args);
+    let _ = run_blazehash(blazehash_args);
+}
+
+/// Warmup for blazehash-only benchmarks.
+fn warmup_blazehash(args: &[&str]) {
+    let _ = run_blazehash(args);
+}
+
 /// Parse a hashdeep-format manifest into (path -> {algo -> hash}) map.
 /// Works for both blazehash and hashdeep output.
 fn parse_manifest(content: &str) -> HashMap<String, HashMap<String, String>> {
@@ -71,10 +88,8 @@ fn parse_manifest(content: &str) -> HashMap<String, HashMap<String, String>> {
 
     for line in content.lines() {
         if line.starts_with("%%%% size,") {
-            // Column definition line: %%%% size,algo1,algo2,...,filename
             let cols = &line["%%%% size,".len()..];
             let parts: Vec<&str> = cols.split(',').collect();
-            // Last is "filename", rest are algo names
             algorithms = parts[..parts.len() - 1]
                 .iter()
                 .map(|s| s.to_string())
@@ -84,8 +99,7 @@ fn parse_manifest(content: &str) -> HashMap<String, HashMap<String, String>> {
         if line.starts_with("%%%%") || line.starts_with('#') || line.is_empty() {
             continue;
         }
-        // Data line: size,hash1,hash2,...,filename
-        let expected = algorithms.len() + 2; // size + hashes + filename
+        let expected = algorithms.len() + 2;
         let parts: Vec<&str> = line.splitn(expected, ',').collect();
         if parts.len() < expected {
             continue;
@@ -100,7 +114,7 @@ fn parse_manifest(content: &str) -> HashMap<String, HashMap<String, String>> {
     records
 }
 
-/// Print a comparison table.
+/// Print a comparison result.
 fn report_timing(label: &str, blazehash_ms: f64, hashdeep_ms: f64) {
     let speedup = hashdeep_ms / blazehash_ms;
     eprintln!(
@@ -120,7 +134,7 @@ fn create_data_file(path: &Path, size: usize) {
 }
 
 // ──────────────────────────────────────────────────────────────
-// Benchmark: Single large file throughput
+// Benchmark: Single large file throughput (256 MiB)
 // ──────────────────────────────────────────────────────────────
 
 #[test]
@@ -133,23 +147,27 @@ fn bench_single_large_file() {
 
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("large.bin");
-    create_data_file(&file, 64 * 1024 * 1024); // 64 MiB
+    create_data_file(&file, 256 * 1024 * 1024); // 256 MiB
     let file_str = file.to_str().unwrap();
 
-    eprintln!("\n=== Single Large File (64 MiB) ===");
+    eprintln!("\n=== Single Large File (256 MiB) ===");
 
-    // Test with each shared algorithm individually
     for algo in ["md5", "sha1", "sha256", "tiger", "whirlpool"] {
+        warmup(&["-c", algo, file_str], &["-c", algo, file_str]);
         let (_, bh_dur) = run_blazehash(&["-c", algo, file_str]);
         let (_, hd_dur) = run_hashdeep(&["-c", algo, file_str]);
         report_timing(
-            &format!("  {algo}"),
+            algo,
             bh_dur.as_secs_f64() * 1000.0,
             hd_dur.as_secs_f64() * 1000.0,
         );
     }
 
     // All shared algorithms at once
+    warmup(
+        &["-c", SHARED_ALGOS, file_str],
+        &["-c", SHARED_ALGOS, file_str],
+    );
     let (_, bh_dur) = run_blazehash(&["-c", SHARED_ALGOS, file_str]);
     let (_, hd_dur) = run_hashdeep(&["-c", SHARED_ALGOS, file_str]);
     report_timing(
@@ -172,19 +190,36 @@ fn bench_many_small_files() {
     }
 
     let dir = TempDir::new().unwrap();
-    // Create 500 files of 4 KiB each (2 MiB total)
-    for i in 0..500 {
+    for i in 0..1000 {
         let file = dir.path().join(format!("file_{i:04}.bin"));
         create_data_file(&file, 4096);
     }
     let dir_str = dir.path().to_str().unwrap();
 
-    eprintln!("\n=== Many Small Files (500 x 4 KiB) ===");
+    eprintln!("\n=== Many Small Files (1000 x 4 KiB) ===");
 
+    // SHA-256 only
+    warmup(
+        &["-r", "-c", "sha256", dir_str],
+        &["-r", "-c", "sha256", dir_str],
+    );
+    let (_, bh_dur) = run_blazehash(&["-r", "-c", "sha256", dir_str]);
+    let (_, hd_dur) = run_hashdeep(&["-r", "-c", "sha256", dir_str]);
+    report_timing(
+        "1000 files, SHA-256",
+        bh_dur.as_secs_f64() * 1000.0,
+        hd_dur.as_secs_f64() * 1000.0,
+    );
+
+    // All 5 algos
+    warmup(
+        &["-r", "-c", SHARED_ALGOS, dir_str],
+        &["-r", "-c", SHARED_ALGOS, dir_str],
+    );
     let (_, bh_dur) = run_blazehash(&["-r", "-c", SHARED_ALGOS, dir_str]);
     let (_, hd_dur) = run_hashdeep(&["-r", "-c", SHARED_ALGOS, dir_str]);
     report_timing(
-        "500 small files, all 5 algos",
+        "1000 files, all 5 algos",
         bh_dur.as_secs_f64() * 1000.0,
         hd_dur.as_secs_f64() * 1000.0,
     );
@@ -203,23 +238,27 @@ fn bench_recursive_walk() {
     }
 
     let dir = TempDir::new().unwrap();
-    // Create a 3-level deep tree: 5 dirs x 5 dirs x 10 files = 250 files
+    // 5 x 5 x 20 = 500 files, 16 KiB each = 8 MiB total
     for i in 0..5 {
         let level1 = dir.path().join(format!("dir_{i}"));
         fs::create_dir(&level1).unwrap();
         for j in 0..5 {
             let level2 = level1.join(format!("sub_{j}"));
             fs::create_dir(&level2).unwrap();
-            for k in 0..10 {
+            for k in 0..20 {
                 let file = level2.join(format!("data_{k}.bin"));
-                create_data_file(&file, 8192); // 8 KiB each
+                create_data_file(&file, 16384);
             }
         }
     }
     let dir_str = dir.path().to_str().unwrap();
 
-    eprintln!("\n=== Recursive Walk (250 files, 3 levels deep) ===");
+    eprintln!("\n=== Recursive Walk (500 files, 3 levels, 8 MiB total) ===");
 
+    warmup(
+        &["-r", "-c", "sha256", dir_str],
+        &["-r", "-c", "sha256", dir_str],
+    );
     let (_, bh_dur) = run_blazehash(&["-r", "-c", "sha256", dir_str]);
     let (_, hd_dur) = run_hashdeep(&["-r", "-c", "sha256", dir_str]);
     report_timing(
@@ -228,6 +267,10 @@ fn bench_recursive_walk() {
         hd_dur.as_secs_f64() * 1000.0,
     );
 
+    warmup(
+        &["-r", "-c", SHARED_ALGOS, dir_str],
+        &["-r", "-c", SHARED_ALGOS, dir_str],
+    );
     let (_, bh_dur) = run_blazehash(&["-r", "-c", SHARED_ALGOS, dir_str]);
     let (_, hd_dur) = run_hashdeep(&["-r", "-c", SHARED_ALGOS, dir_str]);
     report_timing(
@@ -251,11 +294,15 @@ fn bench_piecewise_hashing() {
 
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("piecewise.bin");
-    create_data_file(&file, 32 * 1024 * 1024); // 32 MiB
+    create_data_file(&file, 64 * 1024 * 1024); // 64 MiB
     let file_str = file.to_str().unwrap();
 
-    eprintln!("\n=== Piecewise Hashing (32 MiB, 1M chunks) ===");
+    eprintln!("\n=== Piecewise Hashing (64 MiB, 1M chunks) ===");
 
+    warmup(
+        &["-p", "1M", "-c", "sha256", file_str],
+        &["-p", "1048576", "-c", "sha256", file_str],
+    );
     let (_, bh_dur) = run_blazehash(&["-p", "1M", "-c", "sha256", file_str]);
     let (_, hd_dur) = run_hashdeep(&["-p", "1048576", "-c", "sha256", file_str]);
     report_timing(
@@ -264,6 +311,10 @@ fn bench_piecewise_hashing() {
         hd_dur.as_secs_f64() * 1000.0,
     );
 
+    warmup(
+        &["-p", "1M", "-c", SHARED_ALGOS, file_str],
+        &["-p", "1048576", "-c", SHARED_ALGOS, file_str],
+    );
     let (_, bh_dur) = run_blazehash(&["-p", "1M", "-c", SHARED_ALGOS, file_str]);
     let (_, hd_dur) = run_hashdeep(&["-p", "1048576", "-c", SHARED_ALGOS, file_str]);
     report_timing(
@@ -287,13 +338,12 @@ fn compat_hash_values_match() {
 
     let dir = TempDir::new().unwrap();
 
-    // Test with various file sizes to exercise different code paths
     let test_cases: &[(&str, usize)] = &[
         ("empty.bin", 0),
         ("tiny.bin", 1),
         ("small.bin", 1000),
         ("medium.bin", 100_000),
-        ("boundary.bin", 1024 * 1024), // mmap threshold boundary
+        ("boundary.bin", 1024 * 1024),
     ];
 
     for (name, size) in test_cases {
@@ -314,22 +364,19 @@ fn compat_hash_values_match() {
             let bh_records = parse_manifest(&bh_out);
             let hd_records = parse_manifest(&hd_out);
 
-            // Both should have exactly one record
             assert_eq!(
                 bh_records.len(),
                 1,
-                "blazehash should produce 1 record for {name}"
+                "blazehash: expected 1 record for {name}"
             );
             assert_eq!(
                 hd_records.len(),
                 1,
-                "hashdeep should produce 1 record for {name}"
+                "hashdeep: expected 1 record for {name}"
             );
 
-            // Extract the hash values (keys are full paths, so just get the first entry)
             let bh_hashes = bh_records.values().next().unwrap();
             let hd_hashes = hd_records.values().next().unwrap();
-
             let bh_hash = &bh_hashes[algo];
             let hd_hash = &hd_hashes[algo];
 
@@ -383,7 +430,6 @@ fn compat_multi_algo_values_match() {
 
 // ──────────────────────────────────────────────────────────────
 // Correctness: Audit cross-compatibility
-// blazehash can audit files against a hashdeep-generated manifest
 // ──────────────────────────────────────────────────────────────
 
 #[test]
@@ -405,11 +451,9 @@ fn compat_audit_hashdeep_manifest() {
 
     eprintln!("\n=== Cross-Tool Audit Compatibility ===");
 
-    // Generate manifest with hashdeep
     let (hd_out, _) = run_hashdeep(&["-r", "-c", "sha256", dir_str]);
     fs::write(&manifest, &hd_out).unwrap();
 
-    // Audit with blazehash against hashdeep's manifest
     let output = Command::cargo_bin("blazehash")
         .unwrap()
         .args(["-a", "-k", manifest_str, "-r", dir_str])
@@ -419,7 +463,6 @@ fn compat_audit_hashdeep_manifest() {
     let stdout = String::from_utf8(output.stdout).unwrap();
     eprintln!("  blazehash audit of hashdeep manifest:\n  {stdout}");
 
-    // All 5 files should be matched (manifest may also list manifest file itself)
     assert!(
         stdout.contains("Files matched: 5") || stdout.contains("Files matched: 6"),
         "expected all files to match, got: {stdout}"
@@ -444,7 +487,7 @@ fn compat_piecewise_values_match() {
 
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("piecewise.bin");
-    create_data_file(&file, 10_000); // 10 KiB — will produce multiple chunks at 4K
+    create_data_file(&file, 10_000);
     let file_str = file.to_str().unwrap();
 
     eprintln!("\n=== Piecewise Hash Compatibility (10 KiB, 4K chunks) ===");
@@ -452,7 +495,6 @@ fn compat_piecewise_values_match() {
     let (bh_out, _) = run_blazehash(&["-p", "4096", "-c", "sha256", file_str]);
     let (hd_out, _) = run_hashdeep(&["-p", "4096", "-c", "sha256", file_str]);
 
-    // Parse data lines (skip headers/comments)
     let bh_data: Vec<&str> = bh_out
         .lines()
         .filter(|l| !l.starts_with("%%") && !l.starts_with('#') && !l.is_empty())
@@ -470,7 +512,6 @@ fn compat_piecewise_values_match() {
         hd_data.len()
     );
 
-    // Compare each chunk's hash (format: size,hash,filename)
     for (i, (bh_line, hd_line)) in bh_data.iter().zip(hd_data.iter()).enumerate() {
         let bh_parts: Vec<&str> = bh_line.splitn(3, ',').collect();
         let hd_parts: Vec<&str> = hd_line.splitn(3, ',').collect();
@@ -499,22 +540,30 @@ fn compat_piecewise_values_match() {
 fn bench_blake3_advantage() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("blake3.bin");
-    create_data_file(&file, 64 * 1024 * 1024); // 64 MiB
+    create_data_file(&file, 256 * 1024 * 1024); // 256 MiB
     let file_str = file.to_str().unwrap();
 
-    eprintln!("\n=== BLAKE3 Advantage (64 MiB, blazehash only) ===");
+    eprintln!("\n=== BLAKE3 Advantage (256 MiB, blazehash only) ===");
 
-    for algo in ["blake3", "sha256", "sha512", "sha3-256", "md5", "sha1"] {
+    for algo in [
+        "blake3",
+        "sha256",
+        "sha512",
+        "sha3-256",
+        "md5",
+        "sha1",
+        "tiger",
+        "whirlpool",
+    ] {
+        warmup_blazehash(&["-c", algo, file_str]);
         let (_, dur) = run_blazehash(&["-c", algo, file_str]);
         eprintln!("  {algo:>10}: {:.1}ms", dur.as_secs_f64() * 1000.0);
     }
 
     // All 8 algorithms at once
-    let (_, dur) = run_blazehash(&[
-        "-c",
-        "blake3,sha256,sha512,sha3-256,md5,sha1,tiger,whirlpool",
-        file_str,
-    ]);
+    let all_algos = "blake3,sha256,sha512,sha3-256,md5,sha1,tiger,whirlpool";
+    warmup_blazehash(&["-c", all_algos, file_str]);
+    let (_, dur) = run_blazehash(&["-c", all_algos, file_str]);
     eprintln!("  {:>10}: {:.1}ms", "all 8", dur.as_secs_f64() * 1000.0);
 }
 
@@ -540,7 +589,6 @@ fn compat_manifest_format_structure() {
     let (bh_out, _) = run_blazehash(&["-c", "sha256", file_str]);
     let (hd_out, _) = run_hashdeep(&["-c", "sha256", file_str]);
 
-    // Both should have HASHDEEP-1.0 header
     assert!(
         bh_out.contains("HASHDEEP-1.0"),
         "blazehash missing HASHDEEP-1.0 header"
@@ -550,7 +598,6 @@ fn compat_manifest_format_structure() {
         "hashdeep missing HASHDEEP-1.0 header"
     );
 
-    // Both should have column definition line
     assert!(
         bh_out.contains("%%%% size,sha256,filename"),
         "blazehash missing column definition"
@@ -560,7 +607,6 @@ fn compat_manifest_format_structure() {
         "hashdeep missing column definition"
     );
 
-    // Data line count should match
     let bh_data_count = bh_out
         .lines()
         .filter(|l| !l.starts_with("%%") && !l.starts_with('#') && !l.is_empty())

@@ -6,7 +6,7 @@
 [![Release](https://github.com/SecurityRonin/blazehash/actions/workflows/release.yml/badge.svg)](https://github.com/SecurityRonin/blazehash/releases)
 [![Sponsor](https://img.shields.io/badge/sponsor-h4x0r-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/h4x0r)
 
-hashdeep for the modern era. BLAKE3 by default. Multithreaded. Memory-mapped. Drop-in compatible with every hashdeep flag, plus new ones.
+hashdeep for the modern era. BLAKE3 by default. Multithreaded. Memory-mapped. Drop-in compatible with every hashdeep flag, plus new ones. [**Up to 3.4x faster**](docs/benchmarks.md) than hashdeep on the same algorithms — and **4x faster** when you switch to BLAKE3.
 
 Point this at a case directory. Get a cryptographically verified manifest in seconds, not hours.
 
@@ -35,6 +35,24 @@ hashdeep hasn't had a release since v4.4. It doesn't support BLAKE3. It doesn't 
 **blazehash** intends to bring hashdeep into modern times. Every hashdeep flag works exactly as you expect. The output format is compatible. Your existing scripts, your audit workflows, your court-tested procedures — they all keep working. We just make them faster, add the algorithms the community needs, and fill the gaps hashdeep never got to.
 
 This is not a replacement. It is a continuation.
+
+## Performance
+
+Benchmarked on Apple M4 Pro (14-core, 48 GB RAM). Both tools run on warm cache. Full methodology and results: **[docs/benchmarks.md](docs/benchmarks.md)**.
+
+| Workload | blazehash | hashdeep v4.4 | Speedup |
+|----------|----------:|----------:|--------:|
+| 256 MiB file, SHA-256 | 854 ms | 930 ms | **1.09x** |
+| 256 MiB file, SHA-1 | 275 ms | 572 ms | **2.08x** |
+| 256 MiB file, 5 algos combined | 3.1 s | 3.5 s | **1.14x** |
+| 1000 small files, SHA-256 | 20 ms | 69 ms | **3.43x** |
+| Recursive walk (500 files) | 27 ms | 45 ms | **1.68x** |
+| Piecewise (64 MiB, 1M chunks) | 163 ms | 339 ms | **2.08x** |
+| **256 MiB file, BLAKE3** | **187 ms** | *N/A* | **3.6x vs SHA-256** |
+
+**BLAKE3 at 1.37 GB/s** is blazehash's default — 3.6x faster than SHA-256, unavailable in hashdeep. For practitioners switching from `hashdeep -c sha256`: expect roughly **4x** end-to-end speedup.
+
+All hashes are bit-identical to hashdeep for shared algorithms (MD5, SHA-1, SHA-256, Tiger, Whirlpool). [Verified by automated cross-tool tests](docs/benchmarks.md#correctness).
 
 ## Install
 
