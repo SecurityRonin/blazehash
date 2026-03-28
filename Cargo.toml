@@ -8,6 +8,7 @@ license = "MIT"
 repository = "https://github.com/SecurityRonin/blazehash"
 keywords = ["hash", "forensics", "blake3", "hashdeep", "dfir"]
 categories = ["command-line-utilities", "cryptography"]
+exclude = ["target/", ".github/", ".serena/", "docs/", "wix/", ".pre-commit-config.yaml", "renovate.json", "PACKAGING.md", "Makefile"]
 
 [[bin]]
 name = "blazehash"
