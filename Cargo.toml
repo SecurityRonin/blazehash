@@ -2,6 +2,7 @@
 name = "blazehash"
 version = "0.1.0"
 edition = "2021"
+authors = ["Albert Hui <security-ronin@users.noreply.github.com>"]
 description = "Forensic file hasher — hashdeep for the modern era, BLAKE3 by default"
 license = "MIT"
 repository = "https://github.com/SecurityRonin/blazehash"

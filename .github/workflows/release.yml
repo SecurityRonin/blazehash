@@ -49,12 +49,13 @@ jobs:
           tar czf ../../../blazehash-${{ matrix.target }}.tar.gz blazehash
           cd ../../..
 
-      - name: Package (Windows)
+      - name: Install cargo-wix (Windows)
         if: runner.os == 'Windows'
-        run: |
-          cd target/${{ matrix.target }}/release
-          7z a ../../../blazehash-${{ matrix.target }}.zip blazehash.exe
-          cd ../../..
+        run: cargo install cargo-wix
+
+      - name: Build MSI (Windows)
+        if: runner.os == 'Windows'
+        run: cargo wix --no-build --target ${{ matrix.target }} --output blazehash-${{ matrix.target }}.msi
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -110,7 +111,7 @@ jobs:
       - uses: vedantmgoyal9/winget-releaser@4ffc7888bffd451b357355dc214d43bb9f23917e # v2
         with:
           identifier: SecurityRonin.blazehash
-          installers-regex: '\.zip$'
+          installers-regex: '\.msi$'
           token: ${{ secrets.WINGET_TOKEN }}
           fork-user: securityronin-bot
 

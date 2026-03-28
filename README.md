@@ -72,11 +72,13 @@ brew tap SecurityRonin/tap
 brew install blazehash
 ```
 
-### Windows (winget)
+### Windows
 
 ```powershell
 winget install SecurityRonin.blazehash
 ```
+
+Or download the `.msi` installer from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases).
 
 ### Cargo (all platforms)
 
@@ -94,7 +96,7 @@ Download from [GitHub Releases](https://github.com/SecurityRonin/blazehash/relea
 | macOS | Intel | `blazehash-x86_64-apple-darwin` |
 | Linux | x86_64 (static, musl) | `blazehash-x86_64-unknown-linux-musl` |
 | Linux | ARM64 (static, musl) | `blazehash-aarch64-unknown-linux-musl` |
-| Windows | x86_64 | `blazehash-x86_64-pc-windows-msvc.exe` |
+| Windows | x86_64 | `blazehash-x86_64-pc-windows-msvc.msi` |
 
 Linux binaries are fully static (musl) — no glibc dependency. Drop them on a SIFT workstation, a cloud instance, or an air-gapped forensic box and they just work.
 
