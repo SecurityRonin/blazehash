@@ -71,6 +71,7 @@ fn walk_skips_directories_and_symlinks() {
 }
 
 #[test]
+#[cfg(unix)]
 fn walk_reports_unreadable_files() {
     let dir = TempDir::new().unwrap();
     fs::write(dir.path().join("good.txt"), b"content").unwrap();
