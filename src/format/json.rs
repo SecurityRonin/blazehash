@@ -23,7 +23,10 @@ pub fn write_json<W: Write>(
     results: &[FileHashResult],
     algorithms: &[Algorithm],
 ) -> Result<()> {
-    let arr: Vec<Value> = results.iter().map(|r| result_to_json(r, algorithms)).collect();
+    let arr: Vec<Value> = results
+        .iter()
+        .map(|r| result_to_json(r, algorithms))
+        .collect();
     serde_json::to_writer_pretty(&mut *w, &arr)?;
     writeln!(w)?;
     Ok(())

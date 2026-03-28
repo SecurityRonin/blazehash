@@ -287,7 +287,8 @@ fn e2e_piecewise_with_output_file() {
     assert!(contents.contains("HASHDEEP-1.0"));
     assert!(contents.contains("test.txt"));
     // Should have multiple data lines (2000 bytes / 1K chunks = 2 chunks)
-    let data_lines: Vec<&str> = contents.lines()
+    let data_lines: Vec<&str> = contents
+        .lines()
         .filter(|l| !l.starts_with("%%") && !l.starts_with('#') && !l.is_empty())
         .collect();
     assert_eq!(data_lines.len(), 2);
@@ -400,7 +401,10 @@ fn e2e_resume_skips_already_hashed() {
         .success();
 
     let second_size = fs::metadata(&manifest).unwrap().len();
-    assert_eq!(first_size, second_size, "resume should not duplicate already-hashed files");
+    assert_eq!(
+        first_size, second_size,
+        "resume should not duplicate already-hashed files"
+    );
 }
 
 #[test]
@@ -424,7 +428,10 @@ fn e2e_walk_errors_to_stderr() {
             .unwrap();
 
         let stderr = String::from_utf8(output.stderr).unwrap();
-        assert!(stderr.contains("warning"), "expected warning on stderr for unreadable file");
+        assert!(
+            stderr.contains("warning"),
+            "expected warning on stderr for unreadable file"
+        );
 
         // Cleanup permissions
         fs::set_permissions(&bad, fs::Permissions::from_mode(0o644)).unwrap();

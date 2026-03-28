@@ -1,6 +1,6 @@
 use blazehash::algorithm::Algorithm;
-use blazehash::manifest::{write_header, write_record, parse_header};
 use blazehash::hash::FileHashResult;
+use blazehash::manifest::{parse_header, write_header, write_record};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -46,7 +46,10 @@ fn write_record_single_algorithm() {
 #[test]
 fn write_record_multiple_algorithms() {
     let mut hashes = HashMap::new();
-    hashes.insert(Algorithm::Md5, "5eb63bbbe01eeed093cb22bb8f5acdc3".to_string());
+    hashes.insert(
+        Algorithm::Md5,
+        "5eb63bbbe01eeed093cb22bb8f5acdc3".to_string(),
+    );
     hashes.insert(
         Algorithm::Sha256,
         "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9".to_string(),
@@ -130,7 +133,10 @@ fn parse_header_missing_column_line() {
 fn parse_header_missing_filename_column() {
     let err = parse_header("%%%% HASHDEEP-1.0\n%%%% size,blake3\n");
     assert!(err.is_err());
-    assert!(err.unwrap_err().to_string().contains("missing filename column"));
+    assert!(err
+        .unwrap_err()
+        .to_string()
+        .contains("missing filename column"));
 }
 
 #[test]
@@ -143,7 +149,15 @@ fn parse_header_unknown_algorithm_returns_error() {
 fn parse_header_many_algorithms() {
     let input = "%%%% HASHDEEP-1.0\n%%%% size,blake3,sha256,md5,sha1,filename\n";
     let algos = parse_header(input).unwrap();
-    assert_eq!(algos, vec![Algorithm::Blake3, Algorithm::Sha256, Algorithm::Md5, Algorithm::Sha1]);
+    assert_eq!(
+        algos,
+        vec![
+            Algorithm::Blake3,
+            Algorithm::Sha256,
+            Algorithm::Md5,
+            Algorithm::Sha1
+        ]
+    );
 }
 
 #[test]
@@ -158,7 +172,10 @@ fn write_header_contains_version_comment() {
 #[test]
 fn write_record_zero_size_file() {
     let mut hashes = HashMap::new();
-    hashes.insert(Algorithm::Blake3, "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262".to_string());
+    hashes.insert(
+        Algorithm::Blake3,
+        "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262".to_string(),
+    );
     let result = FileHashResult {
         path: PathBuf::from("/empty.txt"),
         size: 0,

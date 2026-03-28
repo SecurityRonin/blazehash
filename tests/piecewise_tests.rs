@@ -120,5 +120,8 @@ fn piecewise_hashes_match_full_file_hash() {
     let full = hash_file(f.path(), &[Algorithm::Blake3]).unwrap();
 
     assert_eq!(piecewise.len(), 1);
-    assert_eq!(piecewise[0].hashes[&Algorithm::Blake3], full.hashes[&Algorithm::Blake3]);
+    assert_eq!(
+        piecewise[0].hashes[&Algorithm::Blake3],
+        full.hashes[&Algorithm::Blake3]
+    );
 }

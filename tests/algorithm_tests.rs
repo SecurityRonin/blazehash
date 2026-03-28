@@ -77,13 +77,19 @@ use blazehash::algorithm::hash_bytes;
 #[test]
 fn hash_bytes_blake3_known_vector() {
     let hash = hash_bytes(Algorithm::Blake3, b"hello world");
-    assert_eq!(hash, "d74981efa70a0c880b8d8c1985d075dbcbf679b99a5f9914e5aaf96b831a9e24");
+    assert_eq!(
+        hash,
+        "d74981efa70a0c880b8d8c1985d075dbcbf679b99a5f9914e5aaf96b831a9e24"
+    );
 }
 
 #[test]
 fn hash_bytes_sha256_known_vector() {
     let hash = hash_bytes(Algorithm::Sha256, b"hello world");
-    assert_eq!(hash, "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
+    assert_eq!(
+        hash,
+        "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+    );
 }
 
 #[test]
@@ -116,7 +122,10 @@ fn hash_bytes_empty_input() {
 fn hash_bytes_sha3_256_known_vector() {
     let hash = hash_bytes(Algorithm::Sha3_256, b"hello world");
     // SHA3-256 of "hello world"
-    assert_eq!(hash, "644bcc7e564373040999aac89e7622f3ca71fba1d972fd94a31c3bfbf24e3938");
+    assert_eq!(
+        hash,
+        "644bcc7e564373040999aac89e7622f3ca71fba1d972fd94a31c3bfbf24e3938"
+    );
 }
 
 #[test]
@@ -139,10 +148,19 @@ fn parse_algorithm_case_insensitive() {
     assert_eq!(Algorithm::from_str("SHA256").unwrap(), Algorithm::Sha256);
     assert_eq!(Algorithm::from_str("Sha-256").unwrap(), Algorithm::Sha256);
     assert_eq!(Algorithm::from_str("MD5").unwrap(), Algorithm::Md5);
-    assert_eq!(Algorithm::from_str("SHA3-256").unwrap(), Algorithm::Sha3_256);
-    assert_eq!(Algorithm::from_str("SHA3_256").unwrap(), Algorithm::Sha3_256);
+    assert_eq!(
+        Algorithm::from_str("SHA3-256").unwrap(),
+        Algorithm::Sha3_256
+    );
+    assert_eq!(
+        Algorithm::from_str("SHA3_256").unwrap(),
+        Algorithm::Sha3_256
+    );
     assert_eq!(Algorithm::from_str("TIGER").unwrap(), Algorithm::Tiger);
-    assert_eq!(Algorithm::from_str("WHIRLPOOL").unwrap(), Algorithm::Whirlpool);
+    assert_eq!(
+        Algorithm::from_str("WHIRLPOOL").unwrap(),
+        Algorithm::Whirlpool
+    );
     assert_eq!(Algorithm::from_str("SHA512").unwrap(), Algorithm::Sha512);
     assert_eq!(Algorithm::from_str("SHA-1").unwrap(), Algorithm::Sha1);
 }

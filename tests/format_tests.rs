@@ -81,7 +81,8 @@ fn csv_missing_algorithm_returns_error() {
     };
 
     let mut buf = Vec::new();
-    let err = blazehash::format::write_csv(&mut buf, &[result], &[Algorithm::Blake3, Algorithm::Sha256]);
+    let err =
+        blazehash::format::write_csv(&mut buf, &[result], &[Algorithm::Blake3, Algorithm::Sha256]);
     assert!(err.is_err(), "should error when algorithm hash is missing");
 }
 

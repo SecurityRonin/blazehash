@@ -42,7 +42,8 @@ fn resume_from_empty_string() {
 
 #[test]
 fn resume_from_header_only() {
-    let manifest = "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n## Invoked from: blazehash v0.1.0\n##\n";
+    let manifest =
+        "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n## Invoked from: blazehash v0.1.0\n##\n";
     let state = ResumeState::from_manifest(manifest).unwrap();
     assert_eq!(state.completed_count(), 0);
 }

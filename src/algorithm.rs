@@ -1,6 +1,6 @@
+use digest::Digest;
 use std::fmt;
 use std::str::FromStr;
-use digest::Digest;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum Algorithm {
@@ -18,9 +18,14 @@ pub enum Algorithm {
 impl Algorithm {
     pub fn all() -> &'static [Algorithm] {
         &[
-            Algorithm::Blake3, Algorithm::Sha256, Algorithm::Sha512,
-            Algorithm::Sha3_256, Algorithm::Sha1, Algorithm::Md5,
-            Algorithm::Tiger, Algorithm::Whirlpool,
+            Algorithm::Blake3,
+            Algorithm::Sha256,
+            Algorithm::Sha512,
+            Algorithm::Sha3_256,
+            Algorithm::Sha1,
+            Algorithm::Md5,
+            Algorithm::Tiger,
+            Algorithm::Whirlpool,
         ]
     }
 

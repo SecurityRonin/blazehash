@@ -17,8 +17,8 @@ pub fn hash_file_piecewise(
     algorithms: &[Algorithm],
     chunk_size: usize,
 ) -> Result<Vec<PiecewiseResult>> {
-    let mut file = fs::File::open(path)
-        .with_context(|| format!("failed to open {}", path.display()))?;
+    let mut file =
+        fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?;
     let mut buf = vec![0u8; chunk_size];
     let mut offset: u64 = 0;
     let mut results = Vec::new();

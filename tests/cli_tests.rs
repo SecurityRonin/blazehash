@@ -1,8 +1,8 @@
 use assert_cmd::Command;
 use predicates::prelude::*;
+use serde_json;
 use std::fs;
 use tempfile::TempDir;
-use serde_json;
 
 #[test]
 fn cli_version() {
@@ -151,10 +151,7 @@ fn cli_resume_flag() {
 
 #[test]
 fn cli_no_args_shows_error() {
-    Command::cargo_bin("blazehash")
-        .unwrap()
-        .assert()
-        .failure();
+    Command::cargo_bin("blazehash").unwrap().assert().failure();
 }
 
 #[test]
@@ -170,10 +167,15 @@ fn cli_nonexistent_file_returns_error() {
     // Header is present but no data lines (no hash lines after the ## comments)
     assert!(stdout.contains("HASHDEEP-1.0"));
     // There should be no actual hash line (only header/comment lines start with % or #)
-    let data_lines: Vec<&str> = stdout.lines()
+    let data_lines: Vec<&str> = stdout
+        .lines()
         .filter(|l| !l.starts_with('%') && !l.starts_with('#') && !l.is_empty())
         .collect();
-    assert!(data_lines.is_empty(), "expected no data lines, got: {:?}", data_lines);
+    assert!(
+        data_lines.is_empty(),
+        "expected no data lines, got: {:?}",
+        data_lines
+    );
 }
 
 #[test]

@@ -4,7 +4,11 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 #[derive(Parser, Debug)]
-#[command(name = "blazehash", version, about = "Forensic file hasher — hashdeep for the modern era")]
+#[command(
+    name = "blazehash",
+    version,
+    about = "Forensic file hasher — hashdeep for the modern era"
+)]
 pub struct Cli {
     /// Files or directories to hash
     #[arg(required_unless_present = "version")]
@@ -54,15 +58,17 @@ pub struct Cli {
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
     let s = s.trim();
     let (num_str, multiplier) = if s.ends_with('G') || s.ends_with('g') {
-        (&s[..s.len()-1], 1024 * 1024 * 1024)
+        (&s[..s.len() - 1], 1024 * 1024 * 1024)
     } else if s.ends_with('M') || s.ends_with('m') {
-        (&s[..s.len()-1], 1024 * 1024)
+        (&s[..s.len() - 1], 1024 * 1024)
     } else if s.ends_with('K') || s.ends_with('k') {
-        (&s[..s.len()-1], 1024)
+        (&s[..s.len() - 1], 1024)
     } else {
         (s, 1usize)
     };
-    let num: usize = num_str.parse().map_err(|e: std::num::ParseIntError| e.to_string())?;
+    let num: usize = num_str
+        .parse()
+        .map_err(|e: std::num::ParseIntError| e.to_string())?;
     Ok(num * multiplier)
 }
 

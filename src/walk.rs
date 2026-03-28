@@ -53,11 +53,7 @@ pub fn walk_paths(root: &Path, recursive: bool) -> (Vec<PathBuf>, Vec<WalkError>
 
 /// Walk a directory, hash all files, return results and errors.
 /// Uses rayon for parallel file hashing.
-pub fn walk_and_hash(
-    root: &Path,
-    algorithms: &[Algorithm],
-    recursive: bool,
-) -> Result<WalkOutput> {
+pub fn walk_and_hash(root: &Path, algorithms: &[Algorithm], recursive: bool) -> Result<WalkOutput> {
     let (paths, walk_errors) = walk_paths(root, recursive);
 
     let hash_errors = Mutex::new(Vec::new());

@@ -14,7 +14,11 @@ pub fn write_header<W: Write>(w: &mut W, algorithms: &[Algorithm]) -> Result<()>
         write!(w, ",{}", algo.hashdeep_name())?;
     }
     writeln!(w, ",filename")?;
-    writeln!(w, "## Invoked from: blazehash v{}", env!("CARGO_PKG_VERSION"))?;
+    writeln!(
+        w,
+        "## Invoked from: blazehash v{}",
+        env!("CARGO_PKG_VERSION")
+    )?;
     writeln!(w, "##")?;
     Ok(())
 }
@@ -27,7 +31,9 @@ pub fn write_record<W: Write>(
 ) -> Result<()> {
     write!(w, "{}", result.size)?;
     for algo in algorithms {
-        let hash = result.hashes.get(algo)
+        let hash = result
+            .hashes
+            .get(algo)
             .ok_or_else(|| anyhow::anyhow!("missing hash for algorithm {algo}"))?;
         write!(w, ",{hash}")?;
     }
@@ -42,13 +48,19 @@ pub fn parse_header(input: &str) -> Result<Vec<Algorithm>> {
     // First line: %%%% HASHDEEP-1.0
     let first = lines.next().unwrap_or("");
     if !first.starts_with("%%%% HASHDEEP") {
-        bail!("not a hashdeep file: missing header (got {:?})", first.chars().take(40).collect::<String>());
+        bail!(
+            "not a hashdeep file: missing header (got {:?})",
+            first.chars().take(40).collect::<String>()
+        );
     }
 
     // Second line: %%%% size,algo1,algo2,...,filename
     let second = lines.next().unwrap_or("");
     if !second.starts_with("%%%% size,") {
-        bail!("not a hashdeep file: missing column line (got {:?})", second.chars().take(40).collect::<String>());
+        bail!(
+            "not a hashdeep file: missing column line (got {:?})",
+            second.chars().take(40).collect::<String>()
+        );
     }
 
     let cols = &second["%%%% size,".len()..];
@@ -56,7 +68,10 @@ pub fn parse_header(input: &str) -> Result<Vec<Algorithm>> {
 
     // Last part is "filename", skip it
     if parts.is_empty() || parts.last() != Some(&"filename") {
-        bail!("not a hashdeep file: missing filename column (got {:?})", second.chars().take(60).collect::<String>());
+        bail!(
+            "not a hashdeep file: missing filename column (got {:?})",
+            second.chars().take(60).collect::<String>()
+        );
     }
 
     let algo_names = &parts[..parts.len() - 1];

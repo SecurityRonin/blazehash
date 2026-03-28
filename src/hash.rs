@@ -41,8 +41,8 @@ fn hash_file_mmap(
     algorithms: &[Algorithm],
     _size: u64,
 ) -> Result<HashMap<Algorithm, String>> {
-    let file = fs::File::open(path)
-        .with_context(|| format!("failed to open {}", path.display()))?;
+    let file =
+        fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?;
     let mmap = unsafe {
         memmap2::Mmap::map(&file)
             .with_context(|| format!("failed to memory-map {}", path.display()))?
@@ -60,8 +60,8 @@ fn hash_file_streaming(
     path: &Path,
     algorithms: &[Algorithm],
 ) -> Result<HashMap<Algorithm, String>> {
-    let mut file = fs::File::open(path)
-        .with_context(|| format!("failed to open {}", path.display()))?;
+    let mut file =
+        fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?;
     let mut buf = vec![0u8; 64 * 1024]; // 64 KiB read buffer
 
     // Build a hasher for each algorithm

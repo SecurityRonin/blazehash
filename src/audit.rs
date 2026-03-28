@@ -23,10 +23,7 @@ pub enum AuditStatus {
     Missing(PathBuf),
 }
 
-pub fn audit(
-    paths: &[PathBuf],
-    known_content: &str,
-) -> Result<AuditResult> {
+pub fn audit(paths: &[PathBuf], known_content: &str) -> Result<AuditResult> {
     let known_algos = parse_header(known_content)?;
     let known_entries = parse_records(known_content, &known_algos);
 
@@ -62,9 +59,9 @@ pub fn audit(
                 if known.size != file_result.size {
                     continue;
                 }
-                let all_match = known_algos.iter().all(|a| {
-                    file_result.hashes.get(a) == known.hashes.get(a)
-                });
+                let all_match = known_algos
+                    .iter()
+                    .all(|a| file_result.hashes.get(a) == known.hashes.get(a));
                 if all_match {
                     result.moved += 1;
                     result.details.push(AuditStatus::Moved {
@@ -88,10 +85,11 @@ pub fn audit(
     for known in &known_entries {
         if !seen_known_paths.contains(known.path.as_path()) {
             result.missing += 1;
-            result.details.push(AuditStatus::Missing(known.path.clone()));
+            result
+                .details
+                .push(AuditStatus::Missing(known.path.clone()));
         }
     }
 
     Ok(result)
 }
-

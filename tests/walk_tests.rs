@@ -85,7 +85,10 @@ fn walk_reports_unreadable_files() {
 
     let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], false).unwrap();
     assert_eq!(output.results.len(), 1);
-    assert!(!output.errors.is_empty(), "should report errors for unreadable file");
+    assert!(
+        !output.errors.is_empty(),
+        "should report errors for unreadable file"
+    );
 
     // Cleanup permissions so TempDir can delete
     fs::set_permissions(&bad, fs::Permissions::from_mode(0o644)).unwrap();

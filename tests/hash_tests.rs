@@ -73,7 +73,10 @@ fn hash_file_returns_path() {
 
 #[test]
 fn hash_file_nonexistent_returns_error() {
-    let result = hash_file(std::path::Path::new("/nonexistent/file.txt"), &[Algorithm::Blake3]);
+    let result = hash_file(
+        std::path::Path::new("/nonexistent/file.txt"),
+        &[Algorithm::Blake3],
+    );
     assert!(result.is_err());
 }
 
@@ -118,7 +121,11 @@ fn hash_file_all_algorithms() {
     let result = hash_file(f.path(), &algos).unwrap();
     assert_eq!(result.hashes.len(), 8);
     for algo in &algos {
-        assert!(result.hashes.contains_key(algo), "missing hash for {:?}", algo);
+        assert!(
+            result.hashes.contains_key(algo),
+            "missing hash for {:?}",
+            algo
+        );
         assert!(!result.hashes[algo].is_empty());
     }
 }

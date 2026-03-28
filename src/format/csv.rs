@@ -19,7 +19,9 @@ pub fn write_csv<W: Write>(
     for result in results {
         write!(w, "{}", result.size)?;
         for algo in algorithms {
-            let hash = result.hashes.get(algo)
+            let hash = result
+                .hashes
+                .get(algo)
                 .ok_or_else(|| anyhow::anyhow!("missing hash for algorithm {algo}"))?;
             write!(w, ",{hash}")?;
         }
