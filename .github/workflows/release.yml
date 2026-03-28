@@ -74,6 +74,7 @@ jobs:
         run: |
           cd artifacts
           find . -type f -name "blazehash-*" -exec mv -t . {} +
+          find . -mindepth 1 -type d -delete
           sha256sum blazehash-* > checksums.txt
           cat checksums.txt
 
