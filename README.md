@@ -56,7 +56,16 @@ All hashes are bit-identical to hashdeep for shared algorithms (MD5, SHA-1, SHA-
 
 ## Install
 
-### Homebrew (macOS)
+### Debian / Ubuntu / Kali
+
+Download the `.deb` for your architecture from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases), then:
+
+```bash
+sudo apt install ./blazehash_*_amd64.deb     # x86_64
+sudo apt install ./blazehash_*_arm64.deb     # ARM64
+```
+
+### macOS (Homebrew)
 
 ```bash
 brew tap SecurityRonin/tap
