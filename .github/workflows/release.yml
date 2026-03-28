@@ -101,6 +101,7 @@ jobs:
           identifier: SecurityRonin.blazehash
           installers-regex: '\.zip$'
           token: ${{ secrets.WINGET_TOKEN }}
+          fork-user: securityronin-bot
 
   deb:
     strategy:
