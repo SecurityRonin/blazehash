@@ -73,7 +73,7 @@ jobs:
       - name: Generate checksums
         run: |
           cd artifacts
-          find . -name "blazehash-*" -exec mv {} . \;
+          find . -type f -name "blazehash-*" -exec mv -t . {} +
           sha256sum blazehash-* > checksums.txt
           cat checksums.txt
 
