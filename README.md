@@ -59,7 +59,13 @@ All hashes are bit-identical to hashdeep for shared algorithms (MD5, SHA-1, SHA-
 ### Debian / Ubuntu / Kali
 
 ```bash
-sudo apt install blazehash
+# amd64
+curl -LO https://github.com/SecurityRonin/blazehash/releases/latest/download/blazehash_amd64.deb
+sudo apt install ./blazehash_amd64.deb
+
+# arm64
+curl -LO https://github.com/SecurityRonin/blazehash/releases/latest/download/blazehash_arm64.deb
+sudo apt install ./blazehash_arm64.deb
 ```
 
 ### macOS (Homebrew)
