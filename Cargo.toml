@@ -34,6 +34,21 @@ tiger = "0.2"
 walkdir = "2"
 whirlpool = "0.10"
 
+[package.metadata.deb]
+maintainer = "SecurityRonin <security-ronin@users.noreply.github.com>"
+section = "utils"
+priority = "optional"
+extended-description = """\
+blazehash is a forensic file hasher and drop-in superset of hashdeep. \
+It defaults to BLAKE3 for speed, supports 8 hash algorithms \
+(BLAKE3, SHA-256, SHA-512, SHA3-256, SHA-1, MD5, Tiger, Whirlpool), \
+and provides multithreaded parallel hashing with memory-mapped I/O. \
+Features include audit mode, piecewise hashing, resume support, \
+and CSV/JSON/JSONL output formats."""
+assets = [
+    ["target/release/blazehash", "usr/bin/", "755"],
+]
+
 [dev-dependencies]
 tempfile = "3"
 assert_cmd = "2"
