@@ -1,6 +1,5 @@
 use assert_cmd::Command;
 use predicates::prelude::*;
-use serde_json;
 use std::fs;
 use tempfile::TempDir;
 
@@ -150,8 +149,9 @@ fn cli_resume_flag() {
 }
 
 #[test]
-fn cli_no_args_shows_error() {
-    Command::cargo_bin("blazehash").unwrap().assert().failure();
+fn cli_no_args_exits_ok() {
+    // With MCP subcommand support, no args is valid (produces no output, exits 0)
+    Command::cargo_bin("blazehash").unwrap().assert().success();
 }
 
 #[test]
@@ -173,8 +173,7 @@ fn cli_nonexistent_file_returns_error() {
         .collect();
     assert!(
         data_lines.is_empty(),
-        "expected no data lines, got: {:?}",
-        data_lines
+        "expected no data lines, got: {data_lines:?}"
     );
 }
 

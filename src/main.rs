@@ -1,5 +1,7 @@
 mod cli;
 mod commands;
+mod handlers;
+mod mcp;
 
 use anyhow::Result;
 use clap::Parser;
@@ -7,14 +9,27 @@ use cli::{Cli, Mode};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
+
+    match cli.mode() {
+        Mode::Mcp => {
+            mcp::run();
+            return Ok(());
+        }
+        _ => {}
+    }
+
     let algorithms = cli.flat_algorithms();
 
     match cli.mode() {
+        Mode::Mcp => unreachable!(),
         Mode::SizeOnly => {
             commands::size_only::run(&cli.paths, cli.recursive, cli.output.as_ref())?;
         }
         Mode::Audit => {
             commands::audit::run(&cli.paths, &cli.known, cli.recursive, cli.output.as_ref())?;
+        }
+        Mode::VerifyImage => {
+            commands::verify_image::run(&cli.paths, cli.output.as_ref())?;
         }
         Mode::Piecewise => {
             let chunk_str = cli.piecewise.as_ref().unwrap();

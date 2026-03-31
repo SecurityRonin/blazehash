@@ -1,14 +1,17 @@
 [package]
 name = "blazehash"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Albert Hui <security-ronin@users.noreply.github.com>"]
 description = "Forensic file hasher — hashdeep for the modern era, BLAKE3 by default"
 license = "MIT"
 repository = "https://github.com/SecurityRonin/blazehash"
+homepage = "https://github.com/SecurityRonin/blazehash"
+documentation = "https://docs.rs/blazehash"
+readme = "README.md"
 keywords = ["hash", "forensics", "blake3", "hashdeep", "dfir"]
 categories = ["command-line-utilities", "cryptography"]
-exclude = ["target/", ".github/", ".serena/", "docs/", "wix/", ".pre-commit-config.yaml", "renovate.json", "PACKAGING.md", "Makefile"]
+exclude = ["target/", ".github/", ".serena/", "docs/", "wix/", "tests/data/", ".pre-commit-config.yaml", "renovate.json", "PACKAGING.md", "Makefile"]
 
 [[bin]]
 name = "blazehash"
@@ -20,6 +23,7 @@ path = "src/lib.rs"
 
 [dependencies]
 anyhow = "1"
+base64 = "0.22"
 blake3 = "1"
 clap = { version = "4", features = ["derive"] }
 digest = "0.10"
@@ -35,6 +39,11 @@ sha3 = "0.10"
 tiger = "0.2"
 walkdir = "2"
 whirlpool = "0.10"
+ewf = { path = "../ewf/ewf", optional = true }
+
+[features]
+default = ["forensic-image"]
+forensic-image = ["dep:ewf"]
 
 [package.metadata.deb]
 maintainer = "SecurityRonin <security-ronin@users.noreply.github.com>"

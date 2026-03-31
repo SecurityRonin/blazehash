@@ -11,7 +11,7 @@ use std::str::FromStr;
 )]
 pub struct Cli {
     /// Files or directories to hash
-    #[arg(required_unless_present = "version")]
+    #[arg()]
     pub paths: Vec<PathBuf>,
 
     /// Hash algorithms (comma-separated). Default: blake3
@@ -33,6 +33,10 @@ pub struct Cli {
     /// Known hash file(s) for audit mode
     #[arg(short = 'k', long = "known")]
     pub known: Vec<PathBuf>,
+
+    /// Verify forensic disk image integrity (E01/EWF)
+    #[arg(long = "verify-image")]
+    pub verify_image: bool,
 
     /// Size-only mode (no hashing)
     #[arg(short = 's', long = "size-only")]
@@ -80,8 +84,10 @@ fn parse_algorithms(s: &str) -> Result<Vec<Algorithm>, String> {
 
 #[derive(Debug)]
 pub enum Mode {
+    Mcp,
     SizeOnly,
     Audit,
+    VerifyImage,
     Piecewise,
     Hash,
 }
@@ -97,10 +103,14 @@ impl Cli {
     }
 
     pub fn mode(&self) -> Mode {
-        if self.size_only {
+        if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("mcp")) {
+            Mode::Mcp
+        } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
             Mode::Audit
+        } else if self.verify_image {
+            Mode::VerifyImage
         } else if self.piecewise.is_some() {
             Mode::Piecewise
         } else {
