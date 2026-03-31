@@ -174,4 +174,87 @@ mod protocol_tests {
             .stdout(predicate::str::contains("isError"))
             .stdout(predicate::str::contains("unknown algorithm"));
     }
+
+    #[test]
+    fn mcp_audit_matched_file() {
+        use blazehash::algorithm::Algorithm;
+        use blazehash::hash::hash_file;
+        use std::fs;
+        use tempfile::TempDir;
+
+        let dir = TempDir::new().unwrap();
+        let file = dir.path().join("test.txt");
+        fs::write(&file, b"hello world").unwrap();
+
+        let result = hash_file(&file, &[Algorithm::Blake3]).unwrap();
+        let hash = result.hashes[&Algorithm::Blake3].clone();
+        let manifest = format!(
+            "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n{},{},{}\n",
+            result.size, hash, file.display()
+        );
+        let manifest_file = dir.path().join("manifest.hash");
+        fs::write(&manifest_file, &manifest).unwrap();
+
+        let input = format!(
+            r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_audit","arguments":{{"paths":["{}"],"manifest_path":"{}"}}}},"id":20}}"#,
+            file.display(), manifest_file.display()
+        );
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains(r#"\"matched\": 1"#))
+            .stdout(predicate::str::contains(r#"\"changed\": 0"#));
+    }
+
+    #[test]
+    fn mcp_audit_with_inline_manifest() {
+        use blazehash::algorithm::Algorithm;
+        use blazehash::hash::hash_file;
+        use std::fs;
+        use tempfile::TempDir;
+
+        let dir = TempDir::new().unwrap();
+        let file = dir.path().join("test.txt");
+        fs::write(&file, b"hello world").unwrap();
+
+        let result = hash_file(&file, &[Algorithm::Blake3]).unwrap();
+        let hash = result.hashes[&Algorithm::Blake3].clone();
+        // \\n in Rust string = literal \n chars, which JSON interprets as newlines
+        let manifest = format!(
+            "%%%% HASHDEEP-1.0\\n%%%% size,blake3,filename\\n{},{},{}\\n",
+            result.size, hash, file.display()
+        );
+
+        let input = format!(
+            r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_audit","arguments":{{"paths":["{}"],"manifest_content":"{}"}}}}, "id":21}}"#,
+            file.display(), manifest
+        );
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains(r#"\"matched\": 1"#));
+    }
+
+    #[test]
+    fn mcp_audit_no_manifest_returns_error() {
+        use std::fs;
+        use tempfile::TempDir;
+
+        let dir = TempDir::new().unwrap();
+        let file = dir.path().join("test.txt");
+        fs::write(&file, b"hello").unwrap();
+
+        let input = format!(
+            r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_audit","arguments":{{"paths":["{}"]}}}},"id":22}}"#,
+            file.display()
+        );
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("isError"))
+            .stdout(predicate::str::contains("manifest_path or manifest_content"));
+    }
 }

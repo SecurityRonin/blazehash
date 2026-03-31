@@ -66,8 +66,62 @@ pub fn handle_hash(paths: &[String], algorithms: &[String], recursive: bool) -> 
     Ok(json!({ "files": files, "errors": errors }))
 }
 
-pub fn handle_audit(_paths: &[String], _manifest_path: Option<&str>, _manifest_content: Option<&str>, _recursive: bool) -> Result<Value, String> {
-    Err("not yet implemented".into())
+pub fn handle_audit(
+    paths: &[String],
+    manifest_path: Option<&str>,
+    manifest_content: Option<&str>,
+    recursive: bool,
+) -> Result<Value, String> {
+    use blazehash::audit::{audit, AuditStatus};
+    use blazehash::walk::walk_paths;
+    use std::path::PathBuf;
+
+    let manifest = match (manifest_path, manifest_content) {
+        (Some(path), None) => {
+            std::fs::read_to_string(path).map_err(|e| format!("failed to read manifest: {e}"))?
+        }
+        (None, Some(content)) => content.to_string(),
+        (Some(_), Some(_)) => {
+            return Err("provide either manifest_path or manifest_content, not both".into());
+        }
+        (None, None) => {
+            return Err("must provide manifest_path or manifest_content".into());
+        }
+    };
+
+    let mut file_paths: Vec<PathBuf> = Vec::new();
+    for path_str in paths {
+        let path = PathBuf::from(path_str);
+        if path.is_dir() {
+            let (found, _) = walk_paths(&path, recursive);
+            file_paths.extend(found);
+        } else {
+            file_paths.push(path);
+        }
+    }
+
+    let result = audit(&file_paths, &manifest).map_err(|e| e.to_string())?;
+
+    let details: Vec<Value> = result.details.iter().map(|d| match d {
+        AuditStatus::Matched(p) => json!({"status": "matched", "path": p.display().to_string()}),
+        AuditStatus::Changed(p) => json!({"status": "changed", "path": p.display().to_string()}),
+        AuditStatus::New(p) => json!({"status": "new", "path": p.display().to_string()}),
+        AuditStatus::Moved { path, original } => json!({
+            "status": "moved",
+            "path": path.display().to_string(),
+            "original": original.display().to_string()
+        }),
+        AuditStatus::Missing(p) => json!({"status": "missing", "path": p.display().to_string()}),
+    }).collect();
+
+    Ok(json!({
+        "matched": result.matched,
+        "changed": result.changed,
+        "new_files": result.new_files,
+        "moved": result.moved,
+        "missing": result.missing,
+        "details": details
+    }))
 }
 
 pub fn handle_verify_image(_path: &str) -> Result<Value, String> {
