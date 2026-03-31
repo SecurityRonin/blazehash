@@ -284,4 +284,50 @@ mod protocol_tests {
             .stdout(predicate::str::contains("isError"))
             .stdout(predicate::str::contains("unsupported"));
     }
+
+    #[test]
+    fn mcp_hash_bytes_hex_encoding() {
+        // "hello world" = 68656c6c6f20776f726c64
+        let input = r#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"blazehash_hash_bytes","arguments":{"data":"68656c6c6f20776f726c64","encoding":"hex","algorithms":["blake3"]}},"id":40}"#;
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("blake3"))
+            .stdout(predicate::str::contains("d74981efa70a0c880b8d8c1985d075dbcbf679b99a5f9914e5aaf96b831a9e24"))
+            .stdout(predicate::str::contains(r#"\"size\": 11"#));
+    }
+
+    #[test]
+    fn mcp_hash_bytes_base64_encoding() {
+        // "hello world" = aGVsbG8gd29ybGQ=
+        let input = r#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"blazehash_hash_bytes","arguments":{"data":"aGVsbG8gd29ybGQ=","encoding":"base64","algorithms":["blake3"]}},"id":41}"#;
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("d74981efa70a0c880b8d8c1985d075dbcbf679b99a5f9914e5aaf96b831a9e24"))
+            .stdout(predicate::str::contains(r#"\"size\": 11"#));
+    }
+
+    #[test]
+    fn mcp_hash_bytes_invalid_hex() {
+        let input = r#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"blazehash_hash_bytes","arguments":{"data":"ZZZZ","encoding":"hex"}},"id":42}"#;
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("isError"));
+    }
+
+    #[test]
+    fn mcp_hash_bytes_invalid_encoding() {
+        let input = r#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"blazehash_hash_bytes","arguments":{"data":"abc","encoding":"rot13"}},"id":43}"#;
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("isError"))
+            .stdout(predicate::str::contains("encoding"));
+    }
 }

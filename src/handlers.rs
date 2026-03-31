@@ -161,6 +161,34 @@ pub fn handle_algorithms() -> Result<Value, String> {
     }))
 }
 
-pub fn handle_hash_bytes(_data: &str, _encoding: &str, _algorithms: &[String]) -> Result<Value, String> {
-    Err("not yet implemented".into())
+pub fn handle_hash_bytes(data: &str, encoding: &str, algorithms: &[String]) -> Result<Value, String> {
+    use base64::Engine;
+    use blazehash::algorithm::{hash_bytes, Algorithm};
+    use std::str::FromStr;
+
+    let bytes = match encoding {
+        "hex" => hex::decode(data).map_err(|e| format!("invalid hex: {e}"))?,
+        "base64" => base64::engine::general_purpose::STANDARD
+            .decode(data)
+            .map_err(|e| format!("invalid base64: {e}"))?,
+        other => return Err(format!("unsupported encoding: {other} (use \"hex\" or \"base64\")")),
+    };
+
+    let algos: Vec<Algorithm> = if algorithms.is_empty() {
+        vec![Algorithm::Blake3]
+    } else {
+        algorithms.iter()
+            .map(|s| Algorithm::from_str(s).map_err(|e| e.to_string()))
+            .collect::<Result<Vec<_>, _>>()?
+    };
+
+    let mut hashes = serde_json::Map::new();
+    for algo in &algos {
+        hashes.insert(algo.to_string(), json!(hash_bytes(*algo, &bytes)));
+    }
+
+    Ok(json!({
+        "size": bytes.len(),
+        "hashes": hashes
+    }))
 }
