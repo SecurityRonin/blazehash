@@ -15,7 +15,7 @@ blazehash -r /mnt/evidence -c blake3,sha-256 -o results.hash
 ```
 
 ```
-blazehash v0.1.0 — BLAKE3 + SHA-256, 16 threads, mmap I/O
+blazehash v0.2.0 — BLAKE3 + SHA-256, 16 threads, mmap I/O
 [*] Scanning /mnt/evidence recursively
 [+] 847,293 files hashed (2.14 TiB) in 38.7s
 [+] Throughput: 56.6 GiB/s (BLAKE3) · 4.2 GiB/s (SHA-256)
@@ -30,7 +30,7 @@ We owe Jesse a debt of gratitude. hashdeep solved a real problem and solved it w
 
 But hashdeep was written in an era of spinning disks, single-core CPUs, and MD5 as a default. The world moved on. Evidence volumes grew from gigabytes to terabytes. NVMe drives can push 7 GB/s. CPUs ship with 16+ cores. NIST deprecated SHA-1. And BLAKE3 — designed from the ground up for parallelism and hardware acceleration — can hash at memory bandwidth speeds.
 
-hashdeep hasn't had a release since v4.4. It doesn't support BLAKE3. It doesn't use multiple cores. It doesn't memory-map files. It can't resume interrupted runs. It can't export to DFXML or JSON.
+hashdeep hasn't had a release since v4.4. It doesn't support BLAKE3. It doesn't use multiple cores. It doesn't memory-map files. It can't resume interrupted runs. It can't export to JSON.
 
 **blazehash** intends to bring hashdeep into modern times. Every hashdeep flag works exactly as you expect. The output format is compatible. Your existing scripts, your audit workflows, your court-tested procedures — they all keep working. We just make them faster, add the algorithms the community needs, and fill the gaps hashdeep never got to.
 
@@ -88,7 +88,7 @@ blazehash is also available as a Rust library for embedding hashing capabilities
 
 ```toml
 [dependencies]
-blazehash = "0.1"
+blazehash = "0.2"
 ```
 
 See [crates.io](https://crates.io/crates/blazehash) for API documentation.
@@ -120,25 +120,16 @@ blazehash -r /mnt/evidence -a -k hashes.b3                   # b3sum format
 blazehash -r /mnt/evidence -a -k hashes.sha256               # sha256sum format
 ```
 
-Accepts known-hash files in any format blazehash can export: hashdeep, CSV, JSON, JSONL, b3sum, and sha256sum. Audit reports match hashdeep output exactly: files matched, files not matched, files moved, files new.
+Accepts known-hash files in hashdeep format. Audit reports match hashdeep output exactly: files matched, files not matched, files moved, files new.
 
 ### Export formats
 
 ```bash
 blazehash -r /mnt/evidence --format hashdeep     # default, hashdeep-compatible
-blazehash -r /mnt/evidence --format dfxml         # Digital Forensics XML
 blazehash -r /mnt/evidence --format csv           # CSV with headers
 blazehash -r /mnt/evidence --format json          # JSON array
 blazehash -r /mnt/evidence --format jsonl         # one JSON object per line
 ```
-
-### Import NSRL
-
-```bash
-blazehash -r /mnt/evidence --import-nsrl /path/to/NSRLFile.txt -a
-```
-
-Filters known-good files during audit using NIST's [National Software Reference Library](https://www.nist.gov/itl/ssd/software-quality-group/national-software-reference-library-nsrl).
 
 ### Resume interrupted runs
 
@@ -156,10 +147,49 @@ blazehash -r /mnt/evidence -p 1G     # hash in 1 GiB chunks
 
 Piecewise hashing (hashdeep `-p` flag). Each file produces multiple hash entries, one per chunk. Useful for verifying partial transfers or detecting targeted modifications within large files.
 
+### Verify forensic disk images
+
+```bash
+blazehash --verify-image image.E01    # verify E01/EWF image integrity
+```
+
+Recomputes the full-media MD5 (and SHA-1 if stored) and compares against hashes embedded in the image. Supports E01, Ex01, L01, and multi-segment EWF images. Powered by the [ewf](https://crates.io/crates/ewf) crate.
+
 ### Size-only mode (fast pre-scan)
 
 ```bash
 blazehash -r /mnt/evidence -s         # list files with sizes, no hashing
+```
+
+## MCP server
+
+The `blazehash mcp` command starts an [MCP](https://modelcontextprotocol.io/) server for AI-assisted forensic hashing over JSON-RPC stdio.
+
+| Tool | Description |
+|------|-------------|
+| `blazehash_hash` | Hash files/directories with configurable algorithms (default: BLAKE3) |
+| `blazehash_audit` | Audit files against a known manifest — detect changes, moves, missing files |
+| `blazehash_verify_image` | Verify forensic disk image integrity (E01/EWF) |
+| `blazehash_algorithms` | List all 8 supported hash algorithms |
+| `blazehash_hash_bytes` | Hash raw inline data (hex or base64 encoded) |
+
+### Register with Claude Code
+
+```bash
+claude mcp add blazehash -- blazehash mcp
+```
+
+### Claude Desktop configuration
+
+```json
+{
+  "mcpServers": {
+    "blazehash": {
+      "command": "blazehash",
+      "args": ["mcp"]
+    }
+  }
+}
 ```
 
 ## Algorithms
@@ -220,21 +250,19 @@ How blazehash compares to hashdeep, b3sum, sha256sum, and other forensic hashing
 |---------|:---------:|:--------:|:-----:|:---------:|:-------:|
 | Audit mode | **Y** | **Y** | -- | `-c` flag | -- |
 | Piecewise hashing | **Y** | **Y** | -- | -- | -- |
-| NSRL import | **Y** | -- | -- | -- | -- |
 | Resume interrupted | **Y** | -- | -- | -- | -- |
 | Known-hash matching | **Y** | **Y** | -- | -- | **Y** |
 | Recursive hashing | **Y** | **Y** | -- | -- | **Y** |
+| Forensic image verification (E01) | **Y** | -- | -- | -- | -- |
+| MCP server (AI-assisted analysis) | **Y** | -- | -- | -- | -- |
 
 ### Output Formats
 
 | Feature | blazehash | hashdeep | b3sum | sha256sum | md5deep |
 |---------|:---------:|:--------:|:-----:|:---------:|:-------:|
 | hashdeep format | **Y** | **Y** | -- | -- | -- |
-| DFXML | **Y** | -- | -- | -- | -- |
 | CSV | **Y** | -- | -- | -- | -- |
 | JSON / JSONL | **Y** | -- | -- | -- | -- |
-| b3sum format | **Y** | -- | **Y** | -- | -- |
-| sha256sum format | **Y** | -- | -- | **Y** | -- |
 
 ### Platform & Implementation
 
@@ -249,9 +277,8 @@ How blazehash compares to hashdeep, b3sum, sha256sum, and other forensic hashing
 
 - [hashdeep](https://github.com/jessek/hashdeep) (Jesse Kornblum & Simson Garfinkel, forensic hashing and audit)
 - [BLAKE3](https://github.com/BLAKE3-team/BLAKE3) (Jack O'Connor, Samuel Neves, Jean-Philippe Aumasson, Zooko Wilcox-O'Hearn)
-- [NIST NSRL](https://www.nist.gov/itl/ssd/software-quality-group/national-software-reference-library-nsrl) (National Software Reference Library)
-- [DFXML](https://github.com/simsong/dfxml) (Simson Garfinkel, Digital Forensics XML)
 - [SHAttered](https://shattered.io/) (SHA-1 collision, Stevens et al., 2017)
+- [ewf](https://crates.io/crates/ewf) (Pure Rust EWF/E01 reader for forensic image verification)
 
 ## Acknowledgements
 
@@ -259,7 +286,7 @@ This project exists because of [Jesse Kornblum](https://github.com/jessek).
 
 Jesse created [hashdeep](https://github.com/jessek/hashdeep) (and its predecessor md5deep) while working for the US Government, and gave it to the forensic community as a public domain tool. For over a decade, hashdeep has been the go-to utility for evidence hashing and integrity verification in forensic labs, law enforcement agencies, and courtrooms worldwide. Its audit mode — the ability to verify a set of files against a known-good manifest and report what matched, what moved, what changed, and what's new — remains one of the most elegant ideas in forensic tooling.
 
-[Simson Garfinkel](https://simson.net/) co-authored hashdeep and created [DFXML](https://github.com/simsong/dfxml), the Digital Forensics XML format that blazehash supports as an export option.
+[Simson Garfinkel](https://simson.net/) co-authored hashdeep and created [DFXML](https://github.com/simsong/dfxml), the Digital Forensics XML format.
 
 The [BLAKE3 team](https://github.com/BLAKE3-team/BLAKE3) — Jack O'Connor, Samuel Neves, Jean-Philippe Aumasson, and Zooko Wilcox-O'Hearn — designed a hash function that is both fast and correct. BLAKE3's internal parallelism and tree hashing structure are the reason blazehash can saturate NVMe bandwidth on a single file.
 
