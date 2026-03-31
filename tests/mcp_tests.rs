@@ -257,4 +257,31 @@ mod protocol_tests {
             .stdout(predicate::str::contains("isError"))
             .stdout(predicate::str::contains("manifest_path or manifest_content"));
     }
+
+    #[test]
+    fn mcp_verify_image_returns_result() {
+        let e01_path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/data/nps-2010-emails.E01");
+
+        let input = format!(
+            r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_verify_image","arguments":{{"path":"{e01_path}"}}}},"id":30}}"#,
+        );
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("EWF"))
+            .stdout(predicate::str::contains("md5_match"))
+            .stdout(predicate::str::contains("media_size"));
+    }
+
+    #[test]
+    fn mcp_verify_image_unsupported_format() {
+        let input = r#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"blazehash_verify_image","arguments":{"path":"/tmp/fake.raw"}},"id":31}"#;
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("isError"))
+            .stdout(predicate::str::contains("unsupported"));
+    }
 }

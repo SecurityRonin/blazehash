@@ -124,8 +124,31 @@ pub fn handle_audit(
     }))
 }
 
-pub fn handle_verify_image(_path: &str) -> Result<Value, String> {
-    Err("not yet implemented".into())
+pub fn handle_verify_image(path: &str) -> Result<Value, String> {
+    use blazehash::forensic_image::verify_image;
+    use std::path::Path;
+
+    let result = verify_image(Path::new(path)).map_err(|e| e.to_string())?;
+
+    let metadata = result.metadata.as_ref().map(|m| json!({
+        "case_number": m.case_number,
+        "examiner": m.examiner,
+        "description": m.description,
+        "acquiry_software": m.acquiry_software,
+    }));
+
+    Ok(json!({
+        "format": result.format.to_string(),
+        "path": result.path,
+        "media_size": result.media_size,
+        "stored_md5": result.stored_md5,
+        "stored_sha1": result.stored_sha1,
+        "computed_md5": result.computed_md5,
+        "computed_sha1": result.computed_sha1,
+        "md5_match": result.md5_match,
+        "sha1_match": result.sha1_match,
+        "metadata": metadata
+    }))
 }
 
 pub fn handle_algorithms() -> Result<Value, String> {
