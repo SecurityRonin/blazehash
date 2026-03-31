@@ -88,4 +88,90 @@ mod protocol_tests {
             .success()
             .stdout(predicate::str::contains("unknown tool"));
     }
+
+    #[test]
+    fn mcp_hash_file_returns_hashes() {
+        use std::fs;
+        use tempfile::TempDir;
+
+        let dir = TempDir::new().unwrap();
+        let file = dir.path().join("test.txt");
+        fs::write(&file, b"hello world").unwrap();
+
+        let input = format!(
+            r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_hash","arguments":{{"paths":["{}"]}}}},"id":10}}"#,
+            file.display()
+        );
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("blake3"))
+            .stdout(predicate::str::contains("test.txt"));
+    }
+
+    #[test]
+    fn mcp_hash_file_with_multiple_algorithms() {
+        use std::fs;
+        use tempfile::TempDir;
+
+        let dir = TempDir::new().unwrap();
+        let file = dir.path().join("test.txt");
+        fs::write(&file, b"hello world").unwrap();
+
+        let input = format!(
+            r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_hash","arguments":{{"paths":["{}"],"algorithms":["blake3","sha256"]}}}},"id":11}}"#,
+            file.display()
+        );
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("blake3"))
+            .stdout(predicate::str::contains("sha256"));
+    }
+
+    #[test]
+    fn mcp_hash_directory_recursive() {
+        use std::fs;
+        use tempfile::TempDir;
+
+        let dir = TempDir::new().unwrap();
+        fs::write(dir.path().join("a.txt"), b"aaa").unwrap();
+        let sub = dir.path().join("sub");
+        fs::create_dir(&sub).unwrap();
+        fs::write(sub.join("b.txt"), b"bbb").unwrap();
+
+        let input = format!(
+            r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_hash","arguments":{{"paths":["{}"],"recursive":true}}}},"id":12}}"#,
+            dir.path().display()
+        );
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("a.txt"))
+            .stdout(predicate::str::contains("b.txt"));
+    }
+
+    #[test]
+    fn mcp_hash_invalid_algorithm_returns_error() {
+        use std::fs;
+        use tempfile::TempDir;
+
+        let dir = TempDir::new().unwrap();
+        let file = dir.path().join("test.txt");
+        fs::write(&file, b"hello").unwrap();
+
+        let input = format!(
+            r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_hash","arguments":{{"paths":["{}"],"algorithms":["xxhash"]}}}},"id":13}}"#,
+            file.display()
+        );
+        mcp_command()
+            .write_stdin(format!("{input}\n"))
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("isError"))
+            .stdout(predicate::str::contains("unknown algorithm"));
+    }
 }
