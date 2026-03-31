@@ -30,7 +30,7 @@ fn tool_definitions() -> Value {
         },
         {
             "name": "blazehash_audit",
-            "description": "Audit files against a known hash manifest (hashdeep format). Detects matched, changed, new, moved, and missing files.",
+            "description": "Audit files against a known hash manifest (hashdeep format). Detects matched, changed, new, moved, and missing files. Exactly one of manifest_path or manifest_content must be provided.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
