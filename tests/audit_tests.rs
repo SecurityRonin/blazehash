@@ -193,7 +193,7 @@ fn audit_details_contains_correct_statuses() {
     assert_eq!(result.details.len(), 1);
     match &result.details[0] {
         AuditStatus::Matched(p) => assert_eq!(p, &file),
-        other => panic!("expected Matched, got {:?}", other),
+        other => panic!("expected Matched, got {other:?}"),
     }
 }
 

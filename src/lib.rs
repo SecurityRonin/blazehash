@@ -1,5 +1,6 @@
 pub mod algorithm;
 pub mod audit;
+pub mod forensic_image;
 pub mod format;
 pub mod hash;
 pub mod manifest;

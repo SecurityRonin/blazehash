@@ -87,8 +87,7 @@ fn parse_manifest(content: &str) -> HashMap<String, HashMap<String, String>> {
     let mut records: HashMap<String, HashMap<String, String>> = HashMap::new();
 
     for line in content.lines() {
-        if line.starts_with("%%%% size,") {
-            let cols = &line["%%%% size,".len()..];
+        if let Some(cols) = line.strip_prefix("%%%% size,") {
             let parts: Vec<&str> = cols.split(',').collect();
             algorithms = parts[..parts.len() - 1]
                 .iter()

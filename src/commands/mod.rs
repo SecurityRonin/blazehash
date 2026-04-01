@@ -2,6 +2,7 @@ pub mod audit;
 pub mod hash;
 pub mod piecewise;
 pub mod size_only;
+pub mod verify_image;
 
 use blazehash::walk::WalkError;
 

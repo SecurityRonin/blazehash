@@ -123,8 +123,7 @@ fn hash_file_all_algorithms() {
     for algo in &algos {
         assert!(
             result.hashes.contains_key(algo),
-            "missing hash for {:?}",
-            algo
+            "missing hash for {algo:?}"
         );
         assert!(!result.hashes[algo].is_empty());
     }

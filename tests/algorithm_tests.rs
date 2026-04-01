@@ -114,7 +114,7 @@ fn hash_bytes_sha512_known_vector() {
 fn hash_bytes_empty_input() {
     for algo in Algorithm::all() {
         let hash = hash_bytes(*algo, b"");
-        assert!(!hash.is_empty(), "empty hash for {:?}", algo);
+        assert!(!hash.is_empty(), "empty hash for {algo:?}");
     }
 }
 
