@@ -39,7 +39,7 @@ sha3 = "0.10"
 tiger = "0.2"
 walkdir = "2"
 whirlpool = "0.10"
-ewf = { path = "../ewf/ewf", optional = true }
+ewf = { version = "0.2", path = "../ewf/ewf", optional = true }
 
 [features]
 default = ["forensic-image"]
