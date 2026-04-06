@@ -10,12 +10,9 @@ use cli::{Cli, Mode};
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
-    match cli.mode() {
-        Mode::Mcp => {
-            mcp::run();
-            return Ok(());
-        }
-        _ => {}
+    if let Mode::Mcp = cli.mode() {
+        mcp::run();
+        return Ok(());
     }
 
     let algorithms = cli.flat_algorithms();

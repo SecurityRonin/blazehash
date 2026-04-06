@@ -21,6 +21,12 @@ mod protocol_tests {
         cmd
     }
 
+    /// Escape a path for safe embedding in a JSON string.
+    /// On Windows, backslashes must be doubled to avoid invalid JSON escapes.
+    fn json_path(p: &std::path::Path) -> String {
+        p.display().to_string().replace('\\', "\\\\")
+    }
+
     #[test]
     fn mcp_initialize_returns_server_info() {
         let input = r#"{"jsonrpc":"2.0","method":"initialize","id":1}"#;
@@ -100,7 +106,7 @@ mod protocol_tests {
 
         let input = format!(
             r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_hash","arguments":{{"paths":["{}"]}}}},"id":10}}"#,
-            file.display()
+            json_path(&file)
         );
         mcp_command()
             .write_stdin(format!("{input}\n"))
@@ -121,7 +127,7 @@ mod protocol_tests {
 
         let input = format!(
             r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_hash","arguments":{{"paths":["{}"],"algorithms":["blake3","sha256"]}}}},"id":11}}"#,
-            file.display()
+            json_path(&file)
         );
         mcp_command()
             .write_stdin(format!("{input}\n"))
@@ -144,7 +150,7 @@ mod protocol_tests {
 
         let input = format!(
             r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_hash","arguments":{{"paths":["{}"],"recursive":true}}}},"id":12}}"#,
-            dir.path().display()
+            json_path(dir.path())
         );
         mcp_command()
             .write_stdin(format!("{input}\n"))
@@ -165,7 +171,7 @@ mod protocol_tests {
 
         let input = format!(
             r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_hash","arguments":{{"paths":["{}"],"algorithms":["xxhash"]}}}},"id":13}}"#,
-            file.display()
+            json_path(&file)
         );
         mcp_command()
             .write_stdin(format!("{input}\n"))
@@ -197,7 +203,7 @@ mod protocol_tests {
 
         let input = format!(
             r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_audit","arguments":{{"paths":["{}"],"manifest_path":"{}"}}}},"id":20}}"#,
-            file.display(), manifest_file.display()
+            json_path(&file), json_path(&manifest_file)
         );
         mcp_command()
             .write_stdin(format!("{input}\n"))
@@ -223,12 +229,12 @@ mod protocol_tests {
         // \\n in Rust string = literal \n chars, which JSON interprets as newlines
         let manifest = format!(
             "%%%% HASHDEEP-1.0\\n%%%% size,blake3,filename\\n{},{},{}\\n",
-            result.size, hash, file.display()
+            result.size, hash, json_path(&file)
         );
 
         let input = format!(
             r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_audit","arguments":{{"paths":["{}"],"manifest_content":"{}"}}}}, "id":21}}"#,
-            file.display(), manifest
+            json_path(&file), manifest
         );
         mcp_command()
             .write_stdin(format!("{input}\n"))
@@ -248,7 +254,7 @@ mod protocol_tests {
 
         let input = format!(
             r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_audit","arguments":{{"paths":["{}"]}}}},"id":22}}"#,
-            file.display()
+            json_path(&file)
         );
         mcp_command()
             .write_stdin(format!("{input}\n"))
@@ -260,10 +266,12 @@ mod protocol_tests {
 
     #[test]
     fn mcp_verify_image_returns_result() {
-        let e01_path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/data/nps-2010-emails.E01");
+        let e01_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/data/nps-2010-emails.E01");
 
         let input = format!(
-            r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_verify_image","arguments":{{"path":"{e01_path}"}}}},"id":30}}"#,
+            r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_verify_image","arguments":{{"path":"{}"}}}},"id":30}}"#,
+            json_path(&e01_path)
         );
         mcp_command()
             .write_stdin(format!("{input}\n"))
