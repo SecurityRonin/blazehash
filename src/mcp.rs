@@ -106,7 +106,8 @@ fn tool_definitions() -> Value {
 fn dispatch_tool(name: &str, args: &Value) -> Result<Value, String> {
     match name {
         "blazehash_hash" => {
-            let paths = args.get("paths")
+            let paths = args
+                .get("paths")
                 .and_then(|v| v.as_array())
                 .ok_or("missing required parameter: paths")?
                 .iter()
@@ -115,15 +116,24 @@ fn dispatch_tool(name: &str, args: &Value) -> Result<Value, String> {
             if paths.is_empty() {
                 return Err("paths must be a non-empty array of strings".into());
             }
-            let algorithms = args.get("algorithms")
+            let algorithms = args
+                .get("algorithms")
                 .and_then(|v| v.as_array())
-                .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect::<Vec<_>>())
+                .map(|a| {
+                    a.iter()
+                        .filter_map(|v| v.as_str().map(String::from))
+                        .collect::<Vec<_>>()
+                })
                 .unwrap_or_default();
-            let recursive = args.get("recursive").and_then(|v| v.as_bool()).unwrap_or(false);
+            let recursive = args
+                .get("recursive")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
             handlers::handle_hash(&paths, &algorithms, recursive)
         }
         "blazehash_audit" => {
-            let paths = args.get("paths")
+            let paths = args
+                .get("paths")
                 .and_then(|v| v.as_array())
                 .ok_or("missing required parameter: paths")?
                 .iter()
@@ -131,25 +141,37 @@ fn dispatch_tool(name: &str, args: &Value) -> Result<Value, String> {
                 .collect::<Vec<_>>();
             let manifest_path = args.get("manifest_path").and_then(|v| v.as_str());
             let manifest_content = args.get("manifest_content").and_then(|v| v.as_str());
-            let recursive = args.get("recursive").and_then(|v| v.as_bool()).unwrap_or(false);
+            let recursive = args
+                .get("recursive")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
             handlers::handle_audit(&paths, manifest_path, manifest_content, recursive)
         }
         "blazehash_verify_image" => {
-            let path = args.get("path").and_then(|v| v.as_str())
+            let path = args
+                .get("path")
+                .and_then(|v| v.as_str())
                 .ok_or("missing required parameter: path")?;
             handlers::handle_verify_image(path)
         }
-        "blazehash_algorithms" => {
-            handlers::handle_algorithms()
-        }
+        "blazehash_algorithms" => handlers::handle_algorithms(),
         "blazehash_hash_bytes" => {
-            let data = args.get("data").and_then(|v| v.as_str())
+            let data = args
+                .get("data")
+                .and_then(|v| v.as_str())
                 .ok_or("missing required parameter: data")?;
-            let encoding = args.get("encoding").and_then(|v| v.as_str())
+            let encoding = args
+                .get("encoding")
+                .and_then(|v| v.as_str())
                 .ok_or("missing required parameter: encoding")?;
-            let algorithms = args.get("algorithms")
+            let algorithms = args
+                .get("algorithms")
                 .and_then(|v| v.as_array())
-                .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect::<Vec<_>>())
+                .map(|a| {
+                    a.iter()
+                        .filter_map(|v| v.as_str().map(String::from))
+                        .collect::<Vec<_>>()
+                })
                 .unwrap_or_default();
             handlers::handle_hash_bytes(data, encoding, &algorithms)
         }

@@ -1,6 +1,10 @@
 use serde_json::{json, Value};
 
-pub fn handle_hash(paths: &[String], algorithms: &[String], recursive: bool) -> Result<Value, String> {
+pub fn handle_hash(
+    paths: &[String],
+    algorithms: &[String],
+    recursive: bool,
+) -> Result<Value, String> {
     use blazehash::algorithm::Algorithm;
     use blazehash::hash::hash_file;
     use blazehash::walk::walk_and_hash;
@@ -10,7 +14,8 @@ pub fn handle_hash(paths: &[String], algorithms: &[String], recursive: bool) -> 
     let algos: Vec<Algorithm> = if algorithms.is_empty() {
         vec![Algorithm::Blake3]
     } else {
-        algorithms.iter()
+        algorithms
+            .iter()
             .map(|s| Algorithm::from_str(s).map_err(|e| e.to_string()))
             .collect::<Result<Vec<_>, _>>()?
     };
@@ -24,7 +29,9 @@ pub fn handle_hash(paths: &[String], algorithms: &[String], recursive: bool) -> 
             match walk_and_hash(path, &algos, recursive) {
                 Ok(output) => {
                     for r in output.results {
-                        let hashes: serde_json::Map<String, Value> = r.hashes.iter()
+                        let hashes: serde_json::Map<String, Value> = r
+                            .hashes
+                            .iter()
                             .map(|(a, h)| (a.to_string(), json!(h)))
                             .collect();
                         files.push(json!({
@@ -47,7 +54,9 @@ pub fn handle_hash(paths: &[String], algorithms: &[String], recursive: bool) -> 
         } else {
             match hash_file(path, &algos) {
                 Ok(r) => {
-                    let hashes: serde_json::Map<String, Value> = r.hashes.iter()
+                    let hashes: serde_json::Map<String, Value> = r
+                        .hashes
+                        .iter()
                         .map(|(a, h)| (a.to_string(), json!(h)))
                         .collect();
                     files.push(json!({
@@ -102,17 +111,27 @@ pub fn handle_audit(
 
     let result = audit(&file_paths, &manifest).map_err(|e| e.to_string())?;
 
-    let details: Vec<Value> = result.details.iter().map(|d| match d {
-        AuditStatus::Matched(p) => json!({"status": "matched", "path": p.display().to_string()}),
-        AuditStatus::Changed(p) => json!({"status": "changed", "path": p.display().to_string()}),
-        AuditStatus::New(p) => json!({"status": "new", "path": p.display().to_string()}),
-        AuditStatus::Moved { path, original } => json!({
-            "status": "moved",
-            "path": path.display().to_string(),
-            "original": original.display().to_string()
-        }),
-        AuditStatus::Missing(p) => json!({"status": "missing", "path": p.display().to_string()}),
-    }).collect();
+    let details: Vec<Value> = result
+        .details
+        .iter()
+        .map(|d| match d {
+            AuditStatus::Matched(p) => {
+                json!({"status": "matched", "path": p.display().to_string()})
+            }
+            AuditStatus::Changed(p) => {
+                json!({"status": "changed", "path": p.display().to_string()})
+            }
+            AuditStatus::New(p) => json!({"status": "new", "path": p.display().to_string()}),
+            AuditStatus::Moved { path, original } => json!({
+                "status": "moved",
+                "path": path.display().to_string(),
+                "original": original.display().to_string()
+            }),
+            AuditStatus::Missing(p) => {
+                json!({"status": "missing", "path": p.display().to_string()})
+            }
+        })
+        .collect();
 
     Ok(json!({
         "matched": result.matched,
@@ -130,12 +149,14 @@ pub fn handle_verify_image(path: &str) -> Result<Value, String> {
 
     let result = verify_image(Path::new(path)).map_err(|e| e.to_string())?;
 
-    let metadata = result.metadata.as_ref().map(|m| json!({
-        "case_number": m.case_number,
-        "examiner": m.examiner,
-        "description": m.description,
-        "acquiry_software": m.acquiry_software,
-    }));
+    let metadata = result.metadata.as_ref().map(|m| {
+        json!({
+            "case_number": m.case_number,
+            "examiner": m.examiner,
+            "description": m.description,
+            "acquiry_software": m.acquiry_software,
+        })
+    });
 
     Ok(json!({
         "format": result.format.to_string(),
@@ -161,7 +182,11 @@ pub fn handle_algorithms() -> Result<Value, String> {
     }))
 }
 
-pub fn handle_hash_bytes(data: &str, encoding: &str, algorithms: &[String]) -> Result<Value, String> {
+pub fn handle_hash_bytes(
+    data: &str,
+    encoding: &str,
+    algorithms: &[String],
+) -> Result<Value, String> {
     use base64::Engine;
     use blazehash::algorithm::{hash_bytes, Algorithm};
     use std::str::FromStr;
@@ -171,13 +196,18 @@ pub fn handle_hash_bytes(data: &str, encoding: &str, algorithms: &[String]) -> R
         "base64" => base64::engine::general_purpose::STANDARD
             .decode(data)
             .map_err(|e| format!("invalid base64: {e}"))?,
-        other => return Err(format!("unsupported encoding: {other} (use \"hex\" or \"base64\")")),
+        other => {
+            return Err(format!(
+                "unsupported encoding: {other} (use \"hex\" or \"base64\")"
+            ))
+        }
     };
 
     let algos: Vec<Algorithm> = if algorithms.is_empty() {
         vec![Algorithm::Blake3]
     } else {
-        algorithms.iter()
+        algorithms
+            .iter()
             .map(|s| Algorithm::from_str(s).map_err(|e| e.to_string()))
             .collect::<Result<Vec<_>, _>>()?
     };

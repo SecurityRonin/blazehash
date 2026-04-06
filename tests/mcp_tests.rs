@@ -196,14 +196,17 @@ mod protocol_tests {
         let hash = result.hashes[&Algorithm::Blake3].clone();
         let manifest = format!(
             "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n{},{},{}\n",
-            result.size, hash, file.display()
+            result.size,
+            hash,
+            file.display()
         );
         let manifest_file = dir.path().join("manifest.hash");
         fs::write(&manifest_file, &manifest).unwrap();
 
         let input = format!(
             r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_audit","arguments":{{"paths":["{}"],"manifest_path":"{}"}}}},"id":20}}"#,
-            json_path(&file), json_path(&manifest_file)
+            json_path(&file),
+            json_path(&manifest_file)
         );
         mcp_command()
             .write_stdin(format!("{input}\n"))
@@ -229,12 +232,15 @@ mod protocol_tests {
         // \\n in Rust string = literal \n chars, which JSON interprets as newlines
         let manifest = format!(
             "%%%% HASHDEEP-1.0\\n%%%% size,blake3,filename\\n{},{},{}\\n",
-            result.size, hash, json_path(&file)
+            result.size,
+            hash,
+            json_path(&file)
         );
 
         let input = format!(
             r#"{{"jsonrpc":"2.0","method":"tools/call","params":{{"name":"blazehash_audit","arguments":{{"paths":["{}"],"manifest_content":"{}"}}}}, "id":21}}"#,
-            json_path(&file), manifest
+            json_path(&file),
+            manifest
         );
         mcp_command()
             .write_stdin(format!("{input}\n"))
@@ -261,7 +267,9 @@ mod protocol_tests {
             .assert()
             .success()
             .stdout(predicate::str::contains("isError"))
-            .stdout(predicate::str::contains("manifest_path or manifest_content"));
+            .stdout(predicate::str::contains(
+                "manifest_path or manifest_content",
+            ));
     }
 
     #[test]
@@ -302,7 +310,9 @@ mod protocol_tests {
             .assert()
             .success()
             .stdout(predicate::str::contains("blake3"))
-            .stdout(predicate::str::contains("d74981efa70a0c880b8d8c1985d075dbcbf679b99a5f9914e5aaf96b831a9e24"))
+            .stdout(predicate::str::contains(
+                "d74981efa70a0c880b8d8c1985d075dbcbf679b99a5f9914e5aaf96b831a9e24",
+            ))
             .stdout(predicate::str::contains(r#"\"size\": 11"#));
     }
 
@@ -314,7 +324,9 @@ mod protocol_tests {
             .write_stdin(format!("{input}\n"))
             .assert()
             .success()
-            .stdout(predicate::str::contains("d74981efa70a0c880b8d8c1985d075dbcbf679b99a5f9914e5aaf96b831a9e24"))
+            .stdout(predicate::str::contains(
+                "d74981efa70a0c880b8d8c1985d075dbcbf679b99a5f9914e5aaf96b831a9e24",
+            ))
             .stdout(predicate::str::contains(r#"\"size\": 11"#));
     }
 

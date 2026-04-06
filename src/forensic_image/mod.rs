@@ -66,9 +66,17 @@ impl fmt::Display for ImageVerification {
 
         let size = self.media_size;
         if size >= 1024 * 1024 * 1024 {
-            writeln!(f, "Media size:    {size} bytes ({:.1} GiB)", size as f64 / (1024.0 * 1024.0 * 1024.0))?;
+            writeln!(
+                f,
+                "Media size:    {size} bytes ({:.1} GiB)",
+                size as f64 / (1024.0 * 1024.0 * 1024.0)
+            )?;
         } else if size >= 1024 * 1024 {
-            writeln!(f, "Media size:    {size} bytes ({:.1} MiB)", size as f64 / (1024.0 * 1024.0))?;
+            writeln!(
+                f,
+                "Media size:    {size} bytes ({:.1} MiB)",
+                size as f64 / (1024.0 * 1024.0)
+            )?;
         } else {
             writeln!(f, "Media size:    {size} bytes")?;
         }
