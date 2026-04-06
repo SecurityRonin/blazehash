@@ -1,0 +1,8 @@
+# Ensure consistent line endings for source files across all platforms
+*.rs text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+Cargo.lock text eol=lf
