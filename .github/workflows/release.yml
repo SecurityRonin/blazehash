@@ -57,7 +57,7 @@ jobs:
 
       - name: Install cargo-wix (Windows)
         if: runner.os == 'Windows'
-        run: cargo install cargo-wix
+        run: cargo install cargo-wix --version 0.3.9 --locked
 
       - name: Build MSI (Windows)
         if: runner.os == 'Windows'
@@ -148,7 +148,7 @@ jobs:
           echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
 
       - name: Install cargo-deb
-        run: cargo install cargo-deb
+        run: cargo install cargo-deb --version 2.11.2 --locked
 
       - name: Build .deb package
         run: cargo deb --target ${{ matrix.target }}
