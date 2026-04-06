@@ -108,13 +108,20 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
       - name: Publish to crates.io
-        run: cargo publish
+        run: |
+          output=$(cargo publish 2>&1) && echo "$output" || {
+            echo "$output"
+            echo "$output" | grep -q "already exists on crates.io" || exit 1
+            echo "Version already published to crates.io, skipping"
+          }
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
   winget:
     needs: release
     runs-on: windows-latest
+    # First-time winget submission requires a manual PR; continue-on-error until registered
+    continue-on-error: true
     steps:
       - uses: vedantmgoyal9/winget-releaser@4ffc7888bffd451b357355dc214d43bb9f23917e # v2
         with:
