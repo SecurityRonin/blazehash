@@ -58,12 +58,16 @@ All hashes are bit-identical to hashdeep for shared algorithms (MD5, SHA-1, SHA-
 
 ### Debian / Ubuntu / Kali
 
+Works on Debian 11+, Ubuntu 20.04+, Kali Linux, and any Debian-based distro (amd64 and arm64):
+
 ```bash
 curl -1sLf 'https://dl.cloudsmith.io/public/securityronin/blazehash/setup.deb.sh' | sudo bash
 sudo apt install blazehash
 ```
 
-Or download the `.deb` directly from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases):
+The setup script adds the apt repository and GPG key. After that, `apt upgrade` will pick up future releases automatically.
+
+Alternatively, download the `.deb` directly from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases) for an offline install:
 
 ```bash
 sudo apt install ./blazehash_*_amd64.deb     # x86_64
