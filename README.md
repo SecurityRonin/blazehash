@@ -67,13 +67,6 @@ sudo apt install blazehash
 
 The setup script adds the apt repository and GPG key. After that, `apt upgrade` will pick up future releases automatically.
 
-Alternatively, download the `.deb` directly from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases) for an offline install:
-
-```bash
-sudo apt install ./blazehash_*_amd64.deb     # x86_64
-sudo apt install ./blazehash_*_arm64.deb     # ARM64
-```
-
 ### macOS (Homebrew)
 
 ```bash
