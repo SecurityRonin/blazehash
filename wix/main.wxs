@@ -62,7 +62,7 @@
         Id='*'
         Name='blazehash'
         UpgradeCode='F93F61C1-901C-46F0-8E95-6E4811F8A0BF'
-        Manufacturer='Albert Hui'
+        Manufacturer='Security Ronin'
         Language='1033'
         Codepage='1252'
         Version='$(var.Version)'>
@@ -70,7 +70,7 @@
         <Package Id='*'
             Keywords='Installer'
             Description='Forensic file hasher — hashdeep for the modern era, BLAKE3 by default'
-            Manufacturer='Albert Hui'
+            Manufacturer='Security Ronin'
             InstallerVersion='450'
             Languages='1033'
             Compressed='yes'
