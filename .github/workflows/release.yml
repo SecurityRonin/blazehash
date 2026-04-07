@@ -109,7 +109,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
       - name: Publish to crates.io
         run: |
-          output=$(cargo publish 2>&1) && echo "$output" || {
+          output=$(cargo publish --allow-dirty 2>&1) && echo "$output" || {
             echo "$output"
             echo "$output" | grep -q "already exists on crates.io" || exit 1
             echo "Version already published to crates.io, skipping"
