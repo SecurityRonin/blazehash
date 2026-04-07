@@ -58,7 +58,12 @@ All hashes are bit-identical to hashdeep for shared algorithms (MD5, SHA-1, SHA-
 
 ### Debian / Ubuntu / Kali
 
-Download the `.deb` for your architecture from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases):
+```bash
+curl -1sLf 'https://dl.cloudsmith.io/public/securityronin/blazehash/setup.deb.sh' | sudo bash
+sudo apt install blazehash
+```
+
+Or download the `.deb` directly from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases):
 
 ```bash
 sudo apt install ./blazehash_*_amd64.deb     # x86_64

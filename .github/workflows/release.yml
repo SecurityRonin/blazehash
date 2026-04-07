@@ -187,3 +187,37 @@ jobs:
         uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
           files: debs/*.deb
+
+  cloudsmith:
+    needs: release-deb
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: blazehash-*.deb
+          path: debs
+          merge-multiple: true
+
+      - name: Push amd64 to Cloudsmith
+        uses: cloudsmith-io/action@v0.6.0
+        with:
+          api-key: ${{ secrets.CLOUDSMITH_API_KEY }}
+          command: push
+          format: deb
+          owner: securityronin
+          repo: blazehash
+          distro: any
+          release: any
+          file: debs/blazehash_*_amd64.deb
+
+      - name: Push arm64 to Cloudsmith
+        uses: cloudsmith-io/action@v0.6.0
+        with:
+          api-key: ${{ secrets.CLOUDSMITH_API_KEY }}
+          command: push
+          format: deb
+          owner: securityronin
+          repo: blazehash
+          distro: any
+          release: any
+          file: debs/blazehash_*_arm64.deb
