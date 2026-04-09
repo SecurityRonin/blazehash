@@ -138,6 +138,7 @@ fn test_no_cache_flag_produces_correct_hash() {
 
     let mut f = NamedTempFile::new().unwrap();
     f.write_all(b"blazehash no-cache test").unwrap();
+    f.flush().unwrap();
 
     let out_normal = Command::cargo_bin("blazehash")
         .unwrap()
