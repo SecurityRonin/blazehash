@@ -40,7 +40,7 @@ fn hash_file_mmap(
     path: &Path,
     algorithms: &[Algorithm],
     _size: u64,
-    _no_cache: bool,
+    no_cache: bool,
 ) -> Result<HashMap<Algorithm, String>> {
     let file =
         fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?;
@@ -60,7 +60,7 @@ fn hash_file_mmap(
 fn hash_file_streaming(
     path: &Path,
     algorithms: &[Algorithm],
-    _no_cache: bool,
+    no_cache: bool,
 ) -> Result<HashMap<Algorithm, String>> {
     let mut file =
         fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?;

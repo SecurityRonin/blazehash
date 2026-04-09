@@ -169,6 +169,27 @@ fn test_no_cache_flag_produces_correct_hash() {
     assert_eq!(normal_line, nocache_line, "--no-cache must produce identical hashes");
 }
 
+#[cfg(target_os = "macos")]
+#[test]
+fn test_no_cache_macos_opens_file() {
+    use blazehash::hash::hash_file;
+    use blazehash::algorithm::Algorithm;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    let mut f = NamedTempFile::new().unwrap();
+    f.write_all(b"test content for F_NOCACHE").unwrap();
+    f.flush().unwrap();
+
+    let normal = hash_file(f.path(), &[Algorithm::Sha256], false).unwrap();
+    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true).unwrap();
+
+    assert_eq!(
+        normal.hashes[&Algorithm::Sha256],
+        nocache.hashes[&Algorithm::Sha256]
+    );
+}
+
 #[test]
 fn hash_file_streaming_matches_mmap() {
     // Same content hashed via both paths should produce identical results
