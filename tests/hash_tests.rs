@@ -256,6 +256,25 @@ fn test_no_cache_windows_no_buffering() {
     );
 }
 
+#[cfg(target_os = "linux")]
+#[test]
+fn test_large_pages_linux_correct_hash() {
+    use blazehash::hash::hash_file;
+    use blazehash::algorithm::Algorithm;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    let mut f = NamedTempFile::new().unwrap();
+    // 3 MiB — above 2 MiB large page threshold
+    f.write_all(&vec![0x55u8; 3 * 1024 * 1024]).unwrap();
+    f.flush().unwrap();
+
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false).unwrap();
+    let h = &result.hashes[&Algorithm::Blake3];
+    assert_eq!(h.len(), 64, "BLAKE3 hash must be 64 hex chars");
+    assert!(h.chars().all(|c| c.is_ascii_hexdigit()));
+}
+
 #[test]
 fn hash_file_streaming_matches_mmap() {
     // Same content hashed via both paths should produce identical results
