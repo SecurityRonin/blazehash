@@ -223,3 +223,35 @@ fn test_ssdeep_hashdeep_name() {
     assert_eq!(Algorithm::Ssdeep.hashdeep_name(), "ssdeep");
     assert_eq!(Algorithm::Tlsh.hashdeep_name(), "tlsh");
 }
+
+#[test]
+fn test_crc32c_known_vector() {
+    let result = hash_bytes(Algorithm::Crc32c, b"hello world");
+    assert_eq!(result, "c99465aa"); // known CRC32C of "hello world"
+}
+
+#[test]
+fn test_xxh3_known_vector() {
+    let result = hash_bytes(Algorithm::Xxh3, b"");
+    assert_eq!(result.len(), 32); // 128-bit = 32 hex chars
+}
+
+#[test]
+fn test_crc32c_is_non_cryptographic() {
+    assert!(Algorithm::Crc32c.is_non_cryptographic());
+    assert!(Algorithm::Xxh3.is_non_cryptographic());
+    assert!(!Algorithm::Blake3.is_non_cryptographic());
+}
+
+#[test]
+fn test_crc32c_not_in_all() {
+    let all = Algorithm::all();
+    assert!(!all.contains(&Algorithm::Crc32c));
+    assert!(!all.contains(&Algorithm::Xxh3));
+}
+
+#[test]
+fn test_crc32c_parse_from_str() {
+    assert_eq!("crc32c".parse::<Algorithm>().unwrap(), Algorithm::Crc32c);
+    assert_eq!("xxh3".parse::<Algorithm>().unwrap(), Algorithm::Xxh3);
+}
