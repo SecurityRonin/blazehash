@@ -65,6 +65,14 @@ pub struct Cli {
     /// Output format
     #[arg(long = "format", default_value = "hashdeep")]
     pub format: String,
+
+    /// Run GPU calibration benchmark (used with `blazehash bench`)
+    #[arg(long = "gpu", help = "Run GPU calibration benchmark")]
+    pub gpu: bool,
+
+    /// Use conservative defaults; do not run benchmark or write config (used with `blazehash bench`)
+    #[arg(long = "no-calibrate", help = "Use conservative defaults; do not run benchmark or write config")]
+    pub no_calibrate: bool,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -93,6 +101,7 @@ fn parse_algorithms(s: &str) -> Result<Vec<Algorithm>, String> {
 #[derive(Debug)]
 pub enum Mode {
     Mcp,
+    Bench,
     SizeOnly,
     Audit,
     VerifyImage,
@@ -113,6 +122,8 @@ impl Cli {
     pub fn mode(&self) -> Mode {
         if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("mcp")) {
             Mode::Mcp
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("bench")) {
+            Mode::Bench
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

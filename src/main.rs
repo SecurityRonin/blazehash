@@ -15,10 +15,16 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Bench = cli.mode() {
+        commands::bench::run(cli.gpu, cli.no_calibrate)?;
+        return Ok(());
+    }
+
     let algorithms = cli.flat_algorithms();
 
     match cli.mode() {
         Mode::Mcp => unreachable!(),
+        Mode::Bench => unreachable!(),
         Mode::SizeOnly => {
             commands::size_only::run(&cli.paths, cli.recursive, cli.output.as_ref())?;
         }
