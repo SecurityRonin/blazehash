@@ -255,3 +255,30 @@ fn test_crc32c_parse_from_str() {
     assert_eq!("crc32c".parse::<Algorithm>().unwrap(), Algorithm::Crc32c);
     assert_eq!("xxh3".parse::<Algorithm>().unwrap(), Algorithm::Xxh3);
 }
+
+#[test]
+fn test_shake128_known_vector() {
+    // SHAKE-128 of empty string, 32-byte output: known NIST vector
+    let result = hash_bytes(Algorithm::Shake128, b"");
+    assert_eq!(result.len(), 64); // 32 bytes = 64 hex chars
+    assert_eq!(&result[..8], "7f9c2ba4"); // first 4 bytes of NIST SHAKE-128("")
+}
+
+#[test]
+fn test_shake256_known_vector() {
+    let result = hash_bytes(Algorithm::Shake256, b"");
+    assert_eq!(result.len(), 128); // 64 bytes = 128 hex chars
+    assert_eq!(&result[..8], "46b9dd2b"); // first 4 bytes of NIST SHAKE-256("")
+}
+
+#[test]
+fn test_shake128_not_fuzzy_not_non_crypto() {
+    assert!(!Algorithm::Shake128.is_fuzzy());
+    assert!(!Algorithm::Shake128.is_non_cryptographic());
+}
+
+#[test]
+fn test_shake_parse_from_str() {
+    assert_eq!("shake128".parse::<Algorithm>().unwrap(), Algorithm::Shake128);
+    assert_eq!("shake256".parse::<Algorithm>().unwrap(), Algorithm::Shake256);
+}
