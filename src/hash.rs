@@ -229,6 +229,19 @@ pub fn hash_file(path: &Path, algorithms: &[Algorithm], no_cache: bool, no_gpu: 
         .with_context(|| format!("failed to read metadata for {}", path.display()))?;
     let size = metadata.len();
 
+    // Separate crypto and fuzzy algorithms — fuzzy hashes are computed separately after.
+    let fuzzy_algorithms: Vec<Algorithm> = algorithms
+        .iter()
+        .filter(|a| a.is_fuzzy())
+        .copied()
+        .collect();
+    let crypto_algorithms: Vec<Algorithm> = algorithms
+        .iter()
+        .filter(|a| !a.is_fuzzy())
+        .copied()
+        .collect();
+    let algorithms = &crypto_algorithms; // shadow: rest of function uses crypto-only slice
+
     let mut hashes = {
         #[cfg(target_os = "linux")]
         if no_cache {
@@ -265,6 +278,14 @@ pub fn hash_file(path: &Path, algorithms: &[Algorithm], no_cache: bool, no_gpu: 
                 hashes.insert(algo, hash);
             }
         }
+    }
+
+    // Fuzzy pass: ssdeep/tlsh require full file bytes; read separately from crypto path.
+    if !fuzzy_algorithms.is_empty() {
+        let data = fs::read(path)
+            .with_context(|| format!("failed to read {} for fuzzy hashing", path.display()))?;
+        let fuzzy_hashes = crate::fuzzy::compute_fuzzy(&data, &fuzzy_algorithms);
+        hashes.extend(fuzzy_hashes);
     }
 
     Ok(FileHashResult {

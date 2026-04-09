@@ -86,8 +86,8 @@ pub fn hash_bytes(algo: Algorithm, data: &[u8]) -> String {
         Algorithm::Md5 => hex_digest::<md5::Md5>(data),
         Algorithm::Tiger => hex_digest::<tiger::Tiger>(data),
         Algorithm::Whirlpool => hex_digest::<whirlpool::Whirlpool>(data),
-        Algorithm::Ssdeep => todo!("ssdeep: use crate::fuzzy::ssdeep::compute(data) directly"),
-        Algorithm::Tlsh => todo!("tlsh: use crate::fuzzy::tlsh::compute(data) directly"),
+        Algorithm::Ssdeep => crate::fuzzy::ssdeep::compute(data),
+        Algorithm::Tlsh => crate::fuzzy::tlsh::compute(data).unwrap_or_default(),
     }
 }
 
