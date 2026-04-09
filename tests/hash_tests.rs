@@ -908,6 +908,34 @@ fn test_fuzzy_flags_accepted_without_error() {
     );
 }
 
+// ---- Task 5: --min-size / --max-size walk filters ----
+
+#[test]
+fn test_min_size_filter() {
+    use blazehash::walk_filter::WalkFilter;
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("small.bin"), b"hi").unwrap();
+    std::fs::write(dir.path().join("large.bin"), vec![0u8; 1024]).unwrap();
+
+    let filter = WalkFilter::builder().min_size(100).build().unwrap();
+    let output = blazehash::walk::walk_and_hash(dir.path(), &[blazehash::algorithm::Algorithm::Blake3], false, &filter).unwrap();
+    assert_eq!(output.results.len(), 1);
+    assert!(output.results[0].path.to_str().unwrap().ends_with("large.bin"));
+}
+
+#[test]
+fn test_max_size_filter() {
+    use blazehash::walk_filter::WalkFilter;
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("small.bin"), b"hi").unwrap();
+    std::fs::write(dir.path().join("large.bin"), vec![0u8; 1024]).unwrap();
+
+    let filter = WalkFilter::builder().max_size(10).build().unwrap();
+    let output = blazehash::walk::walk_and_hash(dir.path(), &[blazehash::algorithm::Algorithm::Blake3], false, &filter).unwrap();
+    assert_eq!(output.results.len(), 1);
+    assert!(output.results[0].path.to_str().unwrap().ends_with("small.bin"));
+}
+
 #[test]
 fn test_include_glob_with_path_separator() {
     use blazehash::walk_filter::WalkFilter;
