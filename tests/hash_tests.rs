@@ -311,6 +311,32 @@ fn test_large_pages_windows_correct_hash() {
     assert_eq!(with_lp.hashes[&Algorithm::Blake3].len(), 64);
 }
 
+#[cfg(target_os = "windows")]
+#[test]
+fn test_windows_iocp_walk_100_files() {
+    use assert_cmd::Command;
+    use tempfile::TempDir;
+
+    let dir = TempDir::new().unwrap();
+    for i in 0..100 {
+        let path = dir.path().join(format!("file_{i:04}.txt"));
+        std::fs::write(&path, format!("content {i}").as_bytes()).unwrap();
+    }
+
+    let out = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["-r", "-c", "blake3", dir.path().to_str().unwrap()])
+        .output()
+        .unwrap();
+
+    assert!(out.status.success());
+    let lines: Vec<_> = String::from_utf8_lossy(&out.stdout)
+        .lines()
+        .filter(|l| !l.starts_with('%') && !l.is_empty())
+        .collect::<Vec<_>>();
+    assert_eq!(lines.len(), 100, "must hash all 100 files");
+}
+
 #[test]
 fn hash_file_streaming_matches_mmap() {
     // Same content hashed via both paths should produce identical results
