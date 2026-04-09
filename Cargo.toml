@@ -38,7 +38,7 @@ sha1 = { version = "0.10", features = ["oid"] }
 sha2 = { version = "0.10", features = ["oid"] }
 sha3 = "0.10"
 tiger = "0.2"
-tlsh2 = "0.4"
+tlsh2 = { version = "0.4", features = ["diff"] }
 walkdir = "2"
 whirlpool = "0.10"
 ewf = { version = "0.2", optional = true }
