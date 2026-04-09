@@ -47,7 +47,7 @@ fn choose_block_size(data_len: usize) -> u32 {
 pub fn compute(data: &[u8]) -> String {
     let bs = choose_block_size(data.len());
     let (hash1, hash2) = compute_with_bs(data, bs);
-    format!("{}:{}:{}", bs, hash1, hash2)
+    format!("{bs}:{hash1}:{hash2}")
 }
 
 fn compute_with_bs(data: &[u8], bs: u32) -> (String, String) {
@@ -88,5 +88,5 @@ fn compute_with_bs(data: &[u8], bs: u32) -> (String, String) {
 
 /// Parse block size from a ssdeep hash string. Returns None on malformed input.
 pub fn block_size(hash: &str) -> Option<u32> {
-    hash.splitn(2, ':').next()?.parse().ok()
+    hash.split(':').next()?.parse().ok()
 }
