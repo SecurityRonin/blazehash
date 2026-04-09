@@ -469,5 +469,8 @@ fn make_hasher(algo: Algorithm) -> Box<dyn DynHasher> {
         Algorithm::Whirlpool => Box::new(DigestHasher {
             inner: whirlpool::Whirlpool::new(),
         }),
+        Algorithm::Ssdeep | Algorithm::Tlsh => {
+            panic!("fuzzy algorithms (ssdeep/tlsh) cannot be used via make_hasher; use hash_file_fuzzy instead")
+        }
     }
 }

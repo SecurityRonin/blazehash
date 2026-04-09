@@ -13,6 +13,8 @@ pub enum Algorithm {
     Md5,
     Tiger,
     Whirlpool,
+    Ssdeep,
+    Tlsh,
 }
 
 impl Algorithm {
@@ -39,7 +41,13 @@ impl Algorithm {
             Algorithm::Md5 => "md5",
             Algorithm::Tiger => "tiger",
             Algorithm::Whirlpool => "whirlpool",
+            Algorithm::Ssdeep => "ssdeep",
+            Algorithm::Tlsh => "tlsh",
         }
+    }
+
+    pub fn is_fuzzy(&self) -> bool {
+        matches!(self, Algorithm::Ssdeep | Algorithm::Tlsh)
     }
 }
 
@@ -61,6 +69,8 @@ impl FromStr for Algorithm {
             "md5" => Ok(Algorithm::Md5),
             "tiger" => Ok(Algorithm::Tiger),
             "whirlpool" => Ok(Algorithm::Whirlpool),
+            "ssdeep" => Ok(Algorithm::Ssdeep),
+            "tlsh" => Ok(Algorithm::Tlsh),
             other => anyhow::bail!("unknown algorithm: {other}"),
         }
     }
@@ -76,6 +86,8 @@ pub fn hash_bytes(algo: Algorithm, data: &[u8]) -> String {
         Algorithm::Md5 => hex_digest::<md5::Md5>(data),
         Algorithm::Tiger => hex_digest::<tiger::Tiger>(data),
         Algorithm::Whirlpool => hex_digest::<whirlpool::Whirlpool>(data),
+        Algorithm::Ssdeep => String::new(),
+        Algorithm::Tlsh => String::new(),
     }
 }
 
