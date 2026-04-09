@@ -188,3 +188,38 @@ fn algorithm_all_returns_all_variants() {
         assert!(seen.insert(algo));
     }
 }
+
+#[test]
+fn test_ssdeep_from_str() {
+    use std::str::FromStr;
+    assert_eq!(Algorithm::from_str("ssdeep").unwrap(), Algorithm::Ssdeep);
+    assert_eq!(Algorithm::from_str("SSDEEP").unwrap(), Algorithm::Ssdeep);
+}
+
+#[test]
+fn test_tlsh_from_str() {
+    use std::str::FromStr;
+    assert_eq!(Algorithm::from_str("tlsh").unwrap(), Algorithm::Tlsh);
+    assert_eq!(Algorithm::from_str("TLSH").unwrap(), Algorithm::Tlsh);
+}
+
+#[test]
+fn test_ssdeep_is_fuzzy() {
+    assert!(Algorithm::Ssdeep.is_fuzzy());
+    assert!(Algorithm::Tlsh.is_fuzzy());
+    assert!(!Algorithm::Blake3.is_fuzzy());
+    assert!(!Algorithm::Sha256.is_fuzzy());
+}
+
+#[test]
+fn test_fuzzy_not_in_all() {
+    let all = Algorithm::all();
+    assert!(!all.contains(&Algorithm::Ssdeep));
+    assert!(!all.contains(&Algorithm::Tlsh));
+}
+
+#[test]
+fn test_ssdeep_hashdeep_name() {
+    assert_eq!(Algorithm::Ssdeep.hashdeep_name(), "ssdeep");
+    assert_eq!(Algorithm::Tlsh.hashdeep_name(), "tlsh");
+}
