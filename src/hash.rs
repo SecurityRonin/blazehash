@@ -6,9 +6,6 @@ use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-#[cfg(target_os = "macos")]
-extern crate libc;
-
 /// Result of hashing a single file.
 #[derive(Debug)]
 pub struct FileHashResult {
