@@ -53,7 +53,13 @@ fn hash_file_large_uses_mmap() {
     f.write_all(&data).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3, Algorithm::Sha256], false, false).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Blake3, Algorithm::Sha256],
+        false,
+        false,
+    )
+    .unwrap();
     assert_eq!(result.size, 2 * 1024 * 1024);
 
     // Verify against hash_bytes for correctness
@@ -90,7 +96,13 @@ fn hash_file_at_mmap_threshold() {
     f.write_all(&data).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3, Algorithm::Sha256], false, false).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Blake3, Algorithm::Sha256],
+        false,
+        false,
+    )
+    .unwrap();
     assert_eq!(result.size, 1024 * 1024);
 
     // Verify against hash_bytes for correctness
@@ -167,14 +179,17 @@ fn test_no_cache_flag_produces_correct_hash() {
         .unwrap()
         .to_string();
 
-    assert_eq!(normal_line, nocache_line, "--no-cache must produce identical hashes");
+    assert_eq!(
+        normal_line, nocache_line,
+        "--no-cache must produce identical hashes"
+    );
 }
 
 #[cfg(target_os = "macos")]
 #[test]
 fn test_no_cache_macos_opens_file() {
-    use blazehash::hash::hash_file;
     use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
     use std::io::Write;
     use tempfile::NamedTempFile;
 
@@ -194,8 +209,8 @@ fn test_no_cache_macos_opens_file() {
 #[cfg(target_os = "linux")]
 #[test]
 fn test_no_cache_linux_aligned_read() {
-    use blazehash::hash::hash_file;
     use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
     use std::io::Write;
     use tempfile::NamedTempFile;
 
@@ -218,8 +233,8 @@ fn test_no_cache_linux_aligned_read() {
 #[test]
 fn test_no_cache_linux_unaligned_size_file() {
     // File size not a multiple of 512 — must still hash correctly
-    use blazehash::hash::hash_file;
     use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
     use std::io::Write;
     use tempfile::NamedTempFile;
 
@@ -239,8 +254,8 @@ fn test_no_cache_linux_unaligned_size_file() {
 #[cfg(target_os = "windows")]
 #[test]
 fn test_no_cache_windows_no_buffering() {
-    use blazehash::hash::hash_file;
     use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
     use std::io::Write;
     use tempfile::NamedTempFile;
 
@@ -260,8 +275,8 @@ fn test_no_cache_windows_no_buffering() {
 #[cfg(target_os = "linux")]
 #[test]
 fn test_large_pages_linux_correct_hash() {
-    use blazehash::hash::hash_file;
     use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
     use std::io::Write;
     use tempfile::NamedTempFile;
 
@@ -281,8 +296,8 @@ fn test_large_pages_linux_correct_hash() {
 fn test_large_pages_windows_fallback_on_no_privilege() {
     // Without SeLockMemoryPrivilege (typical user), must fall back gracefully.
     // Observable: hash is still correct; no panic or error.
-    use blazehash::hash::hash_file;
     use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
     use std::io::Write;
     use tempfile::NamedTempFile;
 
@@ -291,7 +306,10 @@ fn test_large_pages_windows_fallback_on_no_privilege() {
     f.flush().unwrap();
 
     let result = hash_file(f.path(), &[Algorithm::Sha256], false, false);
-    assert!(result.is_ok(), "hash_file must not error when large page privilege absent");
+    assert!(
+        result.is_ok(),
+        "hash_file must not error when large page privilege absent"
+    );
     let h = &result.unwrap().hashes[&Algorithm::Sha256];
     assert_eq!(h.len(), 64);
 }
@@ -299,8 +317,8 @@ fn test_large_pages_windows_fallback_on_no_privilege() {
 #[cfg(target_os = "windows")]
 #[test]
 fn test_large_pages_windows_correct_hash() {
-    use blazehash::hash::hash_file;
     use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
     use std::io::Write;
     use tempfile::NamedTempFile;
 
@@ -343,10 +361,20 @@ fn test_windows_iocp_walk_100_files() {
 #[test]
 fn test_ssdeep_known_vector_hello() {
     let result = blazehash::fuzzy::ssdeep::compute(b"hello");
-    assert!(result.starts_with("3:"), "expected block size 3, got: {result}");
+    assert!(
+        result.starts_with("3:"),
+        "expected block size 3, got: {result}"
+    );
     let parts: Vec<&str> = result.splitn(3, ':').collect();
-    assert_eq!(parts.len(), 3, "ssdeep output must have 3 colon-separated parts");
-    assert!(parts[0].parse::<u32>().is_ok(), "first part must be numeric block size");
+    assert_eq!(
+        parts.len(),
+        3,
+        "ssdeep output must have 3 colon-separated parts"
+    );
+    assert!(
+        parts[0].parse::<u32>().is_ok(),
+        "first part must be numeric block size"
+    );
 }
 
 #[test]
@@ -357,7 +385,10 @@ fn test_ssdeep_known_vector_1024_zeros() {
     assert_eq!(parts.len(), 3);
     let bs: u32 = parts[0].parse().unwrap();
     assert!(bs >= 3, "block size must be >= 3");
-    assert!(!parts[1].is_empty(), "hash1 must not be empty for 1024 bytes");
+    assert!(
+        !parts[1].is_empty(),
+        "hash1 must not be empty for 1024 bytes"
+    );
 }
 
 #[test]
@@ -400,7 +431,10 @@ fn test_ssdeep_different_similarity() {
     let h1 = ssdeep::compute(b"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     let h2 = ssdeep::compute(b"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
     let sim = ssdeep::similarity(&h1, &h2);
-    assert!(sim <= 20, "unrelated data should have low similarity, got {sim}");
+    assert!(
+        sim <= 20,
+        "unrelated data should have low similarity, got {sim}"
+    );
 }
 
 #[test]
@@ -423,9 +457,18 @@ fn test_ssdeep_block_size_index_filters_correctly() {
     // Query with block size 6 — should return entries with bs 3, 6, 12 (adjacent)
     let candidates = idx.candidates("6:query:q2");
     let paths: Vec<&PathBuf> = candidates.iter().map(|(_, p)| p).collect();
-    assert!(paths.contains(&&PathBuf::from("a.bin")), "same bs should match");
-    assert!(paths.contains(&&PathBuf::from("b.bin")), "double bs should match");
-    assert!(paths.contains(&&PathBuf::from("c.bin")), "half bs should match");
+    assert!(
+        paths.contains(&&PathBuf::from("a.bin")),
+        "same bs should match"
+    );
+    assert!(
+        paths.contains(&&PathBuf::from("b.bin")),
+        "double bs should match"
+    );
+    assert!(
+        paths.contains(&&PathBuf::from("c.bin")),
+        "half bs should match"
+    );
 }
 
 // ---- Task 14: --no-gpu flag ----
@@ -465,7 +508,74 @@ fn test_no_gpu_flag_produces_same_hash_as_default() {
         .unwrap()
         .to_string();
 
-    assert_eq!(default_line, no_gpu_line, "--no-gpu must produce identical hashes");
+    assert_eq!(
+        default_line, no_gpu_line,
+        "--no-gpu must produce identical hashes"
+    );
+}
+
+// ---- Task 4 (batch): WalkFilter glob include/exclude ----
+
+#[test]
+fn test_include_glob_filters_files() {
+    use blazehash::walk_filter::WalkFilter;
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("file.exe"), b"exe content").unwrap();
+    std::fs::write(dir.path().join("file.log"), b"log content").unwrap();
+
+    let filter = WalkFilter::builder()
+        .include("*.exe")
+        .build()
+        .unwrap();
+    let output = blazehash::walk::walk_and_hash(
+        dir.path(),
+        &[blazehash::algorithm::Algorithm::Blake3],
+        false,
+        &filter,
+    )
+    .unwrap();
+    assert_eq!(output.results.len(), 1);
+    assert!(output.results[0].path.to_str().unwrap().ends_with(".exe"));
+}
+
+#[test]
+fn test_exclude_glob_filters_files() {
+    use blazehash::walk_filter::WalkFilter;
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("file.exe"), b"exe").unwrap();
+    std::fs::write(dir.path().join("file.log"), b"log").unwrap();
+
+    let filter = WalkFilter::builder()
+        .exclude("*.log")
+        .build()
+        .unwrap();
+    let output = blazehash::walk::walk_and_hash(
+        dir.path(),
+        &[blazehash::algorithm::Algorithm::Blake3],
+        false,
+        &filter,
+    )
+    .unwrap();
+    assert_eq!(output.results.len(), 1);
+    assert!(output.results[0].path.to_str().unwrap().ends_with(".exe"));
+}
+
+#[test]
+fn test_empty_filter_includes_all() {
+    use blazehash::walk_filter::WalkFilter;
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("a.txt"), b"a").unwrap();
+    std::fs::write(dir.path().join("b.bin"), b"b").unwrap();
+
+    let filter = WalkFilter::default();
+    let output = blazehash::walk::walk_and_hash(
+        dir.path(),
+        &[blazehash::algorithm::Algorithm::Blake3],
+        false,
+        &filter,
+    )
+    .unwrap();
+    assert_eq!(output.results.len(), 2);
 }
 
 // ---- Task 4: tlsh wrapper ----
@@ -476,7 +586,10 @@ fn test_tlsh_compute_returns_some_for_sufficient_data() {
     // tlsh requires both sufficient length AND byte variety; use a repeating pattern
     let data: Vec<u8> = (0u8..=255).cycle().take(512).collect();
     let result = tlsh::compute(&data);
-    assert!(result.is_some(), "tlsh must return Some for 512 bytes of varied data");
+    assert!(
+        result.is_some(),
+        "tlsh must return Some for 512 bytes of varied data"
+    );
     let hash = result.unwrap();
     assert!(hash.len() >= 70, "tlsh digest should be at least 70 chars");
     assert!(hash.starts_with("T1"), "tlsh digest must start with T1");
@@ -487,13 +600,17 @@ fn test_tlsh_compute_returns_none_for_short_data() {
     use blazehash::fuzzy::tlsh;
     let data = vec![0u8; 10]; // Too short for tlsh
     let result = tlsh::compute(&data);
-    assert!(result.is_none(), "tlsh must return None for very short data");
+    assert!(
+        result.is_none(),
+        "tlsh must return None for very short data"
+    );
 }
 
 #[test]
 fn test_tlsh_identical_similarity() {
     use blazehash::fuzzy::tlsh;
-    let data = b"The quick brown fox jumps over the lazy dog. More text to reach minimum length for tlsh.";
+    let data =
+        b"The quick brown fox jumps over the lazy dog. More text to reach minimum length for tlsh.";
     let data = data.repeat(5); // ensure sufficient length
     let h1 = tlsh::compute(&data).expect("must hash");
     let h2 = tlsh::compute(&data).expect("must hash");
@@ -510,7 +627,10 @@ fn test_tlsh_different_similarity() {
     let h1 = tlsh::compute(&d1).expect("must hash d1");
     let h2 = tlsh::compute(&d2).expect("must hash d2");
     let sim = tlsh::similarity(&h1, &h2);
-    assert!(sim < 50, "different byte distributions should have low similarity, got {sim}");
+    assert!(
+        sim < 50,
+        "different byte distributions should have low similarity, got {sim}"
+    );
 }
 
 #[test]
@@ -553,7 +673,10 @@ fn test_bench_gpu_no_calibrate_exits_successfully() {
     // Should not crash/panic — exit code 0 or 1 (feature not enabled) both acceptable
     // The key: must not write config when --no-calibrate is passed
     let config_path = tmp.path().join("config.toml");
-    assert!(!config_path.exists(), "--no-calibrate must not write config file");
+    assert!(
+        !config_path.exists(),
+        "--no-calibrate must not write config file"
+    );
 }
 
 #[test]
@@ -592,7 +715,13 @@ fn test_hash_file_with_ssdeep() {
     }
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3, Algorithm::Ssdeep], false, false).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Blake3, Algorithm::Ssdeep],
+        false,
+        false,
+    )
+    .unwrap();
     assert!(result.hashes.contains_key(&Algorithm::Blake3));
     assert!(result.hashes.contains_key(&Algorithm::Ssdeep));
     let ssdeep_hash = &result.hashes[&Algorithm::Ssdeep];
@@ -631,15 +760,17 @@ fn test_hash_file_tlsh_short_file_empty_string() {
 
     let result = hash_file(f.path(), &[Algorithm::Tlsh], false, false).unwrap();
     let tlsh_hash = &result.hashes[&Algorithm::Tlsh];
-    assert!(tlsh_hash.is_empty() || tlsh_hash.starts_with("T1"),
-        "short file: tlsh hash should be empty or valid, got: {tlsh_hash}");
+    assert!(
+        tlsh_hash.is_empty() || tlsh_hash.starts_with("T1"),
+        "short file: tlsh hash should be empty or valid, got: {tlsh_hash}"
+    );
 }
 
 #[test]
 fn test_manifest_roundtrip_with_ssdeep() {
     use blazehash::algorithm::Algorithm;
     use blazehash::hash::FileHashResult;
-    use blazehash::manifest::{write_header, write_record, parse_header, parse_records};
+    use blazehash::manifest::{parse_header, parse_records, write_header, write_record};
     use std::collections::HashMap;
     use std::path::PathBuf;
 
@@ -664,8 +795,14 @@ fn test_manifest_roundtrip_with_ssdeep() {
 
     let records = parse_records(&content, &algorithms);
     assert_eq!(records.len(), 1);
-    assert_eq!(records[0].hashes.get(&Algorithm::Ssdeep).unwrap(), "3:abc:de");
-    assert_eq!(records[0].hashes.get(&Algorithm::Blake3).unwrap(), &"a".repeat(64));
+    assert_eq!(
+        records[0].hashes.get(&Algorithm::Ssdeep).unwrap(),
+        "3:abc:de"
+    );
+    assert_eq!(
+        records[0].hashes.get(&Algorithm::Blake3).unwrap(),
+        &"a".repeat(64)
+    );
     assert_eq!(records[0].size, 1234);
 }
 
@@ -673,13 +810,16 @@ fn test_manifest_roundtrip_with_ssdeep() {
 fn test_manifest_roundtrip_with_tlsh() {
     use blazehash::algorithm::Algorithm;
     use blazehash::hash::FileHashResult;
-    use blazehash::manifest::{write_header, write_record, parse_header, parse_records};
+    use blazehash::manifest::{parse_header, parse_records, write_header, write_record};
     use std::collections::HashMap;
     use std::path::PathBuf;
 
     let algorithms = vec![Algorithm::Tlsh];
     let mut hashes = HashMap::new();
-    hashes.insert(Algorithm::Tlsh, "T1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F1A2B3".to_string());
+    hashes.insert(
+        Algorithm::Tlsh,
+        "T1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F1A2B3".to_string(),
+    );
 
     let result = FileHashResult {
         path: PathBuf::from("/evidence/sample.bin"),
@@ -698,7 +838,10 @@ fn test_manifest_roundtrip_with_tlsh() {
     let records = parse_records(&content, &algorithms);
     assert_eq!(records.len(), 1);
     let tlsh_val = records[0].hashes.get(&Algorithm::Tlsh).unwrap();
-    assert_eq!(tlsh_val, "T1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F1A2B3");
+    assert_eq!(
+        tlsh_val,
+        "T1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F1A2B3"
+    );
 }
 
 #[test]
@@ -722,12 +865,16 @@ fn hash_file_streaming_matches_mmap() {
 #[test]
 fn test_fuzzy_threshold_in_help() {
     use assert_cmd::Command;
-    let output = Command::cargo_bin("blazehash").unwrap()
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
         .args(["--help"])
         .output()
         .unwrap();
     let help = String::from_utf8_lossy(&output.stdout);
-    assert!(help.contains("fuzzy-threshold"), "help must mention --fuzzy-threshold");
+    assert!(
+        help.contains("fuzzy-threshold"),
+        "help must mention --fuzzy-threshold"
+    );
     assert!(help.contains("fuzzy-top"), "help must mention --fuzzy-top");
 }
 
@@ -743,14 +890,20 @@ fn test_fuzzy_flags_accepted_without_error() {
 
     // --fuzzy-threshold and --fuzzy-top should be accepted without error
     // even outside audit mode (silently ignored per design)
-    let output = Command::cargo_bin("blazehash").unwrap()
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
         .args([
-            "--fuzzy-threshold", "70",
-            "--fuzzy-top", "3",
+            "--fuzzy-threshold",
+            "70",
+            "--fuzzy-top",
+            "3",
             f.path().to_str().unwrap(),
         ])
         .output()
         .unwrap();
     // Should succeed (exit 0) — flags are silently accepted
-    assert!(output.status.success(), "flags should be accepted without error");
+    assert!(
+        output.status.success(),
+        "flags should be accepted without error"
+    );
 }
