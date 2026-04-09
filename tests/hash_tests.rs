@@ -275,6 +275,42 @@ fn test_large_pages_linux_correct_hash() {
     assert!(h.chars().all(|c| c.is_ascii_hexdigit()));
 }
 
+#[cfg(target_os = "windows")]
+#[test]
+fn test_large_pages_windows_fallback_on_no_privilege() {
+    // Without SeLockMemoryPrivilege (typical user), must fall back gracefully.
+    // Observable: hash is still correct; no panic or error.
+    use blazehash::hash::hash_file;
+    use blazehash::algorithm::Algorithm;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    let mut f = NamedTempFile::new().unwrap();
+    f.write_all(&vec![0xAAu8; 4 * 1024 * 1024]).unwrap(); // 4 MiB
+    f.flush().unwrap();
+
+    let result = hash_file(f.path(), &[Algorithm::Sha256], false);
+    assert!(result.is_ok(), "hash_file must not error when large page privilege absent");
+    let h = &result.unwrap().hashes[&Algorithm::Sha256];
+    assert_eq!(h.len(), 64);
+}
+
+#[cfg(target_os = "windows")]
+#[test]
+fn test_large_pages_windows_correct_hash() {
+    use blazehash::hash::hash_file;
+    use blazehash::algorithm::Algorithm;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    let mut f = NamedTempFile::new().unwrap();
+    f.write_all(&vec![0xBBu8; 3 * 1024 * 1024]).unwrap();
+    f.flush().unwrap();
+
+    let with_lp = hash_file(f.path(), &[Algorithm::Blake3], false).unwrap();
+    assert_eq!(with_lp.hashes[&Algorithm::Blake3].len(), 64);
+}
+
 #[test]
 fn hash_file_streaming_matches_mmap() {
     // Same content hashed via both paths should produce identical results
