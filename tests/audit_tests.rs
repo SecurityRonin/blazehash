@@ -255,6 +255,65 @@ fn audit_details_missing_variant() {
         .any(|d| matches!(d, AuditStatus::Missing(_))));
 }
 
+// ---- Fuzzy audit output tests (Task 9) ----
+
+#[test]
+fn test_fuzzy_audit_output_contains_tilde_indicator() {
+    use assert_cmd::Command;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    // Create original file
+    let mut orig = NamedTempFile::new().unwrap();
+    let data = b"The quick brown fox jumps over the lazy dog. ".repeat(100);
+    orig.write_all(&data).unwrap();
+    orig.flush().unwrap();
+
+    // Hash the original with ssdeep
+    let orig_result = blazehash::hash::hash_file(
+        orig.path(), &[Algorithm::Ssdeep], false, false
+    ).unwrap();
+
+    // Build manifest from original
+    let manifest_content = {
+        let algos = vec![Algorithm::Ssdeep];
+        let mut buf = Vec::new();
+        write_header(&mut buf, &algos).unwrap();
+        write_record(&mut buf, &orig_result, &algos).unwrap();
+        String::from_utf8(buf).unwrap()
+    };
+    let mut manifest_file = NamedTempFile::new().unwrap();
+    manifest_file.write_all(manifest_content.as_bytes()).unwrap();
+    manifest_file.flush().unwrap();
+
+    // Create a slightly modified file (1 byte changed) — should fuzzy-match
+    let mut modified = NamedTempFile::new().unwrap();
+    let mut mod_data = data.to_vec();
+    mod_data[0] = b'X';
+    modified.write_all(&mod_data).unwrap();
+    modified.flush().unwrap();
+
+    let output = Command::cargo_bin("blazehash").unwrap()
+        .args([
+            "-a",
+            "-k", manifest_file.path().to_str().unwrap(),
+            "--fuzzy-threshold", "50",
+            modified.path().to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let combined = format!("{stdout}{stderr}");
+
+    // Must contain [~] indicator and sim= annotation — NOT just the summary count
+    assert!(
+        combined.contains("[~]") && combined.contains("sim="),
+        "audit output should contain [~] indicator and sim= annotation for fuzzy match, got:\n{combined}"
+    );
+}
+
 // ---- Fuzzy audit tests (Task 8) ----
 
 fn make_manifest_content(algorithms: &[Algorithm], entries: &[blazehash::hash::FileHashResult]) -> String {
