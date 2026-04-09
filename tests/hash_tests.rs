@@ -716,3 +716,41 @@ fn hash_file_streaming_matches_mmap() {
     let expected = blazehash::algorithm::hash_bytes(Algorithm::Sha256, content);
     assert_eq!(streaming_result.hashes[&Algorithm::Sha256], expected);
 }
+
+// ---- Task 7: --fuzzy-threshold and --fuzzy-top CLI flags ----
+
+#[test]
+fn test_fuzzy_threshold_in_help() {
+    use assert_cmd::Command;
+    let output = Command::cargo_bin("blazehash").unwrap()
+        .args(["--help"])
+        .output()
+        .unwrap();
+    let help = String::from_utf8_lossy(&output.stdout);
+    assert!(help.contains("fuzzy-threshold"), "help must mention --fuzzy-threshold");
+    assert!(help.contains("fuzzy-top"), "help must mention --fuzzy-top");
+}
+
+#[test]
+fn test_fuzzy_flags_accepted_without_error() {
+    use assert_cmd::Command;
+    use std::io::Write;
+
+    // Create a temp file to hash
+    let mut f = tempfile::NamedTempFile::new().unwrap();
+    f.write_all(b"test content").unwrap();
+    f.flush().unwrap();
+
+    // --fuzzy-threshold and --fuzzy-top should be accepted without error
+    // even outside audit mode (silently ignored per design)
+    let output = Command::cargo_bin("blazehash").unwrap()
+        .args([
+            "--fuzzy-threshold", "70",
+            "--fuzzy-top", "3",
+            f.path().to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    // Should succeed (exit 0) — flags are silently accepted
+    assert!(output.status.success(), "flags should be accepted without error");
+}
