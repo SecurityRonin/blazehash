@@ -120,3 +120,26 @@ fn test_no_calibrate_flag_returns_conservative_defaults() {
         multi_mb: blazehash::gpu::config::DEFAULT_THRESHOLD_MULTI_MB,
     });
 }
+
+#[test]
+fn test_backend_detect_returns_option() {
+    // On headless CI with no GPU, returns None gracefully.
+    // On a machine with a GPU, returns Some.
+    // Either way: must not panic.
+    let backend = blazehash::gpu::backend::GpuBackend::detect();
+    if let Some(b) = backend {
+        assert!(!b.adapter_name().is_empty());
+    }
+}
+
+#[test]
+fn test_backend_skips_software_renderers() {
+    // If detect() returns Some, the adapter must not be a known SW renderer.
+    let backend = blazehash::gpu::backend::GpuBackend::detect();
+    if let Some(b) = backend {
+        let name = b.adapter_name().to_lowercase();
+        assert!(!name.contains("warp"), "WARP is a software renderer");
+        assert!(!name.contains("llvmpipe"), "llvmpipe is a software renderer");
+        assert!(!name.contains("software"), "software renderer must be skipped");
+    }
+}
