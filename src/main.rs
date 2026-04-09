@@ -52,6 +52,7 @@ fn main() -> Result<()> {
             )?;
         }
         Mode::Hash => {
+            let filter = cli.build_walk_filter()?;
             commands::hash::run(commands::hash::HashOptions {
                 paths: &cli.paths,
                 algorithms: &algorithms,
@@ -62,6 +63,7 @@ fn main() -> Result<()> {
                 output: cli.output.as_ref(),
                 no_cache: cli.no_cache,
                 no_gpu: cli.no_gpu,
+                filter: &filter,
             })?;
         }
     }

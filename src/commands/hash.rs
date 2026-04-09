@@ -23,6 +23,7 @@ pub struct HashOptions<'a> {
     pub output: Option<&'a PathBuf>,
     pub no_cache: bool,
     pub no_gpu: bool,
+    pub filter: &'a WalkFilter,
 }
 
 pub fn run(opts: HashOptions<'_>) -> Result<()> {
@@ -36,6 +37,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         output,
         no_cache,
         no_gpu,
+        filter,
     } = opts;
     let mut resume_state = load_resume_state(resume, output)?;
     let append = resume && output.is_some_and(|p| p.exists());
@@ -48,6 +50,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         &mut resume_state,
         no_cache,
         no_gpu,
+        filter,
     )?;
 
     let needs_header = !(bare || append);
@@ -78,6 +81,7 @@ fn collect_results(
     resume_state: &mut ResumeState,
     no_cache: bool,
     no_gpu: bool,
+    filter: &WalkFilter,
 ) -> Result<Vec<FileHashResult>> {
     let mut all_results = Vec::new();
 
@@ -91,7 +95,7 @@ fn collect_results(
             resume_state.mark_done(path.clone());
             all_results.push(result);
         } else if path.is_dir() {
-            let output = walk_and_hash(path, algorithms, recursive, &WalkFilter::default())?;
+            let output = walk_and_hash(path, algorithms, recursive, filter)?;
             report_walk_errors(&output.errors);
             for r in output.results {
                 if resume_state.is_done(&r.path) {
