@@ -17,6 +17,10 @@ pub struct FileHashResult {
 /// Threshold above which we use memory-mapped I/O (1 MiB).
 const MMAP_THRESHOLD: u64 = 1024 * 1024;
 
+/// Threshold above which we hint the kernel to use transparent huge pages (2 MiB).
+#[cfg(target_os = "linux")]
+const LARGE_PAGE_THRESHOLD: usize = 2 * 1024 * 1024;
+
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 const DIRECT_IO_ALIGN: usize = 4096;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
@@ -224,6 +228,22 @@ fn hash_file_mmap(
         memmap2::Mmap::map(&file)
             .with_context(|| format!("failed to memory-map {}", path.display()))?
     };
+
+    // Hint kernel to use transparent huge pages for large mappings (Linux only)
+    #[cfg(target_os = "linux")]
+    {
+        if mmap.len() >= LARGE_PAGE_THRESHOLD {
+            unsafe {
+                libc::madvise(
+                    mmap.as_ptr() as *mut libc::c_void,
+                    mmap.len(),
+                    libc::MADV_HUGEPAGE,
+                );
+                // Return value ignored — advisory hint, not guaranteed
+            }
+        }
+    }
+
     let data = &mmap[..];
 
     let mut hashes = HashMap::new();
