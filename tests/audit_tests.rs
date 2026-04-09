@@ -1,7 +1,9 @@
 use blazehash::algorithm::Algorithm;
 use blazehash::audit::audit;
 use blazehash::hash::hash_file;
+use blazehash::manifest::{write_header, write_record};
 use std::fs;
+use std::io::Write;
 use tempfile::TempDir;
 
 fn make_known_file(dir: &TempDir) -> String {
@@ -250,4 +252,83 @@ fn audit_details_missing_variant() {
         .details
         .iter()
         .any(|d| matches!(d, AuditStatus::Missing(_))));
+}
+
+// ---- Fuzzy audit tests (Task 8) ----
+
+fn make_manifest_content(algorithms: &[Algorithm], entries: &[blazehash::hash::FileHashResult]) -> String {
+    let mut buf = Vec::new();
+    write_header(&mut buf, algorithms).unwrap();
+    for entry in entries {
+        write_record(&mut buf, entry, algorithms).unwrap();
+    }
+    String::from_utf8(buf).unwrap()
+}
+
+#[test]
+fn test_fuzzy_audit_result_has_fuzzy_matched_field() {
+    // AuditResult must have fuzzy_matched field
+    let result = blazehash::audit::AuditResult::default();
+    assert_eq!(result.fuzzy_matched, 0);
+}
+
+#[test]
+fn test_audit_function_accepts_fuzzy_params() {
+    // audit() must accept fuzzy_threshold and fuzzy_top params
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("test.txt");
+    fs::write(&file, b"test").unwrap();
+
+    let result = hash_file(&file, &[Algorithm::Blake3], false, false).unwrap();
+    let manifest = make_manifest_content(&[Algorithm::Blake3], &[result]);
+
+    // Verify new signature compiles and works
+    let audit_result = audit(&[file], &manifest, 75, 10).unwrap();
+    assert_eq!(audit_result.matched, 1);
+}
+
+#[test]
+fn test_fuzzy_audit_exact_match_still_works() {
+    // Exact hash match still works when fuzzy algorithms are present
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("fox.txt");
+    let data = b"The quick brown fox jumps over the lazy dog. ".repeat(20);
+    fs::write(&file, &data).unwrap();
+
+    let result = hash_file(
+        &file, &[Algorithm::Blake3, Algorithm::Ssdeep], false, false
+    ).unwrap();
+
+    let manifest = make_manifest_content(&[Algorithm::Blake3, Algorithm::Ssdeep], &[result]);
+
+    let audit_result = audit(&[file], &manifest, 50, 5).unwrap();
+    assert_eq!(audit_result.matched, 1, "exact match must work with fuzzy algos present");
+    assert_eq!(audit_result.fuzzy_matched, 0);
+}
+
+#[test]
+fn test_fuzzy_audit_unrelated_file_is_new() {
+    let dir = TempDir::new().unwrap();
+    let orig = dir.path().join("orig.txt");
+    let data_a: Vec<u8> = (0u8..=127).cycle().take(400).collect();
+    fs::write(&orig, &data_a).unwrap();
+
+    let orig_result = hash_file(&orig, &[Algorithm::Ssdeep], false, false).unwrap();
+    let manifest = make_manifest_content(&[Algorithm::Ssdeep], &[orig_result]);
+
+    let different = dir.path().join("different.txt");
+    let data_b: Vec<u8> = (128u8..=255).cycle().take(400).collect();
+    fs::write(&different, &data_b).unwrap();
+
+    let audit_result = audit(
+        &[different],
+        &manifest,
+        50,
+        5,
+    ).unwrap();
+
+    // Unrelated data should not fuzzy-match above 50%
+    let is_new_or_low_fuzzy = audit_result.new_files == 1 || audit_result.fuzzy_matched == 0;
+    assert!(is_new_or_low_fuzzy, "unrelated file should be New (not matched), got: matched={} fuzzy_matched={}", audit_result.matched, audit_result.fuzzy_matched);
+    assert_eq!(audit_result.matched, 0, "must not be a full match");
 }
