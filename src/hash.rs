@@ -17,15 +17,15 @@ pub struct FileHashResult {
 /// Threshold above which we use memory-mapped I/O (1 MiB).
 const MMAP_THRESHOLD: u64 = 1024 * 1024;
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 const DIRECT_IO_ALIGN: usize = 4096;
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 const DIRECT_IO_BUF_SIZE: usize = DIRECT_IO_ALIGN * 16; // 64 KiB, aligned
 
-/// A heap-allocated buffer with 4096-byte alignment for O_DIRECT I/O.
+/// A heap-allocated buffer with 4096-byte alignment for O_DIRECT / FILE_FLAG_NO_BUFFERING I/O.
 /// `#[repr(align(4096))]` ensures Box<AlignedBuf> satisfies the kernel's
 /// alignment requirements, and Box drops it with the correct Layout.
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 #[repr(align(4096))]
 struct AlignedBuf([u8; DIRECT_IO_BUF_SIZE]);
 
@@ -89,6 +89,69 @@ fn hash_file_direct_linux(path: &Path, algorithms: &[Algorithm]) -> Result<HashM
     Ok(hashes)
 }
 
+#[cfg(target_os = "windows")]
+fn open_file_direct_windows(path: &Path) -> Result<std::fs::File> {
+    use std::os::windows::fs::OpenOptionsExt;
+    use windows_sys::Win32::Storage::FileSystem::{
+        FILE_FLAG_NO_BUFFERING, FILE_FLAG_SEQUENTIAL_SCAN,
+    };
+
+    std::fs::OpenOptions::new()
+        .read(true)
+        .custom_flags(FILE_FLAG_NO_BUFFERING | FILE_FLAG_SEQUENTIAL_SCAN)
+        .open(path)
+        .with_context(|| format!("failed to open {} with FILE_FLAG_NO_BUFFERING", path.display()))
+}
+
+#[cfg(target_os = "windows")]
+fn hash_file_direct_windows(path: &Path, algorithms: &[Algorithm]) -> Result<HashMap<Algorithm, String>> {
+    use std::io::{Read, Seek, SeekFrom};
+
+    let file_size = std::fs::metadata(path)?.len() as usize;
+    let mut file = open_file_direct_windows(path)?;
+    let mut buf = Box::new(AlignedBuf([0u8; DIRECT_IO_BUF_SIZE]));
+
+    let mut hashers: Vec<(Algorithm, Box<dyn DynHasher>)> = algorithms
+        .iter()
+        .map(|algo| (*algo, make_hasher(*algo)))
+        .collect();
+
+    let mut total_read = 0usize;
+    loop {
+        let n = file.read(&mut buf.0)?;
+        if n == 0 {
+            break;
+        }
+        for (_, hasher) in &mut hashers {
+            hasher.update(&buf.0[..n]);
+        }
+        total_read += n;
+        // FILE_FLAG_NO_BUFFERING stops reading at the last aligned block boundary
+        if total_read >= (file_size / DIRECT_IO_ALIGN) * DIRECT_IO_ALIGN {
+            break;
+        }
+    }
+
+    // Handle trailing bytes beyond the last aligned block — re-read without
+    // FILE_FLAG_NO_BUFFERING (the driver cannot return sub-sector remainders).
+    if total_read < file_size {
+        let mut tail_file = std::fs::File::open(path)
+            .with_context(|| format!("failed to open {} for tail read", path.display()))?;
+        tail_file.seek(SeekFrom::Start(total_read as u64))?;
+        let mut tail = Vec::new();
+        tail_file.read_to_end(&mut tail)?;
+        for (_, hasher) in &mut hashers {
+            hasher.update(&tail);
+        }
+    }
+
+    let mut hashes = HashMap::new();
+    for (algo, hasher) in hashers {
+        hashes.insert(algo, hasher.finalize_hex());
+    }
+    Ok(hashes)
+}
+
 /// Open a file, optionally advising the OS to bypass the page cache (macOS F_NOCACHE).
 fn open_file_no_cache(path: &Path) -> Result<std::fs::File> {
     let file = std::fs::File::open(path)
@@ -122,7 +185,16 @@ pub fn hash_file(path: &Path, algorithms: &[Algorithm], no_cache: bool) -> Resul
             hash_file_streaming(path, algorithms, false)?
         }
 
-        #[cfg(not(target_os = "linux"))]
+        #[cfg(target_os = "windows")]
+        if no_cache {
+            hash_file_direct_windows(path, algorithms)?
+        } else if size >= MMAP_THRESHOLD {
+            hash_file_mmap(path, algorithms, size, no_cache)?
+        } else {
+            hash_file_streaming(path, algorithms, no_cache)?
+        }
+
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
         if size >= MMAP_THRESHOLD {
             hash_file_mmap(path, algorithms, size, no_cache)?
         } else {
