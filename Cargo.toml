@@ -52,7 +52,9 @@ libc = "0.2"
 windows-sys = { version = "0.59", features = [
     "Win32_Storage_FileSystem",
     "Win32_Foundation",
+    "Win32_System_Memory",
 ] }
+tokio = { version = "1", features = ["rt-multi-thread", "fs", "sync", "macros"] }
 
 [features]
 default = ["forensic-image"]

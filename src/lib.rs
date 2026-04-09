@@ -8,3 +8,5 @@ pub mod output;
 pub mod piecewise;
 pub mod resume;
 pub mod walk;
+#[cfg(target_os = "windows")]
+pub mod walk_windows;

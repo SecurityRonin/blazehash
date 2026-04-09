@@ -1,0 +1,81 @@
+//! Windows-specific parallel file walk using tokio IOCP.
+//!
+//! tokio::fs uses I/O Completion Ports (IOCP) under the hood on Windows,
+//! allowing concurrent file I/O with minimal thread overhead.
+//! Replaces the rayon-based walk for Windows only.
+
+use crate::algorithm::Algorithm;
+use crate::hash::hash_file;
+use crate::walk::{WalkError, WalkOutput};
+use anyhow::Result;
+use std::path::Path;
+use std::sync::Arc;
+use tokio::sync::Semaphore;
+
+/// Maximum concurrent open file handles.
+const MAX_CONCURRENT: usize = 256;
+
+pub fn walk_and_hash_windows(
+    root: &Path,
+    algorithms: &[Algorithm],
+    recursive: bool,
+) -> Result<WalkOutput> {
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()?;
+
+    rt.block_on(walk_async(root, algorithms, recursive))
+}
+
+async fn walk_async(
+    root: &Path,
+    algorithms: &[Algorithm],
+    recursive: bool,
+) -> Result<WalkOutput> {
+    let sem = Arc::new(Semaphore::new(MAX_CONCURRENT));
+    let algorithms = Arc::new(algorithms.to_vec());
+    let mut handles = tokio::task::JoinSet::new();
+
+    let walker = if recursive {
+        walkdir::WalkDir::new(root)
+    } else {
+        walkdir::WalkDir::new(root).max_depth(1)
+    };
+
+    for entry in walker.into_iter().filter_map(|e| e.ok()) {
+        if !entry.file_type().is_file() {
+            continue;
+        }
+        let path = entry.into_path();
+        let sem = Arc::clone(&sem);
+        let algos = Arc::clone(&algorithms);
+
+        handles.spawn(async move {
+            let _permit = sem.acquire().await.unwrap();
+            tokio::task::spawn_blocking(move || hash_file(&path, &algos, false))
+                .await
+        });
+    }
+
+    let mut results = Vec::new();
+    let mut errors = Vec::new();
+    while let Some(res) = handles.join_next().await {
+        match res {
+            Ok(Ok(Ok(r))) => results.push(r),
+            Ok(Ok(Err(e))) => errors.push(WalkError {
+                path: Default::default(),
+                error: e.to_string(),
+            }),
+            Ok(Err(e)) => errors.push(WalkError {
+                path: Default::default(),
+                error: format!("spawn_blocking panic: {e}"),
+            }),
+            Err(e) => errors.push(WalkError {
+                path: Default::default(),
+                error: format!("join error: {e}"),
+            }),
+        }
+    }
+
+    Ok(WalkOutput { results, errors })
+}

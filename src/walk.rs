@@ -52,8 +52,13 @@ pub fn walk_paths(root: &Path, recursive: bool) -> (Vec<PathBuf>, Vec<WalkError>
 }
 
 /// Walk a directory, hash all files, return results and errors.
-/// Uses rayon for parallel file hashing.
+/// On Windows, uses tokio IOCP for async I/O. On Linux/macOS, uses rayon.
 pub fn walk_and_hash(root: &Path, algorithms: &[Algorithm], recursive: bool) -> Result<WalkOutput> {
+    #[cfg(target_os = "windows")]
+    {
+        return crate::walk_windows::walk_and_hash_windows(root, algorithms, recursive);
+    }
+
     let (paths, walk_errors) = walk_paths(root, recursive);
 
     let hash_errors = Mutex::new(Vec::new());
