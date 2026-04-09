@@ -3,6 +3,7 @@ pub mod bench;
 pub mod hash;
 pub mod piecewise;
 pub mod size_only;
+pub mod stdin;
 pub mod verify_image;
 
 use blazehash::walk::WalkError;

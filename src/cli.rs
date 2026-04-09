@@ -54,6 +54,10 @@ pub struct Cli {
     #[arg(long = "resume")]
     pub resume: bool,
 
+    /// Hash data from stdin instead of files
+    #[arg(long = "stdin")]
+    pub stdin: bool,
+
     /// Bypass OS page cache for direct disk reads (forensic acquisition)
     #[arg(long = "no-cache")]
     pub no_cache: bool,
@@ -149,6 +153,7 @@ pub enum Mode {
     Audit,
     VerifyImage,
     Piecewise,
+    Stdin,
     Hash,
 }
 
@@ -195,6 +200,8 @@ impl Cli {
             Mode::VerifyImage
         } else if self.piecewise.is_some() {
             Mode::Piecewise
+        } else if self.stdin {
+            Mode::Stdin
         } else {
             Mode::Hash
         }

@@ -51,6 +51,9 @@ fn main() -> Result<()> {
                 cli.output.as_ref(),
             )?;
         }
+        Mode::Stdin => {
+            commands::stdin::run(&algorithms, &cli.format, cli.bare, cli.output.as_ref())?;
+        }
         Mode::Hash => {
             let filter = cli.build_walk_filter()?;
             commands::hash::run(commands::hash::HashOptions {
