@@ -239,3 +239,71 @@ fn test_gpu_md5_large_file_matches_cpu() {
     let cpu_result = hex::encode(Md5::digest(&data));
     assert_eq!(gpu_result, cpu_result);
 }
+
+// ---- Task 13: GPU threshold decision function ----
+
+use blazehash::gpu::threshold::{should_use_gpu, GPU_ALGOS};
+use blazehash::algorithm::Algorithm;
+
+#[test]
+fn test_gpu_algos_excludes_blake3() {
+    assert!(!GPU_ALGOS.contains(&Algorithm::Blake3), "BLAKE3 must not be in GPU_ALGOS");
+    assert!(GPU_ALGOS.contains(&Algorithm::Sha256), "SHA-256 must be in GPU_ALGOS");
+    assert!(GPU_ALGOS.contains(&Algorithm::Md5), "MD5 must be in GPU_ALGOS");
+}
+
+#[test]
+fn test_should_use_gpu_skip_state_always_false() {
+    let state = GpuConfigState::Skip;
+    assert!(!should_use_gpu(100, &[Algorithm::Sha256], &state));
+    assert!(!should_use_gpu(100, &[Algorithm::Md5], &state));
+}
+
+#[test]
+fn test_should_use_gpu_needs_calibration_always_false() {
+    let state = GpuConfigState::NeedsCalibration;
+    assert!(!should_use_gpu(100, &[Algorithm::Sha256], &state));
+}
+
+#[test]
+fn test_should_use_gpu_blake3_only_always_false() {
+    let state = GpuConfigState::UseThresholds { single_mb: 10, multi_mb: 3 };
+    // BLAKE3 is not GPU-eligible — never use GPU even if file is huge
+    assert!(!should_use_gpu(1000, &[Algorithm::Blake3], &state));
+}
+
+#[test]
+fn test_should_use_gpu_single_algo_below_threshold() {
+    let state = GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 };
+    // 10 MB < 48 MB threshold — use CPU
+    assert!(!should_use_gpu(10, &[Algorithm::Sha256], &state));
+}
+
+#[test]
+fn test_should_use_gpu_single_algo_above_threshold() {
+    let state = GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 };
+    // 100 MB > 48 MB threshold — use GPU
+    assert!(should_use_gpu(100, &[Algorithm::Sha256], &state));
+}
+
+#[test]
+fn test_should_use_gpu_multi_algo_below_threshold() {
+    let state = GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 };
+    // 1 MB < 3 MB multi threshold with 2 GPU-eligible algos — use CPU
+    assert!(!should_use_gpu(1, &[Algorithm::Sha256, Algorithm::Md5], &state));
+}
+
+#[test]
+fn test_should_use_gpu_multi_algo_above_threshold() {
+    let state = GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 };
+    // 5 MB > 3 MB multi threshold with 2 GPU-eligible algos — use GPU
+    assert!(should_use_gpu(5, &[Algorithm::Sha256, Algorithm::Md5], &state));
+}
+
+#[test]
+fn test_should_use_gpu_mixed_algos_counts_only_gpu_eligible() {
+    let state = GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 };
+    // Blake3 + Sha256 + Md5 — only 2 are GPU-eligible (Sha256, Md5)
+    // 2 eligible algos → multi path: 5 MB > 3 MB → GPU
+    assert!(should_use_gpu(5, &[Algorithm::Blake3, Algorithm::Sha256, Algorithm::Md5], &state));
+}
