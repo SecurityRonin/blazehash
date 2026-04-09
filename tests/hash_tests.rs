@@ -907,3 +907,21 @@ fn test_fuzzy_flags_accepted_without_error() {
         "flags should be accepted without error"
     );
 }
+
+#[test]
+fn test_include_glob_with_path_separator() {
+    use blazehash::walk_filter::WalkFilter;
+    let dir = tempfile::tempdir().unwrap();
+    let subdir = dir.path().join("logs");
+    std::fs::create_dir(&subdir).unwrap();
+    std::fs::write(subdir.join("audit.log"), b"log").unwrap();
+    std::fs::write(dir.path().join("main.rs"), b"code").unwrap();
+
+    let filter = WalkFilter::builder()
+        .include("**/*.log")
+        .build()
+        .unwrap();
+    let output = blazehash::walk::walk_and_hash(dir.path(), &[blazehash::algorithm::Algorithm::Blake3], true, &filter).unwrap();
+    assert_eq!(output.results.len(), 1);
+    assert!(output.results[0].path.to_str().unwrap().ends_with("audit.log"));
+}

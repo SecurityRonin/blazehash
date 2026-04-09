@@ -53,15 +53,11 @@ async fn walk_async(
         let path = entry.into_path();
 
         // Apply filter before spawning a hash task.
-        let filename = path
-            .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .into_owned();
+        let rel = path.strip_prefix(root).unwrap_or(&path);
         let meta = std::fs::metadata(&path);
         let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
         let mtime = meta.ok().and_then(|m| m.modified().ok());
-        if !filter.passes(&filename, size, mtime) {
+        if !filter.passes(&rel.to_string_lossy(), size, mtime) {
             continue;
         }
         let sem = Arc::clone(&sem);
