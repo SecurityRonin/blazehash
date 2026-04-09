@@ -580,6 +580,62 @@ fn test_bench_subcommand_is_recognized() {
 }
 
 #[test]
+fn test_hash_file_with_ssdeep() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
+    use std::io::Write;
+
+    let mut f = tempfile::NamedTempFile::new().unwrap();
+    let data = b"The quick brown fox jumps over the lazy dog. ";
+    for _ in 0..100 {
+        f.write_all(data).unwrap();
+    }
+    f.flush().unwrap();
+
+    let result = hash_file(f.path(), &[Algorithm::Blake3, Algorithm::Ssdeep], false, false).unwrap();
+    assert!(result.hashes.contains_key(&Algorithm::Blake3));
+    assert!(result.hashes.contains_key(&Algorithm::Ssdeep));
+    let ssdeep_hash = &result.hashes[&Algorithm::Ssdeep];
+    assert!(ssdeep_hash.contains(':'), "ssdeep hash must contain ':'");
+    let parts: Vec<&str> = ssdeep_hash.splitn(3, ':').collect();
+    assert_eq!(parts.len(), 3);
+}
+
+#[test]
+fn test_hash_file_with_tlsh() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
+    use std::io::Write;
+
+    let mut f = tempfile::NamedTempFile::new().unwrap();
+    // Write varied data for tlsh entropy requirement
+    let data: Vec<u8> = (0u8..=255).cycle().take(512).collect();
+    f.write_all(&data).unwrap();
+    f.flush().unwrap();
+
+    let result = hash_file(f.path(), &[Algorithm::Tlsh], false, false).unwrap();
+    assert!(result.hashes.contains_key(&Algorithm::Tlsh));
+    let tlsh_hash = &result.hashes[&Algorithm::Tlsh];
+    assert!(tlsh_hash.starts_with("T1"), "tlsh hash must start with T1");
+}
+
+#[test]
+fn test_hash_file_tlsh_short_file_empty_string() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
+    use std::io::Write;
+
+    let mut f = tempfile::NamedTempFile::new().unwrap();
+    f.write_all(b"tiny").unwrap();
+    f.flush().unwrap();
+
+    let result = hash_file(f.path(), &[Algorithm::Tlsh], false, false).unwrap();
+    let tlsh_hash = &result.hashes[&Algorithm::Tlsh];
+    assert!(tlsh_hash.is_empty() || tlsh_hash.starts_with("T1"),
+        "short file: tlsh hash should be empty or valid, got: {tlsh_hash}");
+}
+
+#[test]
 fn hash_file_streaming_matches_mmap() {
     // Same content hashed via both paths should produce identical results
     let content = b"deterministic content for comparison";
