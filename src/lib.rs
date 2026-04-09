@@ -1,5 +1,6 @@
 pub mod algorithm;
 pub mod audit;
+pub mod fuzzy;
 pub mod forensic_image;
 pub mod format;
 #[cfg(feature = "gpu")]
