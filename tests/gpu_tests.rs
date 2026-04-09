@@ -190,3 +190,52 @@ fn test_gpu_sha256_large_file_matches_cpu() {
     let cpu_result = hex::encode(Sha256::digest(&data));
     assert_eq!(gpu_result, cpu_result);
 }
+
+#[test]
+fn test_gpu_md5_empty_input() {
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else {
+        eprintln!("No GPU — skipping GPU md5 test");
+        return;
+    };
+    let hasher = blazehash::gpu::md5::GpuMd5::new(&backend);
+    let result = hasher.hash(b"");
+    // MD5("") = d41d8cd98f00b204e9800998ecf8427e
+    assert_eq!(result, "d41d8cd98f00b204e9800998ecf8427e");
+}
+
+#[test]
+fn test_gpu_md5_abc() {
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let hasher = blazehash::gpu::md5::GpuMd5::new(&backend);
+    let result = hasher.hash(b"abc");
+    // MD5("abc") = 900150983cd24fb0d6963f7d28e17f72
+    assert_eq!(result, "900150983cd24fb0d6963f7d28e17f72");
+}
+
+#[test]
+fn test_gpu_md5_matches_cpu_for_various_sizes() {
+    use md5::{Md5, Digest};
+
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let hasher = blazehash::gpu::md5::GpuMd5::new(&backend);
+
+    for size in [0usize, 1, 55, 56, 63, 64, 128, 1023, 4096] {
+        let data: Vec<u8> = (0..size).map(|i| (i % 251) as u8).collect();
+        let gpu_result = hasher.hash(&data);
+        let cpu_result = hex::encode(Md5::digest(&data));
+        assert_eq!(gpu_result, cpu_result, "mismatch at size={size}");
+    }
+}
+
+#[test]
+fn test_gpu_md5_large_file_matches_cpu() {
+    use md5::{Md5, Digest};
+
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let hasher = blazehash::gpu::md5::GpuMd5::new(&backend);
+
+    let data = vec![0x42u8; 1024 * 1024]; // 1 MiB
+    let gpu_result = hasher.hash(&data);
+    let cpu_result = hex::encode(Md5::digest(&data));
+    assert_eq!(gpu_result, cpu_result);
+}
