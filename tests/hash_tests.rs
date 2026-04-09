@@ -468,6 +468,68 @@ fn test_no_gpu_flag_produces_same_hash_as_default() {
     assert_eq!(default_line, no_gpu_line, "--no-gpu must produce identical hashes");
 }
 
+// ---- Task 4: tlsh wrapper ----
+
+#[test]
+fn test_tlsh_compute_returns_some_for_sufficient_data() {
+    use blazehash::fuzzy::tlsh;
+    let data = vec![0u8; 512]; // 512 bytes — well above minimum
+    let result = tlsh::compute(&data);
+    assert!(result.is_some(), "tlsh must return Some for 512 bytes");
+    let hash = result.unwrap();
+    assert!(hash.len() >= 70, "tlsh digest should be at least 70 chars");
+    assert!(hash.starts_with("T1"), "tlsh digest must start with T1");
+}
+
+#[test]
+fn test_tlsh_compute_returns_none_for_short_data() {
+    use blazehash::fuzzy::tlsh;
+    let data = vec![0u8; 10]; // Too short for tlsh
+    let result = tlsh::compute(&data);
+    assert!(result.is_none(), "tlsh must return None for very short data");
+}
+
+#[test]
+fn test_tlsh_identical_similarity() {
+    use blazehash::fuzzy::tlsh;
+    let data = b"The quick brown fox jumps over the lazy dog. More text to reach minimum length for tlsh.";
+    let data = data.repeat(5); // ensure sufficient length
+    let h1 = tlsh::compute(&data).expect("must hash");
+    let h2 = tlsh::compute(&data).expect("must hash");
+    let sim = tlsh::similarity(&h1, &h2);
+    assert_eq!(sim, 100, "identical data must score 100");
+}
+
+#[test]
+fn test_tlsh_different_similarity() {
+    use blazehash::fuzzy::tlsh;
+    // Completely different data — low similarity expected
+    let d1 = vec![0xAAu8; 300];
+    let d2 = vec![0x55u8; 300];
+    let h1 = tlsh::compute(&d1).expect("must hash");
+    let h2 = tlsh::compute(&d2).expect("must hash");
+    let sim = tlsh::similarity(&h1, &h2);
+    assert!(sim < 50, "different data should have low similarity, got {sim}");
+}
+
+#[test]
+fn test_tlsh_deterministic() {
+    use blazehash::fuzzy::tlsh;
+    let data = vec![42u8; 200];
+    let h1 = tlsh::compute(&data).unwrap();
+    let h2 = tlsh::compute(&data).unwrap();
+    assert_eq!(h1, h2);
+}
+
+#[test]
+fn test_tlsh_distance_inversion() {
+    use blazehash::fuzzy::tlsh;
+    assert_eq!(tlsh::distance_to_similarity(0), 100);
+    assert_eq!(tlsh::distance_to_similarity(300), 0);
+    assert_eq!(tlsh::distance_to_similarity(150), 50);
+    assert_eq!(tlsh::distance_to_similarity(999), 0); // clamped
+}
+
 // ---- Task 15: blazehash bench --gpu subcommand ----
 
 #[test]
