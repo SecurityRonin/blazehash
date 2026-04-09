@@ -504,14 +504,13 @@ fn test_tlsh_identical_similarity() {
 #[test]
 fn test_tlsh_different_similarity() {
     use blazehash::fuzzy::tlsh;
-    // Completely different data — low similarity expected
-    // Use varied byte patterns to satisfy tlsh entropy requirements
-    let d1: Vec<u8> = (0u8..=255).cycle().take(300).collect();
-    let d2: Vec<u8> = (0u8..=255).rev().cycle().take(300).collect();
+    // Different byte distributions — low similarity expected
+    let d1: Vec<u8> = (0u8..=127).cycle().take(400).collect();
+    let d2: Vec<u8> = (128u8..=255).cycle().take(400).collect();
     let h1 = tlsh::compute(&d1).expect("must hash d1");
     let h2 = tlsh::compute(&d2).expect("must hash d2");
     let sim = tlsh::similarity(&h1, &h2);
-    assert!(sim < 80, "different byte-order data should not be fully similar, got {sim}");
+    assert!(sim < 50, "different byte distributions should have low similarity, got {sim}");
 }
 
 #[test]
