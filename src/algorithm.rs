@@ -15,6 +15,8 @@ pub enum Algorithm {
     Whirlpool,
     Ssdeep,
     Tlsh,
+    Crc32c,
+    Xxh3,
 }
 
 impl Algorithm {
@@ -43,11 +45,17 @@ impl Algorithm {
             Algorithm::Whirlpool => "whirlpool",
             Algorithm::Ssdeep => "ssdeep",
             Algorithm::Tlsh => "tlsh",
+            Algorithm::Crc32c => "crc32c",
+            Algorithm::Xxh3 => "xxh3",
         }
     }
 
     pub fn is_fuzzy(&self) -> bool {
         matches!(self, Algorithm::Ssdeep | Algorithm::Tlsh)
+    }
+
+    pub fn is_non_cryptographic(&self) -> bool {
+        matches!(self, Algorithm::Crc32c | Algorithm::Xxh3)
     }
 }
 
@@ -71,6 +79,8 @@ impl FromStr for Algorithm {
             "whirlpool" => Ok(Algorithm::Whirlpool),
             "ssdeep" => Ok(Algorithm::Ssdeep),
             "tlsh" => Ok(Algorithm::Tlsh),
+            "crc32c" => Ok(Algorithm::Crc32c),
+            "xxh3" => Ok(Algorithm::Xxh3),
             other => anyhow::bail!("unknown algorithm: {other}"),
         }
     }
@@ -88,6 +98,15 @@ pub fn hash_bytes(algo: Algorithm, data: &[u8]) -> String {
         Algorithm::Whirlpool => hex_digest::<whirlpool::Whirlpool>(data),
         Algorithm::Ssdeep => crate::fuzzy::ssdeep::compute(data),
         Algorithm::Tlsh => crate::fuzzy::tlsh::compute(data).unwrap_or_default(),
+        Algorithm::Crc32c => {
+            let checksum = crc32c::crc32c(data);
+            format!("{checksum:08x}")
+        }
+        Algorithm::Xxh3 => {
+            use xxhash_rust::xxh3::xxh3_128;
+            let hash = xxh3_128(data);
+            format!("{hash:032x}")
+        }
     }
 }
 

@@ -44,7 +44,10 @@ fn open_file_direct_linux(path: &Path) -> Result<std::fs::File> {
 }
 
 #[cfg(target_os = "linux")]
-fn hash_file_direct_linux(path: &Path, algorithms: &[Algorithm]) -> Result<HashMap<Algorithm, String>> {
+fn hash_file_direct_linux(
+    path: &Path,
+    algorithms: &[Algorithm],
+) -> Result<HashMap<Algorithm, String>> {
     use std::io::{Read, Seek, SeekFrom};
 
     let file_size = std::fs::metadata(path)?.len() as usize;
@@ -132,11 +135,19 @@ fn open_file_direct_windows(path: &Path) -> Result<std::fs::File> {
         .read(true)
         .custom_flags(FILE_FLAG_NO_BUFFERING | FILE_FLAG_SEQUENTIAL_SCAN)
         .open(path)
-        .with_context(|| format!("failed to open {} with FILE_FLAG_NO_BUFFERING", path.display()))
+        .with_context(|| {
+            format!(
+                "failed to open {} with FILE_FLAG_NO_BUFFERING",
+                path.display()
+            )
+        })
 }
 
 #[cfg(target_os = "windows")]
-fn hash_file_direct_windows(path: &Path, algorithms: &[Algorithm]) -> Result<HashMap<Algorithm, String>> {
+fn hash_file_direct_windows(
+    path: &Path,
+    algorithms: &[Algorithm],
+) -> Result<HashMap<Algorithm, String>> {
     use std::io::{Read, Seek, SeekFrom};
 
     let file_size = std::fs::metadata(path)?.len() as usize;
@@ -205,8 +216,8 @@ fn hash_file_direct_windows(path: &Path, algorithms: &[Algorithm]) -> Result<Has
 
 /// Open a file, optionally advising the OS to bypass the page cache (macOS F_NOCACHE).
 fn open_file_no_cache(path: &Path) -> Result<std::fs::File> {
-    let file = std::fs::File::open(path)
-        .with_context(|| format!("failed to open {}", path.display()))?;
+    let file =
+        std::fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?;
 
     #[cfg(target_os = "macos")]
     {
@@ -224,7 +235,12 @@ fn open_file_no_cache(path: &Path) -> Result<std::fs::File> {
 ///
 /// `no_gpu`: when true, skip GPU acceleration even if available (pass `false`
 /// for callers that don't expose this flag — GPU is already gated by feature flag).
-pub fn hash_file(path: &Path, algorithms: &[Algorithm], no_cache: bool, no_gpu: bool) -> Result<FileHashResult> {
+pub fn hash_file(
+    path: &Path,
+    algorithms: &[Algorithm],
+    no_cache: bool,
+    no_gpu: bool,
+) -> Result<FileHashResult> {
     let metadata = fs::metadata(path)
         .with_context(|| format!("failed to read metadata for {}", path.display()))?;
     let size = metadata.len();
@@ -309,16 +325,13 @@ fn gpu_config_path() -> std::path::PathBuf {
 /// in NeedsCalibration state. Returns Some(map) with only the GPU-computed
 /// hashes — the caller merges them over the CPU results.
 #[cfg(feature = "gpu")]
-fn try_gpu_hash(
-    path: &Path,
-    algorithms: &[Algorithm],
-) -> Option<HashMap<Algorithm, String>> {
+fn try_gpu_hash(path: &Path, algorithms: &[Algorithm]) -> Option<HashMap<Algorithm, String>> {
     use crate::gpu::{
         backend::GpuBackend,
         config::{GpuConfig, GpuConfigState},
-        threshold::{should_use_gpu, GPU_ALGOS},
-        sha256::GpuSha256,
         md5::GpuMd5,
+        sha256::GpuSha256,
+        threshold::{should_use_gpu, GPU_ALGOS},
     };
 
     let config_path = gpu_config_path();
@@ -492,6 +505,9 @@ fn make_hasher(algo: Algorithm) -> Box<dyn DynHasher> {
         }),
         Algorithm::Ssdeep | Algorithm::Tlsh => {
             panic!("fuzzy algorithms (ssdeep/tlsh) cannot be used via make_hasher; use crate::fuzzy::compute_fuzzy instead")
+        }
+        Algorithm::Crc32c | Algorithm::Xxh3 => {
+            panic!("non-cryptographic algorithms (crc32c/xxh3) cannot be used via make_hasher; use algorithm::hash_bytes instead")
         }
     }
 }
