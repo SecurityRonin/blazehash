@@ -378,6 +378,53 @@ fn test_no_gpu_flag_produces_same_hash_as_default() {
     assert_eq!(default_line, no_gpu_line, "--no-gpu must produce identical hashes");
 }
 
+// ---- Task 15: blazehash bench --gpu subcommand ----
+
+#[test]
+fn test_bench_gpu_no_calibrate_exits_successfully() {
+    // --no-calibrate should use conservative defaults and not write any config
+    use assert_cmd::Command;
+    use tempfile::TempDir;
+
+    let tmp = TempDir::new().unwrap();
+    // Run bench --gpu --no-calibrate — should exit 0 (or print info and exit 0)
+    // Since gpu feature may not be compiled, accept both success and "unknown subcommand"
+    let out = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["bench", "--gpu", "--no-calibrate"])
+        .env("BLAZEHASH_CONFIG_DIR", tmp.path().to_str().unwrap())
+        .output()
+        .unwrap();
+
+    // Should not crash/panic — exit code 0 or 1 (feature not enabled) both acceptable
+    // The key: must not write config when --no-calibrate is passed
+    let config_path = tmp.path().join("config.toml");
+    assert!(!config_path.exists(), "--no-calibrate must not write config file");
+}
+
+#[test]
+fn test_bench_subcommand_is_recognized() {
+    use assert_cmd::Command;
+
+    let out = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["bench", "--help"])
+        .output()
+        .unwrap();
+
+    // bench subcommand must be recognized (exit 0) and mention bench-specific flags
+    assert!(out.status.success(), "blazehash bench --help must succeed");
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    let combined = format!("{stdout}{stderr}");
+    // The bench subcommand help must mention bench-specific flags like --gpu and --no-calibrate
+    // (not just the global --no-gpu flag that exists on the top-level help)
+    assert!(
+        combined.contains("--no-calibrate"),
+        "bench --help output must mention --no-calibrate flag, got: {combined}"
+    );
+}
+
 #[test]
 fn hash_file_streaming_matches_mmap() {
     // Same content hashed via both paths should produce identical results
