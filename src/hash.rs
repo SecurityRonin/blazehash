@@ -17,6 +17,62 @@ pub struct FileHashResult {
 /// Threshold above which we use memory-mapped I/O (1 MiB).
 const MMAP_THRESHOLD: u64 = 1024 * 1024;
 
+#[cfg(target_os = "linux")]
+const DIRECT_IO_ALIGN: usize = 4096;
+#[cfg(target_os = "linux")]
+const DIRECT_IO_BUF_SIZE: usize = DIRECT_IO_ALIGN * 16; // 64 KiB, aligned
+
+/// Allocate a buffer aligned to DIRECT_IO_ALIGN.
+/// SAFETY: ptr is valid, size bytes are allocated with the correct alignment.
+#[cfg(target_os = "linux")]
+fn alloc_aligned_buf(size: usize) -> Vec<u8> {
+    let layout = std::alloc::Layout::from_size_align(size, DIRECT_IO_ALIGN)
+        .expect("invalid layout");
+    let ptr = unsafe { std::alloc::alloc(layout) };
+    if ptr.is_null() {
+        std::alloc::handle_alloc_error(layout);
+    }
+    // SAFETY: ptr is valid, size bytes are allocated, alignment is correct
+    unsafe { Vec::from_raw_parts(ptr, size, size) }
+}
+
+#[cfg(target_os = "linux")]
+fn open_file_direct_linux(path: &Path) -> Result<std::fs::File> {
+    use std::os::unix::fs::OpenOptionsExt;
+    std::fs::OpenOptions::new()
+        .read(true)
+        .custom_flags(libc::O_DIRECT)
+        .open(path)
+        .with_context(|| format!("failed to open {} with O_DIRECT", path.display()))
+}
+
+#[cfg(target_os = "linux")]
+fn hash_file_direct_linux(path: &Path, algorithms: &[Algorithm]) -> Result<HashMap<Algorithm, String>> {
+    let mut file = open_file_direct_linux(path)?;
+    let mut buf = alloc_aligned_buf(DIRECT_IO_BUF_SIZE);
+
+    let mut hashers: Vec<(Algorithm, Box<dyn DynHasher>)> = algorithms
+        .iter()
+        .map(|algo| (*algo, make_hasher(*algo)))
+        .collect();
+
+    loop {
+        let n = file.read(&mut buf)?;
+        if n == 0 {
+            break;
+        }
+        for (_, hasher) in &mut hashers {
+            hasher.update(&buf[..n]);
+        }
+    }
+
+    let mut hashes = HashMap::new();
+    for (algo, hasher) in hashers {
+        hashes.insert(algo, hasher.finalize_hex());
+    }
+    Ok(hashes)
+}
+
 /// Open a file, optionally advising the OS to bypass the page cache (macOS F_NOCACHE).
 fn open_file_no_cache(path: &Path) -> Result<std::fs::File> {
     let file = std::fs::File::open(path)
@@ -40,10 +96,22 @@ pub fn hash_file(path: &Path, algorithms: &[Algorithm], no_cache: bool) -> Resul
         .with_context(|| format!("failed to read metadata for {}", path.display()))?;
     let size = metadata.len();
 
-    let hashes = if size >= MMAP_THRESHOLD {
-        hash_file_mmap(path, algorithms, size, no_cache)?
-    } else {
-        hash_file_streaming(path, algorithms, no_cache)?
+    let hashes = {
+        #[cfg(target_os = "linux")]
+        if no_cache {
+            hash_file_direct_linux(path, algorithms)?
+        } else if size >= MMAP_THRESHOLD {
+            hash_file_mmap(path, algorithms, size, false)?
+        } else {
+            hash_file_streaming(path, algorithms, false)?
+        }
+
+        #[cfg(not(target_os = "linux"))]
+        if size >= MMAP_THRESHOLD {
+            hash_file_mmap(path, algorithms, size, no_cache)?
+        } else {
+            hash_file_streaming(path, algorithms, no_cache)?
+        }
     };
 
     Ok(FileHashResult {
