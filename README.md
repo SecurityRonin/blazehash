@@ -167,6 +167,27 @@ Recomputes the full-media MD5 (and SHA-1 if stored) and compares against hashes 
 blazehash -r /mnt/evidence -s         # list files with sizes, no hashing
 ```
 
+### Fuzzy / similarity hashing
+
+```bash
+blazehash -r /evidence -c ssdeep,tlsh          # compute fuzzy hashes alongside crypto hashes
+blazehash -r /evidence -c blake3,ssdeep         # BLAKE3 integrity + ssdeep similarity
+```
+
+Fuzzy hashes (ssdeep, tlsh) detect similar-but-not-identical files — malware variants, modified documents, partially overwritten data. Unlike cryptographic hashes, they are designed to score partial matches.
+
+Use in audit mode with `--fuzzy-threshold` (minimum similarity %, default 50) and `--fuzzy-top` (top N matches per file, default 5):
+
+```bash
+blazehash -r /evidence -a -k known.hash -c ssdeep --fuzzy-threshold 70 --fuzzy-top 3
+```
+
+Fuzzy matches appear in audit output as `[~]` with similarity score:
+```
+[~] payload.exe  FUZZY MATCH sim=87%  <- malware/variant_a.exe
+[~] modified.docx  FUZZY MATCH sim=94%  <- original.docx
+```
+
 ## MCP server
 
 The `blazehash mcp` command starts an [MCP](https://modelcontextprotocol.io/) server for AI-assisted forensic hashing over JSON-RPC stdio.
@@ -210,6 +231,8 @@ claude mcp add blazehash -- blazehash mcp
 | MD5 | `md5` | -- | NEON vectorized | SSE2/AVX2 multi-buffer | Broken | Legacy only, collision attacks trivial since 2004 |
 | Tiger | `tiger` | -- | 64-bit optimized lookup tables | 64-bit optimized | Pre-quantum | hashdeep compatibility, 192-bit output |
 | Whirlpool | `whirlpool` | -- | Table-based, 64-bit native | Table-based, 64-bit native | Pre-quantum | hashdeep compatibility, 512-bit output |
+| ssdeep | `ssdeep` | -- | Rolling hash (NEON) | Rolling hash (general) | N/A | Fuzzy/similarity hashing (CTPH). Not cryptographic. |
+| tlsh | `tlsh` | -- | General | General | N/A | Locality-sensitive hash. Not cryptographic. |
 
 BLAKE3 is the default because it is the fastest cryptographic hash on modern hardware while maintaining a 256-bit security level. For court submissions where opposing counsel may challenge algorithm choice, `sha256` remains the safe bet.
 
@@ -260,6 +283,7 @@ How blazehash compares to hashdeep, b3sum, sha256sum, and other forensic hashing
 | Known-hash matching | **Y** | **Y** | -- | -- | **Y** |
 | Recursive hashing | **Y** | **Y** | -- | -- | **Y** |
 | Forensic image verification (E01) | **Y** | -- | -- | -- | -- |
+| Fuzzy/similarity hashing | **Y** | -- | -- | -- | -- |
 | MCP server (AI-assisted analysis) | **Y** | -- | -- | -- | -- |
 
 ### Output Formats
