@@ -2,6 +2,8 @@ pub mod algorithm;
 pub mod audit;
 pub mod forensic_image;
 pub mod format;
+#[cfg(feature = "gpu")]
+pub mod gpu;
 pub mod hash;
 pub mod manifest;
 pub mod output;
