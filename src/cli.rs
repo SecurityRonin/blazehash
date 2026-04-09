@@ -73,6 +73,14 @@ pub struct Cli {
     /// Use conservative defaults; do not run benchmark or write config (used with `blazehash bench`)
     #[arg(long = "no-calibrate", help = "Use conservative defaults; do not run benchmark or write config")]
     pub no_calibrate: bool,
+
+    /// Minimum similarity % to consider a fuzzy match in audit mode (0-100, default: 50)
+    #[arg(long = "fuzzy-threshold", default_value = "50")]
+    pub fuzzy_threshold: u32,
+
+    /// Show top N fuzzy matches per file in audit mode (default: 5)
+    #[arg(long = "fuzzy-top", default_value = "5")]
+    pub fuzzy_top: usize,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
