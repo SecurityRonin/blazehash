@@ -52,8 +52,13 @@ async fn walk_async(
 
         handles.spawn(async move {
             let _permit = sem.acquire().await.unwrap();
+            let path_for_error = path.clone();
             tokio::task::spawn_blocking(move || hash_file(&path, &algos, false))
                 .await
+                .map_err(|e| (path_for_error.clone(), format!("spawn_blocking panic: {e}")))
+                .and_then(|inner| {
+                    inner.map_err(|e| (path_for_error.clone(), e.to_string()))
+                })
         });
     }
 
@@ -61,15 +66,8 @@ async fn walk_async(
     let mut errors = Vec::new();
     while let Some(res) = handles.join_next().await {
         match res {
-            Ok(Ok(Ok(r))) => results.push(r),
-            Ok(Ok(Err(e))) => errors.push(WalkError {
-                path: Default::default(),
-                error: e.to_string(),
-            }),
-            Ok(Err(e)) => errors.push(WalkError {
-                path: Default::default(),
-                error: format!("spawn_blocking panic: {e}"),
-            }),
+            Ok(Ok(r)) => results.push(r),
+            Ok(Err((path, error))) => errors.push(WalkError { path, error }),
             Err(e) => errors.push(WalkError {
                 path: Default::default(),
                 error: format!("join error: {e}"),
