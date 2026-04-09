@@ -32,6 +32,6 @@ pub fn similarity(h1: &str, h2: &str) -> u32 {
         Ok(t) => t,
         Err(_) => return 0,
     };
-    let dist = t1.diff(&t2, false);
+    let dist = t1.diff(&t2, true);
     distance_to_similarity(dist)
 }

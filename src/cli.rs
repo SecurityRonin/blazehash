@@ -75,7 +75,7 @@ pub struct Cli {
     pub no_calibrate: bool,
 
     /// Minimum similarity % to consider a fuzzy match in audit mode (0-100, default: 50)
-    #[arg(long = "fuzzy-threshold", default_value = "50")]
+    #[arg(long = "fuzzy-threshold", default_value = "50", value_parser = clap::value_parser!(u32).range(0..=100))]
     pub fuzzy_threshold: u32,
 
     /// Show top N fuzzy matches per file in audit mode (default: 5)

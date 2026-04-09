@@ -40,6 +40,14 @@ pub fn audit(
         .map(|e| (e.path.as_path(), e))
         .collect();
 
+    // Pre-build ssdeep index for efficient block-size-filtered lookup
+    let mut ssdeep_idx = crate::fuzzy::ssdeep::SsdeepIndex::new();
+    for entry in &known_entries {
+        if let Some(h) = entry.hashes.get(&Algorithm::Ssdeep) {
+            ssdeep_idx.insert(h, entry.path.clone());
+        }
+    }
+
     let mut result = AuditResult::default();
     let mut seen_known_paths: HashSet<&Path> = HashSet::new();
 
@@ -94,13 +102,7 @@ pub fn audit(
 
                 if fuzzy_algos.contains(&Algorithm::Ssdeep) {
                     if let Some(query_hash) = file_result.hashes.get(&Algorithm::Ssdeep) {
-                        let mut idx = crate::fuzzy::ssdeep::SsdeepIndex::new();
-                        for entry in &known_entries {
-                            if let Some(h) = entry.hashes.get(&Algorithm::Ssdeep) {
-                                idx.insert(h, entry.path.clone());
-                            }
-                        }
-                        let candidates = idx.candidates(query_hash);
+                        let candidates = ssdeep_idx.candidates(query_hash);
                         let mut matches: Vec<(u32, PathBuf)> = candidates
                             .iter()
                             .filter_map(|(h, p)| {
