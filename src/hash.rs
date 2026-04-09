@@ -6,6 +6,9 @@ use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
+#[cfg(target_os = "macos")]
+extern crate libc;
+
 /// Result of hashing a single file.
 #[derive(Debug)]
 pub struct FileHashResult {
@@ -16,6 +19,23 @@ pub struct FileHashResult {
 
 /// Threshold above which we use memory-mapped I/O (1 MiB).
 const MMAP_THRESHOLD: u64 = 1024 * 1024;
+
+/// Open a file, optionally advising the OS to bypass the page cache (macOS F_NOCACHE).
+fn open_file_no_cache(path: &Path) -> Result<std::fs::File> {
+    let file = std::fs::File::open(path)
+        .with_context(|| format!("failed to open {}", path.display()))?;
+
+    #[cfg(target_os = "macos")]
+    {
+        use std::os::unix::io::AsRawFd;
+        let ret = unsafe { libc::fcntl(file.as_raw_fd(), libc::F_NOCACHE, 1i32) };
+        if ret == -1 {
+            eprintln!("[warn] fcntl(F_NOCACHE) failed, proceeding without cache bypass");
+        }
+    }
+
+    Ok(file)
+}
 
 /// Hash a file with one or more algorithms simultaneously.
 pub fn hash_file(path: &Path, algorithms: &[Algorithm], no_cache: bool) -> Result<FileHashResult> {
@@ -42,8 +62,11 @@ fn hash_file_mmap(
     _size: u64,
     no_cache: bool,
 ) -> Result<HashMap<Algorithm, String>> {
-    let file =
-        fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?;
+    let file = if no_cache {
+        open_file_no_cache(path)?
+    } else {
+        fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?
+    };
     let mmap = unsafe {
         memmap2::Mmap::map(&file)
             .with_context(|| format!("failed to memory-map {}", path.display()))?
@@ -62,8 +85,11 @@ fn hash_file_streaming(
     algorithms: &[Algorithm],
     no_cache: bool,
 ) -> Result<HashMap<Algorithm, String>> {
-    let mut file =
-        fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?;
+    let mut file = if no_cache {
+        open_file_no_cache(path)?
+    } else {
+        fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?
+    };
     let mut buf = vec![0u8; 64 * 1024]; // 64 KiB read buffer
 
     // Build a hasher for each algorithm
