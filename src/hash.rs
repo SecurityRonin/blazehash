@@ -94,6 +94,34 @@ fn hash_file_direct_linux(path: &Path, algorithms: &[Algorithm]) -> Result<HashM
 }
 
 #[cfg(target_os = "windows")]
+fn try_alloc_large_page_buf(size: usize) -> Option<*mut u8> {
+    use windows_sys::Win32::System::Memory::{
+        VirtualAlloc, MEM_COMMIT, MEM_LARGE_PAGES, MEM_RESERVE, PAGE_READWRITE,
+    };
+    let ptr = unsafe {
+        VirtualAlloc(
+            std::ptr::null(),
+            size,
+            MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES,
+            PAGE_READWRITE,
+        )
+    };
+    if ptr.is_null() {
+        None
+    } else {
+        Some(ptr as *mut u8)
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn free_large_page_buf(ptr: *mut u8, _size: usize) {
+    use windows_sys::Win32::System::Memory::{VirtualFree, MEM_RELEASE};
+    unsafe {
+        VirtualFree(ptr as *mut _, 0, MEM_RELEASE);
+    }
+}
+
+#[cfg(target_os = "windows")]
 fn open_file_direct_windows(path: &Path) -> Result<std::fs::File> {
     use std::os::windows::fs::OpenOptionsExt;
     use windows_sys::Win32::Storage::FileSystem::{
@@ -113,7 +141,20 @@ fn hash_file_direct_windows(path: &Path, algorithms: &[Algorithm]) -> Result<Has
 
     let file_size = std::fs::metadata(path)?.len() as usize;
     let mut file = open_file_direct_windows(path)?;
-    let mut buf = Box::new(AlignedBuf([0u8; DIRECT_IO_BUF_SIZE]));
+
+    // Attempt MEM_LARGE_PAGES allocation; silently fall back to normal aligned heap if unavailable.
+    let large_page_ptr = try_alloc_large_page_buf(DIRECT_IO_BUF_SIZE);
+    let mut fallback_buf = if large_page_ptr.is_none() {
+        Some(Box::new(AlignedBuf([0u8; DIRECT_IO_BUF_SIZE])))
+    } else {
+        None
+    };
+
+    let buf_slice: &mut [u8] = if let Some(ptr) = large_page_ptr {
+        unsafe { std::slice::from_raw_parts_mut(ptr, DIRECT_IO_BUF_SIZE) }
+    } else {
+        &mut fallback_buf.as_mut().unwrap().0
+    };
 
     let mut hashers: Vec<(Algorithm, Box<dyn DynHasher>)> = algorithms
         .iter()
@@ -122,18 +163,23 @@ fn hash_file_direct_windows(path: &Path, algorithms: &[Algorithm]) -> Result<Has
 
     let mut total_read = 0usize;
     loop {
-        let n = file.read(&mut buf.0)?;
+        let n = file.read(buf_slice)?;
         if n == 0 {
             break;
         }
         for (_, hasher) in &mut hashers {
-            hasher.update(&buf.0[..n]);
+            hasher.update(&buf_slice[..n]);
         }
         total_read += n;
         // FILE_FLAG_NO_BUFFERING stops reading at the last aligned block boundary
         if total_read >= (file_size / DIRECT_IO_ALIGN) * DIRECT_IO_ALIGN {
             break;
         }
+    }
+
+    // Free large page buffer before the tail read to avoid holding it longer than needed.
+    if let Some(ptr) = large_page_ptr {
+        free_large_page_buf(ptr, DIRECT_IO_BUF_SIZE);
     }
 
     // Handle trailing bytes beyond the last aligned block — re-read without
