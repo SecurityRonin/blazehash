@@ -383,6 +383,51 @@ fn test_ssdeep_deterministic() {
     assert_eq!(h1, h2, "ssdeep must be deterministic");
 }
 
+// --- ssdeep similarity + block-size index tests ---
+
+#[test]
+fn test_ssdeep_identical_similarity() {
+    use blazehash::fuzzy::ssdeep;
+    let data = b"The quick brown fox jumps over the lazy dog. Some extra text to make it longer.";
+    let h = ssdeep::compute(data);
+    assert_eq!(ssdeep::similarity(&h, &h), 100);
+}
+
+#[test]
+fn test_ssdeep_different_similarity() {
+    use blazehash::fuzzy::ssdeep;
+    // Completely different data → score should be very low (≤ 20)
+    let h1 = ssdeep::compute(b"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    let h2 = ssdeep::compute(b"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+    let sim = ssdeep::similarity(&h1, &h2);
+    assert!(sim <= 20, "unrelated data should have low similarity, got {sim}");
+}
+
+#[test]
+fn test_ssdeep_incompatible_block_size_is_zero() {
+    use blazehash::fuzzy::ssdeep;
+    // Block size 3 vs block size 24 — not adjacent, must return 0
+    let h1 = "3:abc:de";
+    let h2 = "24:xyz:pq";
+    assert_eq!(ssdeep::similarity(h1, h2), 0);
+}
+
+#[test]
+fn test_ssdeep_block_size_index_filters_correctly() {
+    use blazehash::fuzzy::ssdeep::SsdeepIndex;
+    use std::path::PathBuf;
+    let mut idx = SsdeepIndex::new();
+    idx.insert("6:abc:de", PathBuf::from("a.bin"));
+    idx.insert("12:xyz:pq", PathBuf::from("b.bin"));
+    idx.insert("3:foo:ba", PathBuf::from("c.bin"));
+    // Query with block size 6 — should return entries with bs 3, 6, 12 (adjacent)
+    let candidates = idx.candidates("6:query:q2");
+    let paths: Vec<&PathBuf> = candidates.iter().map(|(_, p)| p).collect();
+    assert!(paths.contains(&&PathBuf::from("a.bin")), "same bs should match");
+    assert!(paths.contains(&&PathBuf::from("b.bin")), "double bs should match");
+    assert!(paths.contains(&&PathBuf::from("c.bin")), "half bs should match");
+}
+
 // ---- Task 14: --no-gpu flag ----
 
 #[test]
