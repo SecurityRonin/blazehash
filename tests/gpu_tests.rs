@@ -329,7 +329,7 @@ fn test_gpu_hash_file_sha256_matches_cpu() {
     f.flush().unwrap();
 
     let result1 = hash_file(f.path(), &[Algorithm::Sha256], false, false).unwrap();
-    // Call again — should produce identical result (GPU or CPU, both correct)
+    // Call again — must produce identical result (GPU or CPU, both correct)
     let result2 = hash_file(f.path(), &[Algorithm::Sha256], false, false).unwrap();
     assert_eq!(
         result1.hashes[&Algorithm::Sha256],

@@ -48,6 +48,7 @@ fn main() -> Result<()> {
                 cli.resume,
                 cli.output.as_ref(),
                 cli.no_cache,
+                cli.no_gpu,
             )?;
         }
     }

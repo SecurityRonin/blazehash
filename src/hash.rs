@@ -220,12 +220,15 @@ fn open_file_no_cache(path: &Path) -> Result<std::fs::File> {
 }
 
 /// Hash a file with one or more algorithms simultaneously.
-pub fn hash_file(path: &Path, algorithms: &[Algorithm], no_cache: bool) -> Result<FileHashResult> {
+///
+/// `no_gpu`: when true, skip GPU acceleration even if available (pass `false`
+/// for callers that don't expose this flag — GPU is already gated by feature flag).
+pub fn hash_file(path: &Path, algorithms: &[Algorithm], no_cache: bool, no_gpu: bool) -> Result<FileHashResult> {
     let metadata = fs::metadata(path)
         .with_context(|| format!("failed to read metadata for {}", path.display()))?;
     let size = metadata.len();
 
-    let hashes = {
+    let mut hashes = {
         #[cfg(target_os = "linux")]
         if no_cache {
             hash_file_direct_linux(path, algorithms)?
@@ -252,11 +255,83 @@ pub fn hash_file(path: &Path, algorithms: &[Algorithm], no_cache: bool) -> Resul
         }
     };
 
+    // GPU override: replace CPU hashes with GPU hashes for eligible algorithms.
+    // Only active when the `gpu` feature is enabled and `no_gpu` is false.
+    #[cfg(feature = "gpu")]
+    if !no_gpu {
+        if let Some(gpu_hashes) = try_gpu_hash(path, algorithms) {
+            for (algo, hash) in gpu_hashes {
+                hashes.insert(algo, hash);
+            }
+        }
+    }
+
     Ok(FileHashResult {
         path: path.to_path_buf(),
         size,
         hashes,
     })
+}
+
+#[cfg(feature = "gpu")]
+fn gpu_config_path() -> std::path::PathBuf {
+    if let Some(config_dir) = dirs::config_dir() {
+        config_dir.join("blazehash").join("config.toml")
+    } else {
+        std::path::PathBuf::from("blazehash_gpu_config.toml")
+    }
+}
+
+/// Attempt to hash GPU-eligible algorithms (SHA-256, MD5) on the GPU.
+/// Returns None if no GPU is available, thresholds are not met, or GPU is
+/// in NeedsCalibration state. Returns Some(map) with only the GPU-computed
+/// hashes — the caller merges them over the CPU results.
+#[cfg(feature = "gpu")]
+fn try_gpu_hash(
+    path: &Path,
+    algorithms: &[Algorithm],
+) -> Option<HashMap<Algorithm, String>> {
+    use crate::gpu::{
+        backend::GpuBackend,
+        config::{GpuConfig, GpuConfigState},
+        threshold::{should_use_gpu, GPU_ALGOS},
+        sha256::GpuSha256,
+        md5::GpuMd5,
+    };
+
+    let config_path = gpu_config_path();
+    let config = GpuConfig::load(&config_path);
+    let backend = GpuBackend::detect()?;
+    let adapter_name = backend.adapter_name().to_string();
+
+    let state = GpuConfigState::resolve(config, Some(&adapter_name), &config_path);
+
+    let file_size_mb = std::fs::metadata(path).ok()?.len() / (1024 * 1024);
+    if !should_use_gpu(file_size_mb, algorithms, &state) {
+        return None;
+    }
+
+    // Read the file once; upload to GPU for each eligible algorithm.
+    let data = std::fs::read(path).ok()?;
+
+    let mut results = HashMap::new();
+    for algo in algorithms {
+        if !GPU_ALGOS.contains(algo) {
+            continue;
+        }
+        let hash = match algo {
+            Algorithm::Sha256 => GpuSha256::new(&backend).hash(&data),
+            Algorithm::Md5 => GpuMd5::new(&backend).hash(&data),
+            _ => continue,
+        };
+        results.insert(*algo, hash);
+    }
+
+    if results.is_empty() {
+        None
+    } else {
+        Some(results)
+    }
 }
 
 fn hash_file_mmap(

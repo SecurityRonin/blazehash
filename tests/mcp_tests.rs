@@ -192,7 +192,7 @@ mod protocol_tests {
         let file = dir.path().join("test.txt");
         fs::write(&file, b"hello world").unwrap();
 
-        let result = hash_file(&file, &[Algorithm::Blake3], false).unwrap();
+        let result = hash_file(&file, &[Algorithm::Blake3], false, false).unwrap();
         let hash = result.hashes[&Algorithm::Blake3].clone();
         let manifest = format!(
             "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n{},{},{}\n",
@@ -227,7 +227,7 @@ mod protocol_tests {
         let file = dir.path().join("test.txt");
         fs::write(&file, b"hello world").unwrap();
 
-        let result = hash_file(&file, &[Algorithm::Blake3], false).unwrap();
+        let result = hash_file(&file, &[Algorithm::Blake3], false, false).unwrap();
         let hash = result.hashes[&Algorithm::Blake3].clone();
         // \\n in Rust string = literal \n chars, which JSON interprets as newlines
         let manifest = format!(

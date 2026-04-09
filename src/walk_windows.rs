@@ -53,7 +53,7 @@ async fn walk_async(
         handles.spawn(async move {
             let _permit = sem.acquire().await.unwrap();
             let path_for_error = path.clone();
-            tokio::task::spawn_blocking(move || hash_file(&path, &algos, false))
+            tokio::task::spawn_blocking(move || hash_file(&path, &algos, false, false))
                 .await
                 .map_err(|e| (path_for_error.clone(), format!("spawn_blocking panic: {e}")))
                 .and_then(|inner| {

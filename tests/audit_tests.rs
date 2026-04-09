@@ -8,7 +8,7 @@ fn make_known_file(dir: &TempDir) -> String {
     let file = dir.path().join("test.txt");
     fs::write(&file, b"hello world").unwrap();
 
-    let result = hash_file(&file, &[Algorithm::Blake3], false).unwrap();
+    let result = hash_file(&file, &[Algorithm::Blake3], false, false).unwrap();
     let hash = result.hashes[&Algorithm::Blake3].clone();
 
     format!(
@@ -80,7 +80,7 @@ fn audit_skips_malformed_manifest_lines() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.txt");
     fs::write(&file, b"hello world").unwrap();
-    let hash_result = hash_file(&file, &[Algorithm::Blake3], false).unwrap();
+    let hash_result = hash_file(&file, &[Algorithm::Blake3], false, false).unwrap();
     let hash = hash_result.hashes[&Algorithm::Blake3].clone();
 
     // Manifest with a malformed line (bad size field)
@@ -105,7 +105,7 @@ fn audit_moved_checks_all_algorithms() {
     // Create known file with two algorithms
     let file = dir.path().join("original.txt");
     fs::write(&file, b"hello world").unwrap();
-    let hash_result = hash_file(&file, &[Algorithm::Blake3, Algorithm::Sha256], false).unwrap();
+    let hash_result = hash_file(&file, &[Algorithm::Blake3, Algorithm::Sha256], false, false).unwrap();
     let blake3_hash = hash_result.hashes[&Algorithm::Blake3].clone();
     let sha256_hash = hash_result.hashes[&Algorithm::Sha256].clone();
 
@@ -132,7 +132,7 @@ fn audit_all_new_files() {
     // Create a known manifest for a file that doesn't exist among scanned paths
     let dummy = dir.path().join("dummy.txt");
     fs::write(&dummy, b"dummy").unwrap();
-    let hash_result = hash_file(&dummy, &[Algorithm::Blake3], false).unwrap();
+    let hash_result = hash_file(&dummy, &[Algorithm::Blake3], false, false).unwrap();
     let hash = hash_result.hashes[&Algorithm::Blake3].clone();
     let known = format!(
         "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n{},{},{}\n",
@@ -165,7 +165,7 @@ fn audit_changed_size_same_content_impossible_but_handled() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.txt");
     fs::write(&file, b"hello world").unwrap();
-    let hash_result = hash_file(&file, &[Algorithm::Blake3], false).unwrap();
+    let hash_result = hash_file(&file, &[Algorithm::Blake3], false, false).unwrap();
     let hash = hash_result.hashes[&Algorithm::Blake3].clone();
 
     // Manifest with wrong size but correct hash (artificial scenario)
@@ -202,7 +202,7 @@ fn audit_moved_detection_with_single_algorithm() {
     let dir = TempDir::new().unwrap();
     let original = dir.path().join("original.txt");
     fs::write(&original, b"content to move").unwrap();
-    let hash_result = hash_file(&original, &[Algorithm::Blake3], false).unwrap();
+    let hash_result = hash_file(&original, &[Algorithm::Blake3], false, false).unwrap();
     let hash = hash_result.hashes[&Algorithm::Blake3].clone();
 
     let known = format!(

@@ -58,6 +58,10 @@ pub struct Cli {
     #[arg(long = "no-cache")]
     pub no_cache: bool,
 
+    /// Force CPU hashing even when GPU is available
+    #[arg(long = "no-gpu")]
+    pub no_gpu: bool,
+
     /// Output format
     #[arg(long = "format", default_value = "hashdeep")]
     pub format: String,
