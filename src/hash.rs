@@ -18,15 +18,15 @@ pub struct FileHashResult {
 const MMAP_THRESHOLD: u64 = 1024 * 1024;
 
 /// Hash a file with one or more algorithms simultaneously.
-pub fn hash_file(path: &Path, algorithms: &[Algorithm]) -> Result<FileHashResult> {
+pub fn hash_file(path: &Path, algorithms: &[Algorithm], no_cache: bool) -> Result<FileHashResult> {
     let metadata = fs::metadata(path)
         .with_context(|| format!("failed to read metadata for {}", path.display()))?;
     let size = metadata.len();
 
     let hashes = if size >= MMAP_THRESHOLD {
-        hash_file_mmap(path, algorithms, size)?
+        hash_file_mmap(path, algorithms, size, no_cache)?
     } else {
-        hash_file_streaming(path, algorithms)?
+        hash_file_streaming(path, algorithms, no_cache)?
     };
 
     Ok(FileHashResult {
@@ -40,6 +40,7 @@ fn hash_file_mmap(
     path: &Path,
     algorithms: &[Algorithm],
     _size: u64,
+    _no_cache: bool,
 ) -> Result<HashMap<Algorithm, String>> {
     let file =
         fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?;
@@ -59,6 +60,7 @@ fn hash_file_mmap(
 fn hash_file_streaming(
     path: &Path,
     algorithms: &[Algorithm],
+    _no_cache: bool,
 ) -> Result<HashMap<Algorithm, String>> {
     let mut file =
         fs::File::open(path).with_context(|| format!("failed to open {}", path.display()))?;

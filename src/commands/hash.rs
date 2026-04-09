@@ -20,12 +20,13 @@ pub fn run(
     bare: bool,
     resume: bool,
     output: Option<&PathBuf>,
+    no_cache: bool,
 ) -> Result<()> {
     let mut resume_state = load_resume_state(resume, output)?;
     let append = resume && output.is_some_and(|p| p.exists());
     let mut writer = make_writer(output.map(|p| p.as_path()), append)?;
 
-    let all_results = collect_results(paths, algorithms, recursive, &mut resume_state)?;
+    let all_results = collect_results(paths, algorithms, recursive, &mut resume_state, no_cache)?;
 
     let needs_header = !(bare || append);
     write_output(&mut writer, &all_results, algorithms, format, needs_header)?;
@@ -53,6 +54,7 @@ fn collect_results(
     algorithms: &[Algorithm],
     recursive: bool,
     resume_state: &mut ResumeState,
+    no_cache: bool,
 ) -> Result<Vec<FileHashResult>> {
     let mut all_results = Vec::new();
 
@@ -61,7 +63,7 @@ fn collect_results(
             if resume_state.is_done(path) {
                 continue;
             }
-            let result = hash_file(path, algorithms)
+            let result = hash_file(path, algorithms, no_cache)
                 .with_context(|| format!("failed to hash {}", path.display()))?;
             resume_state.mark_done(path.clone());
             all_results.push(result);

@@ -59,7 +59,7 @@ pub fn walk_and_hash(root: &Path, algorithms: &[Algorithm], recursive: bool) -> 
     let hash_errors = Mutex::new(Vec::new());
     let results: Vec<FileHashResult> = paths
         .par_iter()
-        .filter_map(|path| match hash_file(path, algorithms) {
+        .filter_map(|path| match hash_file(path, algorithms, false) {
             Ok(result) => Some(result),
             Err(err) => {
                 hash_errors.lock().unwrap().push(WalkError {

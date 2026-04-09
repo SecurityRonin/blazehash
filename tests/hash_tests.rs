@@ -9,7 +9,7 @@ fn hash_file_blake3() {
     f.write_all(b"hello world").unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3]).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false).unwrap();
     assert_eq!(result.size, 11);
     assert_eq!(
         result.hashes[&Algorithm::Blake3],
@@ -24,7 +24,7 @@ fn hash_file_multiple_algorithms() {
     f.flush().unwrap();
 
     let algos = vec![Algorithm::Blake3, Algorithm::Sha256, Algorithm::Md5];
-    let result = hash_file(f.path(), &algos).unwrap();
+    let result = hash_file(f.path(), &algos, false).unwrap();
     assert_eq!(result.size, 11);
     assert_eq!(result.hashes.len(), 3);
     assert_eq!(
@@ -40,7 +40,7 @@ fn hash_file_multiple_algorithms() {
 #[test]
 fn hash_file_empty() {
     let f = NamedTempFile::new().unwrap();
-    let result = hash_file(f.path(), &[Algorithm::Blake3]).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false).unwrap();
     assert_eq!(result.size, 0);
     assert!(!result.hashes[&Algorithm::Blake3].is_empty());
 }
@@ -53,7 +53,7 @@ fn hash_file_large_uses_mmap() {
     f.write_all(&data).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3, Algorithm::Sha256]).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3, Algorithm::Sha256], false).unwrap();
     assert_eq!(result.size, 2 * 1024 * 1024);
 
     // Verify against hash_bytes for correctness
@@ -67,7 +67,7 @@ fn hash_file_returns_path() {
     f.write_all(b"test").unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3]).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false).unwrap();
     assert_eq!(result.path, f.path());
 }
 
@@ -76,6 +76,7 @@ fn hash_file_nonexistent_returns_error() {
     let result = hash_file(
         std::path::Path::new("/nonexistent/file.txt"),
         &[Algorithm::Blake3],
+        false,
     );
     assert!(result.is_err());
 }
@@ -88,7 +89,7 @@ fn hash_file_at_mmap_threshold() {
     f.write_all(&data).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3, Algorithm::Sha256]).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3, Algorithm::Sha256], false).unwrap();
     assert_eq!(result.size, 1024 * 1024);
 
     // Verify against hash_bytes for correctness
@@ -104,7 +105,7 @@ fn hash_file_just_below_mmap_threshold() {
     f.write_all(&data).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3]).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false).unwrap();
     assert_eq!(result.size, 1024 * 1024 - 1);
 
     let expected = blazehash::algorithm::hash_bytes(Algorithm::Blake3, &data);
@@ -118,7 +119,7 @@ fn hash_file_all_algorithms() {
     f.flush().unwrap();
 
     let algos: Vec<Algorithm> = Algorithm::all().to_vec();
-    let result = hash_file(f.path(), &algos).unwrap();
+    let result = hash_file(f.path(), &algos, false).unwrap();
     assert_eq!(result.hashes.len(), 8);
     for algo in &algos {
         assert!(
@@ -176,7 +177,7 @@ fn hash_file_streaming_matches_mmap() {
     let mut small = NamedTempFile::new().unwrap();
     small.write_all(content).unwrap();
     small.flush().unwrap();
-    let streaming_result = hash_file(small.path(), &[Algorithm::Sha256]).unwrap();
+    let streaming_result = hash_file(small.path(), &[Algorithm::Sha256], false).unwrap();
 
     // Verify against known hash_bytes
     let expected = blazehash::algorithm::hash_bytes(Algorithm::Sha256, content);

@@ -47,6 +47,7 @@ fn main() -> Result<()> {
                 cli.bare,
                 cli.resume,
                 cli.output.as_ref(),
+                cli.no_cache,
             )?;
         }
     }

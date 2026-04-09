@@ -52,7 +52,7 @@ pub fn handle_hash(
                 }
             }
         } else {
-            match hash_file(path, &algos) {
+            match hash_file(path, &algos, false) {
                 Ok(r) => {
                     let hashes: serde_json::Map<String, Value> = r
                         .hashes

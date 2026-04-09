@@ -54,6 +54,10 @@ pub struct Cli {
     #[arg(long = "resume")]
     pub resume: bool,
 
+    /// Bypass OS page cache for direct disk reads (forensic acquisition)
+    #[arg(long = "no-cache")]
+    pub no_cache: bool,
+
     /// Output format
     #[arg(long = "format", default_value = "hashdeep")]
     pub format: String,

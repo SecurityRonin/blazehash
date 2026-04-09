@@ -36,7 +36,7 @@ pub fn audit(paths: &[PathBuf], known_content: &str) -> Result<AuditResult> {
     let mut seen_known_paths: HashSet<&Path> = HashSet::new();
 
     for path in paths {
-        let file_result = hash_file(path, &known_algos)
+        let file_result = hash_file(path, &known_algos, false)
             .with_context(|| format!("failed to hash {} during audit", path.display()))?;
 
         if let Some(known) = known_by_path.get(path.as_path()) {
