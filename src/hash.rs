@@ -245,15 +245,22 @@ pub fn hash_file(
         .with_context(|| format!("failed to read metadata for {}", path.display()))?;
     let size = metadata.len();
 
-    // Separate crypto and fuzzy algorithms — fuzzy hashes are computed separately after.
+    // Separate crypto, fuzzy, and non-cryptographic algorithms.
+    // Fuzzy and non-crypto hashes are computed separately after via hash_bytes;
+    // only pure crypto algorithms flow through make_hasher.
     let fuzzy_algorithms: Vec<Algorithm> = algorithms
         .iter()
         .filter(|a| a.is_fuzzy())
         .copied()
         .collect();
+    let non_crypto_algorithms: Vec<Algorithm> = algorithms
+        .iter()
+        .filter(|a| a.is_non_cryptographic())
+        .copied()
+        .collect();
     let crypto_algorithms: Vec<Algorithm> = algorithms
         .iter()
-        .filter(|a| !a.is_fuzzy())
+        .filter(|a| !a.is_fuzzy() && !a.is_non_cryptographic())
         .copied()
         .collect();
     let algorithms = &crypto_algorithms; // shadow: rest of function uses crypto-only slice
@@ -302,6 +309,19 @@ pub fn hash_file(
             .with_context(|| format!("failed to read {} for fuzzy hashing", path.display()))?;
         let fuzzy_hashes = crate::fuzzy::compute_fuzzy(&data, &fuzzy_algorithms);
         hashes.extend(fuzzy_hashes);
+    }
+
+    // Non-cryptographic pass: crc32c/xxh3 use hash_bytes (not make_hasher); read file if needed.
+    if !non_crypto_algorithms.is_empty() {
+        let data = fs::read(path).with_context(|| {
+            format!(
+                "failed to read {} for non-cryptographic hashing",
+                path.display()
+            )
+        })?;
+        for algo in &non_crypto_algorithms {
+            hashes.insert(*algo, crate::algorithm::hash_bytes(*algo, &data));
+        }
     }
 
     Ok(FileHashResult {
