@@ -22,19 +22,12 @@ const DIRECT_IO_ALIGN: usize = 4096;
 #[cfg(target_os = "linux")]
 const DIRECT_IO_BUF_SIZE: usize = DIRECT_IO_ALIGN * 16; // 64 KiB, aligned
 
-/// Allocate a buffer aligned to DIRECT_IO_ALIGN.
-/// SAFETY: ptr is valid, size bytes are allocated with the correct alignment.
+/// A heap-allocated buffer with 4096-byte alignment for O_DIRECT I/O.
+/// `#[repr(align(4096))]` ensures Box<AlignedBuf> satisfies the kernel's
+/// alignment requirements, and Box drops it with the correct Layout.
 #[cfg(target_os = "linux")]
-fn alloc_aligned_buf(size: usize) -> Vec<u8> {
-    let layout = std::alloc::Layout::from_size_align(size, DIRECT_IO_ALIGN)
-        .expect("invalid layout");
-    let ptr = unsafe { std::alloc::alloc(layout) };
-    if ptr.is_null() {
-        std::alloc::handle_alloc_error(layout);
-    }
-    // SAFETY: ptr is valid, size bytes are allocated, alignment is correct
-    unsafe { Vec::from_raw_parts(ptr, size, size) }
-}
+#[repr(align(4096))]
+struct AlignedBuf([u8; DIRECT_IO_BUF_SIZE]);
 
 #[cfg(target_os = "linux")]
 fn open_file_direct_linux(path: &Path) -> Result<std::fs::File> {
@@ -48,21 +41,44 @@ fn open_file_direct_linux(path: &Path) -> Result<std::fs::File> {
 
 #[cfg(target_os = "linux")]
 fn hash_file_direct_linux(path: &Path, algorithms: &[Algorithm]) -> Result<HashMap<Algorithm, String>> {
+    use std::io::{Read, Seek, SeekFrom};
+
+    let file_size = std::fs::metadata(path)?.len() as usize;
     let mut file = open_file_direct_linux(path)?;
-    let mut buf = alloc_aligned_buf(DIRECT_IO_BUF_SIZE);
+    let mut buf = Box::new(AlignedBuf([0u8; DIRECT_IO_BUF_SIZE]));
 
     let mut hashers: Vec<(Algorithm, Box<dyn DynHasher>)> = algorithms
         .iter()
         .map(|algo| (*algo, make_hasher(*algo)))
         .collect();
 
+    let mut total_read = 0usize;
     loop {
-        let n = file.read(&mut buf)?;
+        let n = file.read(&mut buf.0)?;
         if n == 0 {
             break;
         }
         for (_, hasher) in &mut hashers {
-            hasher.update(&buf[..n]);
+            hasher.update(&buf.0[..n]);
+        }
+        total_read += n;
+        // O_DIRECT stops reading at the last aligned block boundary
+        if total_read >= (file_size / DIRECT_IO_ALIGN) * DIRECT_IO_ALIGN {
+            break;
+        }
+    }
+
+    // If the file has trailing bytes beyond the last aligned block, re-read
+    // them without O_DIRECT (the kernel cannot return sub-sector remainders
+    // via O_DIRECT).
+    if total_read < file_size {
+        let mut tail_file = std::fs::File::open(path)
+            .with_context(|| format!("failed to open {} for tail read", path.display()))?;
+        tail_file.seek(SeekFrom::Start(total_read as u64))?;
+        let mut tail = Vec::new();
+        tail_file.read_to_end(&mut tail)?;
+        for (_, hasher) in &mut hashers {
+            hasher.update(&tail);
         }
     }
 
