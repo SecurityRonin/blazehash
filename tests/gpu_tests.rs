@@ -160,7 +160,7 @@ fn test_gpu_sha256_abc() {
     let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
     let hasher = blazehash::gpu::sha256::GpuSha256::new(&backend);
     let result = hasher.hash(b"abc");
-    assert_eq!(result, "ba7816bf8f01cfea414140de5dae2ec73b00361bbef0469932d6c57ba3bbf64");
+    assert_eq!(result, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
 }
 
 #[test]
