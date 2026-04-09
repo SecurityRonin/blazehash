@@ -35,15 +35,32 @@ pub fn run(gpu: bool, no_calibrate: bool) -> Result<()> {
             backend.adapter_name()
         );
 
-        let (single_mb, multi_mb) = calibrate(&backend);
+        let (single_mb, multi_mb, gpu_enabled) = calibrate(&backend);
 
         let cfg = GpuConfig {
             device: backend.adapter_name().to_string(),
-            calibrated: "calibrated".to_string(),
+            calibrated: {
+                use std::time::{SystemTime, UNIX_EPOCH};
+                let secs = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_secs();
+                // Compute date components from Unix timestamp
+                let days = secs / 86400;
+                let year = 1970 + days / 365; // approximate — sufficient for config metadata
+                let day_of_year = days % 365;
+                let month = (day_of_year / 30) + 1;
+                let day = (day_of_year % 30) + 1;
+                format!("{year:04}-{month:02}-{day:02}")
+            },
             threshold_single_mb: single_mb,
             threshold_multi_mb: multi_mb,
-            gpu_enabled: true,
+            gpu_enabled,
         };
+
+        if !gpu_enabled {
+            println!("[*] GPU was slower than CPU at all tested sizes — writing gpu_enabled=false");
+        }
 
         std::fs::create_dir_all(&config_dir)?;
         cfg.save(&config_path)?;
@@ -80,7 +97,7 @@ fn get_config_dir() -> std::path::PathBuf {
 }
 
 #[cfg(feature = "gpu")]
-fn calibrate(backend: &blazehash::gpu::backend::GpuBackend) -> (u32, u32) {
+fn calibrate(backend: &blazehash::gpu::backend::GpuBackend) -> (u32, u32, bool) {
     use blazehash::gpu::config::{DEFAULT_THRESHOLD_MULTI_MB, DEFAULT_THRESHOLD_SINGLE_MB};
     use blazehash::gpu::sha256::GpuSha256;
     use std::time::Instant;
@@ -88,6 +105,7 @@ fn calibrate(backend: &blazehash::gpu::backend::GpuBackend) -> (u32, u32) {
     let hasher = GpuSha256::new(backend);
 
     let test_sizes_mb: &[u32] = &[1, 2, 4, 8, 16, 32, 64, 128];
+    let mut gpu_ever_won = false;
     let mut single_threshold = DEFAULT_THRESHOLD_SINGLE_MB;
 
     for &size_mb in test_sizes_mb {
@@ -111,10 +129,15 @@ fn calibrate(backend: &blazehash::gpu::backend::GpuBackend) -> (u32, u32) {
 
         if gpu_ms < cpu_ms {
             single_threshold = size_mb;
+            gpu_ever_won = true;
             break;
         }
     }
 
+    if !gpu_ever_won {
+        return (DEFAULT_THRESHOLD_SINGLE_MB, DEFAULT_THRESHOLD_MULTI_MB, false);
+    }
+
     let multi_threshold = (single_threshold / 4).max(1);
-    (single_threshold, multi_threshold)
+    (single_threshold, multi_threshold, true)
 }

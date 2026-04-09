@@ -1,3 +1,4 @@
+#![cfg(target_os = "windows")]
 //! Windows-specific parallel file walk using tokio IOCP.
 //!
 //! tokio::fs uses I/O Completion Ports (IOCP) under the hood on Windows,

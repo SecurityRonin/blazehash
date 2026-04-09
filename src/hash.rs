@@ -179,6 +179,7 @@ fn hash_file_direct_windows(path: &Path, algorithms: &[Algorithm]) -> Result<Has
 
     // Free large page buffer before the tail read to avoid holding it longer than needed.
     if let Some(ptr) = large_page_ptr {
+        // SAFETY: buf_slice is not accessed after this point — the tail read uses tail_file, not buf_slice.
         free_large_page_buf(ptr, DIRECT_IO_BUF_SIZE);
     }
 
