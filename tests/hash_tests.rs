@@ -130,6 +130,44 @@ fn hash_file_all_algorithms() {
 }
 
 #[test]
+fn test_no_cache_flag_produces_correct_hash() {
+    use assert_cmd::Command;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    let mut f = NamedTempFile::new().unwrap();
+    f.write_all(b"blazehash no-cache test").unwrap();
+
+    let out_normal = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["-c", "sha256", f.path().to_str().unwrap()])
+        .output()
+        .unwrap();
+
+    let out_nocache = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["-c", "sha256", "--no-cache", f.path().to_str().unwrap()])
+        .output()
+        .unwrap();
+
+    assert!(out_normal.status.success());
+    assert!(out_nocache.status.success());
+
+    let normal_line = String::from_utf8_lossy(&out_normal.stdout)
+        .lines()
+        .find(|l| !l.starts_with('%') && !l.is_empty())
+        .unwrap()
+        .to_string();
+    let nocache_line = String::from_utf8_lossy(&out_nocache.stdout)
+        .lines()
+        .find(|l| !l.starts_with('%') && !l.is_empty())
+        .unwrap()
+        .to_string();
+
+    assert_eq!(normal_line, nocache_line, "--no-cache must produce identical hashes");
+}
+
+#[test]
 fn hash_file_streaming_matches_mmap() {
     // Same content hashed via both paths should produce identical results
     let content = b"deterministic content for comparison";
