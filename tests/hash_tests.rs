@@ -908,6 +908,32 @@ fn test_fuzzy_flags_accepted_without_error() {
     );
 }
 
+// ---- Task 6: --stdin mode ----
+
+#[test]
+fn test_stdin_mode_cli_flag_exists() {
+    let mut cmd = assert_cmd::Command::cargo_bin("blazehash").unwrap();
+    cmd.args(["--stdin", "-c", "blake3"])
+        .write_stdin(b"hello" as &[u8])
+        .assert()
+        .success();
+}
+
+#[test]
+fn test_stdin_blake3_known_hash() {
+    let output = assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["--stdin", "-c", "blake3", "--format", "hashdeep"])
+        .write_stdin(b"hello" as &[u8])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        stdout.contains("ea8f163db38682925e4491c5e58d4bb3506ef8c14eb78a86e908c5624a67200f"),
+        "expected blake3 hash of 'hello', got: {stdout}"
+    );
+}
+
 // ---- Task 5: --min-size / --max-size walk filters ----
 
 #[test]
