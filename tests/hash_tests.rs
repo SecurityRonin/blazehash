@@ -636,6 +636,72 @@ fn test_hash_file_tlsh_short_file_empty_string() {
 }
 
 #[test]
+fn test_manifest_roundtrip_with_ssdeep() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::FileHashResult;
+    use blazehash::manifest::{write_header, write_record, parse_header, parse_records};
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+
+    let algorithms = vec![Algorithm::Blake3, Algorithm::Ssdeep];
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Blake3, "a".repeat(64));
+    hashes.insert(Algorithm::Ssdeep, "3:abc:de".to_string());
+
+    let result = FileHashResult {
+        path: PathBuf::from("/evidence/file.bin"),
+        size: 1234,
+        hashes,
+    };
+
+    let mut buf = Vec::new();
+    write_header(&mut buf, &algorithms).unwrap();
+    write_record(&mut buf, &result, &algorithms).unwrap();
+    let content = String::from_utf8(buf).unwrap();
+
+    let parsed_algos = parse_header(&content).unwrap();
+    assert_eq!(parsed_algos, algorithms);
+
+    let records = parse_records(&content, &algorithms);
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0].hashes.get(&Algorithm::Ssdeep).unwrap(), "3:abc:de");
+    assert_eq!(records[0].hashes.get(&Algorithm::Blake3).unwrap(), &"a".repeat(64));
+    assert_eq!(records[0].size, 1234);
+}
+
+#[test]
+fn test_manifest_roundtrip_with_tlsh() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::FileHashResult;
+    use blazehash::manifest::{write_header, write_record, parse_header, parse_records};
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+
+    let algorithms = vec![Algorithm::Tlsh];
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Tlsh, "T1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F1A2B3".to_string());
+
+    let result = FileHashResult {
+        path: PathBuf::from("/evidence/sample.bin"),
+        size: 5678,
+        hashes,
+    };
+
+    let mut buf = Vec::new();
+    write_header(&mut buf, &algorithms).unwrap();
+    write_record(&mut buf, &result, &algorithms).unwrap();
+    let content = String::from_utf8(buf).unwrap();
+
+    let parsed_algos = parse_header(&content).unwrap();
+    assert_eq!(parsed_algos, algorithms);
+
+    let records = parse_records(&content, &algorithms);
+    assert_eq!(records.len(), 1);
+    let tlsh_val = records[0].hashes.get(&Algorithm::Tlsh).unwrap();
+    assert_eq!(tlsh_val, "T1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F1A2B3");
+}
+
+#[test]
 fn hash_file_streaming_matches_mmap() {
     // Same content hashed via both paths should produce identical results
     let content = b"deterministic content for comparison";
