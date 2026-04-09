@@ -263,9 +263,16 @@ fn test_fuzzy_audit_output_contains_tilde_indicator() {
     use std::io::Write;
     use tempfile::NamedTempFile;
 
-    // Create original file
+    // Create original file with pseudo-random non-repetitive data
+    // (ssdeep requires non-repetitive data to produce meaningful similarity scores)
     let mut orig = NamedTempFile::new().unwrap();
-    let data = b"The quick brown fox jumps over the lazy dog. ".repeat(100);
+    let data: Vec<u8> = (0u32..10000)
+        .map(|i| {
+            // LCG pseudo-random to avoid repetitive patterns ssdeep can't handle
+            let x = i.wrapping_mul(1664525).wrapping_add(1013904223);
+            (x ^ (x >> 16)) as u8
+        })
+        .collect();
     orig.write_all(&data).unwrap();
     orig.flush().unwrap();
 
@@ -286,10 +293,10 @@ fn test_fuzzy_audit_output_contains_tilde_indicator() {
     manifest_file.write_all(manifest_content.as_bytes()).unwrap();
     manifest_file.flush().unwrap();
 
-    // Create a slightly modified file (1 byte changed) — should fuzzy-match
+    // Create a slightly modified file (1 byte changed in the middle) — should fuzzy-match
     let mut modified = NamedTempFile::new().unwrap();
-    let mut mod_data = data.to_vec();
-    mod_data[0] = b'X';
+    let mut mod_data = data.clone();
+    mod_data[5000] = mod_data[5000].wrapping_add(1);
     modified.write_all(&mod_data).unwrap();
     modified.flush().unwrap();
 

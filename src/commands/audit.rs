@@ -41,6 +41,30 @@ pub fn run(
         writeln!(writer, "  Files moved: {}", result.moved)?;
         writeln!(writer, "  Files missing: {}", result.missing)?;
         writeln!(writer, "  Files fuzzy matched: {}", result.fuzzy_matched)?;
+
+        // Print per-file details
+        for status in &result.details {
+            match status {
+                blazehash::audit::AuditStatus::Matched(_) => {
+                    // Matched: don't print (too noisy for large audits)
+                }
+                blazehash::audit::AuditStatus::Changed(p) => {
+                    writeln!(writer, "[!] {} CHANGED", p.display())?;
+                }
+                blazehash::audit::AuditStatus::New(p) => {
+                    writeln!(writer, "[!] {} NEW", p.display())?;
+                }
+                blazehash::audit::AuditStatus::Moved { path, original } => {
+                    writeln!(writer, "[*] {} MOVED from {}", path.display(), original.display())?;
+                }
+                blazehash::audit::AuditStatus::Missing(p) => {
+                    writeln!(writer, "[-] {} MISSING", p.display())?;
+                }
+                blazehash::audit::AuditStatus::FuzzyMatch { path, original, similarity } => {
+                    writeln!(writer, "[~] {} FUZZY MATCH sim={}% <- {}", path.display(), similarity, original.display())?;
+                }
+            }
+        }
     }
 
     writer.flush()?;
