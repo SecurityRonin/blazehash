@@ -275,6 +275,8 @@ fn test_shake256_known_vector() {
 fn test_shake128_not_fuzzy_not_non_crypto() {
     assert!(!Algorithm::Shake128.is_fuzzy());
     assert!(!Algorithm::Shake128.is_non_cryptographic());
+    assert!(!Algorithm::Shake256.is_fuzzy());
+    assert!(!Algorithm::Shake256.is_non_cryptographic());
 }
 
 #[test]

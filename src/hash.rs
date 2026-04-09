@@ -253,7 +253,7 @@ pub fn hash_file(
         .filter(|a| a.is_fuzzy())
         .copied()
         .collect();
-    let non_crypto_algorithms: Vec<Algorithm> = algorithms
+    let full_read_algorithms: Vec<Algorithm> = algorithms
         .iter()
         .filter(|a| a.needs_full_read())
         .copied()
@@ -313,14 +313,14 @@ pub fn hash_file(
 
     // Full-read pass: crc32c/xxh3 (non-crypto) and shake128/shake256 (XOF) use hash_bytes
     // rather than the streaming DynHasher trait; read full file bytes if needed.
-    if !non_crypto_algorithms.is_empty() {
+    if !full_read_algorithms.is_empty() {
         let data = fs::read(path).with_context(|| {
             format!(
                 "failed to read {} for full-read hashing",
                 path.display()
             )
         })?;
-        for algo in &non_crypto_algorithms {
+        for algo in &full_read_algorithms {
             hashes.insert(*algo, crate::algorithm::hash_bytes(*algo, &data));
         }
     }
