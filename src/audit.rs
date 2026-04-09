@@ -115,7 +115,7 @@ pub fn audit(
                         matches.sort_by(|a, b| b.0.cmp(&a.0));
                         matches.truncate(fuzzy_top);
                         if let Some((sim, orig)) = matches.into_iter().next() {
-                            if best_fuzzy.as_ref().map_or(true, |(s, _)| sim > *s) {
+                            if best_fuzzy.as_ref().is_none_or(|(s, _)| sim > *s) {
                                 best_fuzzy = Some((sim, orig));
                             }
                         }
@@ -143,7 +143,7 @@ pub fn audit(
                             matches.sort_by(|a, b| b.0.cmp(&a.0));
                             matches.truncate(fuzzy_top);
                             if let Some((sim, orig)) = matches.into_iter().next() {
-                                if best_fuzzy.as_ref().map_or(true, |(s, _)| sim > *s) {
+                                if best_fuzzy.as_ref().is_none_or(|(s, _)| sim > *s) {
                                     best_fuzzy = Some((sim, orig));
                                 }
                             }
