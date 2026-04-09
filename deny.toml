@@ -4,7 +4,11 @@ all-features = true
 
 [advisories]
 version = 2
-ignore = []
+ignore = [
+    # paste v1 is unmaintained but is a transitive dep of metal (wgpu-hal, GPU feature).
+    # No action available until wgpu updates its metal dependency.
+    "RUSTSEC-2024-0436",
+]
 
 [licenses]
 version = 2
@@ -19,6 +23,7 @@ allow = [
     "Zlib",
     "CC0-1.0",
     "0BSD",
+    "MPL-2.0",
 ]
 
 [bans]

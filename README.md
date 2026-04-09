@@ -15,7 +15,7 @@ blazehash -r /mnt/evidence -c blake3,sha-256 -o results.hash
 ```
 
 ```
-blazehash v0.2.0 — BLAKE3 + SHA-256, 16 threads, mmap I/O
+blazehash v0.2.2 — BLAKE3 + SHA-256, 16 threads, mmap I/O
 [*] Scanning /mnt/evidence recursively
 [+] 847,293 files hashed (2.14 TiB) in 38.7s
 [+] Throughput: 56.6 GiB/s (BLAKE3) · 4.2 GiB/s (SHA-256)
@@ -161,6 +161,29 @@ blazehash --verify-image image.E01    # verify E01/EWF image integrity
 
 Recomputes the full-media MD5 (and SHA-1 if stored) and compares against hashes embedded in the image. Supports E01, Ex01, L01, and multi-segment EWF images. Powered by the [ewf](https://crates.io/crates/ewf) crate.
 
+### Direct I/O — bypass the OS page cache
+
+```bash
+blazehash -r /mnt/evidence --no-cache
+```
+
+Reads directly from disk without populating the OS page cache. Forensic use case: hashing a live system without disturbing in-memory evidence. Uses `F_NOCACHE` on macOS, `O_DIRECT` on Linux, and `FILE_FLAG_NO_BUFFERING` on Windows.
+
+### GPU-accelerated hashing
+
+When compiled with the `gpu` feature, blazehash automatically offloads SHA-256 and MD5 to the GPU for large files. Thresholds are calibrated per-device:
+
+```bash
+blazehash bench --gpu               # calibrate GPU vs CPU crossover, write config
+blazehash bench --gpu --no-calibrate  # use conservative shipped defaults
+```
+
+Pass `--no-gpu` to force CPU on any run:
+
+```bash
+blazehash -r /mnt/evidence -c sha256 --no-gpu
+```
+
 ### Size-only mode (fast pre-scan)
 
 ```bash
@@ -197,7 +220,7 @@ The `blazehash mcp` command starts an [MCP](https://modelcontextprotocol.io/) se
 | `blazehash_hash` | Hash files/directories with configurable algorithms (default: BLAKE3) |
 | `blazehash_audit` | Audit files against a known manifest — detect changes, moves, missing files |
 | `blazehash_verify_image` | Verify forensic disk image integrity (E01/EWF) |
-| `blazehash_algorithms` | List all 8 supported hash algorithms |
+| `blazehash_algorithms` | List all supported hash algorithms (8 cryptographic + 2 fuzzy) |
 | `blazehash_hash_bytes` | Hash raw inline data (hex or base64 encoded) |
 
 ### Register with Claude Code
@@ -245,6 +268,10 @@ BLAKE3 is the default because it is the fastest cryptographic hash on modern har
 | Multithreaded file walking | Directory traversal and hashing run on a thread pool (defaults to all cores). Large files are parallelized internally by BLAKE3; many small files are parallelized across threads |
 | Streaming architecture | Files are hashed as they stream in. No file is ever fully loaded into memory, regardless of size |
 | Hardware intrinsics | BLAKE3 uses AVX-512/AVX2/SSE4.1 on x86 and NEON on ARM. SHA-256 uses SHA-NI where available |
+| Direct I/O (`--no-cache`) | Bypasses the OS page cache entirely. On macOS: `F_NOCACHE`. On Linux: `O_DIRECT` with aligned buffers. On Windows: `FILE_FLAG_NO_BUFFERING`. Preserves in-memory state on live systems |
+| Transparent huge pages (Linux) | `madvise(MADV_HUGEPAGE)` on mmap regions for files > 2 MiB. Reduces TLB pressure on large file hashing |
+| Windows IOCP async I/O | On Windows, directory walking uses tokio + IOCP (I/O Completion Ports) for concurrent file dispatch. Replaces the synchronous rayon walk, most visible on thousands of small files |
+| GPU acceleration (`gpu` feature) | SHA-256 and MD5 offloaded to GPU via WGSL compute shaders (wgpu). Auto-selected above a calibrated file-size threshold. Run `blazehash bench --gpu` to calibrate for your hardware |
 
 ## Feature Comparison
 

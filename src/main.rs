@@ -52,17 +52,17 @@ fn main() -> Result<()> {
             )?;
         }
         Mode::Hash => {
-            commands::hash::run(
-                &cli.paths,
-                &algorithms,
-                cli.recursive,
-                &cli.format,
-                cli.bare,
-                cli.resume,
-                cli.output.as_ref(),
-                cli.no_cache,
-                cli.no_gpu,
-            )?;
+            commands::hash::run(commands::hash::HashOptions {
+                paths: &cli.paths,
+                algorithms: &algorithms,
+                recursive: cli.recursive,
+                format: &cli.format,
+                bare: cli.bare,
+                resume: cli.resume,
+                output: cli.output.as_ref(),
+                no_cache: cli.no_cache,
+                no_gpu: cli.no_gpu,
+            })?;
         }
     }
 

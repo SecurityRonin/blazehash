@@ -12,22 +12,42 @@ use std::path::PathBuf;
 
 use super::report_walk_errors;
 
-pub fn run(
-    paths: &[PathBuf],
-    algorithms: &[Algorithm],
-    recursive: bool,
-    format: &str,
-    bare: bool,
-    resume: bool,
-    output: Option<&PathBuf>,
-    no_cache: bool,
-    no_gpu: bool,
-) -> Result<()> {
+pub struct HashOptions<'a> {
+    pub paths: &'a [PathBuf],
+    pub algorithms: &'a [Algorithm],
+    pub recursive: bool,
+    pub format: &'a str,
+    pub bare: bool,
+    pub resume: bool,
+    pub output: Option<&'a PathBuf>,
+    pub no_cache: bool,
+    pub no_gpu: bool,
+}
+
+pub fn run(opts: HashOptions<'_>) -> Result<()> {
+    let HashOptions {
+        paths,
+        algorithms,
+        recursive,
+        format,
+        bare,
+        resume,
+        output,
+        no_cache,
+        no_gpu,
+    } = opts;
     let mut resume_state = load_resume_state(resume, output)?;
     let append = resume && output.is_some_and(|p| p.exists());
     let mut writer = make_writer(output.map(|p| p.as_path()), append)?;
 
-    let all_results = collect_results(paths, algorithms, recursive, &mut resume_state, no_cache, no_gpu)?;
+    let all_results = collect_results(
+        paths,
+        algorithms,
+        recursive,
+        &mut resume_state,
+        no_cache,
+        no_gpu,
+    )?;
 
     let needs_header = !(bare || append);
     write_output(&mut writer, &all_results, algorithms, format, needs_header)?;

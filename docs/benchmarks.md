@@ -12,7 +12,7 @@ This page documents measured performance across real forensic workloads, with fu
 | **RAM** | 48 GB LPDDR5X |
 | **OS** | macOS 15.7.5 (arm64) |
 | **Disk** | Internal NVMe SSD |
-| **blazehash** | v0.1.0 (release build, `--release`) |
+| **blazehash** | v0.2.2 (release build, `--release`) |
 | **hashdeep** | v4.4 (`brew install md5deep`) |
 | **Rust** | stable toolchain |
 
