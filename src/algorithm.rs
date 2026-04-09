@@ -17,6 +17,8 @@ pub enum Algorithm {
     Tlsh,
     Crc32c,
     Xxh3,
+    Shake128,
+    Shake256,
 }
 
 impl Algorithm {
@@ -47,6 +49,8 @@ impl Algorithm {
             Algorithm::Tlsh => "tlsh",
             Algorithm::Crc32c => "crc32c",
             Algorithm::Xxh3 => "xxh3",
+            Algorithm::Shake128 => "shake128",
+            Algorithm::Shake256 => "shake256",
         }
     }
 
@@ -56,6 +60,17 @@ impl Algorithm {
 
     pub fn is_non_cryptographic(&self) -> bool {
         matches!(self, Algorithm::Crc32c | Algorithm::Xxh3)
+    }
+
+    /// Returns true for algorithms that require reading the full file into memory
+    /// before hashing — either because they are non-cryptographic (CRC32C, XXH3)
+    /// or because they are XOFs (SHAKE-128, SHAKE-256) that cannot stream via
+    /// the `DynHasher` trait.
+    pub fn needs_full_read(&self) -> bool {
+        matches!(
+            self,
+            Algorithm::Crc32c | Algorithm::Xxh3 | Algorithm::Shake128 | Algorithm::Shake256
+        )
     }
 }
 
@@ -81,6 +96,8 @@ impl FromStr for Algorithm {
             "tlsh" => Ok(Algorithm::Tlsh),
             "crc32c" => Ok(Algorithm::Crc32c),
             "xxh3" => Ok(Algorithm::Xxh3),
+            "shake128" => Ok(Algorithm::Shake128),
+            "shake256" => Ok(Algorithm::Shake256),
             other => anyhow::bail!("unknown algorithm: {other}"),
         }
     }
@@ -106,6 +123,24 @@ pub fn hash_bytes(algo: Algorithm, data: &[u8]) -> String {
             use xxhash_rust::xxh3::xxh3_128;
             let hash = xxh3_128(data);
             format!("{hash:032x}")
+        }
+        Algorithm::Shake128 => {
+            use sha3::digest::{ExtendableOutput, Update, XofReader};
+            let mut h = sha3::Shake128::default();
+            sha3::digest::Update::update(&mut h, data);
+            let mut reader = h.finalize_xof();
+            let mut buf = [0u8; 32];
+            reader.read(&mut buf);
+            hex::encode(buf)
+        }
+        Algorithm::Shake256 => {
+            use sha3::digest::{ExtendableOutput, Update, XofReader};
+            let mut h = sha3::Shake256::default();
+            sha3::digest::Update::update(&mut h, data);
+            let mut reader = h.finalize_xof();
+            let mut buf = [0u8; 64];
+            reader.read(&mut buf);
+            hex::encode(buf)
         }
     }
 }

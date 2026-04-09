@@ -255,12 +255,12 @@ pub fn hash_file(
         .collect();
     let non_crypto_algorithms: Vec<Algorithm> = algorithms
         .iter()
-        .filter(|a| a.is_non_cryptographic())
+        .filter(|a| a.needs_full_read())
         .copied()
         .collect();
     let crypto_algorithms: Vec<Algorithm> = algorithms
         .iter()
-        .filter(|a| !a.is_fuzzy() && !a.is_non_cryptographic())
+        .filter(|a| !a.is_fuzzy() && !a.needs_full_read())
         .copied()
         .collect();
     let algorithms = &crypto_algorithms; // shadow: rest of function uses crypto-only slice
@@ -311,11 +311,12 @@ pub fn hash_file(
         hashes.extend(fuzzy_hashes);
     }
 
-    // Non-cryptographic pass: crc32c/xxh3 use hash_bytes (not make_hasher); read file if needed.
+    // Full-read pass: crc32c/xxh3 (non-crypto) and shake128/shake256 (XOF) use hash_bytes
+    // rather than the streaming DynHasher trait; read full file bytes if needed.
     if !non_crypto_algorithms.is_empty() {
         let data = fs::read(path).with_context(|| {
             format!(
-                "failed to read {} for non-cryptographic hashing",
+                "failed to read {} for full-read hashing",
                 path.display()
             )
         })?;
@@ -528,6 +529,9 @@ fn make_hasher(algo: Algorithm) -> Box<dyn DynHasher> {
         }
         Algorithm::Crc32c | Algorithm::Xxh3 => {
             panic!("non-cryptographic algorithms (crc32c/xxh3) cannot be used via make_hasher; use algorithm::hash_bytes instead")
+        }
+        Algorithm::Shake128 | Algorithm::Shake256 => {
+            panic!("XOF algorithms (shake128/shake256) cannot be used via make_hasher; use algorithm::hash_bytes instead")
         }
     }
 }
