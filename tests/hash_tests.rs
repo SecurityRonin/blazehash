@@ -338,6 +338,51 @@ fn test_windows_iocp_walk_100_files() {
     assert_eq!(lines.len(), 100, "must hash all 100 files");
 }
 
+// --- ssdeep compute tests ---
+
+#[test]
+fn test_ssdeep_known_vector_hello() {
+    let result = blazehash::fuzzy::ssdeep::compute(b"hello");
+    assert!(result.starts_with("3:"), "expected block size 3, got: {result}");
+    let parts: Vec<&str> = result.splitn(3, ':').collect();
+    assert_eq!(parts.len(), 3, "ssdeep output must have 3 colon-separated parts");
+    assert!(parts[0].parse::<u32>().is_ok(), "first part must be numeric block size");
+}
+
+#[test]
+fn test_ssdeep_known_vector_1024_zeros() {
+    let data = vec![0u8; 1024];
+    let result = blazehash::fuzzy::ssdeep::compute(&data);
+    let parts: Vec<&str> = result.splitn(3, ':').collect();
+    assert_eq!(parts.len(), 3);
+    let bs: u32 = parts[0].parse().unwrap();
+    assert!(bs >= 3, "block size must be >= 3");
+    assert!(!parts[1].is_empty(), "hash1 must not be empty for 1024 bytes");
+}
+
+#[test]
+fn test_ssdeep_output_is_base64_chars_only() {
+    let data = b"The quick brown fox jumps over the lazy dog";
+    let result = blazehash::fuzzy::ssdeep::compute(data);
+    let parts: Vec<&str> = result.splitn(3, ':').collect();
+    assert_eq!(parts.len(), 3);
+    let valid = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    for c in parts[1].chars() {
+        assert!(valid.contains(c), "hash1 contains non-base64 char: {c}");
+    }
+    for c in parts[2].chars() {
+        assert!(valid.contains(c), "hash2 contains non-base64 char: {c}");
+    }
+}
+
+#[test]
+fn test_ssdeep_deterministic() {
+    let data = b"blazehash fuzzy hashing test determinism";
+    let h1 = blazehash::fuzzy::ssdeep::compute(data);
+    let h2 = blazehash::fuzzy::ssdeep::compute(data);
+    assert_eq!(h1, h2, "ssdeep must be deterministic");
+}
+
 // ---- Task 14: --no-gpu flag ----
 
 #[test]
