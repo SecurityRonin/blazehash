@@ -6,6 +6,7 @@ use blazehash::manifest::{write_header, write_record};
 use blazehash::output::make_writer;
 use blazehash::resume::ResumeState;
 use blazehash::walk::walk_and_hash;
+use blazehash::walk_filter::WalkFilter;
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
@@ -90,7 +91,7 @@ fn collect_results(
             resume_state.mark_done(path.clone());
             all_results.push(result);
         } else if path.is_dir() {
-            let output = walk_and_hash(path, algorithms, recursive)?;
+            let output = walk_and_hash(path, algorithms, recursive, &WalkFilter::default())?;
             report_walk_errors(&output.errors);
             for r in output.results {
                 if resume_state.is_done(&r.path) {

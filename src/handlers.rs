@@ -8,6 +8,7 @@ pub fn handle_hash(
     use blazehash::algorithm::Algorithm;
     use blazehash::hash::hash_file;
     use blazehash::walk::walk_and_hash;
+    use blazehash::walk_filter::WalkFilter;
     use std::path::Path;
     use std::str::FromStr;
 
@@ -26,7 +27,7 @@ pub fn handle_hash(
     for path_str in paths {
         let path = Path::new(path_str);
         if path.is_dir() {
-            match walk_and_hash(path, &algos, recursive) {
+            match walk_and_hash(path, &algos, recursive, &WalkFilter::default()) {
                 Ok(output) => {
                     for r in output.results {
                         let hashes: serde_json::Map<String, Value> = r
@@ -130,7 +131,11 @@ pub fn handle_audit(
             AuditStatus::Missing(p) => {
                 json!({"status": "missing", "path": p.display().to_string()})
             }
-            AuditStatus::FuzzyMatch { path, original, similarity } => json!({
+            AuditStatus::FuzzyMatch {
+                path,
+                original,
+                similarity,
+            } => json!({
                 "status": "fuzzy_match",
                 "path": path.display().to_string(),
                 "original": original.display().to_string(),

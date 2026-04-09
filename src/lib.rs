@@ -1,8 +1,8 @@
 pub mod algorithm;
 pub mod audit;
-pub mod fuzzy;
 pub mod forensic_image;
 pub mod format;
+pub mod fuzzy;
 #[cfg(feature = "gpu")]
 pub mod gpu;
 pub mod hash;
@@ -11,5 +11,6 @@ pub mod output;
 pub mod piecewise;
 pub mod resume;
 pub mod walk;
+pub mod walk_filter;
 #[cfg(target_os = "windows")]
 pub mod walk_windows;

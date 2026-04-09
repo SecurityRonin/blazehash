@@ -1,5 +1,6 @@
 use crate::algorithm::Algorithm;
 use crate::hash::{hash_file, FileHashResult};
+use crate::walk_filter::WalkFilter;
 use anyhow::Result;
 use rayon::prelude::*;
 use std::path::{Path, PathBuf};
@@ -53,16 +54,36 @@ pub fn walk_paths(root: &Path, recursive: bool) -> (Vec<PathBuf>, Vec<WalkError>
 
 /// Walk a directory, hash all files, return results and errors.
 /// On Windows, uses tokio IOCP for async I/O. On Linux/macOS, uses rayon.
-pub fn walk_and_hash(root: &Path, algorithms: &[Algorithm], recursive: bool) -> Result<WalkOutput> {
+pub fn walk_and_hash(
+    root: &Path,
+    algorithms: &[Algorithm],
+    recursive: bool,
+    filter: &WalkFilter,
+) -> Result<WalkOutput> {
     #[cfg(target_os = "windows")]
     {
-        return crate::walk_windows::walk_and_hash_windows(root, algorithms, recursive);
+        return crate::walk_windows::walk_and_hash_windows(root, algorithms, recursive, filter);
     }
 
     let (paths, walk_errors) = walk_paths(root, recursive);
 
+    // Apply filter to paths before hashing.
+    let filtered: Vec<PathBuf> = paths
+        .into_iter()
+        .filter(|path| {
+            let filename = path
+                .file_name()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .into_owned();
+            let size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+            let mtime = std::fs::metadata(path).ok().and_then(|m| m.modified().ok());
+            filter.passes(&filename, size, mtime)
+        })
+        .collect();
+
     let hash_errors = Mutex::new(Vec::new());
-    let results: Vec<FileHashResult> = paths
+    let results: Vec<FileHashResult> = filtered
         .par_iter()
         .filter_map(|path| match hash_file(path, algorithms, false, false) {
             Ok(result) => Some(result),

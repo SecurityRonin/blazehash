@@ -8,6 +8,7 @@
 use crate::algorithm::Algorithm;
 use crate::hash::hash_file;
 use crate::walk::{WalkError, WalkOutput};
+use crate::walk_filter::WalkFilter;
 use anyhow::Result;
 use std::path::Path;
 use std::sync::Arc;
@@ -20,18 +21,20 @@ pub fn walk_and_hash_windows(
     root: &Path,
     algorithms: &[Algorithm],
     recursive: bool,
+    filter: &WalkFilter,
 ) -> Result<WalkOutput> {
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()?;
 
-    rt.block_on(walk_async(root, algorithms, recursive))
+    rt.block_on(walk_async(root, algorithms, recursive, filter))
 }
 
 async fn walk_async(
     root: &Path,
     algorithms: &[Algorithm],
     recursive: bool,
+    filter: &WalkFilter,
 ) -> Result<WalkOutput> {
     let sem = Arc::new(Semaphore::new(MAX_CONCURRENT));
     let algorithms = Arc::new(algorithms.to_vec());
@@ -48,6 +51,19 @@ async fn walk_async(
             continue;
         }
         let path = entry.into_path();
+
+        // Apply filter before spawning a hash task.
+        let filename = path
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .into_owned();
+        let meta = std::fs::metadata(&path);
+        let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
+        let mtime = meta.ok().and_then(|m| m.modified().ok());
+        if !filter.passes(&filename, size, mtime) {
+            continue;
+        }
         let sem = Arc::clone(&sem);
         let algos = Arc::clone(&algorithms);
 
@@ -57,9 +73,7 @@ async fn walk_async(
             tokio::task::spawn_blocking(move || hash_file(&path, &algos, false, false))
                 .await
                 .map_err(|e| (path_for_error.clone(), format!("spawn_blocking panic: {e}")))
-                .and_then(|inner| {
-                    inner.map_err(|e| (path_for_error.clone(), e.to_string()))
-                })
+                .and_then(|inner| inner.map_err(|e| (path_for_error.clone(), e.to_string())))
         });
     }
 
