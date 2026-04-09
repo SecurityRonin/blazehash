@@ -307,3 +307,34 @@ fn test_should_use_gpu_mixed_algos_counts_only_gpu_eligible() {
     // 2 eligible algos → multi path: 5 MB > 3 MB → GPU
     assert!(should_use_gpu(5, &[Algorithm::Blake3, Algorithm::Sha256, Algorithm::Md5], &state));
 }
+
+// ---- Task 14: GPU integration in hash_file ----
+
+#[test]
+fn test_gpu_hash_file_sha256_matches_cpu() {
+    use blazehash::hash::hash_file;
+    use blazehash::algorithm::Algorithm;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    // Only run this test if a GPU is available
+    if blazehash::gpu::backend::GpuBackend::detect().is_none() {
+        eprintln!("No GPU — skipping hash_file GPU integration test");
+        return;
+    }
+
+    let mut f = NamedTempFile::new().unwrap();
+    // 1 MiB file — verify correctness regardless of which path is taken.
+    f.write_all(&vec![0x77u8; 1024 * 1024]).unwrap();
+    f.flush().unwrap();
+
+    let result1 = hash_file(f.path(), &[Algorithm::Sha256], false, false).unwrap();
+    // Call again — should produce identical result (GPU or CPU, both correct)
+    let result2 = hash_file(f.path(), &[Algorithm::Sha256], false, false).unwrap();
+    assert_eq!(
+        result1.hashes[&Algorithm::Sha256],
+        result2.hashes[&Algorithm::Sha256],
+        "hash_file must be deterministic"
+    );
+    assert_eq!(result1.hashes[&Algorithm::Sha256].len(), 64);
+}

@@ -337,6 +337,46 @@ fn test_windows_iocp_walk_100_files() {
     assert_eq!(lines.len(), 100, "must hash all 100 files");
 }
 
+// ---- Task 14: --no-gpu flag ----
+
+#[test]
+fn test_no_gpu_flag_produces_same_hash_as_default() {
+    use assert_cmd::Command;
+    use tempfile::NamedTempFile;
+
+    let mut f = NamedTempFile::new().unwrap();
+    std::io::Write::write_all(&mut f, &vec![0x55u8; 4096]).unwrap();
+    f.flush().unwrap();
+
+    let out_default = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["-c", "sha256", f.path().to_str().unwrap()])
+        .output()
+        .unwrap();
+
+    let out_no_gpu = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["-c", "sha256", "--no-gpu", f.path().to_str().unwrap()])
+        .output()
+        .unwrap();
+
+    assert!(out_default.status.success());
+    assert!(out_no_gpu.status.success());
+
+    let default_line = String::from_utf8_lossy(&out_default.stdout)
+        .lines()
+        .find(|l| !l.starts_with('%') && !l.is_empty())
+        .unwrap()
+        .to_string();
+    let no_gpu_line = String::from_utf8_lossy(&out_no_gpu.stdout)
+        .lines()
+        .find(|l| !l.starts_with('%') && !l.is_empty())
+        .unwrap()
+        .to_string();
+
+    assert_eq!(default_line, no_gpu_line, "--no-gpu must produce identical hashes");
+}
+
 #[test]
 fn hash_file_streaming_matches_mmap() {
     // Same content hashed via both paths should produce identical results
