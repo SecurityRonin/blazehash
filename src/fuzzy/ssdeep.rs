@@ -90,3 +90,95 @@ fn compute_with_bs(data: &[u8], bs: u32) -> (String, String) {
 pub fn block_size(hash: &str) -> Option<u32> {
     hash.split(':').next()?.parse().ok()
 }
+
+/// Edit distance (Levenshtein) between two byte slices, capped at `cap`.
+fn edit_distance(a: &[u8], b: &[u8], cap: usize) -> usize {
+    if a == b { return 0; }
+    let n = a.len();
+    let m = b.len();
+    if n == 0 { return m.min(cap); }
+    if m == 0 { return n.min(cap); }
+
+    let mut prev: Vec<usize> = (0..=m).collect();
+    let mut curr = vec![0usize; m + 1];
+
+    for i in 1..=n {
+        curr[0] = i;
+        for j in 1..=m {
+            curr[j] = if a[i - 1] == b[j - 1] {
+                prev[j - 1]
+            } else {
+                1 + prev[j - 1].min(prev[j]).min(curr[j - 1])
+            };
+        }
+        std::mem::swap(&mut prev, &mut curr);
+        if *prev.iter().min().unwrap() >= cap {
+            return cap;
+        }
+    }
+    prev[m].min(cap)
+}
+
+/// Compute similarity (0-100) between two ssdeep hash strings.
+/// Returns 0 for incompatible block sizes or malformed input.
+pub fn similarity(h1: &str, h2: &str) -> u32 {
+    let p1: Vec<&str> = h1.splitn(3, ':').collect();
+    let p2: Vec<&str> = h2.splitn(3, ':').collect();
+    if p1.len() < 3 || p2.len() < 3 { return 0; }
+
+    let bs1: u32 = match p1[0].parse() { Ok(v) => v, Err(_) => return 0 };
+    let bs2: u32 = match p2[0].parse() { Ok(v) => v, Err(_) => return 0 };
+
+    if bs1 == bs2 {
+        score_pair(p1[1].as_bytes(), p2[1].as_bytes())
+            .max(score_pair(p1[2].as_bytes(), p2[2].as_bytes()))
+    } else if bs1 == bs2 * 2 {
+        score_pair(p1[1].as_bytes(), p2[2].as_bytes())
+    } else if bs2 == bs1 * 2 {
+        score_pair(p1[2].as_bytes(), p2[1].as_bytes())
+    } else {
+        0
+    }
+}
+
+fn score_pair(a: &[u8], b: &[u8]) -> u32 {
+    if a.is_empty() || b.is_empty() { return 0; }
+    let len = a.len().max(b.len());
+    let dist = edit_distance(a, b, len);
+    100u32.saturating_sub((dist * 100 / len) as u32)
+}
+
+use std::collections::HashMap;
+use std::path::PathBuf;
+
+/// Index of ssdeep hashes by block size for fast candidate lookup.
+/// Only manifest entries with same/adjacent block sizes can match (CTPH property).
+pub struct SsdeepIndex {
+    inner: HashMap<u32, Vec<(String, PathBuf)>>,
+}
+
+impl SsdeepIndex {
+    pub fn new() -> Self {
+        Self { inner: HashMap::new() }
+    }
+
+    /// Insert a ssdeep hash string and its associated path.
+    pub fn insert(&mut self, hash: &str, path: PathBuf) {
+        if let Some(bs) = block_size(hash) {
+            self.inner.entry(bs).or_default().push((hash.to_string(), path));
+        }
+    }
+
+    /// Return all candidates compatible with `query_hash` (same bs, or ×2, or ÷2).
+    pub fn candidates(&self, query_hash: &str) -> Vec<&(String, PathBuf)> {
+        let Some(bs) = block_size(query_hash) else { return vec![] };
+        let mut results = Vec::new();
+        for candidate_bs in [bs / 2, bs, bs * 2] {
+            if candidate_bs == 0 { continue; }
+            if let Some(entries) = self.inner.get(&candidate_bs) {
+                results.extend(entries.iter());
+            }
+        }
+        results
+    }
+}
