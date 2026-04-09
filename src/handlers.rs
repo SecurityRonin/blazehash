@@ -109,7 +109,7 @@ pub fn handle_audit(
         }
     }
 
-    let result = audit(&file_paths, &manifest).map_err(|e| e.to_string())?;
+    let result = audit(&file_paths, &manifest, 50, 5).map_err(|e| e.to_string())?;
 
     let details: Vec<Value> = result
         .details
@@ -130,6 +130,12 @@ pub fn handle_audit(
             AuditStatus::Missing(p) => {
                 json!({"status": "missing", "path": p.display().to_string()})
             }
+            AuditStatus::FuzzyMatch { path, original, similarity } => json!({
+                "status": "fuzzy_match",
+                "path": path.display().to_string(),
+                "original": original.display().to_string(),
+                "similarity": similarity
+            }),
         })
         .collect();
 
@@ -139,6 +145,7 @@ pub fn handle_audit(
         "new_files": result.new_files,
         "moved": result.moved,
         "missing": result.missing,
+        "fuzzy_matched": result.fuzzy_matched,
         "details": details
     }))
 }

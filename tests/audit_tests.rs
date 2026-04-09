@@ -3,7 +3,6 @@ use blazehash::audit::audit;
 use blazehash::hash::hash_file;
 use blazehash::manifest::{write_header, write_record};
 use std::fs;
-use std::io::Write;
 use tempfile::TempDir;
 
 fn make_known_file(dir: &TempDir) -> String {
@@ -26,7 +25,7 @@ fn audit_all_matched() {
     let dir = TempDir::new().unwrap();
     let known = make_known_file(&dir);
 
-    let result = audit(&[dir.path().join("test.txt")], &known).unwrap();
+    let result = audit(&[dir.path().join("test.txt")], &known, 50, 5).unwrap();
 
     assert_eq!(result.matched, 1);
     assert_eq!(result.new_files, 0);
@@ -40,7 +39,7 @@ fn audit_detects_changed_file() {
 
     fs::write(dir.path().join("test.txt"), b"modified content").unwrap();
 
-    let result = audit(&[dir.path().join("test.txt")], &known).unwrap();
+    let result = audit(&[dir.path().join("test.txt")], &known, 50, 5).unwrap();
 
     assert_eq!(result.matched, 0);
     assert_eq!(result.changed, 1);
@@ -56,6 +55,8 @@ fn audit_detects_new_file() {
     let result = audit(
         &[dir.path().join("test.txt"), dir.path().join("new.txt")],
         &known,
+        50,
+        5,
     )
     .unwrap();
 
@@ -72,7 +73,7 @@ fn audit_detects_missing_file() {
     fs::remove_file(dir.path().join("test.txt")).unwrap();
 
     // Audit with empty paths list — the known file is missing
-    let result = audit(&[], &known).unwrap();
+    let result = audit(&[], &known, 50, 5).unwrap();
 
     assert_eq!(result.missing, 1);
 }
@@ -93,7 +94,7 @@ fn audit_skips_malformed_manifest_lines() {
         file.display()
     );
 
-    let result = audit(&[file], &known).unwrap();
+    let result = audit(&[file], &known, 50, 5).unwrap();
     assert_eq!(
         result.matched, 1,
         "should match the valid entry and skip the malformed one"
@@ -123,7 +124,7 @@ fn audit_moved_checks_all_algorithms() {
     let moved_file = dir.path().join("moved.txt");
     fs::rename(&file, &moved_file).unwrap();
 
-    let result = audit(&[moved_file], &known).unwrap();
+    let result = audit(&[moved_file], &known, 50, 5).unwrap();
 
     assert_eq!(result.moved, 1);
 }
@@ -145,7 +146,7 @@ fn audit_all_new_files() {
     let new_file = dir.path().join("new.txt");
     fs::write(&new_file, b"brand new content").unwrap();
 
-    let result = audit(&[new_file], &known).unwrap();
+    let result = audit(&[new_file], &known, 50, 5).unwrap();
     assert_eq!(result.new_files, 1);
     assert_eq!(result.matched, 0);
     assert_eq!(result.missing, 1); // original.txt is missing
@@ -156,7 +157,7 @@ fn audit_empty_paths_list() {
     let dir = TempDir::new().unwrap();
     let known = make_known_file(&dir);
 
-    let result = audit(&[], &known).unwrap();
+    let result = audit(&[], &known, 50, 5).unwrap();
     assert_eq!(result.matched, 0);
     assert_eq!(result.missing, 1);
 }
@@ -177,7 +178,7 @@ fn audit_changed_size_same_content_impossible_but_handled() {
         file.display()
     );
 
-    let result = audit(&[file], &known).unwrap();
+    let result = audit(&[file], &known, 50, 5).unwrap();
     // Size mismatch means "changed"
     assert_eq!(result.changed, 1);
 }
@@ -191,7 +192,7 @@ fn audit_details_contains_correct_statuses() {
     fs::write(&file, b"hello world").unwrap();
     let known = make_known_file(&dir);
 
-    let result = audit(&[file.clone()], &known).unwrap();
+    let result = audit(&[file.clone()], &known, 50, 5).unwrap();
     assert_eq!(result.details.len(), 1);
     match &result.details[0] {
         AuditStatus::Matched(p) => assert_eq!(p, &file),
@@ -218,7 +219,7 @@ fn audit_moved_detection_with_single_algorithm() {
     let moved = dir.path().join("moved.txt");
     fs::rename(&original, &moved).unwrap();
 
-    let result = audit(&[moved], &known).unwrap();
+    let result = audit(&[moved], &known, 50, 5).unwrap();
     assert_eq!(result.moved, 1);
 }
 
@@ -232,7 +233,7 @@ fn audit_details_new_file_variant() {
     let new_file = dir.path().join("brand_new.txt");
     fs::write(&new_file, b"new").unwrap();
 
-    let result = audit(&[new_file.clone()], known).unwrap();
+    let result = audit(&[new_file.clone()], known, 50, 5).unwrap();
     assert!(result
         .details
         .iter()
@@ -247,7 +248,7 @@ fn audit_details_missing_variant() {
     let known = make_known_file(&dir);
     fs::remove_file(dir.path().join("test.txt")).unwrap();
 
-    let result = audit(&[], &known).unwrap();
+    let result = audit(&[], &known, 50, 5).unwrap();
     assert!(result
         .details
         .iter()

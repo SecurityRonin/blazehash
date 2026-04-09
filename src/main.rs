@@ -29,7 +29,14 @@ fn main() -> Result<()> {
             commands::size_only::run(&cli.paths, cli.recursive, cli.output.as_ref())?;
         }
         Mode::Audit => {
-            commands::audit::run(&cli.paths, &cli.known, cli.recursive, cli.output.as_ref())?;
+            commands::audit::run(
+                &cli.paths,
+                &cli.known,
+                cli.recursive,
+                cli.output.as_ref(),
+                cli.fuzzy_threshold,
+                cli.fuzzy_top,
+            )?;
         }
         Mode::VerifyImage => {
             commands::verify_image::run(&cli.paths, cli.output.as_ref())?;

@@ -1,3 +1,4 @@
+use crate::algorithm::Algorithm;
 use crate::hash::hash_file;
 use crate::manifest::{parse_header, parse_records, ManifestRecord};
 use anyhow::{Context, Result};
@@ -11,6 +12,7 @@ pub struct AuditResult {
     pub new_files: usize,
     pub moved: usize,
     pub missing: usize,
+    pub fuzzy_matched: usize,
     pub details: Vec<AuditStatus>,
 }
 
@@ -21,9 +23,15 @@ pub enum AuditStatus {
     New(PathBuf),
     Moved { path: PathBuf, original: PathBuf },
     Missing(PathBuf),
+    FuzzyMatch { path: PathBuf, original: PathBuf, similarity: u32 },
 }
 
-pub fn audit(paths: &[PathBuf], known_content: &str) -> Result<AuditResult> {
+pub fn audit(
+    paths: &[PathBuf],
+    known_content: &str,
+    fuzzy_threshold: u32,
+    fuzzy_top: usize,
+) -> Result<AuditResult> {
     let known_algos = parse_header(known_content)?;
     let known_entries = parse_records(known_content, &known_algos);
 
@@ -75,8 +83,85 @@ pub fn audit(paths: &[PathBuf], known_content: &str) -> Result<AuditResult> {
             }
 
             if !found_move {
-                result.new_files += 1;
-                result.details.push(AuditStatus::New(path.clone()));
+                // Try fuzzy matching if fuzzy algorithms are in the manifest
+                let fuzzy_algos: Vec<Algorithm> = known_algos
+                    .iter()
+                    .filter(|a| a.is_fuzzy())
+                    .copied()
+                    .collect();
+
+                let mut best_fuzzy: Option<(u32, PathBuf)> = None;
+
+                if fuzzy_algos.contains(&Algorithm::Ssdeep) {
+                    if let Some(query_hash) = file_result.hashes.get(&Algorithm::Ssdeep) {
+                        let mut idx = crate::fuzzy::ssdeep::SsdeepIndex::new();
+                        for entry in &known_entries {
+                            if let Some(h) = entry.hashes.get(&Algorithm::Ssdeep) {
+                                idx.insert(h, entry.path.clone());
+                            }
+                        }
+                        let candidates = idx.candidates(query_hash);
+                        let mut matches: Vec<(u32, PathBuf)> = candidates
+                            .iter()
+                            .filter_map(|(h, p)| {
+                                let sim = crate::fuzzy::ssdeep::similarity(query_hash, h);
+                                if sim >= fuzzy_threshold {
+                                    Some((sim, p.clone()))
+                                } else {
+                                    None
+                                }
+                            })
+                            .collect();
+                        matches.sort_by(|a, b| b.0.cmp(&a.0));
+                        matches.truncate(fuzzy_top);
+                        if let Some((sim, orig)) = matches.into_iter().next() {
+                            if best_fuzzy.as_ref().map_or(true, |(s, _)| sim > *s) {
+                                best_fuzzy = Some((sim, orig));
+                            }
+                        }
+                    }
+                }
+
+                if fuzzy_algos.contains(&Algorithm::Tlsh) {
+                    if let Some(query_hash) = file_result.hashes.get(&Algorithm::Tlsh) {
+                        if !query_hash.is_empty() {
+                            let mut matches: Vec<(u32, PathBuf)> = known_entries
+                                .iter()
+                                .filter_map(|entry| {
+                                    let h = entry.hashes.get(&Algorithm::Tlsh)?;
+                                    if h.is_empty() {
+                                        return None;
+                                    }
+                                    let sim = crate::fuzzy::tlsh::similarity(query_hash, h);
+                                    if sim >= fuzzy_threshold {
+                                        Some((sim, entry.path.clone()))
+                                    } else {
+                                        None
+                                    }
+                                })
+                                .collect();
+                            matches.sort_by(|a, b| b.0.cmp(&a.0));
+                            matches.truncate(fuzzy_top);
+                            if let Some((sim, orig)) = matches.into_iter().next() {
+                                if best_fuzzy.as_ref().map_or(true, |(s, _)| sim > *s) {
+                                    best_fuzzy = Some((sim, orig));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if let Some((sim, orig)) = best_fuzzy {
+                    result.fuzzy_matched += 1;
+                    result.details.push(AuditStatus::FuzzyMatch {
+                        path: path.clone(),
+                        original: orig,
+                        similarity: sim,
+                    });
+                } else {
+                    result.new_files += 1;
+                    result.details.push(AuditStatus::New(path.clone()));
+                }
             }
         }
     }

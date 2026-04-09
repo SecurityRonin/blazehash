@@ -13,6 +13,8 @@ pub fn run(
     known: &[PathBuf],
     recursive: bool,
     output: Option<&PathBuf>,
+    fuzzy_threshold: u32,
+    fuzzy_top: usize,
 ) -> Result<()> {
     let mut writer = make_writer(output.map(|p| p.as_path()), false)?;
 
@@ -31,13 +33,14 @@ pub fn run(
             }
         }
 
-        let result = audit::audit(&all_paths, &known_content)?;
+        let result = audit::audit(&all_paths, &known_content, fuzzy_threshold, fuzzy_top)?;
         writeln!(writer, "blazehash audit summary:")?;
         writeln!(writer, "  Files matched: {}", result.matched)?;
         writeln!(writer, "  Files changed: {}", result.changed)?;
         writeln!(writer, "  Files new: {}", result.new_files)?;
         writeln!(writer, "  Files moved: {}", result.moved)?;
         writeln!(writer, "  Files missing: {}", result.missing)?;
+        writeln!(writer, "  Files fuzzy matched: {}", result.fuzzy_matched)?;
     }
 
     writer.flush()?;
