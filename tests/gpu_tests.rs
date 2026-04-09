@@ -143,3 +143,50 @@ fn test_backend_skips_software_renderers() {
         assert!(!name.contains("software"), "software renderer must be skipped");
     }
 }
+
+#[test]
+fn test_gpu_sha256_empty_input() {
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else {
+        eprintln!("No GPU — skipping GPU sha256 test");
+        return;
+    };
+    let hasher = blazehash::gpu::sha256::GpuSha256::new(&backend);
+    let result = hasher.hash(b"");
+    assert_eq!(result, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+}
+
+#[test]
+fn test_gpu_sha256_abc() {
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let hasher = blazehash::gpu::sha256::GpuSha256::new(&backend);
+    let result = hasher.hash(b"abc");
+    assert_eq!(result, "ba7816bf8f01cfea414140de5dae2ec73b00361bbef0469932d6c57ba3bbf64");
+}
+
+#[test]
+fn test_gpu_sha256_matches_cpu_for_various_sizes() {
+    use sha2::{Sha256, Digest};
+
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let hasher = blazehash::gpu::sha256::GpuSha256::new(&backend);
+
+    for size in [0usize, 1, 55, 56, 63, 64, 128, 1023, 4096] {
+        let data: Vec<u8> = (0..size).map(|i| (i % 251) as u8).collect();
+        let gpu_result = hasher.hash(&data);
+        let cpu_result = hex::encode(Sha256::digest(&data));
+        assert_eq!(gpu_result, cpu_result, "mismatch at size={size}");
+    }
+}
+
+#[test]
+fn test_gpu_sha256_large_file_matches_cpu() {
+    use sha2::{Sha256, Digest};
+
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let hasher = blazehash::gpu::sha256::GpuSha256::new(&backend);
+
+    let data = vec![0x42u8; 1024 * 1024]; // 1 MiB
+    let gpu_result = hasher.hash(&data);
+    let cpu_result = hex::encode(Sha256::digest(&data));
+    assert_eq!(gpu_result, cpu_result);
+}
