@@ -157,6 +157,12 @@ pub struct SsdeepIndex {
     inner: HashMap<u32, Vec<(String, PathBuf)>>,
 }
 
+impl Default for SsdeepIndex {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SsdeepIndex {
     pub fn new() -> Self {
         Self { inner: HashMap::new() }
