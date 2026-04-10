@@ -28,12 +28,28 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Dedup = cli.mode() {
+        let algorithms = cli.flat_algorithms();
+        let has_dupes = commands::dedup::run(
+            &cli.paths,
+            &algorithms,
+            cli.recursive,
+            cli.dedup_unique,
+            cli.dedup_dupes,
+        )?;
+        if has_dupes {
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
     let algorithms = cli.flat_algorithms();
 
     match cli.mode() {
         Mode::Mcp => unreachable!(),
         Mode::Bench => unreachable!(),
         Mode::Diff => unreachable!(),
+        Mode::Dedup => unreachable!(),
         Mode::SizeOnly => {
             commands::size_only::run(&cli.paths, cli.recursive, cli.output.as_ref())?;
         }

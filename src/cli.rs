@@ -112,6 +112,14 @@ pub struct Cli {
     /// Hash NTFS Alternate Data Streams alongside main file content (Windows only, no-op elsewhere)
     #[arg(long = "ads")]
     pub ads: bool,
+
+    /// Print one representative per duplicate group
+    #[arg(long = "dedup-unique")]
+    pub dedup_unique: bool,
+
+    /// Print only files that have duplicates
+    #[arg(long = "dedup-dupes")]
+    pub dedup_dupes: bool,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -154,6 +162,7 @@ pub enum Mode {
     Mcp,
     Bench,
     Diff,
+    Dedup,
     SizeOnly,
     Audit,
     VerifyImage,
@@ -199,6 +208,8 @@ impl Cli {
             Mode::Bench
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("diff")) {
             Mode::Diff
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("dedup")) {
+            Mode::Dedup
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
