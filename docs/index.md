@@ -1,14 +1,8 @@
 # blazehash
 
-[![Crates.io](https://img.shields.io/crates/v/blazehash.svg)](https://crates.io/crates/blazehash)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/SecurityRonin/blazehash/actions/workflows/ci.yml/badge.svg)](https://github.com/SecurityRonin/blazehash/actions/workflows/ci.yml)
-[![Release](https://github.com/SecurityRonin/blazehash/actions/workflows/release.yml/badge.svg)](https://github.com/SecurityRonin/blazehash/releases)
-[![Sponsor](https://img.shields.io/badge/sponsor-h4x0r-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/h4x0r)
-
 **hashdeep, at 2026 speed.**
 
-BLAKE3 by default. GPU-accelerated. Ed25519 manifest signing. Full hashdeep compatibility. [Up to 3.4x faster](docs/benchmarks.md) than hashdeep — and [~5x faster](docs/benchmarks.md#the-blake3-advantage) when you switch to BLAKE3.
+Forensic file hashing with BLAKE3 by default, GPU acceleration, Ed25519 manifest signing, and full hashdeep compatibility. Point this at a folder. Get a manifest. Sign it. Done.
 
 ```bash
 blazehash -r /mnt/evidence -c blake3,sha256 -o manifest.hash --sign
@@ -23,38 +17,36 @@ blazehash v0.3.0 — BLAKE3 + SHA-256, 16 threads, mmap I/O
 [+] Signature:  manifest.hash.sig
 ```
 
-**[Full documentation](https://securityronin.github.io/blazehash/)**
-
 ---
 
 ## Install
 
-### Debian / Ubuntu / Kali
+=== "Debian / Ubuntu / Kali"
 
-```bash
-curl -1sLf 'https://dl.cloudsmith.io/public/securityronin/blazehash/setup.deb.sh' | sudo bash
-sudo apt install blazehash
-```
+    ```bash
+    curl -1sLf 'https://dl.cloudsmith.io/public/securityronin/blazehash/setup.deb.sh' | sudo bash
+    sudo apt install blazehash
+    ```
 
-### macOS
+=== "macOS"
 
-```bash
-brew tap SecurityRonin/tap && brew install blazehash
-```
+    ```bash
+    brew tap SecurityRonin/tap && brew install blazehash
+    ```
 
-### Windows
+=== "Windows"
 
-```powershell
-winget install SecurityRonin.blazehash
-```
+    ```powershell
+    winget install SecurityRonin.blazehash
+    ```
 
-Or download the `.msi` from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases).
+    Or download the `.msi` from [GitHub Releases](https://github.com/SecurityRonin/blazehash/releases).
 
-### Cargo (all platforms)
+=== "Cargo (all platforms)"
 
-```bash
-cargo install blazehash
-```
+    ```bash
+    cargo install blazehash
+    ```
 
 ---
 
@@ -78,7 +70,7 @@ blazehash -r /path/to/folder -a -k manifest.hash
 blazehash sign manifest.hash
 ```
 
-**[See the full docs](https://securityronin.github.io/blazehash/)** for getting started, CLI reference, real-world recipes, and more.
+[Get started with the full walkthrough.](getting-started.md){ .md-button }
 
 ---
 
@@ -109,32 +101,19 @@ blazehash sign manifest.hash
 
 ## Performance
 
-Benchmarked on Apple M4 Pro (14-core, 48 GB RAM), warm cache. Full methodology: **[docs/benchmarks.md](docs/benchmarks.md)**.
+Benchmarked on Apple M4 Pro (14-core, 48 GB RAM), warm cache. Full methodology: [benchmarks](benchmarks.md).
 
 | Workload | blazehash | hashdeep v4.4 | Speedup |
 |----------|----------:|----------:|--------:|
 | 256 MiB file, SHA-256 | 854 ms | 930 ms | **1.09x** |
-| 256 MiB file, SHA-1 | 275 ms | 572 ms | **2.08x** |
-| 256 MiB file, 5 algos | 3.1 s | 3.5 s | **1.14x** |
 | 1,000 small files, SHA-256 | 20 ms | 69 ms | **3.43x** |
-| Recursive walk (500 files) | 27 ms | 45 ms | **1.68x** |
-| **256 MiB file, BLAKE3** | **187 ms** | *not supported* | **~5x vs hashdeep SHA-256** |
-
-### How it's fast
-
-| Technique | Effect |
-|-----------|--------|
-| BLAKE3 default | Internally parallelizes each file across a Merkle tree of 1 KiB chunks |
-| Memory-mapped I/O | OS pages in file data directly; eliminates one `memcpy` per read |
-| Multithreaded file walking | All cores used; small files parallelized across threads |
-| Hardware intrinsics | AVX-512/AVX2/SSE4.1 on x86; NEON on ARM; SHA-NI for SHA-256 |
-| GPU acceleration | SHA-256 / MD5 via WGSL compute shaders (wgpu); auto-threshold |
+| 256 MiB file, BLAKE3 | 187 ms | *n/a* | **~5x vs hashdeep SHA-256** |
 
 ---
 
 ## Why This Exists
 
-[hashdeep](https://github.com/jessek/hashdeep) — written by [Jesse Kornbluth](https://github.com/jessek) and [Simson Garfinkel](https://simson.net/) — gave the forensic community its canonical file hashing and audit tool. For over a decade, court-tested workflows have depended on it. It's public domain, auditable, and honest.
+[hashdeep](https://github.com/jessek/hashdeep) — written by Jesse Kornbluth and Simson Garfinkel — gave the forensic community its canonical file hashing and audit tool. Court-tested workflows have depended on it for over a decade.
 
 But hashdeep hasn't had a release since v4.4. It doesn't support BLAKE3. It doesn't use multiple cores. It can't sign manifests. It can't filter by NSRL. It can't detect duplicates or diff two sessions.
 
@@ -149,11 +128,3 @@ But hashdeep hasn't had a release since v4.4. It doesn't support BLAKE3. It does
 **Simson Garfinkel** co-authored hashdeep and created [DFXML](https://github.com/simsong/dfxml), the Digital Forensics XML standard.
 
 The [BLAKE3 team](https://github.com/BLAKE3-team/BLAKE3) — Jack O'Connor, Samuel Neves, Jean-Philippe Aumasson, and Zooko Wilcox-O'Hearn — designed the hash function that makes blazehash fast enough to matter.
-
-## Author
-
-**Albert Hui** ([@h4x0r](https://github.com/h4x0r)) · [@SecurityRonin](https://github.com/SecurityRonin)
-
-## License
-
-[MIT License](LICENSE)
