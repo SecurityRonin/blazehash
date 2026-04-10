@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use blazehash::audit;
+use blazehash::manifest_loader::find_manifest;
 use blazehash::output::make_writer;
 use blazehash::walk::walk_paths;
 use std::fs;
@@ -18,7 +19,34 @@ pub fn run(
 ) -> Result<()> {
     let mut writer = make_writer(output.map(|p| p.as_path()), false)?;
 
-    for known_path in known {
+    // If no -k paths provided, auto-locate a manifest by scanning the target paths.
+    let auto_known: Vec<PathBuf>;
+    let effective_known: &[PathBuf] = if known.is_empty() {
+        // Collect search dirs: directories from paths, plus cwd as fallback.
+        let search_dirs: Vec<&std::path::Path> = {
+            let mut dirs: Vec<&std::path::Path> = paths
+                .iter()
+                .filter(|p| p.is_dir())
+                .map(|p| p.as_path())
+                .collect();
+            // Include cwd if no directory paths given
+            if dirs.is_empty() {
+                static CWD_PATH: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
+                let cwd = CWD_PATH.get_or_init(|| {
+                    std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
+                });
+                dirs.push(cwd.as_path());
+            }
+            dirs
+        };
+        let found = find_manifest(&search_dirs)?;
+        auto_known = vec![found];
+        &auto_known
+    } else {
+        known
+    };
+
+    for known_path in effective_known {
         let known_content = fs::read_to_string(known_path)
             .with_context(|| format!("failed to read known file {}", known_path.display()))?;
 
@@ -55,13 +83,28 @@ pub fn run(
                     writeln!(writer, "[!] {} NEW", p.display())?;
                 }
                 blazehash::audit::AuditStatus::Moved { path, original } => {
-                    writeln!(writer, "[*] {} MOVED from {}", path.display(), original.display())?;
+                    writeln!(
+                        writer,
+                        "[*] {} MOVED from {}",
+                        path.display(),
+                        original.display()
+                    )?;
                 }
                 blazehash::audit::AuditStatus::Missing(p) => {
                     writeln!(writer, "[-] {} MISSING", p.display())?;
                 }
-                blazehash::audit::AuditStatus::FuzzyMatch { path, original, similarity } => {
-                    writeln!(writer, "[~] {} FUZZY MATCH sim={}% <- {}", path.display(), similarity, original.display())?;
+                blazehash::audit::AuditStatus::FuzzyMatch {
+                    path,
+                    original,
+                    similarity,
+                } => {
+                    writeln!(
+                        writer,
+                        "[~] {} FUZZY MATCH sim={}% <- {}",
+                        path.display(),
+                        similarity,
+                        original.display()
+                    )?;
                 }
             }
         }

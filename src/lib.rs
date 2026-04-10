@@ -7,6 +7,7 @@ pub mod fuzzy;
 pub mod gpu;
 pub mod hash;
 pub mod manifest;
+pub mod manifest_loader;
 pub mod output;
 pub mod piecewise;
 pub mod resume;
