@@ -22,11 +22,26 @@ pub fn run(
 
     let results = load_results(targets, algorithms, recursive)?;
 
-    // Group by first hash value
+    // Group by hash value — use a deterministic key by preferring algorithms in
+    // a fixed priority order, then falling back to a sorted key, so the grouping
+    // is stable regardless of HashMap iteration order.
     let mut groups: HashMap<String, Vec<&FileHashResult>> = HashMap::new();
     for r in &results {
-        if let Some(hash) = r.hashes.values().next() {
+        let hash = r.hashes.get(&Algorithm::Blake3)
+            .or_else(|| r.hashes.get(&Algorithm::Sha256))
+            .or_else(|| r.hashes.get(&Algorithm::Sha1))
+            .or_else(|| r.hashes.get(&Algorithm::Md5))
+            .or_else(|| r.hashes.get(&Algorithm::Whirlpool))
+            .or_else(|| r.hashes.get(&Algorithm::Tiger))
+            .or_else(|| {
+                let mut keys: Vec<&Algorithm> = r.hashes.keys().collect();
+                keys.sort_by_key(|k| format!("{k:?}"));
+                keys.into_iter().next().and_then(|k| r.hashes.get(k))
+            });
+        if let Some(hash) = hash {
             groups.entry(hash.clone()).or_default().push(r);
+        } else {
+            eprintln!("[!] Skipping {} — no hashes available", r.path.display());
         }
     }
 
@@ -46,7 +61,7 @@ pub fn run(
         if dedup_unique {
             println!("{}", group[0].path.display());
         } else if dedup_dupes {
-            for r in group.iter() {
+            for r in group[1..].iter() {
                 println!("{}", r.path.display());
             }
         } else {
