@@ -140,6 +140,16 @@ pub struct Cli {
     /// Skip manifest signature auto-verification in audit mode
     #[arg(long = "ignore-sig")]
     pub ignore_sig: bool,
+
+    /// Use NTFS $MFT direct read for size-only mode (Windows only, requires Admin).
+    /// If not already elevated, a UAC prompt will appear to escalate privileges.
+    #[arg(long = "mft")]
+    pub mft: bool,
+
+    /// [Internal] Elevated MFT worker: write TSV size results to FILE, then exit.
+    /// This flag is passed automatically when spawning an elevated subprocess via UAC.
+    #[arg(long = "_mft-worker", value_name = "FILE", hide = true)]
+    pub mft_worker_output: Option<PathBuf>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {

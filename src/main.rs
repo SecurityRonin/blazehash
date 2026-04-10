@@ -11,6 +11,15 @@ use std::path::PathBuf;
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
+    // Elevated MFT worker subprocess: enumerate $MFT, write TSV results, exit.
+    // This path is taken when the process was spawned by spawn_elevated_mft_worker().
+    #[cfg(target_os = "windows")]
+    if let Some(ref output_file) = cli.mft_worker_output {
+        let root = cli.paths.first().cloned().unwrap_or_else(|| PathBuf::from("."));
+        blazehash::walk_windows_mft::run_mft_worker(&root, cli.recursive, output_file)?;
+        return Ok(());
+    }
+
     if let Mode::Mcp = cli.mode() {
         mcp::run();
         return Ok(());
@@ -94,7 +103,7 @@ fn main() -> Result<()> {
             if !valid { std::process::exit(1); }
         }
         Mode::SizeOnly => {
-            commands::size_only::run(&cli.paths, cli.recursive, cli.output.as_ref())?;
+            commands::size_only::run(&cli.paths, cli.recursive, cli.output.as_ref(), cli.mft)?;
         }
         Mode::Audit => {
             commands::audit::run(

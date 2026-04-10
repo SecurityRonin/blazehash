@@ -21,3 +21,5 @@ pub mod walk;
 pub mod walk_filter;
 #[cfg(target_os = "windows")]
 pub mod walk_windows;
+#[cfg(target_os = "windows")]
+pub mod walk_windows_mft;
