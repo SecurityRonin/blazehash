@@ -6,11 +6,14 @@
 //! - JSONL (`{...}` per line)
 //! - CSV with hash-column headers
 
+use crate::algorithm::Algorithm;
 use crate::manifest::{parse_records, ManifestRecord};
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
+use std::collections::HashMap;
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 
 /// File extensions considered candidate manifests when scanning directories.
 const MANIFEST_EXTENSIONS: &[&str] = &["hash", "hashdeep", "csv", "json", "jsonl"];
@@ -121,12 +124,9 @@ pub fn load_manifest(path: &Path) -> Result<Vec<ManifestRecord>> {
             let algorithms = parse_header_universal(&content)?;
             Ok(parse_records(&content, &algorithms))
         }
-        ManifestFormat::JsonArray | ManifestFormat::Jsonl => {
-            bail!("JSON/JSONL manifest parsing is not yet implemented; use hashdeep format");
-        }
-        ManifestFormat::Csv => {
-            bail!("CSV manifest parsing is not yet implemented; use hashdeep format");
-        }
+        ManifestFormat::JsonArray => parse_json_array(&content),
+        ManifestFormat::Jsonl => parse_jsonl(&content),
+        ManifestFormat::Csv => parse_csv(&content),
         ManifestFormat::Unknown => {
             bail!(
                 "unrecognised manifest format in {}",
@@ -134,6 +134,87 @@ pub fn load_manifest(path: &Path) -> Result<Vec<ManifestRecord>> {
             );
         }
     }
+}
+
+/// Convert a string algorithm name to an `Algorithm` variant, or `None` if unrecognised.
+fn parse_algorithm_name(name: &str) -> Option<Algorithm> {
+    Algorithm::from_str(name).ok()
+}
+
+#[derive(serde::Deserialize)]
+struct JsonRecord {
+    filename: String,
+    size: u64,
+    hashes: HashMap<String, String>,
+}
+
+fn json_record_to_manifest(r: JsonRecord) -> ManifestRecord {
+    ManifestRecord {
+        path: PathBuf::from(&r.filename),
+        size: r.size,
+        hashes: r
+            .hashes
+            .into_iter()
+            .filter_map(|(k, v)| parse_algorithm_name(&k).map(|alg| (alg, v)))
+            .collect(),
+    }
+}
+
+fn parse_json_array(content: &str) -> Result<Vec<ManifestRecord>> {
+    let records: Vec<JsonRecord> =
+        serde_json::from_str(content).context("invalid JSON manifest")?;
+    Ok(records.into_iter().map(json_record_to_manifest).collect())
+}
+
+fn parse_jsonl(content: &str) -> Result<Vec<ManifestRecord>> {
+    let mut records = Vec::new();
+    for line in content.lines() {
+        let line = line.trim();
+        if line.is_empty() {
+            continue;
+        }
+        let r: JsonRecord = serde_json::from_str(line).context("invalid JSONL line")?;
+        records.push(json_record_to_manifest(r));
+    }
+    Ok(records)
+}
+
+fn parse_csv(content: &str) -> Result<Vec<ManifestRecord>> {
+    let mut lines = content.lines();
+    let header = lines.next().ok_or_else(|| anyhow::anyhow!("empty CSV"))?;
+    let cols: Vec<&str> = header.split(',').collect();
+
+    let size_col = cols
+        .iter()
+        .position(|&c| c == "size")
+        .ok_or_else(|| anyhow::anyhow!("CSV missing 'size' column"))?;
+    let filename_col = cols
+        .iter()
+        .position(|&c| c == "filename")
+        .ok_or_else(|| anyhow::anyhow!("CSV missing 'filename' column"))?;
+
+    let algo_cols: Vec<(usize, Algorithm)> = cols
+        .iter()
+        .enumerate()
+        .filter(|&(i, _)| i != size_col && i != filename_col)
+        .filter_map(|(i, name)| parse_algorithm_name(name).map(|alg| (i, alg)))
+        .collect();
+
+    let mut records = Vec::new();
+    for line in lines {
+        let fields: Vec<&str> = line.split(',').collect();
+        if fields.len() < cols.len() {
+            continue;
+        }
+        let size: u64 = fields[size_col].parse().context("CSV invalid size")?;
+        let path = PathBuf::from(fields[filename_col]);
+        let hashes: HashMap<Algorithm, String> = algo_cols
+            .iter()
+            .map(|&(i, alg)| (alg, fields[i].to_string()))
+            .collect();
+        records.push(ManifestRecord { path, size, hashes });
+    }
+    Ok(records)
 }
 
 /// Scan `search_dirs` for manifest files (by extension + content sniff).
