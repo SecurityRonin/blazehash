@@ -26,8 +26,7 @@ pub fn run(gpu: bool, no_calibrate: bool) -> Result<()> {
             return Ok(());
         }
 
-        let config_dir = get_config_dir();
-        let config_path = config_dir.join("config.toml");
+        let config_path = blazehash::config::config_path();
 
         let backend = match blazehash::gpu::backend::GpuBackend::detect() {
             Some(b) => b,
@@ -69,8 +68,10 @@ pub fn run(gpu: bool, no_calibrate: bool) -> Result<()> {
             println!("[*] GPU was slower than CPU at all tested sizes — writing gpu_enabled=false");
         }
 
-        std::fs::create_dir_all(&config_dir)?;
-        cfg.save(&config_path)?;
+        // Merge GPU config into the unified config file (preserving [parallel]).
+        let mut blaze_cfg = blazehash::config::BlazeConfig::load(&config_path);
+        blaze_cfg.gpu = Some(cfg);
+        blaze_cfg.save(&config_path)?;
 
         println!(
             "[+] Calibration complete. Written to {}",
@@ -89,18 +90,6 @@ pub fn run(gpu: bool, no_calibrate: bool) -> Result<()> {
     }
 
     Ok(())
-}
-
-#[cfg(feature = "gpu")]
-fn get_config_dir() -> std::path::PathBuf {
-    if let Ok(dir) = std::env::var("BLAZEHASH_CONFIG_DIR") {
-        return std::path::PathBuf::from(dir);
-    }
-    if let Some(config_dir) = dirs::config_dir() {
-        config_dir.join("blazehash")
-    } else {
-        std::path::PathBuf::from(".")
-    }
 }
 
 #[cfg(feature = "gpu")]

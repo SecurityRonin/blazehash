@@ -82,7 +82,7 @@ fn test_config_path_respects_env_var() {
     std::env::remove_var("BLAZEHASH_CONFIG_DIR");
 
     assert!(path.starts_with(dir.path()));
-    assert_eq!(path.file_name().unwrap(), "parallel.toml");
+    assert_eq!(path.file_name().unwrap(), "config.toml");
 }
 
 // ── 6. Calibration produces a config with a sensible threshold ────────────────

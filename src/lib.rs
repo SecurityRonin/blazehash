@@ -1,4 +1,5 @@
 pub mod ads;
+pub mod config;
 pub mod parallel_config;
 pub mod signing;
 #[cfg(feature = "nsrl")]

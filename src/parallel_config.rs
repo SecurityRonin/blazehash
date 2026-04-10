@@ -1,9 +1,9 @@
 //! Platform-adaptive parallel hashing threshold.
 //!
 //! Rayon's per-task dispatch costs ~20–40 µs. For files below the threshold,
-//! sequential iteration is faster. The threshold is either:
-//!  - loaded from `~/.config/blazehash/parallel.toml` (written by `blazehash bench`)
-//!  - or the hardcoded default of 64 KiB (safe for all platforms)
+//! sequential iteration is faster. The threshold is persisted in the unified
+//! `~/.config/blazehash/config.toml` under a `[parallel]` section, written
+//! by `blazehash bench`.
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -41,40 +41,24 @@ impl ParallelConfig {
         mean_file_bytes >= self.parallel_threshold_bytes
     }
 
-    /// Path to the parallel config TOML file.
-    /// Respects `$BLAZEHASH_CONFIG_DIR`; falls back to `~/.config/blazehash/`.
+    /// Canonical config path — delegates to the unified config module.
     pub fn config_path() -> PathBuf {
-        config_dir().join("parallel.toml")
+        crate::config::config_path()
     }
 
-    /// Load from `path`, returning `Default` if the file is absent or unparseable.
+    /// Load the `[parallel]` section from `path`, returning `Default` if absent.
     pub fn load_or_default(path: &Path) -> Self {
-        let content = match std::fs::read_to_string(path) {
-            Ok(c) => c,
-            Err(_) => return Self::default(),
-        };
-        toml::from_str(&content).unwrap_or_default()
+        crate::config::BlazeConfig::load(path)
+            .parallel
+            .unwrap_or_default()
     }
 
-    /// Write this config to `path`, creating parent directories as needed.
+    /// Persist this config into the `[parallel]` section of `path`,
+    /// preserving any other sections already in the file.
     pub fn save(&self, path: &Path) -> Result<()> {
-        if let Some(parent) = path.parent() {
-            std::fs::create_dir_all(parent)?;
-        }
-        let content = toml::to_string(self)?;
-        std::fs::write(path, content)?;
-        Ok(())
-    }
-}
-
-fn config_dir() -> PathBuf {
-    if let Ok(dir) = std::env::var("BLAZEHASH_CONFIG_DIR") {
-        return PathBuf::from(dir);
-    }
-    if let Some(cfg) = dirs::config_dir() {
-        cfg.join("blazehash")
-    } else {
-        PathBuf::from(".")
+        let mut cfg = crate::config::BlazeConfig::load(path);
+        cfg.parallel = Some(self.clone());
+        cfg.save(path)
     }
 }
 

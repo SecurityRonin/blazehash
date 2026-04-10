@@ -335,14 +335,6 @@ pub fn hash_file(
     })
 }
 
-#[cfg(feature = "gpu")]
-fn gpu_config_path() -> std::path::PathBuf {
-    if let Some(config_dir) = dirs::config_dir() {
-        config_dir.join("blazehash").join("config.toml")
-    } else {
-        std::path::PathBuf::from("blazehash_gpu_config.toml")
-    }
-}
 
 /// Attempt to hash GPU-eligible algorithms (SHA-256, MD5) on the GPU.
 /// Returns None if no GPU is available, thresholds are not met, or GPU is
@@ -352,14 +344,14 @@ fn gpu_config_path() -> std::path::PathBuf {
 fn try_gpu_hash(path: &Path, algorithms: &[Algorithm]) -> Option<HashMap<Algorithm, String>> {
     use crate::gpu::{
         backend::GpuBackend,
-        config::{GpuConfig, GpuConfigState},
+        config::GpuConfigState,
         md5::GpuMd5,
         sha256::GpuSha256,
         threshold::{should_use_gpu, GPU_ALGOS},
     };
 
-    let config_path = gpu_config_path();
-    let config = GpuConfig::load(&config_path);
+    let config_path = crate::config::config_path();
+    let config = crate::config::BlazeConfig::load(&config_path).gpu;
     let backend = GpuBackend::detect()?;
     let adapter_name = backend.adapter_name().to_string();
 
