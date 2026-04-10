@@ -1,6 +1,6 @@
 use anyhow::Result;
 use blazehash::algorithm::Algorithm;
-use blazehash::format::{write_csv, write_dfxml, write_json, write_jsonl};
+use blazehash::format::{write_csv, write_dfxml, write_json, write_jsonl, write_sumfile};
 use blazehash::hash::FileHashResult;
 use blazehash::manifest::{write_header, write_record};
 use blazehash::output::make_writer;
@@ -37,6 +37,7 @@ pub fn run(
         "dfxml" => write_dfxml(&mut writer, &[result], algorithms)?,
         "json" => write_json(&mut writer, &[result], algorithms)?,
         "jsonl" => write_jsonl(&mut writer, &[result], algorithms)?,
+        "sha256sum" | "md5sum" => write_sumfile(&mut writer, &[result], algorithms)?,
         _ => {
             if !bare {
                 write_header(&mut writer, algorithms)?;
