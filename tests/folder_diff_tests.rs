@@ -247,3 +247,63 @@ fn test_folder_diff_has_diff_true_when_different() {
     let result = diff_folders(left.path(), right.path(), false, CompareBy::Content).unwrap();
     assert!(result.has_diff());
 }
+
+// ── 12. Paranoid mode (BLAKE3) ────────────────────────────────────────────────
+
+#[test]
+fn test_folder_diff_paranoid_identical() {
+    let left = tempfile::tempdir().unwrap();
+    let right = tempfile::tempdir().unwrap();
+    make_file(&left, "a.bin", b"identical content");
+    make_file(&right, "a.bin", b"identical content");
+    let result = diff_folders(left.path(), right.path(), false, CompareBy::Paranoid).unwrap();
+    assert!(!result.has_diff());
+    assert_eq!(result.summary().identical, 1);
+}
+
+#[test]
+fn test_folder_diff_paranoid_detects_modification() {
+    let left = tempfile::tempdir().unwrap();
+    let right = tempfile::tempdir().unwrap();
+    make_file(&left, "a.bin", b"version one");
+    make_file(&right, "a.bin", b"version two");
+    let result = diff_folders(left.path(), right.path(), false, CompareBy::Paranoid).unwrap();
+    assert!(result.has_diff());
+    assert_eq!(result.summary().modified, 1);
+}
+
+#[test]
+fn test_folder_diff_paranoid_move_detection() {
+    let left = tempfile::tempdir().unwrap();
+    let right = tempfile::tempdir().unwrap();
+    make_file(&left, "old.bin", b"unique paranoid content abc");
+    make_file(&right, "new.bin", b"unique paranoid content abc");
+    let result = diff_folders(left.path(), right.path(), false, CompareBy::Paranoid).unwrap();
+    assert_eq!(result.summary().moved, 1);
+}
+
+#[test]
+fn test_folder_diff_paranoid_agrees_with_content_on_identical() {
+    // Both modes should agree that these files are identical
+    let left = tempfile::tempdir().unwrap();
+    let right = tempfile::tempdir().unwrap();
+    make_file(&left, "f.bin", b"some bytes");
+    make_file(&right, "f.bin", b"some bytes");
+
+    let r_content = diff_folders(left.path(), right.path(), false, CompareBy::Content).unwrap();
+    let r_paranoid = diff_folders(left.path(), right.path(), false, CompareBy::Paranoid).unwrap();
+    assert_eq!(r_content.has_diff(), r_paranoid.has_diff());
+    assert_eq!(r_content.summary().identical, r_paranoid.summary().identical);
+}
+
+#[test]
+fn test_folder_diff_paranoid_agrees_with_content_on_modified() {
+    let left = tempfile::tempdir().unwrap();
+    let right = tempfile::tempdir().unwrap();
+    make_file(&left, "f.bin", b"before");
+    make_file(&right, "f.bin", b"after");
+
+    let r_content = diff_folders(left.path(), right.path(), false, CompareBy::Content).unwrap();
+    let r_paranoid = diff_folders(left.path(), right.path(), false, CompareBy::Paranoid).unwrap();
+    assert_eq!(r_content.summary().modified, r_paranoid.summary().modified);
+}
