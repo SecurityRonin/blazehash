@@ -1009,6 +1009,18 @@ fn test_sha256sum_rejects_multiple_algorithms() {
         .failure();
 }
 
+// ---- Task 11: --ads flag (NTFS Alternate Data Streams) ----
+
+#[test]
+fn test_ads_flag_accepted() {
+    let dir = tempfile::tempdir().unwrap();
+    assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([dir.path().to_str().unwrap(), "--ads", "-c", "blake3"])
+        .assert()
+        .success();
+}
+
 #[test]
 fn test_include_glob_with_path_separator() {
     use blazehash::walk_filter::WalkFilter;
