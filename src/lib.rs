@@ -1,3 +1,4 @@
+pub mod ads;
 pub mod algorithm;
 pub mod audit;
 pub mod forensic_image;

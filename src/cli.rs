@@ -108,6 +108,10 @@ pub struct Cli {
     /// Exclude files matching GLOB pattern (repeatable, overrides --include)
     #[arg(long = "exclude")]
     pub exclude: Vec<String>,
+
+    /// Hash NTFS Alternate Data Streams alongside main file content (Windows only, no-op elsewhere)
+    #[arg(long = "ads")]
+    pub ads: bool,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
