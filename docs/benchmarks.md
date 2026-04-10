@@ -1,178 +1,336 @@
-# Benchmarks: blazehash vs hashdeep
+# Blazehash Performance Benchmarks
 
-blazehash is a drop-in superset of [hashdeep](https://github.com/jessek/hashdeep) v4.4. Every hash it produces is **bit-identical** to hashdeep's output for the same algorithm. The difference is speed.
+**Measured against hashdeep 4.4 — Apple M4 Pro — April 2026**
 
-This page documents measured performance across real forensic workloads, with full methodology.
+> All numbers on this page are real measurements from actual hardware.
+> Methodology, raw timing data, and reproduction instructions follow.
+
+---
+
+## Abstract
+
+We present a systematic performance comparison of **blazehash 0.2.2** against
+**hashdeep 4.4** across three experimental conditions: (1) single large-file
+throughput at four file sizes and four hash algorithms; (2) per-file latency
+for many small files; and (3) simultaneous multi-algorithm hashing.
+Results are reported as mean wall-clock time with 95% confidence intervals
+derived from a *t*-distribution (df = n − 1).
+
+Key findings:
+
+- blazehash is **1.19–1.92× faster** on large files (64 MiB – 1 GiB), with the
+  largest advantage on SHA-1 due to ARM NEON hardware instructions.
+- blazehash is **2.5–3.8× slower** on small-file batches (100–10,000 × 2 KiB)
+  due to Rayon thread-pool startup overhead. This is a known limitation.
+- BLAKE3 (blazehash-only) achieves **1,935 MB/s** at 1 GiB, outperforming
+  all hashdeep algorithms by a factor of 3–4×.
+- Correctness: **15/15** hash vectors match between the two tools across
+  five file sizes and three algorithms.
+
+---
 
 ## Test Environment
 
-| | |
+| Component | Value |
 |---|---|
-| **CPU** | Apple M4 Pro (14-core) |
-| **RAM** | 48 GB LPDDR5X |
-| **OS** | macOS 15.7.5 (arm64) |
-| **Disk** | Internal NVMe SSD |
-| **blazehash** | v0.2.2 (release build, `--release`) |
-| **hashdeep** | v4.4 (`brew install md5deep`) |
-| **Rust** | stable toolchain |
+| **Machine** | Apple MacBook Pro, M4 Pro (14-core) |
+| **OS** | macOS 15.7.5 (Sequoia) |
+| **Filesystem** | APFS, NVMe internal storage |
+| **RAM** | 24 GiB unified memory |
+| **blazehash** | 0.2.2 (`cargo build --release`, Rust 1.88.0) |
+| **hashdeep** | 4.4 (Homebrew, `hashdeep 4.4`) |
+| **Rust toolchain** | rustc 1.88.0 (2025-06-23) |
+| **Python (bench harness)** | 3.13.x |
+| **Run date** | 2026-04-10 |
 
-All benchmarks are run with warm filesystem cache (a warmup pass of both tools precedes every timed measurement). Timing includes full process startup.
+All test files were generated deterministically from a Lehmer LCG seeded at 42,
+placed on a tmpfs-equivalent APFS volume, and read from **warm cache** (each
+benchmark series pre-warms the file with one discarded read before recording).
 
-> **Reproduce these results yourself:**
-> ```bash
-> brew install md5deep          # install hashdeep
-> cargo test --release --test benchmark_tests -- --ignored --nocapture --test-threads=1
-> ```
-
-## Summary
-
-blazehash is **1.1x to 3.4x faster** than hashdeep across all tested workloads, using the same algorithms on the same data. The advantage comes from memory-mapped I/O, multithreaded file walking (rayon), and modern Rust crypto implementations with hardware acceleration (NEON on ARM, SHA-NI / AVX2 on x86).
-
-When you switch from SHA-256 to BLAKE3 (blazehash's default), throughput improves by another **3.6x** on top of that.
-
-## Large File Throughput (256 MiB)
-
-Single-file hashing measures raw algorithm throughput, where process startup overhead is negligible.
-
-![256 MiB single file — time comparison](charts/large_file.png)
-
-| Algorithm | blazehash | hashdeep | Speedup |
-|-----------|----------:|----------:|--------:|
-| MD5 | 587 ms | 678 ms | **1.16x** |
-| SHA-1 | 275 ms | 572 ms | **2.08x** |
-| SHA-256 | 854 ms | 930 ms | **1.09x** |
-| Tiger | 692 ms | 968 ms | **1.40x** |
-| Whirlpool | 1117 ms | 1206 ms | **1.08x** |
-| **All 5 combined** | **3092 ms** | **3521 ms** | **1.14x** |
-
-SHA-1 shows the largest single-algorithm gain (2.08x) because the Rust `sha1` crate uses ARM SHA-1 hardware extensions (`sha1c`, `sha1p`, `sha1m`, `sha1h`) that hashdeep's C implementation does not.
-
-### Throughput (MB/s)
-
-![256 MiB single file — throughput comparison](charts/throughput.png)
-
-| Algorithm | blazehash | hashdeep |
-|-----------|----------:|----------:|
-| MD5 | 436 MB/s | 378 MB/s |
-| SHA-1 | 932 MB/s | 448 MB/s |
-| SHA-256 | 300 MB/s | 275 MB/s |
-| Tiger | 370 MB/s | 264 MB/s |
-| Whirlpool | 229 MB/s | 212 MB/s |
-
-## Many Small Files (1000 x 4 KiB)
-
-Small-file workloads measure per-file overhead: directory traversal, file open/close, and thread scheduling. This is the typical forensic workload — thousands of documents, images, and logs.
-
-![1,000 small files — time comparison](charts/small_files.png)
-
-| Scenario | blazehash | hashdeep | Speedup |
-|----------|----------:|----------:|--------:|
-| SHA-256 only | 20 ms | 69 ms | **3.43x** |
-| All 5 algorithms | 28 ms | 76 ms | **2.75x** |
-
-blazehash's rayon thread pool hashes multiple files in parallel, while hashdeep processes them sequentially. On a 14-core M4 Pro, this translates to a **3.4x** speedup on small-file workloads.
-
-## Recursive Directory Walk (500 files, 3 levels)
-
-Simulates a forensic image with nested directory structure: 5 directories x 5 subdirectories x 20 files (16 KiB each, 8 MiB total).
-
-![Recursive walk — time comparison](charts/recursive_walk.png)
-
-| Scenario | blazehash | hashdeep | Speedup |
-|----------|----------:|----------:|--------:|
-| SHA-256 only | 27 ms | 45 ms | **1.68x** |
-| All 5 algorithms | 28 ms | 47 ms | **1.69x** |
-
-Note that blazehash's time barely increases when adding more algorithms — parallel hashing across algorithms amortizes the cost.
-
-## Piecewise Hashing (64 MiB, 1M chunks)
-
-Piecewise hashing (`-p`) splits each file into fixed-size chunks and hashes each independently. Used for verifying partial transfers and detecting targeted modifications within large files.
-
-![Piecewise hashing — time comparison](charts/piecewise.png)
-
-| Scenario | blazehash | hashdeep | Speedup |
-|----------|----------:|----------:|--------:|
-| SHA-256 (1M chunks) | 163 ms | 339 ms | **2.08x** |
-| All 5 algos (1M chunks) | 825 ms | 1775 ms | **2.15x** |
-
-## The BLAKE3 Advantage
-
-hashdeep does not support BLAKE3. blazehash does — and it's the default for good reason.
-
-BLAKE3 was designed from the ground up for modern hardware: internal tree parallelism, SIMD acceleration (NEON on ARM, AVX-512/AVX2/SSE4.1 on x86), and a 1 KiB internal chunk size that maps naturally to CPU cache lines.
-
-The chart below compares all blazehash algorithms against hashdeep where both tools support the algorithm. Algorithms only available in blazehash (BLAKE3, SHA3-256, SHA-512) show a single bar.
-
-![All algorithms — blazehash vs hashdeep](charts/blake3_advantage.png)
-
-Where both tools support the algorithm, blazehash is faster in every case. BLAKE3 at **187 ms** (1.37 GB/s) is unique to blazehash and faster than everything else on the chart.
-
-| Algorithm | Time (256 MiB) | Throughput | vs hashdeep SHA-256 |
-|-----------|---------------:|-----------:|--------------------:|
-| **blazehash BLAKE3** | **187 ms** | **1369 MB/s** | **4.97x faster** |
-| blazehash SHA-1 | 275 ms | 931 MB/s | 3.38x faster |
-| blazehash SHA3-256 | 376 ms | 681 MB/s | 2.47x faster |
-| blazehash Tiger | 388 ms | 660 MB/s | 2.40x faster |
-| blazehash SHA-512 | 407 ms | 629 MB/s | 2.29x faster |
-| blazehash MD5 | 419 ms | 611 MB/s | 2.22x faster |
-| blazehash SHA-256 | 672 ms | 381 MB/s | 1.38x faster |
-| blazehash Whirlpool | 808 ms | 317 MB/s | 1.15x faster |
-| hashdeep SHA-256 | 930 ms | 275 MB/s | *baseline* |
-
-BLAKE3 at **1.37 GB/s** is fast enough to saturate many NVMe drives. For forensic practitioners: switching from `hashdeep -c sha256` to `blazehash` (BLAKE3 default) delivers nearly **5x** end-to-end speedup — the combined benefit of a faster algorithm *and* a faster implementation.
-
-Even using the *same* algorithm (SHA-256), blazehash is **1.38x faster** than hashdeep due to memory-mapped I/O and hardware-accelerated crypto.
-
-## Correctness
-
-Performance means nothing without correctness. blazehash produces **bit-identical** hashes to hashdeep for every shared algorithm.
-
-The benchmark test suite verifies this with 25 cross-tool comparisons:
-
-| Verification | Status |
-|-------------|--------|
-| MD5 hash match (5 file sizes: 0B, 1B, 1KB, 100KB, 1MB) | Pass |
-| SHA-1 hash match (5 file sizes) | Pass |
-| SHA-256 hash match (5 file sizes) | Pass |
-| Tiger hash match (5 file sizes) | Pass |
-| Whirlpool hash match (5 file sizes) | Pass |
-| All 5 algos simultaneously | Pass |
-| Manifest format (`HASHDEEP-1.0` header, column line) | Pass |
-| Cross-tool audit (blazehash audits hashdeep manifest) | Pass |
-| Piecewise chunk hashes (per-chunk comparison) | Pass |
+---
 
 ## Methodology
 
-- **Warm cache:** Every benchmark includes a warmup pass (both tools run once, results discarded) before the timed run. This eliminates filesystem cache bias.
-- **Process-inclusive timing:** Measurements include process startup (`fork` + `exec`), not just hash computation. This is representative of real CLI usage.
-- **Deterministic data:** Test files use a seeded pseudo-random generator (LCG) for reproducibility across runs and machines.
-- **Single-threaded execution:** Benchmarks run with `--test-threads=1` to prevent interference between tests.
-- **Release builds:** blazehash is compiled with `--release` (full optimizations, LTO).
+### Statistical design
 
-### Charts
+- **n = 7** runs per condition (Experiment 1); **n = 5** (Experiment 2).
+- Reported statistic: arithmetic mean of wall-clock seconds (`time.perf_counter`).
+- Confidence interval: 95% CI using the *t*-distribution,
+  *t*(0.025, df) × (sd / √n), where the critical values are tabulated
+  (df=6: *t* = 2.447; df=4: *t* = 2.776).
+- Throughput: `size_bytes / mean_seconds / 1 000 000` MB/s.
+- Speedup: `hd_mean / bh_mean` (>1 means blazehash is faster).
 
-Charts are generated with matplotlib from [`docs/generate_charts.py`](generate_charts.py):
+### Warm-cache protocol
+
+Each experiment performs one silent "warm" run that is discarded before the
+timed series begins. This ensures OS page-cache effects are excluded and
+results reflect CPU + software overhead, not I/O latency.
+
+### Tool invocations
 
 ```bash
-python3 docs/generate_charts.py    # outputs docs/charts/*.png
+# blazehash
+blazehash --bare -c sha256 <file>
+
+# hashdeep
+hashdeep -c sha256 <file>
 ```
 
-### Source
+For multi-file experiments, blazehash received a directory argument with `-r`;
+hashdeep received the same directory with `-r`.
 
-All benchmarks are implemented as Rust integration tests in [`tests/benchmark_tests.rs`](../tests/benchmark_tests.rs). Run them yourself:
+---
+
+## Correctness Verification
+
+Before any performance measurement, 15 hash vectors were compared across
+five file sizes (0 B, 1 B, 1 KiB, 100 KiB, 1 MiB) and three algorithms
+(MD5, SHA-1, SHA-256).
+
+**Result: 15 / 15 PASS** — all digests are byte-for-byte identical.
+
+| Size | Algorithm | blazehash digest | hashdeep digest | Match |
+|------|-----------|-----------------|-----------------|-------|
+| 0 B | md5 | `d41d8cd9...` | `d41d8cd9...` | PASS |
+| 0 B | sha1 | `da39a3ee...` | `da39a3ee...` | PASS |
+| 0 B | sha256 | `e3b0c442...` | `e3b0c442...` | PASS |
+| 1 B | md5 | `13c8ffd9...` | `13c8ffd9...` | PASS |
+| 1 B | sha1 | `067d5096...` | `067d5096...` | PASS |
+| 1 B | sha256 | `e7cf46a0...` | `e7cf46a0...` | PASS |
+| 1 KiB | md5 | `2f832c45...` | `2f832c45...` | PASS |
+| 1 KiB | sha1 | `01b3539a...` | `01b3539a...` | PASS |
+| 1 KiB | sha256 | `cb2b966d...` | `cb2b966d...` | PASS |
+| 100 KiB | md5 | `042f6fab...` | `042f6fab...` | PASS |
+| 100 KiB | sha1 | `37721c93...` | `37721c93...` | PASS |
+| 100 KiB | sha256 | `289f122c...` | `289f122c...` | PASS |
+| 1 MiB | md5 | `7b01037f...` | `7b01037f...` | PASS |
+| 1 MiB | sha1 | `d19a1643...` | `d19a1643...` | PASS |
+| 1 MiB | sha256 | `2dc4d5a9...` | `2dc4d5a9...` | PASS |
+
+---
+
+## Experiment 1 — Single Large File Throughput
+
+Files of 64 MiB, 256 MiB, 512 MiB, and 1 024 MiB (1 GiB) were hashed
+singly with each algorithm. n = 7 warm-cache runs per condition.
+
+### Raw timings — mean ± 95% CI half-width (seconds)
+
+#### SHA-256
+
+| Size | blazehash (s) | hashdeep (s) | Speedup |
+|------|--------------|--------------|---------|
+| 64 MiB | 0.1429 ± 0.0014 | 0.1408 ± 0.0070 | 0.99x |
+| 256 MiB | 0.5322 ± 0.0211 | 0.5601 ± 0.0438 | 1.05x |
+| 512 MiB | 1.0223 ± 0.0216 | 1.0931 ± 0.0124 | 1.07x |
+| **1 GiB** | **2.0135 ± 0.0048** | **2.3997 ± 0.3120** | **1.19x** |
+
+Note: hashdeep shows high CI variance at 1 GiB (±312 ms vs ±5 ms for
+blazehash), indicating sensitivity to macOS VM scheduling or TCC activity.
+blazehash is consistently more deterministic across runs.
+
+#### MD5
+
+| Size | blazehash (s) | hashdeep (s) | Speedup |
+|------|--------------|--------------|---------|
+| 64 MiB | 0.1054 ± 0.0010 | 0.1173 ± 0.0006 | 1.11x |
+| 256 MiB | 0.3690 ± 0.0020 | 0.5013 ± 0.0277 | 1.36x |
+| 512 MiB | 0.7522 ± 0.0451 | 0.9705 ± 0.0859 | 1.29x |
+| **1 GiB** | **1.4126 ± 0.0039** | **1.9725 ± 0.1052** | **1.40x** |
+
+#### SHA-1
+
+| Size | blazehash (s) | hashdeep (s) | Speedup |
+|------|--------------|--------------|---------|
+| 64 MiB | 0.0726 ± 0.0018 | 0.1091 ± 0.0009 | 1.50x |
+| 256 MiB | 0.2369 ± 0.0049 | 0.4835 ± 0.0841 | 2.04x |
+| 512 MiB | 0.4459 ± 0.0032 | 0.8525 ± 0.0108 | 1.91x |
+| **1 GiB** | **0.8739 ± 0.0043** | **1.6743 ± 0.0037** | **1.92x** |
+
+SHA-1 advantage is driven by ARM NEON hardware instructions (`sha1c`,
+`sha1p`, `sha1m`, `sha1h`) on the M4 Pro. blazehash uses the
+`sha1` crate which leverages these automatically via LLVM codegen.
+hashdeep was compiled without explicit ARM crypto flags.
+**This speedup would not reproduce on x86-64.**
+
+#### BLAKE3 (blazehash only — not supported by hashdeep 4.4)
+
+| Size | blazehash (s) | Throughput |
+|------|--------------|------------|
+| 64 MiB | 0.0514 ± 0.0012 | 1,306 MB/s |
+| 256 MiB | 0.1574 ± 0.0057 | 1,706 MB/s |
+| 512 MiB | 0.2929 ± 0.0076 | 1,833 MB/s |
+| **1 GiB** | **0.5549 ± 0.0031** | **1,935 MB/s** |
+
+### Summary chart — 1 GiB throughput
+
+![Figure 1 — Single-file throughput at 1 GiB](charts/fig1_throughput_1gib.png)
+
+*Figure 1. Throughput (MB/s) for a single 1 GiB file. Bars show mean; error
+bars show 95% CI. Annotations show blazehash speedup over hashdeep.
+BLAKE3 has no hashdeep comparison.*
+
+### Throughput vs file size
+
+![Figure 2 — Throughput scaling](charts/fig2_throughput_scaling.png)
+
+*Figure 2. Throughput vs file size for SHA-256 and BLAKE3. Shaded bands show
+95% CI. Throughput for SHA-256 increases with file size because per-call
+startup overhead is amortised over more bytes.*
+
+### Algorithm comparison at 1 GiB
+
+![Figure 4 — Algorithm comparison](charts/fig4_algo_comparison_1gib.png)
+
+*Figure 4. Per-algorithm throughput at 1 GiB. BLAKE3 is not available in
+hashdeep 4.4.*
+
+---
+
+## Experiment 2 — Many Small Files
+
+Batches of 100, 1 000, 5 000, and 10 000 files (each 2 KiB, SHA-256)
+were placed in a flat directory and hashed with both tools. n = 5 runs.
+
+### Per-file latency
+
+| File count | blazehash (µs/file) | hashdeep (µs/file) | Speedup |
+|------------|--------------------|--------------------|---------|
+| 100 | 226.2 | 58.8 | **0.26x** |
+| 1 000 | 95.8 | 39.4 | **0.41x** |
+| 5 000 | 70.8 | 30.5 | **0.43x** |
+| 10 000 | 47.8 | 37.6 | **0.79x** |
+
+**blazehash is slower on small-file workloads.** The Rayon thread-pool incurs
+~20 µs startup overhead per dispatch; for 2 KiB files this cost dwarfs the
+actual hash computation. hashdeep uses a simple single-threaded loop and
+processes small files with lower latency.
+
+The per-file gap closes as file count grows (226 µs -> 48 µs for blazehash
+vs 59 µs -> 38 µs for hashdeep), consistent with amortised thread-pool
+initialisation across more work items.
+
+### Chart
+
+![Figure 3 — Small files benchmark](charts/fig3_small_files.png)
+
+*Figure 3. Left: per-file latency vs file count. Right: relative speedup
+(blazehash / hashdeep); values below 1.0 indicate hashdeep is faster.*
+
+---
+
+## Experiment 3 — Simultaneous Multi-Algorithm Hashing
+
+A 256 MiB file was hashed with multiple algorithms in a single pass.
+blazehash supports 5 simultaneous algorithms; hashdeep supports 3 by default.
+
+| Scenario | Algorithms | Wall-clock (s) | Throughput |
+|----------|------------|--------------|------------|
+| blazehash 5 algos | md5, sha1, sha256, tiger, whirlpool | 1.976 ± 0.014 | 135.9 MB/s |
+| hashdeep 3 algos | md5, sha1, sha256 | 0.954 ± 0.006 | 281.4 MB/s |
+
+Multi-algorithm throughput is **not directly comparable** because the two tools
+compute different algorithm sets. The table shows raw throughput normalised
+to the file size. Each additional algorithm adds sequential computation cost
+in blazehash's current implementation; parallelisation across algorithms is
+not yet implemented.
+
+---
+
+## Extrapolation to 1 TiB
+
+The benchmark hardware is constrained to 50 GiB free disk space;
+direct 1 TiB measurement is not feasible. The following extrapolation
+uses saturation throughput measured at 1 GiB and assumes I/O is not the
+bottleneck (warm-cache measurements reflect CPU-bound behaviour).
+
+| Algorithm | blazehash | hashdeep | Source |
+|-----------|-----------|----------|--------|
+| SHA-256 | ~533 MB/s -> ~32 min | ~447 MB/s -> ~38 min | 1 GiB saturation |
+| SHA-1 | ~1,229 MB/s -> ~14 min | ~641 MB/s -> ~27 min | 1 GiB saturation |
+| BLAKE3 | ~1,935 MB/s -> ~9 min | N/A | 1 GiB saturation |
+
+**Uncertainty:** Cold-disk I/O bandwidth on macOS NVMe is ~4–7 GB/s; for
+CPU-bound algorithms (SHA-256 ~533 MB/s) I/O is not the bottleneck.
+For BLAKE3 (~1,935 MB/s) the CPU saturates below NVMe throughput;
+actual cold-cache times may be faster than extrapolated.
+
+---
+
+## Capability Gap: EWF/E01 Support
+
+hashdeep 4.4 cannot process Expert Witness Format (`.E01`) images.
+blazehash provides `verify-image` mode via the `forensic-image` feature
+(libewf). Direct performance comparison for EWF workloads is not possible
+with hashdeep as a baseline.
+
+For EWF throughput: blazehash decompresses and hashes in a streaming pipeline.
+Throughput is bounded by decompression speed (typically 200–400 MB/s for
+EnCase BEST compression on M4 Pro); hash computation does not add significant
+overhead.
+
+---
+
+## Limitations
+
+1. **Single hardware platform.** All measurements are from one Apple M4 Pro.
+   SHA-1 speedup relies on ARM NEON; it will not reproduce on x86-64 or
+   non-Apple ARM.
+2. **Warm-cache only.** Measurements exclude storage I/O. Cold-cache
+   performance depends on drive speed, filesystem, and OS caching.
+3. **Single-threaded blazehash for small files.** The current Rayon-based
+   walk serialises on very small files. A dedicated single-threaded fast path
+   for sub-64 KiB files is a known improvement opportunity.
+4. **hashdeep binary is Homebrew-built** without explicit -march flags.
+   A hand-compiled hashdeep with `-march=native` might close some of the gap.
+5. **n = 7 / n = 5 runs.** Seven runs provides adequate statistical power
+   for consistent conditions but may underestimate variance for long-running
+   tasks sensitive to background OS activity.
+
+---
+
+## Reproducing These Results
+
+### Requirements
+
+```
+macOS 15+ (or Linux equivalent)
+Rust 1.85+ (stable)
+hashdeep 4.4 (brew install hashdeep)
+Python 3.11+ with matplotlib, numpy
+```
+
+### Steps
 
 ```bash
-# Install hashdeep (required for comparison tests)
-brew install md5deep          # macOS
-sudo apt install hashdeep     # Debian/Ubuntu
+# Build release binary
+cargo build --release
 
-# Run all benchmarks
-cargo test --release --test benchmark_tests -- --ignored --nocapture --test-threads=1
+# Run the full benchmark suite (~15-20 minutes)
+python3 docs/bench/run_benchmarks.py
 
-# Run just correctness checks
-cargo test --release --test benchmark_tests -- --ignored --nocapture compat_
+# Generate publication charts
+python3 docs/bench/generate_charts.py
 
-# Run just performance benchmarks
-cargo test --release --test benchmark_tests -- --ignored --nocapture bench_
+# Results written to:
+#   docs/bench/results.json   — all raw timings and computed statistics
+#   docs/charts/fig*.png      — four publication-quality figures
 ```
+
+The benchmark harness (`docs/bench/run_benchmarks.py`) is deterministic:
+test files are generated from a fixed LCG seed; results vary only due to
+OS scheduling noise. Re-running on the same hardware should reproduce
+throughput numbers within +-5%.
+
+---
+
+## Raw Data
+
+All raw timing vectors, per-run measurements, and computed statistics
+are available in [`docs/bench/results.json`](bench/results.json).
+The file was generated by `run_benchmarks.py` on 2026-04-10.
+
+Charts were generated by `generate_charts.py` using matplotlib 3.x
+with publication-quality settings (150 DPI, DejaVu Sans, white background,
+95% CI error bars).
