@@ -41,4 +41,27 @@ mod nsrl_tests {
         let lookup = NsrlLookup::open(&bloom_path).unwrap();
         assert_eq!(lookup.lookup("aabbcc"), NsrlResult::KnownGood);
     }
+
+    #[test]
+    fn test_nsrl_bloom_unknown() {
+        let dir = tempdir().unwrap();
+        let db = make_test_db(dir.path());
+        let bloom_path = dir.path().join("nsrl.bloom");
+        blazehash::nsrl::build_bloom(&db, &bloom_path, 0.001).unwrap();
+
+        let lookup = NsrlLookup::open(&bloom_path).unwrap();
+        assert_eq!(lookup.lookup("deadbeef"), NsrlResult::Unknown);
+    }
+
+    #[test]
+    fn test_nsrl_bloom_md5_known_good() {
+        let dir = tempdir().unwrap();
+        let db = make_test_db(dir.path());
+        let bloom_path = dir.path().join("nsrl.bloom");
+        blazehash::nsrl::build_bloom(&db, &bloom_path, 0.001).unwrap();
+
+        let lookup = NsrlLookup::open(&bloom_path).unwrap();
+        // "ddeeff" is the MD5 in the test DB fixture
+        assert_eq!(lookup.lookup("ddeeff"), NsrlResult::KnownGood);
+    }
 }

@@ -55,6 +55,7 @@ fn main() -> Result<()> {
                 anyhow::anyhow!("--output required for nsrl build-bloom")
             })?;
             blazehash::nsrl::build_bloom(db, out, 0.001)?;
+            eprintln!("[+] Bloom filter written to {}", out.display());
         }
         #[cfg(not(feature = "nsrl"))]
         {

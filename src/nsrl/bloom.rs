@@ -27,7 +27,11 @@ impl BloomNsrl {
 
 pub fn build_bloom_from_sqlite(db_path: &Path, out_path: &Path, fp_rate: f64) -> Result<()> {
     let conn = Connection::open(db_path)?;
-    let count: i64 = conn.query_row("SELECT COUNT(*) FROM FILE", [], |r| r.get(0))?;
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(SHA256) + COUNT(MD5) FROM FILE",
+        [],
+        |r| r.get(0),
+    )?;
     // Bloom::new_for_fp_rate requires items_count > 0
     let items = (count as usize).max(1);
     let mut bloom: Bloom<String> = Bloom::new_for_fp_rate(items, fp_rate);
@@ -39,8 +43,14 @@ pub fn build_bloom_from_sqlite(db_path: &Path, out_path: &Path, fp_rate: f64) ->
         bloom.set(&hash);
     }
 
+    let mut stmt2 = conn.prepare("SELECT UPPER(MD5) FROM FILE WHERE MD5 IS NOT NULL")?;
+    let mut rows2 = stmt2.query([])?;
+    while let Some(row) = rows2.next()? {
+        let hash: String = row.get(0)?;
+        bloom.set(&hash);
+    }
+
     let bytes = bincode::serialize(&bloom)?;
     std::fs::write(out_path, bytes)?;
-    eprintln!("[+] Bloom filter written to {}", out_path.display());
     Ok(())
 }

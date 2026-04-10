@@ -59,12 +59,26 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
 
     #[cfg(feature = "nsrl")]
     if let Some(nsrl_path) = nsrl {
+        if nsrl_exclude
+            && nsrl_path
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("")
+                == "bloom"
+        {
+            eprintln!("[!] Warning: --nsrl-exclude with a bloom filter may suppress evidence due to false positives. Confirm with a SQLite NSRL database.");
+        }
         let lookup = blazehash::nsrl::NsrlLookup::open(nsrl_path)?;
         let mut known_count = 0usize;
         all_results = all_results
             .into_iter()
             .filter(|r| {
-                let hash_val = r.hashes.values().next().map(|s| s.as_str()).unwrap_or("");
+                let hash_val = r
+                    .hashes
+                    .get(&Algorithm::Sha256)
+                    .or_else(|| r.hashes.get(&Algorithm::Md5))
+                    .map(|s| s.as_str())
+                    .unwrap_or("");
                 if lookup.lookup(hash_val) == blazehash::nsrl::NsrlResult::KnownGood {
                     eprintln!("[K] {}  (NSRL known-good)", r.path.display());
                     known_count += 1;

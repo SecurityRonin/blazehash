@@ -3,6 +3,7 @@ mod bloom;
 #[cfg(feature = "nsrl")]
 mod sqlite;
 
+#[cfg(feature = "nsrl")]
 #[derive(Debug, PartialEq, Eq)]
 pub enum NsrlResult {
     KnownGood,

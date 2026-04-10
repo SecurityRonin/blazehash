@@ -1,6 +1,6 @@
 use super::NsrlResult;
 use anyhow::Result;
-use rusqlite::{params, Connection};
+use rusqlite::{params, Connection, OpenFlags};
 use std::path::Path;
 
 pub struct SqliteNsrl {
@@ -9,7 +9,10 @@ pub struct SqliteNsrl {
 
 impl SqliteNsrl {
     pub fn open(path: &Path) -> Result<Self> {
-        let conn = Connection::open(path)?;
+        let conn = Connection::open_with_flags(
+            path,
+            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )?;
         Ok(SqliteNsrl { conn })
     }
 
