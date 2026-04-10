@@ -1,5 +1,6 @@
 pub mod audit;
 pub mod bench;
+pub mod diff;
 pub mod hash;
 pub mod piecewise;
 pub mod size_only;

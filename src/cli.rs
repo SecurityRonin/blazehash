@@ -153,6 +153,7 @@ fn parse_algorithms(s: &str) -> Result<Vec<Algorithm>, String> {
 pub enum Mode {
     Mcp,
     Bench,
+    Diff,
     SizeOnly,
     Audit,
     VerifyImage,
@@ -196,6 +197,8 @@ impl Cli {
             Mode::Mcp
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("bench")) {
             Mode::Bench
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("diff")) {
+            Mode::Diff
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

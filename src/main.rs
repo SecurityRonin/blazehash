@@ -20,11 +20,20 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Diff = cli.mode() {
+        let has_diff = commands::diff::run(&cli.paths)?;
+        if has_diff {
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
     let algorithms = cli.flat_algorithms();
 
     match cli.mode() {
         Mode::Mcp => unreachable!(),
         Mode::Bench => unreachable!(),
+        Mode::Diff => unreachable!(),
         Mode::SizeOnly => {
             commands::size_only::run(&cli.paths, cli.recursive, cli.output.as_ref())?;
         }
