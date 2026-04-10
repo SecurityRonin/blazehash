@@ -1,8 +1,15 @@
 use anyhow::Result;
 
 pub fn run(gpu: bool, no_calibrate: bool) -> Result<()> {
+    // Always calibrate the parallel (sequential/par_iter) threshold,
+    // unless the user explicitly opted out.
+    if !no_calibrate {
+        blazehash::parallel_config::calibrate_and_save()?;
+    } else {
+        eprintln!("[*] --no-calibrate: skipping parallel threshold calibration");
+    }
+
     if !gpu {
-        eprintln!("Usage: blazehash bench --gpu [--no-calibrate]");
         return Ok(());
     }
 
