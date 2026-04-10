@@ -13,7 +13,7 @@ pub fn run(
     algorithms: &[Algorithm],
     recursive: bool,
     dedup_unique: bool,
-    _dedup_dupes: bool,
+    dedup_dupes: bool,
 ) -> Result<bool> {
     let targets = &paths[1..]; // paths[0] is "dedup"
     if targets.is_empty() {
@@ -45,6 +45,10 @@ pub fn run(
 
         if dedup_unique {
             println!("{}", group[0].path.display());
+        } else if dedup_dupes {
+            for r in group.iter() {
+                println!("{}", r.path.display());
+            }
         } else {
             println!("## {} copies:", group.len());
             for r in group.iter() {
