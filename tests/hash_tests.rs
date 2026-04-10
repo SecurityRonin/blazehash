@@ -981,6 +981,34 @@ fn test_dfxml_output_format() {
     assert!(stdout.contains("blake3"), "expected blake3 hashdigest type");
 }
 
+// ---- Task 9: sha256sum/md5sum output format ----
+
+#[test]
+fn test_sha256sum_output_format() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("test.bin"), b"hello").unwrap();
+
+    let output = assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([dir.path().to_str().unwrap(), "-c", "sha256", "--format", "sha256sum"])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains("  "), "expected two spaces between hash and path");
+    assert!(!stdout.contains("%%%%"), "sha256sum format must not contain hashdeep header");
+}
+
+#[test]
+fn test_sha256sum_rejects_multiple_algorithms() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("f.bin"), b"x").unwrap();
+    assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([dir.path().to_str().unwrap(), "-c", "sha256,md5", "--format", "sha256sum"])
+        .assert()
+        .failure();
+}
+
 #[test]
 fn test_include_glob_with_path_separator() {
     use blazehash::walk_filter::WalkFilter;
