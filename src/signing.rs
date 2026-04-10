@@ -19,6 +19,18 @@ fn sig_path_for(manifest_path: &Path) -> std::path::PathBuf {
     p
 }
 
+fn pub_path_for(manifest_path: &Path) -> std::path::PathBuf {
+    let mut p = manifest_path.to_path_buf();
+    let new_name = format!(
+        "{}.pub",
+        manifest_path.file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("manifest")
+    );
+    p.set_file_name(new_name);
+    p
+}
+
 fn derive_key(password: &str) -> Result<SigningKey> {
     let params = Params::new(65536, 3, 1, Some(32))
         .map_err(|e| anyhow::anyhow!("argon2 params: {e}"))?;
@@ -67,9 +79,14 @@ pub fn sign(manifest_path: &Path) -> Result<()> {
     std::fs::write(&sig_path, &sig_content)
         .with_context(|| format!("cannot write {}", sig_path.display()))?;
 
+    let pub_path = pub_path_for(manifest_path);
+    std::fs::write(&pub_path, &pubkey_hex)
+        .with_context(|| format!("cannot write {}", pub_path.display()))?;
+
     eprintln!("[+] Signed: {}", manifest_path.display());
     eprintln!("[+] Public key: {pubkey_hex}");
     eprintln!("[+] Signature: {}", sig_path.display());
+    eprintln!("[+] Public key file: {}", pub_path.display());
     Ok(())
 }
 
