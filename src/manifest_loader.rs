@@ -113,8 +113,8 @@ fn parse_header_universal(content: &str) -> Result<Vec<crate::algorithm::Algorit
 
 /// Load a manifest from `path`, auto-detecting the format.
 ///
-/// Currently fully implements hashdeep/blazehash format loading.
-/// JSON and CSV formats return an empty record list (stubs for future expansion).
+/// Supports hashdeep/blazehash (`%%%%`), JSON array (`[...]`), JSONL (`{...}` per line),
+/// and CSV with hash-column headers.
 pub fn load_manifest(path: &Path) -> Result<Vec<ManifestRecord>> {
     let content = fs::read_to_string(path)
         .map_err(|e| anyhow::anyhow!("failed to read manifest {}: {e}", path.display()))?;

@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use blazehash::ads::enumerate_ads;
 use blazehash::algorithm::Algorithm;
 use blazehash::format::{write_csv, write_dfxml, write_json, write_jsonl, write_sumfile};
 use blazehash::hash::{hash_file, FileHashResult};
@@ -27,6 +28,7 @@ pub struct HashOptions<'a> {
     pub nsrl: Option<&'a PathBuf>,
     pub nsrl_exclude: bool,
     pub sign: bool,
+    pub ads: bool,
 }
 
 pub fn run(opts: HashOptions<'_>) -> Result<()> {
@@ -44,6 +46,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         nsrl,
         nsrl_exclude,
         sign,
+        ads,
     } = opts;
     let mut resume_state = load_resume_state(resume, output)?;
     let append = resume && output.is_some_and(|p| p.exists());
@@ -57,6 +60,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         no_cache,
         no_gpu,
         filter,
+        ads,
     )?;
 
     #[cfg(feature = "nsrl")]
@@ -132,6 +136,7 @@ fn collect_results(
     no_cache: bool,
     no_gpu: bool,
     filter: &WalkFilter,
+    ads: bool,
 ) -> Result<Vec<FileHashResult>> {
     let mut all_results = Vec::new();
 
@@ -143,6 +148,9 @@ fn collect_results(
             let result = hash_file(path, algorithms, no_cache, no_gpu)
                 .with_context(|| format!("failed to hash {}", path.display()))?;
             resume_state.mark_done(path.clone());
+            if ads {
+                hash_ads_streams(path, algorithms, no_cache, no_gpu, &mut all_results);
+            }
             all_results.push(result);
         } else if path.is_dir() {
             let output = walk_and_hash(path, algorithms, recursive, filter)?;
@@ -151,6 +159,9 @@ fn collect_results(
                 if resume_state.is_done(&r.path) {
                     continue;
                 }
+                if ads {
+                    hash_ads_streams(&r.path, algorithms, no_cache, no_gpu, &mut all_results);
+                }
                 resume_state.mark_done(r.path.clone());
                 all_results.push(r);
             }
@@ -158,6 +169,23 @@ fn collect_results(
     }
 
     Ok(all_results)
+}
+
+/// Hash any NTFS Alternate Data Streams attached to `path` and append results.
+/// No-op on non-Windows or when the file has no named ADS.
+fn hash_ads_streams(
+    path: &PathBuf,
+    algorithms: &[Algorithm],
+    no_cache: bool,
+    no_gpu: bool,
+    results: &mut Vec<FileHashResult>,
+) {
+    for stream_path in enumerate_ads(path) {
+        match hash_file(&stream_path, algorithms, no_cache, no_gpu) {
+            Ok(r) => results.push(r),
+            Err(e) => eprintln!("[!] Failed to hash ADS {}: {e}", stream_path.display()),
+        }
+    }
 }
 
 fn write_output<W: Write>(

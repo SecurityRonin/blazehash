@@ -140,6 +140,7 @@ fn main() -> Result<()> {
                 nsrl: cli.nsrl.as_ref(),
                 nsrl_exclude: cli.nsrl_exclude,
                 sign: cli.sign,
+                ads: cli.ads,
             })?;
         }
     }
