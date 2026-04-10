@@ -962,6 +962,25 @@ fn test_max_size_filter() {
     assert!(output.results[0].path.to_str().unwrap().ends_with("small.bin"));
 }
 
+// ---- Task 8: DFXML output format ----
+
+#[test]
+fn test_dfxml_output_format() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("test.bin"), b"hello").unwrap();
+
+    let output = assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([dir.path().to_str().unwrap(), "-c", "blake3", "--format", "dfxml"])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains("<?xml"), "expected XML declaration, got: {stdout}");
+    assert!(stdout.contains("<dfxml"), "expected dfxml root element");
+    assert!(stdout.contains("<fileobject>"), "expected fileobject element");
+    assert!(stdout.contains("blake3"), "expected blake3 hashdigest type");
+}
+
 #[test]
 fn test_include_glob_with_path_separator() {
     use blazehash::walk_filter::WalkFilter;
