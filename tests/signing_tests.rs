@@ -38,7 +38,7 @@ fn test_verify_sig_roundtrip() {
     Command::cargo_bin("blazehash").unwrap()
         .args(["verify-sig", manifest.to_str().unwrap(), "--expected-pubkey", pubkey])
         .assert().success()
-        .stdout(predicates::str::contains("[+]"));
+        .stderr(predicates::str::contains("[+]"));
 }
 
 #[test]
@@ -63,5 +63,5 @@ fn test_verify_sig_fails_on_tampered_manifest() {
     Command::cargo_bin("blazehash").unwrap()
         .args(["verify-sig", manifest.to_str().unwrap(), "--expected-pubkey", pubkey])
         .assert().failure()
-        .stdout(predicates::str::contains("[!]"));
+        .stderr(predicates::str::contains("[!]"));
 }

@@ -119,11 +119,11 @@ pub fn verify_sig(manifest_path: &Path, expected_pubkey_hex: &str) -> Result<boo
 
     match verifying_key.verify(&manifest_bytes, &signature) {
         Ok(()) => {
-            println!("[+] Signature valid — {}", manifest_path.display());
+            eprintln!("[+] Signature valid — {}", manifest_path.display());
             Ok(true)
         }
         Err(_) => {
-            println!("[!] Signature INVALID — {}", manifest_path.display());
+            eprintln!("[!] Signature INVALID — {}", manifest_path.display());
             Ok(false)
         }
     }
