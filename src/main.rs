@@ -31,7 +31,12 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Diff = cli.mode() {
-        let has_diff = commands::diff::run(&cli.paths)?;
+        let has_diff = commands::diff::run(
+            &cli.paths,
+            cli.recursive,
+            &cli.compare_by,
+            cli.show_identical,
+        )?;
         if has_diff {
             std::process::exit(1);
         }

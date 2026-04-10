@@ -10,13 +10,38 @@ pub enum DiffEntry {
     Moved { from: PathBuf, to: PathBuf },
 }
 
-pub fn run(paths: &[PathBuf]) -> Result<bool> {
-    // paths[0] = "diff", paths[1] = before, paths[2] = after
+pub fn run(
+    paths: &[PathBuf],
+    recursive: bool,
+    compare_by: &str,
+    show_identical: bool,
+) -> Result<bool> {
+    // paths[0] = "diff", paths[1] = left/before, paths[2] = right/after
     if paths.len() < 3 {
-        anyhow::bail!("usage: blazehash diff <before.hash> <after.hash>");
+        anyhow::bail!("usage: blazehash diff <left> <right>");
     }
-    let before_records = load_manifest(&paths[1])?;
-    let after_records = load_manifest(&paths[2])?;
+    let left = &paths[1];
+    let right = &paths[2];
+
+    // ── Folder-vs-folder diff ─────────────────────────────────────────────────
+    if left.is_dir() && right.is_dir() {
+        use blazehash::folder_diff::{CompareBy, diff_folders, print_entry, print_summary};
+        let cmp = match compare_by {
+            "size-time" => CompareBy::SizeTime,
+            "name" => CompareBy::Name,
+            _ => CompareBy::Content,
+        };
+        let result = diff_folders(left, right, recursive, cmp)?;
+        for e in &result.entries {
+            print_entry(e, show_identical);
+        }
+        print_summary(left, right, &result);
+        return Ok(result.has_diff());
+    }
+
+    // ── Manifest-vs-manifest diff (existing behaviour) ────────────────────────
+    let before_records = load_manifest(left)?;
+    let after_records = load_manifest(right)?;
 
     // path -> first hash value
     let before_map: HashMap<PathBuf, String> = before_records

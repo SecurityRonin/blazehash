@@ -141,6 +141,14 @@ pub struct Cli {
     #[arg(long = "ignore-sig")]
     pub ignore_sig: bool,
 
+    /// Folder diff comparison method: content (default), size-time, name
+    #[arg(long = "compare-by", default_value = "content", value_parser = ["content", "size-time", "name"])]
+    pub compare_by: String,
+
+    /// Show identical files in folder diff output (hidden by default)
+    #[arg(long = "show-identical")]
+    pub show_identical: bool,
+
     /// Use NTFS $MFT direct read for size-only mode (Windows only, requires Admin).
     /// If not already elevated, a UAC prompt will appear to escalate privileges.
     #[arg(long = "mft")]
