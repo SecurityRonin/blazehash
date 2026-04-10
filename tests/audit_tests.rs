@@ -108,7 +108,8 @@ fn audit_moved_checks_all_algorithms() {
     // Create known file with two algorithms
     let file = dir.path().join("original.txt");
     fs::write(&file, b"hello world").unwrap();
-    let hash_result = hash_file(&file, &[Algorithm::Blake3, Algorithm::Sha256], false, false).unwrap();
+    let hash_result =
+        hash_file(&file, &[Algorithm::Blake3, Algorithm::Sha256], false, false).unwrap();
     let blake3_hash = hash_result.hashes[&Algorithm::Blake3].clone();
     let sha256_hash = hash_result.hashes[&Algorithm::Sha256].clone();
 
@@ -277,9 +278,8 @@ fn test_fuzzy_audit_output_contains_tilde_indicator() {
     orig.flush().unwrap();
 
     // Hash the original with ssdeep
-    let orig_result = blazehash::hash::hash_file(
-        orig.path(), &[Algorithm::Ssdeep], false, false
-    ).unwrap();
+    let orig_result =
+        blazehash::hash::hash_file(orig.path(), &[Algorithm::Ssdeep], false, false).unwrap();
 
     // Build manifest from original
     let manifest_content = {
@@ -290,7 +290,9 @@ fn test_fuzzy_audit_output_contains_tilde_indicator() {
         String::from_utf8(buf).unwrap()
     };
     let mut manifest_file = NamedTempFile::new().unwrap();
-    manifest_file.write_all(manifest_content.as_bytes()).unwrap();
+    manifest_file
+        .write_all(manifest_content.as_bytes())
+        .unwrap();
     manifest_file.flush().unwrap();
 
     // Create a slightly modified file (1 byte changed in the middle) — should fuzzy-match
@@ -300,11 +302,14 @@ fn test_fuzzy_audit_output_contains_tilde_indicator() {
     modified.write_all(&mod_data).unwrap();
     modified.flush().unwrap();
 
-    let output = Command::cargo_bin("blazehash").unwrap()
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
         .args([
             "-a",
-            "-k", manifest_file.path().to_str().unwrap(),
-            "--fuzzy-threshold", "50",
+            "-k",
+            manifest_file.path().to_str().unwrap(),
+            "--fuzzy-threshold",
+            "50",
             modified.path().to_str().unwrap(),
         ])
         .output()
@@ -323,7 +328,10 @@ fn test_fuzzy_audit_output_contains_tilde_indicator() {
 
 // ---- Fuzzy audit tests (Task 8) ----
 
-fn make_manifest_content(algorithms: &[Algorithm], entries: &[blazehash::hash::FileHashResult]) -> String {
+fn make_manifest_content(
+    algorithms: &[Algorithm],
+    entries: &[blazehash::hash::FileHashResult],
+) -> String {
     let mut buf = Vec::new();
     write_header(&mut buf, algorithms).unwrap();
     for entry in entries {
@@ -362,15 +370,67 @@ fn test_fuzzy_audit_exact_match_still_works() {
     let data = b"The quick brown fox jumps over the lazy dog. ".repeat(20);
     fs::write(&file, &data).unwrap();
 
-    let result = hash_file(
-        &file, &[Algorithm::Blake3, Algorithm::Ssdeep], false, false
-    ).unwrap();
+    let result = hash_file(&file, &[Algorithm::Blake3, Algorithm::Ssdeep], false, false).unwrap();
 
     let manifest = make_manifest_content(&[Algorithm::Blake3, Algorithm::Ssdeep], &[result]);
 
     let audit_result = audit(&[file], &manifest, 50, 5).unwrap();
-    assert_eq!(audit_result.matched, 1, "exact match must work with fuzzy algos present");
+    assert_eq!(
+        audit_result.matched, 1,
+        "exact match must work with fuzzy algos present"
+    );
     assert_eq!(audit_result.fuzzy_matched, 0);
+}
+
+// ---- Universal manifest loader tests (Task 7) ----
+
+#[test]
+fn test_load_manifest_hashdeep_format() {
+    use blazehash::manifest_loader::load_manifest;
+    let dir = tempfile::tempdir().unwrap();
+    let manifest = dir.path().join("test.hash");
+    std::fs::write(&manifest, "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n## comment\n5,abc123,/file.bin\n").unwrap();
+    let records = load_manifest(&manifest).unwrap();
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0].path, std::path::PathBuf::from("/file.bin"));
+}
+
+#[test]
+fn test_load_manifest_blazehash_format() {
+    use blazehash::manifest_loader::load_manifest;
+    let dir = tempfile::tempdir().unwrap();
+    let manifest = dir.path().join("test.hash");
+    std::fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n## comment\n5,abc123,/file.bin\n").unwrap();
+    let records = load_manifest(&manifest).unwrap();
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0].path, std::path::PathBuf::from("/file.bin"));
+}
+
+#[test]
+fn test_find_manifest_finds_single_candidate() {
+    use blazehash::manifest_loader::find_manifest;
+    let dir = tempfile::tempdir().unwrap();
+    let manifest = dir.path().join("manifest.hash");
+    std::fs::write(&manifest, "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n##\n").unwrap();
+    let found = find_manifest(&[dir.path()]).unwrap();
+    assert_eq!(found, manifest);
+}
+
+#[test]
+fn test_find_manifest_errors_on_multiple() {
+    use blazehash::manifest_loader::find_manifest;
+    let dir = tempfile::tempdir().unwrap();
+    let header = "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n##\n";
+    std::fs::write(dir.path().join("a.hash"), header).unwrap();
+    std::fs::write(dir.path().join("b.hash"), header).unwrap();
+    assert!(find_manifest(&[dir.path()]).is_err());
+}
+
+#[test]
+fn test_find_manifest_errors_on_none() {
+    use blazehash::manifest_loader::find_manifest;
+    let dir = tempfile::tempdir().unwrap();
+    assert!(find_manifest(&[dir.path()]).is_err());
 }
 
 #[test]
@@ -387,15 +447,14 @@ fn test_fuzzy_audit_unrelated_file_is_new() {
     let data_b: Vec<u8> = (128u8..=255).cycle().take(400).collect();
     fs::write(&different, &data_b).unwrap();
 
-    let audit_result = audit(
-        &[different],
-        &manifest,
-        50,
-        5,
-    ).unwrap();
+    let audit_result = audit(&[different], &manifest, 50, 5).unwrap();
 
     // Unrelated data should not fuzzy-match above 50%
     let is_new_or_low_fuzzy = audit_result.new_files == 1 || audit_result.fuzzy_matched == 0;
-    assert!(is_new_or_low_fuzzy, "unrelated file should be New (not matched), got: matched={} fuzzy_matched={}", audit_result.matched, audit_result.fuzzy_matched);
+    assert!(
+        is_new_or_low_fuzzy,
+        "unrelated file should be New (not matched), got: matched={} fuzzy_matched={}",
+        audit_result.matched, audit_result.fuzzy_matched
+    );
     assert_eq!(audit_result.matched, 0, "must not be a full match");
 }
