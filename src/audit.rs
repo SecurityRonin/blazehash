@@ -21,9 +21,16 @@ pub enum AuditStatus {
     Matched(PathBuf),
     Changed(PathBuf),
     New(PathBuf),
-    Moved { path: PathBuf, original: PathBuf },
+    Moved {
+        path: PathBuf,
+        original: PathBuf,
+    },
     Missing(PathBuf),
-    FuzzyMatch { path: PathBuf, original: PathBuf, similarity: u32 },
+    FuzzyMatch {
+        path: PathBuf,
+        original: PathBuf,
+        similarity: u32,
+    },
 }
 
 pub fn audit(

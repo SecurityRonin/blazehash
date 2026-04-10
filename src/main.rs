@@ -64,7 +64,6 @@ fn main() -> Result<()> {
                 "NSRL support requires the `nsrl` feature: cargo build --features nsrl"
             );
         }
-        return Ok(());
     }
 
     let algorithms = cli.flat_algorithms();
@@ -77,7 +76,7 @@ fn main() -> Result<()> {
         Mode::NsrlBuildBloom => unreachable!(),
         Mode::Sign => {
             let manifest = cli.paths.get(1)
-                .map(|p| PathBuf::from(p))
+                .map(PathBuf::from)
                 .or_else(|| {
                     {
                         let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));

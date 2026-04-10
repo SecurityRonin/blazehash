@@ -49,7 +49,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
     let append = resume && output.is_some_and(|p| p.exists());
     let mut writer = make_writer(output.map(|p| p.as_path()), append)?;
 
-    let mut all_results = collect_results(
+    let all_results = collect_results(
         paths,
         algorithms,
         recursive,

@@ -86,7 +86,11 @@ impl<'a> GpuMd5<'a> {
             cache: None,
         });
 
-        Self { backend, pipeline, bind_group_layout }
+        Self {
+            backend,
+            pipeline,
+            bind_group_layout,
+        }
     }
 
     pub fn hash(&self, data: &[u8]) -> String {
@@ -97,9 +101,7 @@ impl<'a> GpuMd5<'a> {
         let queue = self.backend.queue();
 
         // MD5 words are already LE u32s — upload as native bytes
-        let msg_bytes: Vec<u8> = words.iter()
-            .flat_map(|w| w.to_le_bytes())
-            .collect();
+        let msg_bytes: Vec<u8> = words.iter().flat_map(|w| w.to_le_bytes()).collect();
 
         let msg_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("md5_msg"),
@@ -134,9 +136,18 @@ impl<'a> GpuMd5<'a> {
             label: Some("md5_bg"),
             layout: &self.bind_group_layout,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: msg_buf.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: digest_buf.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 2, resource: params_buf.as_entire_binding() },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: msg_buf.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: digest_buf.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: params_buf.as_entire_binding(),
+                },
             ],
         });
 
@@ -167,14 +178,16 @@ impl<'a> GpuMd5<'a> {
 
         let data = slice.get_mapped_range();
         // MD5 digest: 4 LE u32 words, output as little-endian hex
-        let digest: Vec<u32> = data.chunks_exact(4)
+        let digest: Vec<u32> = data
+            .chunks_exact(4)
             .map(|c| u32::from_le_bytes([c[0], c[1], c[2], c[3]]))
             .collect();
         drop(data);
         staging_buf.unmap();
 
         // Format each word as little-endian bytes in hex
-        digest.iter()
+        digest
+            .iter()
             .flat_map(|w| w.to_le_bytes())
             .map(|b| format!("{b:02x}"))
             .collect()

@@ -60,7 +60,13 @@ fn test_state_same_device_enabled_returns_use_thresholds() {
     };
     cfg.save(&path).unwrap();
     let state = GpuConfigState::resolve(GpuConfig::load(&path), Some("NVIDIA RTX 3090"), &path);
-    assert_eq!(state, GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 });
+    assert_eq!(
+        state,
+        GpuConfigState::UseThresholds {
+            single_mb: 48,
+            multi_mb: 3
+        }
+    );
 }
 
 #[test]
@@ -115,10 +121,13 @@ fn test_state_no_gpu_adapter_returns_skip_leaves_config() {
 #[test]
 fn test_no_calibrate_flag_returns_conservative_defaults() {
     let state = GpuConfigState::resolve_no_calibrate(Some("NVIDIA RTX 3090"));
-    assert_eq!(state, GpuConfigState::UseThresholds {
-        single_mb: blazehash::gpu::config::DEFAULT_THRESHOLD_SINGLE_MB,
-        multi_mb: blazehash::gpu::config::DEFAULT_THRESHOLD_MULTI_MB,
-    });
+    assert_eq!(
+        state,
+        GpuConfigState::UseThresholds {
+            single_mb: blazehash::gpu::config::DEFAULT_THRESHOLD_SINGLE_MB,
+            multi_mb: blazehash::gpu::config::DEFAULT_THRESHOLD_MULTI_MB,
+        }
+    );
 }
 
 #[test]
@@ -139,8 +148,14 @@ fn test_backend_skips_software_renderers() {
     if let Some(b) = backend {
         let name = b.adapter_name().to_lowercase();
         assert!(!name.contains("warp"), "WARP is a software renderer");
-        assert!(!name.contains("llvmpipe"), "llvmpipe is a software renderer");
-        assert!(!name.contains("software"), "software renderer must be skipped");
+        assert!(
+            !name.contains("llvmpipe"),
+            "llvmpipe is a software renderer"
+        );
+        assert!(
+            !name.contains("software"),
+            "software renderer must be skipped"
+        );
     }
 }
 
@@ -152,22 +167,32 @@ fn test_gpu_sha256_empty_input() {
     };
     let hasher = blazehash::gpu::sha256::GpuSha256::new(&backend);
     let result = hasher.hash(b"");
-    assert_eq!(result, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    assert_eq!(
+        result,
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    );
 }
 
 #[test]
 fn test_gpu_sha256_abc() {
-    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else {
+        return;
+    };
     let hasher = blazehash::gpu::sha256::GpuSha256::new(&backend);
     let result = hasher.hash(b"abc");
-    assert_eq!(result, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+    assert_eq!(
+        result,
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
 }
 
 #[test]
 fn test_gpu_sha256_matches_cpu_for_various_sizes() {
-    use sha2::{Sha256, Digest};
+    use sha2::{Digest, Sha256};
 
-    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else {
+        return;
+    };
     let hasher = blazehash::gpu::sha256::GpuSha256::new(&backend);
 
     for size in [0usize, 1, 55, 56, 63, 64, 128, 1023, 4096] {
@@ -180,9 +205,11 @@ fn test_gpu_sha256_matches_cpu_for_various_sizes() {
 
 #[test]
 fn test_gpu_sha256_large_file_matches_cpu() {
-    use sha2::{Sha256, Digest};
+    use sha2::{Digest, Sha256};
 
-    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else {
+        return;
+    };
     let hasher = blazehash::gpu::sha256::GpuSha256::new(&backend);
 
     let data = vec![0x42u8; 1024 * 1024]; // 1 MiB
@@ -205,7 +232,9 @@ fn test_gpu_md5_empty_input() {
 
 #[test]
 fn test_gpu_md5_abc() {
-    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else {
+        return;
+    };
     let hasher = blazehash::gpu::md5::GpuMd5::new(&backend);
     let result = hasher.hash(b"abc");
     // MD5("abc") = 900150983cd24fb0d6963f7d28e17f72
@@ -214,9 +243,11 @@ fn test_gpu_md5_abc() {
 
 #[test]
 fn test_gpu_md5_matches_cpu_for_various_sizes() {
-    use md5::{Md5, Digest};
+    use md5::{Digest, Md5};
 
-    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else {
+        return;
+    };
     let hasher = blazehash::gpu::md5::GpuMd5::new(&backend);
 
     for size in [0usize, 1, 55, 56, 63, 64, 128, 1023, 4096] {
@@ -229,9 +260,11 @@ fn test_gpu_md5_matches_cpu_for_various_sizes() {
 
 #[test]
 fn test_gpu_md5_large_file_matches_cpu() {
-    use md5::{Md5, Digest};
+    use md5::{Digest, Md5};
 
-    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else { return; };
+    let Some(backend) = blazehash::gpu::backend::GpuBackend::detect() else {
+        return;
+    };
     let hasher = blazehash::gpu::md5::GpuMd5::new(&backend);
 
     let data = vec![0x42u8; 1024 * 1024]; // 1 MiB
@@ -242,14 +275,23 @@ fn test_gpu_md5_large_file_matches_cpu() {
 
 // ---- Task 13: GPU threshold decision function ----
 
-use blazehash::gpu::threshold::{should_use_gpu, GPU_ALGOS};
 use blazehash::algorithm::Algorithm;
+use blazehash::gpu::threshold::{should_use_gpu, GPU_ALGOS};
 
 #[test]
 fn test_gpu_algos_excludes_blake3() {
-    assert!(!GPU_ALGOS.contains(&Algorithm::Blake3), "BLAKE3 must not be in GPU_ALGOS");
-    assert!(GPU_ALGOS.contains(&Algorithm::Sha256), "SHA-256 must be in GPU_ALGOS");
-    assert!(GPU_ALGOS.contains(&Algorithm::Md5), "MD5 must be in GPU_ALGOS");
+    assert!(
+        !GPU_ALGOS.contains(&Algorithm::Blake3),
+        "BLAKE3 must not be in GPU_ALGOS"
+    );
+    assert!(
+        GPU_ALGOS.contains(&Algorithm::Sha256),
+        "SHA-256 must be in GPU_ALGOS"
+    );
+    assert!(
+        GPU_ALGOS.contains(&Algorithm::Md5),
+        "MD5 must be in GPU_ALGOS"
+    );
 }
 
 #[test]
@@ -267,53 +309,83 @@ fn test_should_use_gpu_needs_calibration_always_false() {
 
 #[test]
 fn test_should_use_gpu_blake3_only_always_false() {
-    let state = GpuConfigState::UseThresholds { single_mb: 10, multi_mb: 3 };
+    let state = GpuConfigState::UseThresholds {
+        single_mb: 10,
+        multi_mb: 3,
+    };
     // BLAKE3 is not GPU-eligible — never use GPU even if file is huge
     assert!(!should_use_gpu(1000, &[Algorithm::Blake3], &state));
 }
 
 #[test]
 fn test_should_use_gpu_single_algo_below_threshold() {
-    let state = GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 };
+    let state = GpuConfigState::UseThresholds {
+        single_mb: 48,
+        multi_mb: 3,
+    };
     // 10 MB < 48 MB threshold — use CPU
     assert!(!should_use_gpu(10, &[Algorithm::Sha256], &state));
 }
 
 #[test]
 fn test_should_use_gpu_single_algo_above_threshold() {
-    let state = GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 };
+    let state = GpuConfigState::UseThresholds {
+        single_mb: 48,
+        multi_mb: 3,
+    };
     // 100 MB > 48 MB threshold — use GPU
     assert!(should_use_gpu(100, &[Algorithm::Sha256], &state));
 }
 
 #[test]
 fn test_should_use_gpu_multi_algo_below_threshold() {
-    let state = GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 };
+    let state = GpuConfigState::UseThresholds {
+        single_mb: 48,
+        multi_mb: 3,
+    };
     // 1 MB < 3 MB multi threshold with 2 GPU-eligible algos — use CPU
-    assert!(!should_use_gpu(1, &[Algorithm::Sha256, Algorithm::Md5], &state));
+    assert!(!should_use_gpu(
+        1,
+        &[Algorithm::Sha256, Algorithm::Md5],
+        &state
+    ));
 }
 
 #[test]
 fn test_should_use_gpu_multi_algo_above_threshold() {
-    let state = GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 };
+    let state = GpuConfigState::UseThresholds {
+        single_mb: 48,
+        multi_mb: 3,
+    };
     // 5 MB > 3 MB multi threshold with 2 GPU-eligible algos — use GPU
-    assert!(should_use_gpu(5, &[Algorithm::Sha256, Algorithm::Md5], &state));
+    assert!(should_use_gpu(
+        5,
+        &[Algorithm::Sha256, Algorithm::Md5],
+        &state
+    ));
 }
 
 #[test]
 fn test_should_use_gpu_mixed_algos_counts_only_gpu_eligible() {
-    let state = GpuConfigState::UseThresholds { single_mb: 48, multi_mb: 3 };
+    let state = GpuConfigState::UseThresholds {
+        single_mb: 48,
+        multi_mb: 3,
+    };
     // Blake3 + Sha256 + Md5 — only 2 are GPU-eligible (Sha256, Md5)
     // 2 eligible algos → multi path: 5 MB > 3 MB → GPU
-    assert!(should_use_gpu(5, &[Algorithm::Blake3, Algorithm::Sha256, Algorithm::Md5], &state));
+    assert!(should_use_gpu(
+        5,
+        &[Algorithm::Blake3, Algorithm::Sha256, Algorithm::Md5],
+        &state
+    ));
 }
 
 // ---- Task 14: GPU integration in hash_file ----
 
 #[test]
 fn test_gpu_hash_file_sha256_matches_cpu() {
-    use blazehash::hash::hash_file;
     use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
     use std::io::Write;
     use tempfile::NamedTempFile;
 

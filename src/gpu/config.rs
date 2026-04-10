@@ -46,7 +46,11 @@ impl GpuConfigState {
     /// Resolve GPU state given loaded config and current detected adapter name.
     ///
     /// `adapter_name`: None means no real GPU detected (absent, or software renderer).
-    pub fn resolve(config: Option<GpuConfig>, adapter_name: Option<&str>, _config_path: &Path) -> Self {
+    pub fn resolve(
+        config: Option<GpuConfig>,
+        adapter_name: Option<&str>,
+        _config_path: &Path,
+    ) -> Self {
         let Some(name) = adapter_name else {
             return GpuConfigState::Skip;
         };

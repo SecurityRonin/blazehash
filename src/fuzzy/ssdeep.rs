@@ -15,14 +15,22 @@ struct RollingState {
 
 impl RollingState {
     fn new() -> Self {
-        Self { window: [0u8; ROLLING_WINDOW], h1: 0, h2: 0, h3: 0, n: 0 }
+        Self {
+            window: [0u8; ROLLING_WINDOW],
+            h1: 0,
+            h2: 0,
+            h3: 0,
+            n: 0,
+        }
     }
 
     fn update(&mut self, c: u8) {
-        self.h2 = self.h2
+        self.h2 = self
+            .h2
             .wrapping_sub(self.h1)
             .wrapping_add((ROLLING_WINDOW as u32).wrapping_mul(c as u32));
-        self.h1 = self.h1
+        self.h1 = self
+            .h1
             .wrapping_add(c as u32)
             .wrapping_sub(self.window[self.n % ROLLING_WINDOW] as u32);
         self.window[self.n % ROLLING_WINDOW] = c;
@@ -93,11 +101,17 @@ pub fn block_size(hash: &str) -> Option<u32> {
 
 /// Edit distance (Levenshtein) between two byte slices, capped at `cap`.
 fn edit_distance(a: &[u8], b: &[u8], cap: usize) -> usize {
-    if a == b { return 0; }
+    if a == b {
+        return 0;
+    }
     let n = a.len();
     let m = b.len();
-    if n == 0 { return m.min(cap); }
-    if m == 0 { return n.min(cap); }
+    if n == 0 {
+        return m.min(cap);
+    }
+    if m == 0 {
+        return n.min(cap);
+    }
 
     let mut prev: Vec<usize> = (0..=m).collect();
     let mut curr = vec![0usize; m + 1];
@@ -124,10 +138,18 @@ fn edit_distance(a: &[u8], b: &[u8], cap: usize) -> usize {
 pub fn similarity(h1: &str, h2: &str) -> u32 {
     let p1: Vec<&str> = h1.splitn(3, ':').collect();
     let p2: Vec<&str> = h2.splitn(3, ':').collect();
-    if p1.len() < 3 || p2.len() < 3 { return 0; }
+    if p1.len() < 3 || p2.len() < 3 {
+        return 0;
+    }
 
-    let bs1: u32 = match p1[0].parse() { Ok(v) => v, Err(_) => return 0 };
-    let bs2: u32 = match p2[0].parse() { Ok(v) => v, Err(_) => return 0 };
+    let bs1: u32 = match p1[0].parse() {
+        Ok(v) => v,
+        Err(_) => return 0,
+    };
+    let bs2: u32 = match p2[0].parse() {
+        Ok(v) => v,
+        Err(_) => return 0,
+    };
 
     if bs1 == bs2 {
         score_pair(p1[1].as_bytes(), p2[1].as_bytes())
@@ -142,7 +164,9 @@ pub fn similarity(h1: &str, h2: &str) -> u32 {
 }
 
 fn score_pair(a: &[u8], b: &[u8]) -> u32 {
-    if a.is_empty() || b.is_empty() { return 0; }
+    if a.is_empty() || b.is_empty() {
+        return 0;
+    }
     let len = a.len().max(b.len());
     let dist = edit_distance(a, b, len);
     100u32.saturating_sub((dist * 100 / len) as u32)
@@ -165,22 +189,31 @@ impl Default for SsdeepIndex {
 
 impl SsdeepIndex {
     pub fn new() -> Self {
-        Self { inner: HashMap::new() }
+        Self {
+            inner: HashMap::new(),
+        }
     }
 
     /// Insert a ssdeep hash string and its associated path.
     pub fn insert(&mut self, hash: &str, path: PathBuf) {
         if let Some(bs) = block_size(hash) {
-            self.inner.entry(bs).or_default().push((hash.to_string(), path));
+            self.inner
+                .entry(bs)
+                .or_default()
+                .push((hash.to_string(), path));
         }
     }
 
     /// Return all candidates compatible with `query_hash` (same bs, or ×2, or ÷2).
     pub fn candidates(&self, query_hash: &str) -> Vec<&(String, PathBuf)> {
-        let Some(bs) = block_size(query_hash) else { return vec![] };
+        let Some(bs) = block_size(query_hash) else {
+            return vec![];
+        };
         let mut results = Vec::new();
         for candidate_bs in [bs / 2, bs, bs * 2] {
-            if candidate_bs == 0 { continue; }
+            if candidate_bs == 0 {
+                continue;
+            }
             if let Some(entries) = self.inner.get(&candidate_bs) {
                 results.extend(entries.iter());
             }

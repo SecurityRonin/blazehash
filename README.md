@@ -397,7 +397,7 @@ blazehash --verify-image disk.raw
 
 ## Advanced
 
-### New algorithms: CRC32C, XXH3, SHAKE
+### Non-cryptographic and XOF algorithms
 
 ```bash
 # CRC32C — ultra-fast non-cryptographic checksum (storage integrity)
@@ -413,7 +413,7 @@ blazehash -r /mnt/data -c shake128
 blazehash -r /mnt/data -c shake256
 ```
 
-> **Note:** CRC32C, XXH3, and SHAKE variants are not included in hashdeep-compatible manifests by default because they aren't part of hashdeep's algorithm set. Use them for integrity checking within blazehash workflows.
+> **CRC32C and XXH3** are not cryptographically secure — use them for storage integrity checking and deduplication, not for evidence integrity. **SHAKE-128/256** are cryptographic extendable-output functions (XOFs) from the SHA-3 family.
 
 ### Direct I/O — bypass the OS page cache
 

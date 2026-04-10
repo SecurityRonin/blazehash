@@ -45,14 +45,13 @@ pub fn run(
         }
     }
 
-    let has_dupes;
     let mut total_redundant = 0usize;
     let mut reclaimable = 0u64;
 
     let mut sorted_groups: Vec<_> = groups.values().filter(|g| g.len() >= 2).collect();
     sorted_groups.sort_by_key(|g| Reverse(g.len()));
 
-    has_dupes = !sorted_groups.is_empty();
+    let has_dupes = !sorted_groups.is_empty();
 
     for group in &sorted_groups {
         total_redundant += group.len() - 1;

@@ -241,6 +241,9 @@ pub fn hash_file(
     no_cache: bool,
     no_gpu: bool,
 ) -> Result<FileHashResult> {
+    // no_gpu is only consumed by the gpu feature block below; suppress the warning otherwise.
+    #[cfg(not(feature = "gpu"))]
+    let _ = no_gpu;
     let metadata = fs::metadata(path)
         .with_context(|| format!("failed to read metadata for {}", path.display()))?;
     let size = metadata.len();

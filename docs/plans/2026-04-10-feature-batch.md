@@ -2225,13 +2225,28 @@ git commit -m "feat: add NSRL lookup with SQLite and bloom filter backends (--ns
 
 ---
 
-### Task 15: Signed manifests (`blazehash keygen/sign/verify-sig`)
+### Task 15: Signed manifests (password-derived Ed25519, no key files)
+
+**Design (revised from original):**
+- No `keygen` command — no key files to manage
+- Password-derived keypair: `Argon2id(password, b"blazehash-signing-v1")` → 32-byte seed → Ed25519
+- Same password always produces same keypair (deterministic, no salt file)
+- Password from keyboard via `rpassword` crate (`/dev/tty`, not stdin)
+- `BLAZEHASH_SIGN_PASSWORD` env var for scripted use (prints warning to stderr)
+- New crates needed: add `argon2 = "0.5"` and `rpassword = "6"` to `[dependencies]` in `Cargo.toml`
+- `--sign` flag on hash command — requires `--output` (errors with hint if missing)
+- `blazehash sign [manifest]` — standalone sign; auto-finds via `find_manifest()` if no arg given
+- `blazehash verify-sig <manifest> --expected-pubkey <hex>`
+- `.sig` sidecar: `blazehash-sig-v1\npubkey: <hex>\nsigned: <timestamp>\nsig: <hex>`
+- Audit auto-verifies `.sig` sidecar if present and `--expected-pubkey` given; prints pubkey on sign for chain-of-custody recording
 
 **Files:**
 - Create: `src/signing.rs`
+- Modify: `Cargo.toml` (add argon2, rpassword)
 - Modify: `src/lib.rs`
 - Modify: `src/cli.rs`
 - Modify: `src/main.rs`
+- Modify: `src/commands/hash.rs` (--sign flag)
 - Modify: `src/commands/audit.rs`
 - Create: `tests/signing_tests.rs`
 
@@ -2245,16 +2260,68 @@ use tempfile::tempdir;
 use std::fs;
 
 #[test]
-fn test_keygen_creates_key_files() {
+fn test_sign_creates_sig_sidecar() {
+    // Uses env var for non-interactive signing in tests
     let dir = tempdir().unwrap();
-    let key_path = dir.path().join("signing");
+    let manifest = dir.path().join("manifest.hash");
+    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n").unwrap();
 
     Command::cargo_bin("blazehash").unwrap()
-        .args(["keygen", "--out", key_path.to_str().unwrap()])
+        .env("BLAZEHASH_SIGN_PASSWORD", "test-password-for-ci")
+        .args(["sign", manifest.to_str().unwrap()])
         .assert().success();
 
-    assert!(dir.path().join("signing.key").exists(), "signing.key not created");
-    assert!(dir.path().join("signing.pub").exists(), "signing.pub not created");
+    assert!(dir.path().join("manifest.hash.sig").exists(), ".sig file not created");
+}
+
+#[test]
+fn test_verify_sig_roundtrip() {
+    let dir = tempdir().unwrap();
+    let manifest = dir.path().join("manifest.hash");
+    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n").unwrap();
+
+    // Sign
+    let sign_output = Command::cargo_bin("blazehash").unwrap()
+        .env("BLAZEHASH_SIGN_PASSWORD", "test-password-for-ci")
+        .args(["sign", manifest.to_str().unwrap()])
+        .output().unwrap();
+    let stderr = String::from_utf8(sign_output.stderr).unwrap();
+    // Extract public key from stderr output
+    let pubkey = stderr.lines()
+        .find(|l| l.contains("Public key:"))
+        .and_then(|l| l.split_whitespace().last())
+        .expect("public key not printed to stderr");
+
+    // Verify
+    Command::cargo_bin("blazehash").unwrap()
+        .args(["verify-sig", manifest.to_str().unwrap(), "--expected-pubkey", pubkey])
+        .assert().success()
+        .stdout(predicates::str::contains("[+]"));
+}
+
+#[test]
+fn test_verify_sig_fails_on_tampered_manifest() {
+    let dir = tempdir().unwrap();
+    let manifest = dir.path().join("manifest.hash");
+    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n").unwrap();
+
+    let sign_output = Command::cargo_bin("blazehash").unwrap()
+        .env("BLAZEHASH_SIGN_PASSWORD", "test-password-for-ci")
+        .args(["sign", manifest.to_str().unwrap()])
+        .output().unwrap();
+    let stderr = String::from_utf8(sign_output.stderr).unwrap();
+    let pubkey = stderr.lines()
+        .find(|l| l.contains("Public key:"))
+        .and_then(|l| l.split_whitespace().last())
+        .expect("public key not printed to stderr");
+
+    // Tamper
+    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,TAMPERED,/f.bin\n").unwrap();
+
+    Command::cargo_bin("blazehash").unwrap()
+        .args(["verify-sig", manifest.to_str().unwrap(), "--expected-pubkey", pubkey])
+        .assert().failure()
+        .stdout(predicates::str::contains("[!]"));
 }
 
 #[test]

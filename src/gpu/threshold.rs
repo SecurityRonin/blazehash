@@ -19,7 +19,10 @@ pub const GPU_ALGOS: &[Algorithm] = &[Algorithm::Sha256, Algorithm::Md5];
 ///   - 2+ GPU-eligible algos: file_size_mb >= threshold_multi_mb
 pub fn should_use_gpu(file_size_mb: u64, algos: &[Algorithm], state: &GpuConfigState) -> bool {
     let (single_mb, multi_mb) = match state {
-        GpuConfigState::UseThresholds { single_mb, multi_mb } => (*single_mb as u64, *multi_mb as u64),
+        GpuConfigState::UseThresholds {
+            single_mb,
+            multi_mb,
+        } => (*single_mb as u64, *multi_mb as u64),
         _ => return false,
     };
 

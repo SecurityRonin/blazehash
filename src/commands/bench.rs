@@ -114,7 +114,8 @@ fn calibrate(backend: &blazehash::gpu::backend::GpuBackend) -> (u32, u32, bool) 
         // CPU timing
         let t0 = Instant::now();
         for _ in 0..3 {
-            let _ = blazehash::algorithm::hash_bytes(blazehash::algorithm::Algorithm::Sha256, &data);
+            let _ =
+                blazehash::algorithm::hash_bytes(blazehash::algorithm::Algorithm::Sha256, &data);
         }
         let cpu_ms = t0.elapsed().as_millis() / 3;
 
@@ -135,7 +136,11 @@ fn calibrate(backend: &blazehash::gpu::backend::GpuBackend) -> (u32, u32, bool) 
     }
 
     if !gpu_ever_won {
-        return (DEFAULT_THRESHOLD_SINGLE_MB, DEFAULT_THRESHOLD_MULTI_MB, false);
+        return (
+            DEFAULT_THRESHOLD_SINGLE_MB,
+            DEFAULT_THRESHOLD_MULTI_MB,
+            false,
+        );
     }
 
     let multi_threshold = (single_threshold / 4).max(1);

@@ -125,7 +125,7 @@ pub fn hash_bytes(algo: Algorithm, data: &[u8]) -> String {
             format!("{hash:032x}")
         }
         Algorithm::Shake128 => {
-            use sha3::digest::{ExtendableOutput, Update, XofReader};
+            use sha3::digest::{ExtendableOutput, XofReader};
             let mut h = sha3::Shake128::default();
             sha3::digest::Update::update(&mut h, data);
             let mut reader = h.finalize_xof();
@@ -134,7 +134,7 @@ pub fn hash_bytes(algo: Algorithm, data: &[u8]) -> String {
             hex::encode(buf)
         }
         Algorithm::Shake256 => {
-            use sha3::digest::{ExtendableOutput, Update, XofReader};
+            use sha3::digest::{ExtendableOutput, XofReader};
             let mut h = sha3::Shake256::default();
             sha3::digest::Update::update(&mut h, data);
             let mut reader = h.finalize_xof();

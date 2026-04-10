@@ -84,7 +84,11 @@ impl<'a> GpuSha256<'a> {
             cache: None,
         });
 
-        Self { backend, pipeline, bind_group_layout }
+        Self {
+            backend,
+            pipeline,
+            bind_group_layout,
+        }
     }
 
     pub fn hash(&self, data: &[u8]) -> String {
@@ -95,9 +99,7 @@ impl<'a> GpuSha256<'a> {
         let queue = self.backend.queue();
 
         // Upload message as little-endian bytes so GPU reads the correct integer values
-        let msg_bytes: Vec<u8> = words.iter()
-            .flat_map(|w| w.to_le_bytes())
-            .collect();
+        let msg_bytes: Vec<u8> = words.iter().flat_map(|w| w.to_le_bytes()).collect();
 
         let msg_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("sha256_msg"),
@@ -132,9 +134,18 @@ impl<'a> GpuSha256<'a> {
             label: Some("sha256_bg"),
             layout: &self.bind_group_layout,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: msg_buf.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: digest_buf.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 2, resource: params_buf.as_entire_binding() },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: msg_buf.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: digest_buf.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: params_buf.as_entire_binding(),
+                },
             ],
         });
 
@@ -167,7 +178,8 @@ impl<'a> GpuSha256<'a> {
         let data = slice.get_mapped_range();
         // GPU writes u32 values in native (little-endian) byte order.
         // Read them back as little-endian to recover the original integer value.
-        let digest: Vec<u32> = data.chunks_exact(4)
+        let digest: Vec<u32> = data
+            .chunks_exact(4)
             .map(|c| u32::from_le_bytes([c[0], c[1], c[2], c[3]]))
             .collect();
         drop(data);
