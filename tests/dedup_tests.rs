@@ -54,3 +54,34 @@ fn test_dedup_from_manifest() {
     assert!(stdout.contains("a.bin") || stdout.contains("b.bin"),
         "expected duplicate files: {stdout}");
 }
+
+#[test]
+fn test_dedup_dupes_excludes_canonical() {
+    let dir = tempdir().unwrap();
+    fs::write(dir.path().join("a.bin"), b"same").unwrap();
+    fs::write(dir.path().join("b.bin"), b"same").unwrap();
+    fs::write(dir.path().join("c.bin"), b"same").unwrap();
+
+    let output = Command::cargo_bin("blazehash").unwrap()
+        .args(["dedup", "--dedup-dupes", dir.path().to_str().unwrap()])
+        .output().unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let lines: Vec<&str> = stdout.lines().collect();
+    // Should print 2 redundant copies (not 3 — canonical is excluded)
+    assert_eq!(lines.len(), 2, "expected 2 redundant copies, got: {stdout}");
+}
+
+#[test]
+fn test_dedup_grouping_is_deterministic() {
+    let dir = tempdir().unwrap();
+    fs::write(dir.path().join("a.bin"), b"dup").unwrap();
+    fs::write(dir.path().join("b.bin"), b"dup").unwrap();
+
+    let out1 = Command::cargo_bin("blazehash").unwrap()
+        .args(["dedup", dir.path().to_str().unwrap(), "-c", "blake3"])
+        .output().unwrap();
+    let out2 = Command::cargo_bin("blazehash").unwrap()
+        .args(["dedup", dir.path().to_str().unwrap(), "-c", "blake3"])
+        .output().unwrap();
+    assert_eq!(out1.stdout, out2.stdout, "dedup output must be deterministic");
+}
