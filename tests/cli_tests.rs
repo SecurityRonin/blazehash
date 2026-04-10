@@ -195,6 +195,41 @@ fn cli_size_only_directory() {
 }
 
 #[test]
+fn cli_size_only_summary_stderr() {
+    // -s should print a [+] summary line on stderr: file count, total size, time estimate
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("a.txt"), b"aaa").unwrap();
+    fs::write(dir.path().join("b.txt"), b"bbbb").unwrap();
+
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .arg("-s")
+        .arg("-r")
+        .arg(dir.path().to_str().unwrap())
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("2 files"))
+        .stderr(predicate::str::contains("est."));
+}
+
+#[test]
+fn cli_size_only_single_file_summary() {
+    // Single-file -s should also emit summary on stderr
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("test.txt");
+    fs::write(&file, b"hello world").unwrap();
+
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .arg("-s")
+        .arg(file.to_str().unwrap())
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("1 file"))
+        .stderr(predicate::str::contains("est."));
+}
+
+#[test]
 fn cli_bare_mode_no_header() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.txt");
