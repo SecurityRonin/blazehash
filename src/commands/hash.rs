@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use blazehash::algorithm::Algorithm;
-use blazehash::format::{write_csv, write_json, write_jsonl};
+use blazehash::format::{write_csv, write_dfxml, write_json, write_jsonl};
 use blazehash::hash::{hash_file, FileHashResult};
 use blazehash::manifest::{write_header, write_record};
 use blazehash::output::make_writer;
@@ -119,6 +119,7 @@ fn write_output<W: Write>(
 ) -> Result<()> {
     match format {
         "csv" => write_csv(writer, results, algorithms)?,
+        "dfxml" => write_dfxml(writer, results, algorithms)?,
         "json" => write_json(writer, results, algorithms)?,
         "jsonl" => write_jsonl(writer, results, algorithms)?,
         _ => {
