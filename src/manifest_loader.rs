@@ -122,12 +122,10 @@ pub fn load_manifest(path: &Path) -> Result<Vec<ManifestRecord>> {
             Ok(parse_records(&content, &algorithms))
         }
         ManifestFormat::JsonArray | ManifestFormat::Jsonl => {
-            // JSON formats: stub returning empty — extend in a future task
-            Ok(Vec::new())
+            bail!("JSON/JSONL manifest parsing is not yet implemented; use hashdeep format");
         }
         ManifestFormat::Csv => {
-            // CSV format: stub returning empty — extend in a future task
-            Ok(Vec::new())
+            bail!("CSV manifest parsing is not yet implemented; use hashdeep format");
         }
         ManifestFormat::Unknown => {
             bail!(
