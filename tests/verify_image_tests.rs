@@ -137,4 +137,40 @@ mod tests {
             .success()
             .stdout(predicate::str::contains("--verify-image"));
     }
+
+    #[test]
+    fn test_sidecar_verification_pass() {
+        let dir = tempfile::tempdir().unwrap();
+        let image = dir.path().join("evidence.dd");
+        std::fs::write(&image, b"disk image content here").unwrap();
+
+        // Compute actual SHA-256 via blazehash
+        let sha256 = {
+            use blazehash::algorithm::{hash_bytes, Algorithm};
+            hash_bytes(Algorithm::Sha256, b"disk image content here")
+        };
+        std::fs::write(dir.path().join("evidence.dd.sha256"), format!("{sha256}\n")).unwrap();
+
+        Command::cargo_bin("blazehash")
+            .unwrap()
+            .args(["--verify-image", image.to_str().unwrap()])
+            .assert()
+            .success()
+            .stdout(predicates::str::contains("[+]"));
+    }
+
+    #[test]
+    fn test_sidecar_verification_fail() {
+        let dir = tempfile::tempdir().unwrap();
+        let image = dir.path().join("evidence.dd");
+        std::fs::write(&image, b"disk image content here").unwrap();
+        std::fs::write(dir.path().join("evidence.dd.sha256"), "deadbeef\n").unwrap();
+
+        Command::cargo_bin("blazehash")
+            .unwrap()
+            .args(["--verify-image", image.to_str().unwrap()])
+            .assert()
+            .failure()
+            .stdout(predicates::str::contains("[!]"));
+    }
 }
