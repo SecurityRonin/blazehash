@@ -43,6 +43,28 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::NsrlBuildBloom = cli.mode() {
+        #[cfg(feature = "nsrl")]
+        {
+            let db = cli.paths.get(2).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "usage: blazehash nsrl build-bloom <input.db> --output <out.bloom>"
+                )
+            })?;
+            let out = cli.output.as_ref().ok_or_else(|| {
+                anyhow::anyhow!("--output required for nsrl build-bloom")
+            })?;
+            blazehash::nsrl::build_bloom(db, out, 0.001)?;
+        }
+        #[cfg(not(feature = "nsrl"))]
+        {
+            anyhow::bail!(
+                "NSRL support requires the `nsrl` feature: cargo build --features nsrl"
+            );
+        }
+        return Ok(());
+    }
+
     let algorithms = cli.flat_algorithms();
 
     match cli.mode() {
@@ -50,6 +72,7 @@ fn main() -> Result<()> {
         Mode::Bench => unreachable!(),
         Mode::Diff => unreachable!(),
         Mode::Dedup => unreachable!(),
+        Mode::NsrlBuildBloom => unreachable!(),
         Mode::SizeOnly => {
             commands::size_only::run(&cli.paths, cli.recursive, cli.output.as_ref())?;
         }
@@ -92,6 +115,8 @@ fn main() -> Result<()> {
                 no_cache: cli.no_cache,
                 no_gpu: cli.no_gpu,
                 filter: &filter,
+                nsrl: cli.nsrl.as_ref(),
+                nsrl_exclude: cli.nsrl_exclude,
             })?;
         }
     }

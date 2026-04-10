@@ -120,6 +120,14 @@ pub struct Cli {
     /// Print only files that have duplicates
     #[arg(long = "dedup-dupes")]
     pub dedup_dupes: bool,
+
+    /// Path to NSRL database (.db SQLite or .bloom filter file)
+    #[arg(long = "nsrl", value_name = "FILE")]
+    pub nsrl: Option<PathBuf>,
+
+    /// Suppress known-good files from output (requires --nsrl)
+    #[arg(long = "nsrl-exclude")]
+    pub nsrl_exclude: bool,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -163,6 +171,7 @@ pub enum Mode {
     Bench,
     Diff,
     Dedup,
+    NsrlBuildBloom,
     SizeOnly,
     Audit,
     VerifyImage,
@@ -210,6 +219,10 @@ impl Cli {
             Mode::Diff
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("dedup")) {
             Mode::Dedup
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("nsrl"))
+            && self.paths.get(1).and_then(|p| p.to_str()) == Some("build-bloom")
+        {
+            Mode::NsrlBuildBloom
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

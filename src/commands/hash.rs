@@ -24,6 +24,8 @@ pub struct HashOptions<'a> {
     pub no_cache: bool,
     pub no_gpu: bool,
     pub filter: &'a WalkFilter,
+    pub nsrl: Option<&'a PathBuf>,
+    pub nsrl_exclude: bool,
 }
 
 pub fn run(opts: HashOptions<'_>) -> Result<()> {
@@ -38,12 +40,14 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         no_cache,
         no_gpu,
         filter,
+        nsrl,
+        nsrl_exclude,
     } = opts;
     let mut resume_state = load_resume_state(resume, output)?;
     let append = resume && output.is_some_and(|p| p.exists());
     let mut writer = make_writer(output.map(|p| p.as_path()), append)?;
 
-    let all_results = collect_results(
+    let mut all_results = collect_results(
         paths,
         algorithms,
         recursive,
@@ -52,6 +56,30 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         no_gpu,
         filter,
     )?;
+
+    #[cfg(feature = "nsrl")]
+    if let Some(nsrl_path) = nsrl {
+        let lookup = blazehash::nsrl::NsrlLookup::open(nsrl_path)?;
+        let mut known_count = 0usize;
+        all_results = all_results
+            .into_iter()
+            .filter(|r| {
+                let hash_val = r.hashes.values().next().map(|s| s.as_str()).unwrap_or("");
+                if lookup.lookup(hash_val) == blazehash::nsrl::NsrlResult::KnownGood {
+                    eprintln!("[K] {}  (NSRL known-good)", r.path.display());
+                    known_count += 1;
+                    !nsrl_exclude
+                } else {
+                    true
+                }
+            })
+            .collect();
+        if known_count > 0 {
+            eprintln!("[K] {known_count} file(s) matched NSRL");
+        }
+    }
+    #[cfg(not(feature = "nsrl"))]
+    let _ = (nsrl, nsrl_exclude);
 
     let needs_header = !(bare || append);
     write_output(&mut writer, &all_results, algorithms, format, needs_header)?;

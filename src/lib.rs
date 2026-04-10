@@ -1,4 +1,6 @@
 pub mod ads;
+#[cfg(feature = "nsrl")]
+pub mod nsrl;
 pub mod algorithm;
 pub mod audit;
 pub mod forensic_image;
