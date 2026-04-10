@@ -1,6 +1,5 @@
 use crate::algorithm::Algorithm;
 use crate::hash::{hash_file, FileHashResult};
-use crate::parallel_config::ParallelConfig;
 use crate::walk_filter::WalkFilter;
 use anyhow::Result;
 use rayon::prelude::*;
@@ -79,39 +78,23 @@ pub fn walk_and_hash(
         })
         .collect();
 
-    // Determine mean file size to decide sequential vs parallel dispatch.
-    let total_bytes: u64 = filtered
-        .iter()
-        .map(|p| std::fs::metadata(p).map(|m| m.len()).unwrap_or(0))
-        .sum();
-    let mean_bytes = total_bytes / filtered.len().max(1) as u64;
-    let pcfg = ParallelConfig::load_or_default(&ParallelConfig::config_path());
-    let use_parallel = pcfg.should_parallelize(mean_bytes);
-
+    // File walks are I/O-bound: parallel always wins because it hides syscall
+    // latency across cores. The parallel_config threshold applies only to
+    // in-memory hashing (e.g., GPU vs CPU) — not to the directory walk.
     let hash_errors = Mutex::new(Vec::new());
-
-    macro_rules! hash_each {
-        ($iter:expr) => {
-            $iter
-                .filter_map(|path| match hash_file(path, algorithms, false, false) {
-                    Ok(result) => Some(result),
-                    Err(err) => {
-                        hash_errors.lock().unwrap().push(WalkError {
-                            path: path.clone(),
-                            error: err.to_string(),
-                        });
-                        None
-                    }
-                })
-                .collect()
-        };
-    }
-
-    let results: Vec<FileHashResult> = if use_parallel {
-        hash_each!(filtered.par_iter())
-    } else {
-        hash_each!(filtered.iter())
-    };
+    let results: Vec<FileHashResult> = filtered
+        .par_iter()
+        .filter_map(|path| match hash_file(path, algorithms, false, false) {
+            Ok(result) => Some(result),
+            Err(err) => {
+                hash_errors.lock().unwrap().push(WalkError {
+                    path: path.clone(),
+                    error: err.to_string(),
+                });
+                None
+            }
+        })
+        .collect();
 
     let mut errors = walk_errors;
     errors.extend(hash_errors.into_inner().unwrap());
