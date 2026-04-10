@@ -73,7 +73,7 @@ windows-sys = { version = "0.59", features = [
 tokio = { version = "1", features = ["rt-multi-thread", "fs", "sync", "macros"] }
 
 [features]
-default = ["forensic-image"]
+default = ["forensic-image", "gpu"]
 forensic-image = ["dep:ewf"]
 gpu = ["dep:wgpu", "dep:pollster", "dep:toml", "dep:dirs"]
 nsrl = ["dep:rusqlite", "dep:bloomfilter"]

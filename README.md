@@ -457,12 +457,12 @@ Lists files with sizes, no hashing. Useful for a quick inventory before committi
 
 ### GPU-accelerated hashing
 
-When compiled with the `gpu` feature, blazehash auto-offloads SHA-256 and MD5 to the GPU for large files. Calibrate first:
+blazehash automatically offloads SHA-256 and MD5 to the GPU for large files. Run calibration once to tune the crossover threshold for your hardware:
 
 ```bash
 blazehash bench --gpu               # measure GPU vs CPU crossover, write config
-blazehash bench --gpu --no-calibrate  # use conservative defaults
-blazehash -r /mnt/evidence -c sha256 --no-gpu  # force CPU
+blazehash bench --gpu --no-calibrate  # use conservative defaults without writing config
+blazehash -r /mnt/evidence -c sha256 --no-gpu  # override: force CPU only
 ```
 
 ---
