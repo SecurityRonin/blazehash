@@ -7,6 +7,18 @@ const APP_SALT: &[u8] = b"blazehash-signing-v1";
 
 /// Derive an Ed25519 signing key from a password using Argon2id.
 /// Same password always produces the same 32-byte seed → same keypair.
+fn sig_path_for(manifest_path: &Path) -> std::path::PathBuf {
+    let mut p = manifest_path.to_path_buf();
+    let new_name = format!(
+        "{}.sig",
+        manifest_path.file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("manifest")
+    );
+    p.set_file_name(new_name);
+    p
+}
+
 fn derive_key(password: &str) -> Result<SigningKey> {
     let params = Params::new(65536, 3, 1, Some(32))
         .map_err(|e| anyhow::anyhow!("argon2 params: {e}"))?;
@@ -50,17 +62,7 @@ pub fn sign(manifest_path: &Path) -> Result<()> {
     );
 
     // .sig sidecar path: manifest.hash → manifest.hash.sig
-    let sig_path = {
-        let mut p = manifest_path.to_path_buf();
-        let new_name = format!(
-            "{}.sig",
-            manifest_path.file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("manifest")
-        );
-        p.set_file_name(new_name);
-        p
-    };
+    let sig_path = sig_path_for(manifest_path);
 
     std::fs::write(&sig_path, &sig_content)
         .with_context(|| format!("cannot write {}", sig_path.display()))?;
@@ -74,17 +76,7 @@ pub fn sign(manifest_path: &Path) -> Result<()> {
 /// Verify `manifest_path` against its `.sig` sidecar and an expected public key hex.
 /// Returns Ok(true) if valid, Ok(false) if invalid.
 pub fn verify_sig(manifest_path: &Path, expected_pubkey_hex: &str) -> Result<bool> {
-    let sig_path = {
-        let mut p = manifest_path.to_path_buf();
-        let new_name = format!(
-            "{}.sig",
-            manifest_path.file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("manifest")
-        );
-        p.set_file_name(new_name);
-        p
-    };
+    let sig_path = sig_path_for(manifest_path);
 
     let sig_content = std::fs::read_to_string(&sig_path)
         .with_context(|| format!("cannot read sig file {}", sig_path.display()))?;
@@ -103,7 +95,7 @@ pub fn verify_sig(manifest_path: &Path, expected_pubkey_hex: &str) -> Result<boo
         // Verify embedded pubkey matches expected (tamper check on sig file itself)
         if let Some(ref embedded) = embedded_pubkey_hex {
             if embedded.trim() != expected_pubkey_hex.trim() {
-                println!("[!] Sig file pubkey does not match --expected-pubkey");
+                eprintln!("[!] Sig file pubkey does not match --expected-pubkey");
                 return Ok(false);
             }
         }
@@ -139,17 +131,7 @@ pub fn verify_sig(manifest_path: &Path, expected_pubkey_hex: &str) -> Result<boo
 
 /// Auto-verify `.sig` sidecar if present. Returns Ok(false) if no sidecar (not an error).
 pub fn auto_verify_sidecar(manifest_path: &Path, expected_pubkey_hex: Option<&str>) -> Result<bool> {
-    let sig_path = {
-        let mut p = manifest_path.to_path_buf();
-        let new_name = format!(
-            "{}.sig",
-            manifest_path.file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("manifest")
-        );
-        p.set_file_name(new_name);
-        p
-    };
+    let sig_path = sig_path_for(manifest_path);
     if !sig_path.exists() {
         return Ok(false);
     }

@@ -49,8 +49,8 @@ pub fn run(
     };
 
     if !ignore_sig {
-        if let Some(known_path) = effective_known.first() {
-            let _ = blazehash::signing::auto_verify_sidecar(known_path, expected_pubkey.as_deref())?;
+        for known in effective_known {
+            let _ = blazehash::signing::auto_verify_sidecar(known, expected_pubkey.as_deref())?;
         }
     }
 
