@@ -6,6 +6,7 @@ mod mcp;
 use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Mode};
+use std::path::PathBuf;
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -74,6 +75,25 @@ fn main() -> Result<()> {
         Mode::Diff => unreachable!(),
         Mode::Dedup => unreachable!(),
         Mode::NsrlBuildBloom => unreachable!(),
+        Mode::Sign => {
+            let manifest = cli.paths.get(1)
+                .map(|p| PathBuf::from(p))
+                .or_else(|| {
+                    {
+                        let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+                        blazehash::manifest_loader::find_manifest(&[cwd.as_path()]).ok()
+                    }
+                })
+                .ok_or_else(|| anyhow::anyhow!("usage: blazehash sign [manifest]"))?;
+            blazehash::signing::sign(&manifest)?;
+        }
+        Mode::VerifySig => {
+            let manifest = PathBuf::from(cli.paths.get(1)
+                .ok_or_else(|| anyhow::anyhow!("usage: blazehash verify-sig <manifest> --expected-pubkey <hex>"))?);
+            let pubkey = cli.expected_pubkey.as_deref().unwrap_or("");
+            let valid = blazehash::signing::verify_sig(&manifest, pubkey)?;
+            if !valid { std::process::exit(1); }
+        }
         Mode::SizeOnly => {
             commands::size_only::run(&cli.paths, cli.recursive, cli.output.as_ref())?;
         }
@@ -85,6 +105,8 @@ fn main() -> Result<()> {
                 cli.output.as_ref(),
                 cli.fuzzy_threshold,
                 cli.fuzzy_top,
+                cli.ignore_sig,
+                cli.expected_pubkey.clone(),
             )?;
         }
         Mode::VerifyImage => {
@@ -118,6 +140,7 @@ fn main() -> Result<()> {
                 filter: &filter,
                 nsrl: cli.nsrl.as_ref(),
                 nsrl_exclude: cli.nsrl_exclude,
+                sign: cli.sign,
             })?;
         }
     }

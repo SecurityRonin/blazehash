@@ -128,6 +128,18 @@ pub struct Cli {
     /// Suppress known-good files from output (requires --nsrl)
     #[arg(long = "nsrl-exclude")]
     pub nsrl_exclude: bool,
+
+    /// Expected public key hex for verify-sig / audit auto-verify
+    #[arg(long = "expected-pubkey", value_name = "HEX")]
+    pub expected_pubkey: Option<String>,
+
+    /// Sign manifest after writing (requires --output)
+    #[arg(long = "sign")]
+    pub sign: bool,
+
+    /// Skip manifest signature auto-verification in audit mode
+    #[arg(long = "ignore-sig")]
+    pub ignore_sig: bool,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -177,6 +189,8 @@ pub enum Mode {
     VerifyImage,
     Piecewise,
     Stdin,
+    Sign,
+    VerifySig,
     Hash,
 }
 
@@ -223,6 +237,10 @@ impl Cli {
             && self.paths.get(1).and_then(|p| p.to_str()) == Some("build-bloom")
         {
             Mode::NsrlBuildBloom
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("sign")) {
+            Mode::Sign
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("verify-sig")) {
+            Mode::VerifySig
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

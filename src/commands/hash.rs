@@ -26,6 +26,7 @@ pub struct HashOptions<'a> {
     pub filter: &'a WalkFilter,
     pub nsrl: Option<&'a PathBuf>,
     pub nsrl_exclude: bool,
+    pub sign: bool,
 }
 
 pub fn run(opts: HashOptions<'_>) -> Result<()> {
@@ -42,6 +43,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         filter,
         nsrl,
         nsrl_exclude,
+        sign,
     } = opts;
     let mut resume_state = load_resume_state(resume, output)?;
     let append = resume && output.is_some_and(|p| p.exists());
@@ -99,6 +101,12 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
     write_output(&mut writer, &all_results, algorithms, format, needs_header)?;
 
     writer.flush()?;
+
+    if sign {
+        let output_path = output.ok_or_else(|| anyhow::anyhow!("--sign requires --output"))?;
+        blazehash::signing::sign(output_path)?;
+    }
+
     Ok(())
 }
 

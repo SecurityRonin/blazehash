@@ -16,6 +16,8 @@ pub fn run(
     output: Option<&PathBuf>,
     fuzzy_threshold: u32,
     fuzzy_top: usize,
+    ignore_sig: bool,
+    expected_pubkey: Option<String>,
 ) -> Result<()> {
     let mut writer = make_writer(output.map(|p| p.as_path()), false)?;
 
@@ -45,6 +47,12 @@ pub fn run(
     } else {
         known
     };
+
+    if !ignore_sig {
+        if let Some(known_path) = effective_known.first() {
+            let _ = blazehash::signing::auto_verify_sidecar(known_path, expected_pubkey.as_deref())?;
+        }
+    }
 
     for known_path in effective_known {
         let known_content = fs::read_to_string(known_path)
