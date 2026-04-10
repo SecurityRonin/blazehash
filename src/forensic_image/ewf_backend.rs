@@ -46,5 +46,6 @@ pub fn verify_ewf(path: &Path) -> Result<ImageVerification> {
         md5_match: result.md5_match,
         sha1_match: result.sha1_match,
         metadata,
+        sidecar_results: vec![],
     })
 }

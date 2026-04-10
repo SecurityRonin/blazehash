@@ -292,7 +292,8 @@ mod protocol_tests {
 
     #[test]
     fn mcp_verify_image_unsupported_format() {
-        let input = r#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"blazehash_verify_image","arguments":{"path":"/tmp/fake.raw"}},"id":31}"#;
+        // .xyz has no sidecar files on disk → falls through to "unsupported format" error
+        let input = r#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"blazehash_verify_image","arguments":{"path":"/tmp/fake.xyz"}},"id":31}"#;
         mcp_command()
             .write_stdin(format!("{input}\n"))
             .assert()

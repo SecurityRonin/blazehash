@@ -71,6 +71,7 @@ mod tests {
             md5_match: Some(true),
             sha1_match: None,
             metadata: None,
+            sidecar_results: vec![],
         };
         let display = format!("{v}");
         assert!(display.contains("PASS"));
@@ -90,6 +91,7 @@ mod tests {
             md5_match: Some(false),
             sha1_match: None,
             metadata: None,
+            sidecar_results: vec![],
         };
         let display = format!("{v}");
         assert!(display.contains("FAIL"));
