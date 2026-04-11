@@ -56,6 +56,15 @@ toml = { version = "0.8", optional = true }
 dirs = { version = "5", optional = true }
 rusqlite = { version = "0.31", optional = true, features = ["bundled"] }
 bloomfilter = { version = "1", optional = true, features = ["serde"] }
+yara-x = { version = "0.9", optional = true }
+minijinja = { version = "2", optional = true }
+parquet = { version = "53", optional = true }
+arrow = { version = "53", optional = true }
+oci-distribution = { version = "0.11", optional = true }
+flate2 = { version = "1", optional = true }
+tar = { version = "0.4", optional = true }
+notify = "6"
+ureq = { version = "2", features = ["json"] }
 bincode = "1"
 tempfile = "3"
 
@@ -82,6 +91,10 @@ default = ["forensic-image", "gpu"]
 forensic-image = ["dep:ewf"]
 gpu = ["dep:wgpu", "dep:pollster", "dep:toml", "dep:dirs"]
 nsrl = ["dep:rusqlite", "dep:bloomfilter"]
+yara    = ["dep:yara-x"]
+report  = ["dep:minijinja"]
+parquet-output = ["dep:parquet", "dep:arrow"]
+docker  = ["dep:oci-distribution", "dep:flate2", "dep:tar"]
 
 [package.metadata.deb]
 maintainer = "SecurityRonin <security-ronin@users.noreply.github.com>"
