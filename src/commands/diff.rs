@@ -27,6 +27,7 @@ pub fn run(
     if left.is_dir() && right.is_dir() {
         use blazehash::folder_diff::{CompareBy, diff_folders, print_entry, print_summary};
         let cmp = match compare_by {
+            "paranoid" => CompareBy::Paranoid,
             "size-time" => CompareBy::SizeTime,
             "name" => CompareBy::Name,
             _ => CompareBy::Content,

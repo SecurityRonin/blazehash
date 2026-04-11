@@ -1,7 +1,8 @@
-//! Folder-vs-folder diff with parallel XXH3-128 hashing.
+//! Folder-vs-folder diff with parallel hashing.
 //!
 //! Inspired by Beyond Compare 5's comparison modes:
 //! - `Content`  — hash every file with XXH3-128 (~30-50 GB/s, non-crypto)
+//! - `Paranoid` — hash every file with BLAKE3 (~6-10 GB/s, cryptographic)
 //! - `SizeTime` — compare size + mtime only (no I/O beyond stat)
 //! - `Name`     — existence check only (fastest, no I/O at all)
 //!
@@ -19,8 +20,12 @@ use std::time::SystemTime;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CompareBy {
-    /// Full content hash (XXH3-128). Definitive but reads every byte.
+    /// Full content hash (XXH3-128, ~30-50 GB/s). Non-crypto; collisions
+    /// are astronomically unlikely but theoretically possible.
     Content,
+    /// Full content hash (BLAKE3, ~6-10 GB/s). Cryptographically secure;
+    /// use when you need proof-grade collision resistance.
+    Paranoid,
     /// Size + modification time. Fast; no file I/O beyond stat.
     SizeTime,
     /// Name existence only. Instant; no stat, no I/O.
@@ -170,6 +175,8 @@ fn collect(root: &Path, recursive: bool, compare_by: CompareBy) -> Vec<FileRecor
             let mtime = meta.modified().ok();
             let hash = if compare_by == CompareBy::Content {
                 hash_xxh3(&abs).ok()
+            } else if compare_by == CompareBy::Paranoid {
+                hash_blake3(&abs).ok()
             } else {
                 None
             };
@@ -219,6 +226,49 @@ fn hash_xxh3(path: &Path) -> Result<u128> {
     Ok(hasher.digest128())
 }
 
+/// Hash a file with BLAKE3 (~6-10 GB/s, cryptographic).
+///
+/// Produces a 128-bit value (low 16 bytes of the 256-bit BLAKE3 output) so
+/// it fits the same `u128` slot used by XXH3, keeping the comparison logic
+/// uniform. The full 256-bit BLAKE3 output is collision-resistant; truncating
+/// to 128 bits retains 2^64 collision resistance — still far beyond practical
+/// attack budgets.
+fn hash_blake3(path: &Path) -> Result<u128> {
+    let file = std::fs::File::open(path)
+        .with_context(|| format!("cannot open {}", path.display()))?;
+    let meta = file.metadata()?;
+    let len = meta.len() as usize;
+
+    if len == 0 {
+        let hash = blake3::hash(&[]);
+        return Ok(u128::from_le_bytes(hash.as_bytes()[..16].try_into().unwrap()));
+    }
+
+    // mmap fast path
+    if len <= 512 * 1024 * 1024 {
+        let mmap = unsafe { memmap2::Mmap::map(&file) };
+        if let Ok(m) = mmap {
+            let hash = blake3::hash(&m);
+            return Ok(u128::from_le_bytes(hash.as_bytes()[..16].try_into().unwrap()));
+        }
+    }
+
+    // Streaming fallback
+    use std::io::Read;
+    let mut hasher = blake3::Hasher::new();
+    let mut reader = std::io::BufReader::with_capacity(256 * 1024, file);
+    let mut buf = vec![0u8; 256 * 1024];
+    loop {
+        let n = reader.read(&mut buf)?;
+        if n == 0 {
+            break;
+        }
+        hasher.update(&buf[..n]);
+    }
+    let hash = hasher.finalize();
+    Ok(u128::from_le_bytes(hash.as_bytes()[..16].try_into().unwrap()))
+}
+
 // ─── Core diff logic ──────────────────────────────────────────────────────────
 
 /// Compare two directories and return a structured diff result.
@@ -249,7 +299,7 @@ pub fn diff_folders(
         right_records.into_iter().map(|r| (r.rel.clone(), r)).collect();
 
     // Build reverse hash→path map for move detection (content mode only)
-    let left_by_hash: HashMap<u128, &PathBuf> = if compare_by == CompareBy::Content {
+    let left_by_hash: HashMap<u128, &PathBuf> = if matches!(compare_by, CompareBy::Content | CompareBy::Paranoid) {
         left_map
             .iter()
             .filter_map(|(p, r)| r.hash.map(|h| (h, p)))
@@ -266,7 +316,7 @@ pub fn diff_folders(
         match left_map.get(rel) {
             None => {
                 // Not in left — Added, or Moved from somewhere else?
-                if compare_by == CompareBy::Content {
+                if matches!(compare_by, CompareBy::Content | CompareBy::Paranoid) {
                     if let Some(hash) = rr.hash {
                         if let Some(&from_path) = left_by_hash.get(&hash) {
                             if !right_map.contains_key(from_path) {
@@ -346,7 +396,7 @@ fn files_match(left: &FileRecord, right: &FileRecord, compare_by: CompareBy) -> 
                 _ => left.size == right.size, // no mtime → fall back to size only
             }
         }
-        CompareBy::Content => left.hash == right.hash && left.hash.is_some(),
+        CompareBy::Content | CompareBy::Paranoid => left.hash == right.hash && left.hash.is_some(),
     }
 }
 

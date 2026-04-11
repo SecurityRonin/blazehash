@@ -141,8 +141,8 @@ pub struct Cli {
     #[arg(long = "ignore-sig")]
     pub ignore_sig: bool,
 
-    /// Folder diff comparison method: content (default), size-time, name
-    #[arg(long = "compare-by", default_value = "content", value_parser = ["content", "size-time", "name"])]
+    /// Folder diff comparison method: content (XXH3-128, default), paranoid (BLAKE3), size-time, name
+    #[arg(long = "compare-by", default_value = "content", value_parser = ["content", "paranoid", "size-time", "name"])]
     pub compare_by: String,
 
     /// Show identical files in folder diff output (hidden by default)
