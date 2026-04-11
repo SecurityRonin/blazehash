@@ -22,8 +22,9 @@ Key findings:
   SHA-1 shows the largest gain (2×) due to ARM NEON hardware instructions.
   SHA-256 shows a more modest 1.14× at 1 GiB.
 - blazehash is **1.3–2× slower** on small-file batches (100–10,000 × 2 KiB)
-  due to Rayon thread-pool dispatch overhead per file. This is a documented
-  limitation for many-small-file workloads.
+  due to Rayon thread-pool dispatch overhead per file. An adaptive 64 KiB
+  threshold (`parallel_threshold_bytes`) falls back to sequential I/O for
+  small files; run `blazehash bench calibrate` to tune it to your hardware.
 - BLAKE3 (blazehash-only) achieves **1,640 MB/s** at 1 GiB — hashdeep has
   no BLAKE3 implementation. Compared to hashdeep's fastest algorithm
   (SHA-1 at 595 MB/s), BLAKE3 is 2.8× faster.
@@ -212,7 +213,10 @@ with embedded hash verification against the image's stored digests.
 2. **Warm-cache measurements only.** Cold-cache throughput is bounded by
    storage I/O speed, not CPU.
 3. **Small files: hashdeep is faster.** Rayon thread dispatch overhead
-   dominates for sub-64 KiB files. This is a known limitation.
+   dominates for sub-64 KiB files. blazehash mitigates this with an
+   adaptive 64 KiB threshold (`parallel_threshold_bytes`): files below
+   the threshold are hashed sequentially, matching hashdeep's overhead
+   profile. Run `blazehash bench calibrate` to tune this to your hardware.
 4. **hashdeep compiled without `-march=native`.** Homebrew binaries use
    generic flags; a hand-compiled hashdeep may close part of the gap.
 5. **n = 7 runs.** Adequate for consistent conditions; background system

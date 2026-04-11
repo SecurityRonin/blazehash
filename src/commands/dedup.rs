@@ -4,7 +4,6 @@ use blazehash::hash::FileHashResult;
 use blazehash::manifest_loader::load_manifest;
 use blazehash::walk::{walk_and_hash, WalkOutput};
 use blazehash::walk_filter::WalkFilter;
-use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -50,8 +49,19 @@ pub fn run(
     let mut total_redundant = 0usize;
     let mut reclaimable = 0u64;
 
-    let mut sorted_groups: Vec<_> = groups.values().filter(|g| g.len() >= 2).collect();
-    sorted_groups.sort_by_key(|g| Reverse(g.len()));
+    let mut sorted_groups: Vec<Vec<&FileHashResult>> = groups
+        .into_values()
+        .filter(|g| g.len() >= 2)
+        .map(|mut g| {
+            g.sort_by_key(|r| r.path.to_string_lossy().into_owned());
+            g
+        })
+        .collect();
+    sorted_groups.sort_by(|a, b| {
+        b.len()
+            .cmp(&a.len())
+            .then_with(|| a[0].path.cmp(&b[0].path))
+    });
 
     let has_dupes = !sorted_groups.is_empty();
 
@@ -73,7 +83,7 @@ pub fn run(
         }
     }
 
-    let unique = groups.values().filter(|g| g.len() == 1).count();
+    let unique = results.len() - sorted_groups.iter().map(|g| g.len()).sum::<usize>();
     let dup_groups = sorted_groups.len();
     eprintln!(
         "[+] {} files — {} unique, {} duplicate groups, {} redundant ({:.1} MiB reclaimable)",
