@@ -350,11 +350,11 @@ fn test_windows_iocp_walk_100_files() {
 
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
-    let lines: Vec<_> = stdout
-        .lines()
-        .filter(|l| !l.starts_with('%') && !l.is_empty())
-        .collect::<Vec<_>>();
-    assert_eq!(lines.len(), 100, "must hash all 100 files");
+    // Count only lines for our created files (file_XXXX.txt) — Windows temp
+    // dirs may contain additional system files (e.g. desktop.ini) that would
+    // inflate the count if we filtered only on the `%` header prefix.
+    let count = stdout.lines().filter(|l| l.contains("file_")).count();
+    assert_eq!(count, 100, "must hash all 100 files");
 }
 
 // --- ssdeep compute tests ---
