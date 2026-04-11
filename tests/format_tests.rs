@@ -236,3 +236,53 @@ fn json_missing_algorithm_silently_skipped() {
     assert!(parsed[0]["hashes"].get("blake3").is_some());
     assert!(parsed[0]["hashes"].get("sha256").is_none());
 }
+
+// ---- Task 2: --entropy column ----
+
+#[test]
+fn csv_entropy_column_present_when_set() {
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::FileHashResult;
+    use blazehash::format::write_csv;
+
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Blake3, "abc".to_string());
+    let r = FileHashResult {
+        path: PathBuf::from("/f.bin"),
+        size: 10,
+        hashes,
+        entropy: Some(7.9),
+    };
+    let algos = vec![Algorithm::Blake3];
+    let mut buf = Vec::new();
+    write_csv(&mut buf, &[r], &algos).unwrap();
+    let out = String::from_utf8(buf).unwrap();
+    assert!(out.contains("entropy"), "header must contain entropy column");
+    assert!(out.contains("7.9"), "data row must contain entropy value");
+}
+
+#[test]
+fn json_entropy_field_present_when_set() {
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::FileHashResult;
+    use blazehash::format::write_json;
+
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Blake3, "abc".to_string());
+    let r = FileHashResult {
+        path: PathBuf::from("/f.bin"),
+        size: 10,
+        hashes,
+        entropy: Some(3.5),
+    };
+    let mut buf = Vec::new();
+    write_json(&mut buf, &[r], &[Algorithm::Blake3]).unwrap();
+    let out = String::from_utf8(buf).unwrap();
+    let v: serde_json::Value = serde_json::from_str(&out).unwrap();
+    assert!(v[0].get("entropy").is_some(), "JSON must include entropy field");
+    assert_eq!(v[0]["entropy"], 3.5);
+}

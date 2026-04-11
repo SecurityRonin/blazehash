@@ -903,6 +903,36 @@ fn test_fuzzy_flags_accepted_without_error() {
     );
 }
 
+// ---- Task 2: compute_entropy ----
+
+#[test]
+fn test_entropy_all_zeros() {
+    let bytes = vec![0u8; 1024];
+    let h = blazehash::hash::compute_entropy(&bytes);
+    assert_eq!(h, 0.0, "all-zeros must have entropy 0.0");
+}
+
+#[test]
+fn test_entropy_two_values_equal() {
+    let mut bytes = vec![0u8; 128];
+    bytes.extend(vec![1u8; 128]);
+    let h = blazehash::hash::compute_entropy(&bytes);
+    assert!((h - 1.0).abs() < 1e-9, "half-half binary must have entropy 1.0, got {h}");
+}
+
+#[test]
+fn test_entropy_uniform_256() {
+    let bytes: Vec<u8> = (0u8..=255).collect();
+    let h = blazehash::hash::compute_entropy(&bytes);
+    assert!((h - 8.0).abs() < 1e-9, "uniform 256-value must have entropy 8.0, got {h}");
+}
+
+#[test]
+fn test_entropy_empty_is_zero() {
+    let h = blazehash::hash::compute_entropy(&[]);
+    assert_eq!(h, 0.0);
+}
+
 // ---- Task 6: --stdin mode ----
 
 #[test]
