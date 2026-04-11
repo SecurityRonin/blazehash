@@ -173,6 +173,7 @@ fn main() -> Result<()> {
                 nsrl_exclude: cli.nsrl_exclude,
                 sign: cli.sign,
                 ads: cli.ads,
+                entropy: cli.entropy,
             })?;
         }
     }

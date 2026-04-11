@@ -9,7 +9,7 @@ fn hash_file_blake3() {
     f.write_all(b"hello world").unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false).unwrap();
     assert_eq!(result.size, 11);
     assert_eq!(
         result.hashes[&Algorithm::Blake3],
@@ -24,7 +24,7 @@ fn hash_file_multiple_algorithms() {
     f.flush().unwrap();
 
     let algos = vec![Algorithm::Blake3, Algorithm::Sha256, Algorithm::Md5];
-    let result = hash_file(f.path(), &algos, false, false).unwrap();
+    let result = hash_file(f.path(), &algos, false, false, false).unwrap();
     assert_eq!(result.size, 11);
     assert_eq!(result.hashes.len(), 3);
     assert_eq!(
@@ -40,7 +40,7 @@ fn hash_file_multiple_algorithms() {
 #[test]
 fn hash_file_empty() {
     let f = NamedTempFile::new().unwrap();
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false).unwrap();
     assert_eq!(result.size, 0);
     assert!(!result.hashes[&Algorithm::Blake3].is_empty());
 }
@@ -58,6 +58,7 @@ fn hash_file_large_uses_mmap() {
         &[Algorithm::Blake3, Algorithm::Sha256],
         false,
         false,
+        false,
     )
     .unwrap();
     assert_eq!(result.size, 2 * 1024 * 1024);
@@ -73,7 +74,7 @@ fn hash_file_returns_path() {
     f.write_all(b"test").unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false).unwrap();
     assert_eq!(result.path, f.path());
 }
 
@@ -82,6 +83,7 @@ fn hash_file_nonexistent_returns_error() {
     let result = hash_file(
         std::path::Path::new("/nonexistent/file.txt"),
         &[Algorithm::Blake3],
+        false,
         false,
         false,
     );
@@ -101,6 +103,7 @@ fn hash_file_at_mmap_threshold() {
         &[Algorithm::Blake3, Algorithm::Sha256],
         false,
         false,
+        false,
     )
     .unwrap();
     assert_eq!(result.size, 1024 * 1024);
@@ -118,7 +121,7 @@ fn hash_file_just_below_mmap_threshold() {
     f.write_all(&data).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false).unwrap();
     assert_eq!(result.size, 1024 * 1024 - 1);
 
     let expected = blazehash::algorithm::hash_bytes(Algorithm::Blake3, &data);
@@ -132,7 +135,7 @@ fn hash_file_all_algorithms() {
     f.flush().unwrap();
 
     let algos: Vec<Algorithm> = Algorithm::all().to_vec();
-    let result = hash_file(f.path(), &algos, false, false).unwrap();
+    let result = hash_file(f.path(), &algos, false, false, false).unwrap();
     assert_eq!(result.hashes.len(), 8);
     for algo in &algos {
         assert!(
@@ -197,8 +200,8 @@ fn test_no_cache_macos_opens_file() {
     f.write_all(b"test content for F_NOCACHE").unwrap();
     f.flush().unwrap();
 
-    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false).unwrap();
-    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false).unwrap();
+    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false, false).unwrap();
+    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false, false).unwrap();
 
     assert_eq!(
         normal.hashes[&Algorithm::Sha256],
@@ -219,8 +222,8 @@ fn test_no_cache_linux_aligned_read() {
     f.write_all(&vec![0xABu8; 4096]).unwrap();
     f.flush().unwrap();
 
-    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false).unwrap();
-    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false).unwrap();
+    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false, false).unwrap();
+    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false, false).unwrap();
 
     assert_eq!(
         normal.hashes[&Algorithm::Sha256],
@@ -242,8 +245,8 @@ fn test_no_cache_linux_unaligned_size_file() {
     f.write_all(&vec![0x42u8; 777]).unwrap(); // deliberately odd size
     f.flush().unwrap();
 
-    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false).unwrap();
-    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false).unwrap();
+    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false, false).unwrap();
+    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false, false).unwrap();
 
     assert_eq!(
         normal.hashes[&Algorithm::Sha256],
@@ -263,8 +266,8 @@ fn test_no_cache_windows_no_buffering() {
     f.write_all(&vec![0xCDu8; 8192]).unwrap(); // 2 × 4096
     f.flush().unwrap();
 
-    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false).unwrap();
-    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false).unwrap();
+    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false, false).unwrap();
+    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false, false).unwrap();
 
     assert_eq!(
         normal.hashes[&Algorithm::Sha256],
@@ -285,7 +288,7 @@ fn test_large_pages_linux_correct_hash() {
     f.write_all(&vec![0x55u8; 3 * 1024 * 1024]).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false).unwrap();
     let h = &result.hashes[&Algorithm::Blake3];
     assert_eq!(h.len(), 64, "BLAKE3 hash must be 64 hex chars");
     assert!(h.chars().all(|c| c.is_ascii_hexdigit()));
@@ -305,7 +308,7 @@ fn test_large_pages_windows_fallback_on_no_privilege() {
     f.write_all(&vec![0xAAu8; 4 * 1024 * 1024]).unwrap(); // 4 MiB
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Sha256], false, false);
+    let result = hash_file(f.path(), &[Algorithm::Sha256], false, false, false);
     assert!(
         result.is_ok(),
         "hash_file must not error when large page privilege absent"
@@ -326,7 +329,7 @@ fn test_large_pages_windows_correct_hash() {
     f.write_all(&vec![0xBBu8; 3 * 1024 * 1024]).unwrap();
     f.flush().unwrap();
 
-    let with_lp = hash_file(f.path(), &[Algorithm::Blake3], false, false).unwrap();
+    let with_lp = hash_file(f.path(), &[Algorithm::Blake3], false, false, false).unwrap();
     assert_eq!(with_lp.hashes[&Algorithm::Blake3].len(), 64);
 }
 
@@ -715,6 +718,7 @@ fn test_hash_file_with_ssdeep() {
         &[Algorithm::Blake3, Algorithm::Ssdeep],
         false,
         false,
+        false,
     )
     .unwrap();
     assert!(result.hashes.contains_key(&Algorithm::Blake3));
@@ -737,7 +741,7 @@ fn test_hash_file_with_tlsh() {
     f.write_all(&data).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Tlsh], false, false).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Tlsh], false, false, false).unwrap();
     assert!(result.hashes.contains_key(&Algorithm::Tlsh));
     let tlsh_hash = &result.hashes[&Algorithm::Tlsh];
     assert!(tlsh_hash.starts_with("T1"), "tlsh hash must start with T1");
@@ -753,7 +757,7 @@ fn test_hash_file_tlsh_short_file_empty_string() {
     f.write_all(b"tiny").unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Tlsh], false, false).unwrap();
+    let result = hash_file(f.path(), &[Algorithm::Tlsh], false, false, false).unwrap();
     let tlsh_hash = &result.hashes[&Algorithm::Tlsh];
     assert!(
         tlsh_hash.is_empty() || tlsh_hash.starts_with("T1"),
@@ -850,7 +854,8 @@ fn hash_file_streaming_matches_mmap() {
     let mut small = NamedTempFile::new().unwrap();
     small.write_all(content).unwrap();
     small.flush().unwrap();
-    let streaming_result = hash_file(small.path(), &[Algorithm::Sha256], false, false).unwrap();
+    let streaming_result =
+        hash_file(small.path(), &[Algorithm::Sha256], false, false, false).unwrap();
 
     // Verify against known hash_bytes
     let expected = blazehash::algorithm::hash_bytes(Algorithm::Sha256, content);
@@ -998,12 +1003,7 @@ fn cli_entropy_flag_shows_entropy_in_csv() {
 
     let output = Command::cargo_bin("blazehash")
         .unwrap()
-        .args([
-            "--entropy",
-            "--format",
-            "csv",
-            f.path().to_str().unwrap(),
-        ])
+        .args(["--entropy", "--format", "csv", f.path().to_str().unwrap()])
         .output()
         .unwrap();
     assert!(output.status.success(), "blazehash --entropy must succeed");
@@ -1019,7 +1019,11 @@ fn cli_entropy_flag_shows_entropy_in_csv() {
     let data_row = lines[1];
     let fields: Vec<&str> = data_row.splitn(4, ',').collect();
     // fields: size, blake3, entropy, filename (4 fields)
-    assert_eq!(fields.len(), 4, "expected 4 CSV fields: size,blake3,entropy,filename; got: {data_row}");
+    assert_eq!(
+        fields.len(),
+        4,
+        "expected 4 CSV fields: size,blake3,entropy,filename; got: {data_row}"
+    );
     let entropy_val: f64 = fields[2].parse().expect("entropy field must be a number");
     assert!(
         entropy_val > 7.0,

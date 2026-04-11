@@ -6,7 +6,7 @@ use blazehash::hash::{hash_file, FileHashResult};
 use blazehash::manifest::{write_header, write_record};
 use blazehash::output::make_writer;
 use blazehash::resume::ResumeState;
-use blazehash::walk::walk_and_hash;
+use blazehash::walk::walk_and_hash_with_options;
 use blazehash::walk_filter::WalkFilter;
 use std::fs;
 use std::io::Write;
@@ -29,6 +29,7 @@ pub struct HashOptions<'a> {
     pub nsrl_exclude: bool,
     pub sign: bool,
     pub ads: bool,
+    pub entropy: bool,
 }
 
 pub fn run(opts: HashOptions<'_>) -> Result<()> {
@@ -47,6 +48,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         nsrl_exclude,
         sign,
         ads,
+        entropy,
     } = opts;
     let mut resume_state = load_resume_state(resume, output)?;
     let append = resume && output.is_some_and(|p| p.exists());
@@ -62,6 +64,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         no_gpu,
         filter,
         ads,
+        entropy,
     )?;
 
     #[cfg(feature = "nsrl")]
@@ -130,6 +133,7 @@ fn collect_results(
     no_gpu: bool,
     filter: &WalkFilter,
     ads: bool,
+    entropy: bool,
 ) -> Result<Vec<FileHashResult>> {
     let mut all_results = Vec::new();
 
@@ -138,7 +142,7 @@ fn collect_results(
             if resume_state.is_done(path) {
                 continue;
             }
-            let result = hash_file(path, algorithms, no_cache, no_gpu)
+            let result = hash_file(path, algorithms, no_cache, no_gpu, entropy)
                 .with_context(|| format!("failed to hash {}", path.display()))?;
             resume_state.mark_done(path.clone());
             if ads {
@@ -146,7 +150,7 @@ fn collect_results(
             }
             all_results.push(result);
         } else if path.is_dir() {
-            let output = walk_and_hash(path, algorithms, recursive, filter)?;
+            let output = walk_and_hash_with_options(path, algorithms, recursive, filter, entropy)?;
             report_walk_errors(&output.errors);
             for r in output.results {
                 if resume_state.is_done(&r.path) {
@@ -174,7 +178,7 @@ fn hash_ads_streams(
     results: &mut Vec<FileHashResult>,
 ) {
     for stream_path in enumerate_ads(path) {
-        match hash_file(&stream_path, algorithms, no_cache, no_gpu) {
+        match hash_file(&stream_path, algorithms, no_cache, no_gpu, false) {
             Ok(r) => results.push(r),
             Err(e) => eprintln!("[!] Failed to hash ADS {}: {e}", stream_path.display()),
         }

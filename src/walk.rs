@@ -65,9 +65,27 @@ pub fn walk_and_hash(
     recursive: bool,
     filter: &WalkFilter,
 ) -> Result<WalkOutput> {
+    walk_and_hash_with_options(root, algorithms, recursive, filter, false)
+}
+
+/// Like `walk_and_hash`, but exposes additional per-file options.
+/// `compute_entropy`: when true, compute Shannon entropy for each file.
+pub fn walk_and_hash_with_options(
+    root: &Path,
+    algorithms: &[Algorithm],
+    recursive: bool,
+    filter: &WalkFilter,
+    compute_entropy: bool,
+) -> Result<WalkOutput> {
     #[cfg(target_os = "windows")]
     {
-        crate::walk_windows::walk_and_hash_windows(root, algorithms, recursive, filter)
+        crate::walk_windows::walk_and_hash_windows(
+            root,
+            algorithms,
+            recursive,
+            filter,
+            compute_entropy,
+        )
     }
 
     #[cfg(not(target_os = "windows"))]
@@ -91,16 +109,18 @@ pub fn walk_and_hash(
         let hash_errors = Mutex::new(Vec::new());
         let results: Vec<FileHashResult> = filtered
             .par_iter()
-            .filter_map(|path| match hash_file(path, algorithms, false, false) {
-                Ok(result) => Some(result),
-                Err(err) => {
-                    hash_errors.lock().unwrap().push(WalkError {
-                        path: path.clone(),
-                        error: err.to_string(),
-                    });
-                    None
-                }
-            })
+            .filter_map(
+                |path| match hash_file(path, algorithms, false, false, compute_entropy) {
+                    Ok(result) => Some(result),
+                    Err(err) => {
+                        hash_errors.lock().unwrap().push(WalkError {
+                            path: path.clone(),
+                            error: err.to_string(),
+                        });
+                        None
+                    }
+                },
+            )
             .collect();
 
         let mut errors = walk_errors;

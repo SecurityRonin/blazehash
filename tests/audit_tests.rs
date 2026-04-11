@@ -9,7 +9,7 @@ fn make_known_file(dir: &TempDir) -> String {
     let file = dir.path().join("test.txt");
     fs::write(&file, b"hello world").unwrap();
 
-    let result = hash_file(&file, &[Algorithm::Blake3], false, false).unwrap();
+    let result = hash_file(&file, &[Algorithm::Blake3], false, false, false).unwrap();
     let hash = result.hashes[&Algorithm::Blake3].clone();
 
     format!(
@@ -83,7 +83,7 @@ fn audit_skips_malformed_manifest_lines() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.txt");
     fs::write(&file, b"hello world").unwrap();
-    let hash_result = hash_file(&file, &[Algorithm::Blake3], false, false).unwrap();
+    let hash_result = hash_file(&file, &[Algorithm::Blake3], false, false, false).unwrap();
     let hash = hash_result.hashes[&Algorithm::Blake3].clone();
 
     // Manifest with a malformed line (bad size field)
@@ -108,8 +108,14 @@ fn audit_moved_checks_all_algorithms() {
     // Create known file with two algorithms
     let file = dir.path().join("original.txt");
     fs::write(&file, b"hello world").unwrap();
-    let hash_result =
-        hash_file(&file, &[Algorithm::Blake3, Algorithm::Sha256], false, false).unwrap();
+    let hash_result = hash_file(
+        &file,
+        &[Algorithm::Blake3, Algorithm::Sha256],
+        false,
+        false,
+        false,
+    )
+    .unwrap();
     let blake3_hash = hash_result.hashes[&Algorithm::Blake3].clone();
     let sha256_hash = hash_result.hashes[&Algorithm::Sha256].clone();
 
@@ -136,7 +142,7 @@ fn audit_all_new_files() {
     // Create a known manifest for a file that doesn't exist among scanned paths
     let dummy = dir.path().join("dummy.txt");
     fs::write(&dummy, b"dummy").unwrap();
-    let hash_result = hash_file(&dummy, &[Algorithm::Blake3], false, false).unwrap();
+    let hash_result = hash_file(&dummy, &[Algorithm::Blake3], false, false, false).unwrap();
     let hash = hash_result.hashes[&Algorithm::Blake3].clone();
     let known = format!(
         "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n{},{},{}\n",
@@ -169,7 +175,7 @@ fn audit_changed_size_same_content_impossible_but_handled() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.txt");
     fs::write(&file, b"hello world").unwrap();
-    let hash_result = hash_file(&file, &[Algorithm::Blake3], false, false).unwrap();
+    let hash_result = hash_file(&file, &[Algorithm::Blake3], false, false, false).unwrap();
     let hash = hash_result.hashes[&Algorithm::Blake3].clone();
 
     // Manifest with wrong size but correct hash (artificial scenario)
@@ -206,7 +212,7 @@ fn audit_moved_detection_with_single_algorithm() {
     let dir = TempDir::new().unwrap();
     let original = dir.path().join("original.txt");
     fs::write(&original, b"content to move").unwrap();
-    let hash_result = hash_file(&original, &[Algorithm::Blake3], false, false).unwrap();
+    let hash_result = hash_file(&original, &[Algorithm::Blake3], false, false, false).unwrap();
     let hash = hash_result.hashes[&Algorithm::Blake3].clone();
 
     let known = format!(
@@ -279,7 +285,7 @@ fn test_fuzzy_audit_output_contains_tilde_indicator() {
 
     // Hash the original with ssdeep
     let orig_result =
-        blazehash::hash::hash_file(orig.path(), &[Algorithm::Ssdeep], false, false).unwrap();
+        blazehash::hash::hash_file(orig.path(), &[Algorithm::Ssdeep], false, false, false).unwrap();
 
     // Build manifest from original
     let manifest_content = {
@@ -354,7 +360,7 @@ fn test_audit_function_accepts_fuzzy_params() {
     let file = dir.path().join("test.txt");
     fs::write(&file, b"test").unwrap();
 
-    let result = hash_file(&file, &[Algorithm::Blake3], false, false).unwrap();
+    let result = hash_file(&file, &[Algorithm::Blake3], false, false, false).unwrap();
     let manifest = make_manifest_content(&[Algorithm::Blake3], &[result]);
 
     // Verify new signature compiles and works
@@ -370,7 +376,14 @@ fn test_fuzzy_audit_exact_match_still_works() {
     let data = b"The quick brown fox jumps over the lazy dog. ".repeat(20);
     fs::write(&file, &data).unwrap();
 
-    let result = hash_file(&file, &[Algorithm::Blake3, Algorithm::Ssdeep], false, false).unwrap();
+    let result = hash_file(
+        &file,
+        &[Algorithm::Blake3, Algorithm::Ssdeep],
+        false,
+        false,
+        false,
+    )
+    .unwrap();
 
     let manifest = make_manifest_content(&[Algorithm::Blake3, Algorithm::Ssdeep], &[result]);
 
@@ -452,7 +465,7 @@ fn test_fuzzy_audit_unrelated_file_is_new() {
     let data_a: Vec<u8> = (0u8..=127).cycle().take(400).collect();
     fs::write(&orig, &data_a).unwrap();
 
-    let orig_result = hash_file(&orig, &[Algorithm::Ssdeep], false, false).unwrap();
+    let orig_result = hash_file(&orig, &[Algorithm::Ssdeep], false, false, false).unwrap();
     let manifest = make_manifest_content(&[Algorithm::Ssdeep], &[orig_result]);
 
     let different = dir.path().join("different.txt");

@@ -254,11 +254,14 @@ fn open_file_no_cache(path: &Path) -> Result<std::fs::File> {
 ///
 /// `no_gpu`: when true, skip GPU acceleration even if available (pass `false`
 /// for callers that don't expose this flag — GPU is already gated by feature flag).
+/// `entropy_flag`: when true, compute Shannon entropy from the file bytes and
+/// set `result.entropy = Some(h)`. Pass `false` for callers that don't need it.
 pub fn hash_file(
     path: &Path,
     algorithms: &[Algorithm],
     no_cache: bool,
     no_gpu: bool,
+    entropy_flag: bool,
 ) -> Result<FileHashResult> {
     // no_gpu is only consumed by the gpu feature block below; suppress the warning otherwise.
     #[cfg(not(feature = "gpu"))]
@@ -343,11 +346,23 @@ pub fn hash_file(
         }
     }
 
+    // Compute Shannon entropy if requested. Read file bytes once — reuses the
+    // OS page cache populated by the hashing passes above so the extra read is
+    // effectively free for small-to-medium files.
+    let entropy = if entropy_flag {
+        match fs::read(path) {
+            Ok(data) => Some(compute_entropy(&data)),
+            Err(_) => None, // best-effort: don't fail the hash just for entropy
+        }
+    } else {
+        None
+    };
+
     Ok(FileHashResult {
         path: path.to_path_buf(),
         size,
         hashes,
-        entropy: None,
+        entropy,
     })
 }
 

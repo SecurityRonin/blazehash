@@ -22,12 +22,19 @@ pub fn walk_and_hash_windows(
     algorithms: &[Algorithm],
     recursive: bool,
     filter: &WalkFilter,
+    compute_entropy: bool,
 ) -> Result<WalkOutput> {
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()?;
 
-    rt.block_on(walk_async(root, algorithms, recursive, filter))
+    rt.block_on(walk_async(
+        root,
+        algorithms,
+        recursive,
+        filter,
+        compute_entropy,
+    ))
 }
 
 async fn walk_async(
@@ -35,6 +42,7 @@ async fn walk_async(
     algorithms: &[Algorithm],
     recursive: bool,
     filter: &WalkFilter,
+    compute_entropy: bool,
 ) -> Result<WalkOutput> {
     let sem = Arc::new(Semaphore::new(MAX_CONCURRENT));
     let algorithms = Arc::new(algorithms.to_vec());
@@ -66,10 +74,12 @@ async fn walk_async(
         handles.spawn(async move {
             let _permit = sem.acquire().await.unwrap();
             let path_for_error = path.clone();
-            tokio::task::spawn_blocking(move || hash_file(&path, &algos, false, false))
-                .await
-                .map_err(|e| (path_for_error.clone(), format!("spawn_blocking panic: {e}")))
-                .and_then(|inner| inner.map_err(|e| (path_for_error.clone(), e.to_string())))
+            tokio::task::spawn_blocking(move || {
+                hash_file(&path, &algos, false, false, compute_entropy)
+            })
+            .await
+            .map_err(|e| (path_for_error.clone(), format!("spawn_blocking panic: {e}")))
+            .and_then(|inner| inner.map_err(|e| (path_for_error.clone(), e.to_string())))
         });
     }
 

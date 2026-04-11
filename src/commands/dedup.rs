@@ -117,7 +117,7 @@ fn load_results(
                     }
                 }
                 Err(_) => {
-                    let r = blazehash::hash::hash_file(target, algorithms, false, false)?;
+                    let r = blazehash::hash::hash_file(target, algorithms, false, false, false)?;
                     all.push(r);
                 }
             }
