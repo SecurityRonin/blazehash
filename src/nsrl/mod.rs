@@ -16,6 +16,7 @@ pub struct NsrlLookup {
 }
 
 #[cfg(feature = "nsrl")]
+#[allow(dead_code)] // Bloom variant kept for future .bloom import support
 enum NsrlBackend {
     Sqlite(sqlite::SqliteNsrl),
     Bloom(bloom::BloomNsrl),

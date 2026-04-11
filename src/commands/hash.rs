@@ -71,9 +71,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
     if let Some(nsrl_path) = nsrl {
         let lookup = blazehash::nsrl::NsrlLookup::open(nsrl_path)?;
         let mut known_count = 0usize;
-        all_results = all_results
-            .into_iter()
-            .filter(|r| {
+        all_results.retain(|r| {
                 let hash_val = r
                     .hashes
                     .get(&Algorithm::Sha256)
@@ -87,8 +85,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
                 } else {
                     true
                 }
-            })
-            .collect();
+            });
         if known_count > 0 {
             eprintln!("[K] {known_count} file(s) matched NSRL");
         }

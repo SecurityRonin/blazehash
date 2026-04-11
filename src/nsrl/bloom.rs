@@ -9,6 +9,7 @@ pub struct BloomNsrl {
 }
 
 impl BloomNsrl {
+    #[allow(dead_code)] // kept for future bloom filter import support
     pub fn open(path: &Path) -> Result<Self> {
         let bytes = std::fs::read(path)?;
         let bloom: Bloom<String> =
