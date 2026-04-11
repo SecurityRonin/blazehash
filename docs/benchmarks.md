@@ -182,8 +182,8 @@ the cost of simultaneous multi-algorithm computation in each tool.
 
 ## Extrapolation to 1 TiB
 
-Direct 1 TiB measurement is infeasible on the available hardware (50 GiB free).
-Extrapolated from saturation throughput at 1 GiB (CPU-bound, warm cache):
+Throughput was confirmed linear at 20 GiB (warm cache); the table below
+extrapolates from measured saturation throughput (CPU-bound regime):
 
 | Algorithm | blazehash est. | hashdeep est. |
 |-----------|----------------|---------------|

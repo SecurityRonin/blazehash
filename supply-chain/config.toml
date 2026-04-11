@@ -10,9 +10,6 @@ url = "https://raw.githubusercontent.com/mozilla/cargo-vet/main/supply-chain/aud
 [policy.blazehash]
 audit-as-crates-io = true
 
-[policy.ewf]
-audit-as-crates-io = true
-
 [[exemptions.adler2]]
 version = "2.0.1"
 criteria = "safe-to-deploy"
