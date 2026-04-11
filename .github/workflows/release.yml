@@ -199,7 +199,7 @@ jobs:
           merge-multiple: true
 
       - name: Push amd64 to Cloudsmith
-        uses: cloudsmith-io/action@v0.6.0
+        uses: cloudsmith-io/action@bd583dece935b5e8bcc050785b0ac229ed4a390d # v0.6.0
         with:
           api-key: ${{ secrets.CLOUDSMITH_API_KEY }}
           command: push
@@ -211,7 +211,7 @@ jobs:
           file: debs/blazehash_*_amd64.deb
 
       - name: Push arm64 to Cloudsmith
-        uses: cloudsmith-io/action@v0.6.0
+        uses: cloudsmith-io/action@bd583dece935b5e8bcc050785b0ac229ed4a390d # v0.6.0
         with:
           api-key: ${{ secrets.CLOUDSMITH_API_KEY }}
           command: push
