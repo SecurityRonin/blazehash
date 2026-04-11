@@ -66,7 +66,7 @@ fn main() -> Result<()> {
                     "usage: blazehash nsrl build-bloom <input.db> --output <out.bloom>"
                 )
             })?;
-            let out = cli.output.as_ref().ok_or_else(|| {
+            let out = output.as_ref().ok_or_else(|| {
                 anyhow::anyhow!("--output required for nsrl build-bloom")
             })?;
             blazehash::nsrl::build_bloom(db, out, 0.001)?;
@@ -81,6 +81,7 @@ fn main() -> Result<()> {
     }
 
     let algorithms = cli.flat_algorithms();
+    let output = cli.resolve_output();
 
     match cli.mode() {
         Mode::Mcp => unreachable!(),
@@ -108,14 +109,14 @@ fn main() -> Result<()> {
             if !valid { std::process::exit(1); }
         }
         Mode::SizeOnly => {
-            commands::size_only::run(&cli.paths, cli.recursive, cli.output.as_ref(), cli.mft)?;
+            commands::size_only::run(&cli.paths, cli.recursive, output.as_ref(), cli.mft)?;
         }
         Mode::Audit => {
             commands::audit::run(
                 &cli.paths,
                 &cli.known,
                 cli.recursive,
-                cli.output.as_ref(),
+                output.as_ref(),
                 cli.fuzzy_threshold,
                 cli.fuzzy_top,
                 cli.ignore_sig,
@@ -123,7 +124,7 @@ fn main() -> Result<()> {
             )?;
         }
         Mode::VerifyImage => {
-            commands::verify_image::run(&cli.paths, cli.output.as_ref())?;
+            commands::verify_image::run(&cli.paths, output.as_ref())?;
         }
         Mode::Piecewise => {
             let chunk_str = cli.piecewise.as_ref().unwrap();
@@ -132,11 +133,11 @@ fn main() -> Result<()> {
                 &algorithms,
                 chunk_str,
                 cli.bare,
-                cli.output.as_ref(),
+                output.as_ref(),
             )?;
         }
         Mode::Stdin => {
-            commands::stdin::run(&algorithms, &cli.format, cli.bare, cli.output.as_ref())?;
+            commands::stdin::run(&algorithms, &cli.format, cli.bare, output.as_ref())?;
         }
         Mode::Hash => {
             let filter = cli.build_walk_filter()?;
@@ -147,7 +148,7 @@ fn main() -> Result<()> {
                 format: &cli.format,
                 bare: cli.bare,
                 resume: cli.resume,
-                output: cli.output.as_ref(),
+                output: output.as_ref(),
                 no_cache: cli.no_cache,
                 no_gpu: cli.no_gpu,
                 filter: &filter,

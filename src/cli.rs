@@ -22,8 +22,9 @@ pub struct Cli {
     #[arg(short = 'r', long = "recursive")]
     pub recursive: bool,
 
-    /// Output file (default: stdout)
-    #[arg(short = 'o', long = "output")]
+    /// Output file (default: stdout). Bare -o (no filename) auto-derives
+    /// <dirname>.hash for a single directory, or manifest.hash otherwise.
+    #[arg(short = 'o', long = "output", num_args = 0..=1, default_missing_value = "__auto__")]
     pub output: Option<PathBuf>,
 
     /// Audit mode — verify files against known hashes
@@ -220,6 +221,21 @@ impl Cli {
         } else {
             flat
         }
+    }
+
+    /// Resolve the `-o` value to a concrete path, handling the `__auto__` sentinel.
+    pub fn resolve_output(&self) -> Option<PathBuf> {
+        let raw = self.output.as_ref()?;
+        if raw.as_os_str() != "__auto__" {
+            return Some(raw.clone());
+        }
+        let name = self.paths.iter()
+            .find(|p| p.is_dir() || p.exists())
+            .and_then(|p| p.file_name())
+            .and_then(|n| n.to_str())
+            .filter(|n| *n != "." && *n != "..")
+            .unwrap_or("manifest");
+        Some(PathBuf::from(format!("{name}.hash")))
     }
 
     pub fn build_walk_filter(&self) -> anyhow::Result<blazehash::walk_filter::WalkFilter> {
