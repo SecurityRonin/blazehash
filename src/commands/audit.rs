@@ -9,6 +9,7 @@ use std::path::PathBuf;
 
 use super::report_walk_errors;
 
+#[allow(clippy::too_many_arguments)]
 pub fn run(
     paths: &[PathBuf],
     known: &[PathBuf],

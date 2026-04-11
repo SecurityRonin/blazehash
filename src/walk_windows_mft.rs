@@ -17,15 +17,17 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{bail, Context, Result};
 
-use windows_sys::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
+use windows_sys::Win32::Foundation::{CloseHandle, GENERIC_READ, HANDLE, INVALID_HANDLE_VALUE};
 use windows_sys::Win32::Security::{
-    GetTokenInformation, OpenProcessToken, TokenElevation, TOKEN_ELEVATION, TOKEN_QUERY,
+    GetTokenInformation, TokenElevation, TOKEN_ELEVATION, TOKEN_QUERY,
 };
 use windows_sys::Win32::Storage::FileSystem::{
     CreateFileW, FILE_FLAG_SEQUENTIAL_SCAN, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
-    GENERIC_READ, OPEN_EXISTING,
+    OPEN_EXISTING,
 };
-use windows_sys::Win32::System::Threading::{GetCurrentProcess, WaitForSingleObject, INFINITE};
+use windows_sys::Win32::System::Threading::{
+    GetCurrentProcess, OpenProcessToken, WaitForSingleObject, INFINITE,
+};
 use windows_sys::Win32::UI::Shell::{SEE_MASK_NOCLOSEPROCESS, SHELLEXECUTEINFOW, ShellExecuteExW};
 
 // ─── Public types ─────────────────────────────────────────────────────────────
@@ -77,7 +79,7 @@ fn drive_root_for(path: &Path) -> Option<PathBuf> {
 /// Returns `true` if the current process has administrator privileges.
 pub fn is_elevated() -> bool {
     unsafe {
-        let mut token: HANDLE = 0;
+        let mut token: HANDLE = std::ptr::null_mut();
         if OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token) == 0 {
             return false;
         }
@@ -362,7 +364,7 @@ pub fn enumerate_mft_sizes(root: &Path, recursive: bool) -> Result<Vec<MftEntry>
             std::ptr::null(),
             OPEN_EXISTING,
             FILE_FLAG_SEQUENTIAL_SCAN,
-            0,
+            std::ptr::null_mut(),
         )
     };
     if handle == INVALID_HANDLE_VALUE {
@@ -466,7 +468,7 @@ pub fn spawn_elevated_mft_worker(
     sei.nShow = 2; // SW_SHOWMINIMIZED — start minimized so console doesn't intrude
 
     let ok = unsafe { ShellExecuteExW(&mut sei) };
-    if ok == 0 || sei.hProcess == 0 {
+    if ok == 0 || sei.hProcess.is_null() {
         bail!("UAC elevation was cancelled or failed");
     }
 

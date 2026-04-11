@@ -52,6 +52,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
     let append = resume && output.is_some_and(|p| p.exists());
     let mut writer = make_writer(output.map(|p| p.as_path()), append)?;
 
+    #[allow(unused_mut)] // `mut` is only needed when the `nsrl` feature is enabled
     let mut all_results = collect_results(
         paths,
         algorithms,
@@ -119,6 +120,7 @@ fn load_resume_state(resume: bool, output: Option<&PathBuf>) -> Result<ResumeSta
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn collect_results(
     paths: &[PathBuf],
     algorithms: &[Algorithm],
@@ -165,7 +167,7 @@ fn collect_results(
 /// Hash any NTFS Alternate Data Streams attached to `path` and append results.
 /// No-op on non-Windows or when the file has no named ADS.
 fn hash_ads_streams(
-    path: &PathBuf,
+    path: &std::path::Path,
     algorithms: &[Algorithm],
     no_cache: bool,
     no_gpu: bool,

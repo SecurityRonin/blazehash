@@ -391,7 +391,7 @@ fn files_match(left: &FileRecord, right: &FileRecord, compare_by: CompareBy) -> 
                     } else {
                         rt.duration_since(lt)
                     };
-                    diff.map_or(false, |d| d.as_secs() <= 2)
+                    diff.is_ok_and(|d| d.as_secs() <= 2)
                 }
                 _ => left.size == right.size, // no mtime → fall back to size only
             }
@@ -493,6 +493,6 @@ fn format_size(bytes: u64) -> String {
     } else if bytes >= KIB {
         format!("{:.1} KiB", bytes as f64 / KIB as f64)
     } else {
-        format!("{} B", bytes)
+        format!("{bytes} B")
     }
 }
