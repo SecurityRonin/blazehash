@@ -388,3 +388,57 @@ fn cli_resume_without_output_file() {
         .success()
         .stdout(predicate::str::contains("test.txt"));
 }
+
+// ── -o auto-naming ────────────────────────────────────────────────────────────
+
+#[test]
+fn cli_bare_o_derives_dirname_hash() {
+    let dir = TempDir::new().unwrap();
+    let evidence = dir.path().join("smith-2026");
+    fs::create_dir_all(&evidence).unwrap();
+    fs::write(evidence.join("file.txt"), b"data").unwrap();
+
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .arg("-r")
+        .arg(&evidence)
+        .arg("-o")   // no filename — should auto-derive smith-2026.hash
+        .current_dir(dir.path())
+        .assert()
+        .success();
+
+    assert!(dir.path().join("smith-2026.hash").exists(), "smith-2026.hash not created");
+}
+
+#[test]
+fn cli_bare_o_falls_back_to_manifest_hash_for_dot() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("file.txt"), b"data").unwrap();
+
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .arg(".")
+        .arg("-o")
+        .current_dir(dir.path())
+        .assert()
+        .success();
+
+    assert!(dir.path().join("manifest.hash").exists(), "manifest.hash not created");
+}
+
+#[test]
+fn cli_explicit_o_filename_unchanged() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("file.txt"), b"data").unwrap();
+    let out = dir.path().join("custom.hash");
+
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .arg(dir.path())
+        .arg("-o")
+        .arg(&out)
+        .assert()
+        .success();
+
+    assert!(out.exists(), "custom.hash not created");
+}
