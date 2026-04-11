@@ -81,9 +81,8 @@ and 3 algorithms (MD5, SHA-1, SHA-256). Full digest table in
 | 512 MiB | 1.022 ± 0.008 | 1.154 ± 0.070 | 1.13x |
 | **1 GiB** | **2.182 ± 0.148** | **2.485 ± 0.230** | **1.14x** |
 
-SHA-256 speedup is modest but consistent: blazehash's Rust implementation
-outperforms hashdeep's C at larger file sizes where startup overhead is
-amortised. The variance at 1 GiB is higher than at 512 MiB — both tools
+SHA-256 speedup is modest but consistent at larger file sizes where
+startup overhead is amortised. The variance at 1 GiB is higher than at 512 MiB — both tools
 show OS scheduler jitter over multi-second runs.
 
 ### MD5
@@ -106,7 +105,7 @@ show OS scheduler jitter over multi-second runs.
 
 SHA-1 advantage is driven by ARM NEON hardware instructions (`sha1c`,
 `sha1p`, `sha1m`, `sha1h`) on the M4 Pro. The Rust `sha1` crate generates
-these automatically via LLVM; hashdeep's C build does not.
+these automatically via LLVM; the Homebrew hashdeep binary is compiled without `-march=native` and does not use them.
 **This 2× speedup is ARM-specific and will not reproduce on x86-64.**
 
 ### BLAKE3 (blazehash only — not in hashdeep 4.4)
@@ -200,7 +199,7 @@ on slower drives.
 
 ## Capability Gap: EWF/E01
 
-hashdeep 4.4 cannot process Expert Witness Format images. blazehash
+EWF image processing is outside hashdeep's scope. blazehash
 `--verify-image` handles E01/Ex01/L01/Lx01 via the bundled libewf backend,
 with embedded hash verification against the image's stored digests.
 

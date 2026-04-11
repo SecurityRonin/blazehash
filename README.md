@@ -73,17 +73,16 @@ blazehash sign manifest.hash
 
 ## Feature Comparison
 
-### What hashdeep can't do
+### Beyond hashdeep's scope
 
-These are the features that make blazehash irreplaceable in certain workflows —
-hashdeep returns an error or silently misses data in each case.
+Features not available in hashdeep that blazehash adds.
 
 | Feature | Notes |
 |---------|-------|
-| **EWF / E01 image verification** | hashdeep cannot open E01 images at all — use `blazehash --verify-image` instead of `ewfverify` |
-| **Resume interrupted runs** | Start over vs pick up where you left off on a 4 TB drive |
-| **NTFS Alternate Data Streams** | hashdeep silently skips ADS; malware routinely hides payloads there |
-| **Manifest signing (Ed25519)** | Cryptographic proof of chain of custody; hashdeep has no equivalent |
+| **EWF / E01 image verification** | Verify forensic images acquired with FTK Imager, EnCase, or similar — `blazehash --verify-image evidence.E01` |
+| **Resume interrupted runs** | Pick up where you left off on a 4 TB acquisition without starting over |
+| **NTFS Alternate Data Streams** | Hash ADS alongside main file content on Windows (`--ads`) |
+| **Manifest signing (Ed25519)** | Cryptographic proof of chain of custody, self-contained in the manifest |
 | **Folder diff** | Compare two directory trees by content, size+time, or name |
 
 ### Parity with hashdeep
@@ -163,9 +162,7 @@ cryptographically stronger, with no length-extension vulnerability.
 
 [hashdeep](https://github.com/jessek/hashdeep) — written by Jesse Kornbluth and Simson Garfinkel — gave the forensic community its canonical file hashing and audit tool. Court-tested workflows have depended on it for over a decade. It is public domain, auditable, and honest.
 
-But hashdeep hasn't had a release since v4.4. It doesn't support BLAKE3, NTFS ADS, or EWF images. It has no manifest signing, no NSRL filtering, no fuzzy hashing, no deduplication, no MCP server.
-
-**blazehash** is a continuation, not a replacement. Every hashdeep flag works as expected. The output format is compatible. Your existing scripts keep working. We add what the community needs.
+**blazehash** is a continuation, not a replacement. Every hashdeep flag works as expected. The output format is compatible. Your existing scripts keep working. We add what the community needs next: BLAKE3, EWF image verification, manifest signing, NSRL filtering, fuzzy hashing, deduplication, and more.
 
 ---
 
