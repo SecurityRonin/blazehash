@@ -941,6 +941,92 @@ fn test_entropy_empty_is_zero() {
     assert_eq!(h, 0.0);
 }
 
+// ---- Task 2 (wiring): --entropy flag threads through hash_file and walk pipeline ----
+
+#[test]
+fn test_hash_file_entropy_flag_computes_entropy() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
+    use std::io::Write;
+
+    let mut f = tempfile::NamedTempFile::new().unwrap();
+    // Write known non-zero-entropy data: all 256 byte values uniformly
+    let data: Vec<u8> = (0u8..=255).collect();
+    f.write_all(&data).unwrap();
+    f.flush().unwrap();
+
+    // compute_entropy=true → entropy must be Some(_)
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, true).unwrap();
+    assert!(
+        result.entropy.is_some(),
+        "entropy should be Some when compute_entropy=true"
+    );
+    let h = result.entropy.unwrap();
+    assert!(
+        (h - 8.0).abs() < 0.01,
+        "uniform 256-byte file should have entropy ~8.0, got {h}"
+    );
+}
+
+#[test]
+fn test_hash_file_no_entropy_flag_has_none() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::hash_file;
+    use std::io::Write;
+
+    let mut f = tempfile::NamedTempFile::new().unwrap();
+    f.write_all(b"hello world").unwrap();
+    f.flush().unwrap();
+
+    // compute_entropy=false → entropy must be None
+    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false).unwrap();
+    assert!(
+        result.entropy.is_none(),
+        "entropy should be None when compute_entropy=false"
+    );
+}
+
+#[test]
+fn cli_entropy_flag_shows_entropy_in_csv() {
+    use assert_cmd::Command;
+    use std::io::Write;
+
+    let mut f = tempfile::NamedTempFile::new().unwrap();
+    let data: Vec<u8> = (0u8..=255).collect();
+    f.write_all(&data).unwrap();
+    f.flush().unwrap();
+
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([
+            "--entropy",
+            "--format",
+            "csv",
+            f.path().to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "blazehash --entropy must succeed");
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        stdout.contains("entropy"),
+        "CSV output must contain 'entropy' column header when --entropy is used"
+    );
+    // Data row must contain a numeric entropy value (not empty)
+    let lines: Vec<&str> = stdout.lines().collect();
+    assert_eq!(lines.len(), 2, "header + 1 data row");
+    // entropy column should contain a number like 8.0 or 7.xxx
+    let data_row = lines[1];
+    let fields: Vec<&str> = data_row.splitn(4, ',').collect();
+    // fields: size, blake3, entropy, filename (4 fields)
+    assert_eq!(fields.len(), 4, "expected 4 CSV fields: size,blake3,entropy,filename; got: {data_row}");
+    let entropy_val: f64 = fields[2].parse().expect("entropy field must be a number");
+    assert!(
+        entropy_val > 7.0,
+        "entropy of uniform 256-byte file must be > 7.0, got {entropy_val}"
+    );
+}
+
 // ---- Task 6: --stdin mode ----
 
 #[test]
