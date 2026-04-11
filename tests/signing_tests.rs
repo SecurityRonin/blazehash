@@ -112,8 +112,11 @@ fn test_verify_sig_fails_on_tampered_manifest() {
 fn test_verify_sig_returns_true_for_valid_sig() {
     let dir = tempdir().unwrap();
     let manifest = dir.path().join("manifest.hash");
-    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
-        .unwrap();
+    fs::write(
+        &manifest,
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n",
+    )
+    .unwrap();
 
     let sign_output = Command::cargo_bin("blazehash")
         .unwrap()
@@ -136,8 +139,11 @@ fn test_verify_sig_returns_true_for_valid_sig() {
 fn test_verify_sig_returns_false_for_tampered_manifest() {
     let dir = tempdir().unwrap();
     let manifest = dir.path().join("manifest.hash");
-    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
-        .unwrap();
+    fs::write(
+        &manifest,
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n",
+    )
+    .unwrap();
 
     let sign_output = Command::cargo_bin("blazehash")
         .unwrap()
@@ -159,15 +165,21 @@ fn test_verify_sig_returns_false_for_tampered_manifest() {
     .unwrap();
 
     let result = signing::verify_sig(&manifest, pubkey).unwrap();
-    assert!(!result, "verify_sig should return false for tampered manifest");
+    assert!(
+        !result,
+        "verify_sig should return false for tampered manifest"
+    );
 }
 
 #[test]
 fn test_auto_verify_sidecar_no_sig() {
     let dir = tempdir().unwrap();
     let manifest = dir.path().join("manifest.hash");
-    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
-        .unwrap();
+    fs::write(
+        &manifest,
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n",
+    )
+    .unwrap();
     // No .sig file — should return Ok(false)
     let result = signing::auto_verify_sidecar(&manifest, None).unwrap();
     assert!(!result, "expected Ok(false) when no .sig exists");
@@ -177,8 +189,11 @@ fn test_auto_verify_sidecar_no_sig() {
 fn test_auto_verify_sidecar_valid() {
     let dir = tempdir().unwrap();
     let manifest = dir.path().join("manifest.hash");
-    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
-        .unwrap();
+    fs::write(
+        &manifest,
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n",
+    )
+    .unwrap();
 
     // Sign to produce .sig
     let sign_output = Command::cargo_bin("blazehash")
@@ -203,8 +218,11 @@ fn test_auto_verify_sidecar_valid() {
 fn test_auto_verify_sidecar_invalid() {
     let dir = tempdir().unwrap();
     let manifest = dir.path().join("manifest.hash");
-    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
-        .unwrap();
+    fs::write(
+        &manifest,
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n",
+    )
+    .unwrap();
 
     // Sign, then tamper
     let sign_output = Command::cargo_bin("blazehash")

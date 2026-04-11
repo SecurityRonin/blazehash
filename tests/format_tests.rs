@@ -168,7 +168,11 @@ fn dfxml_output_has_hash_digests() {
     let mut buf = Vec::new();
     write_dfxml(&mut buf, &results, &algos).unwrap();
     let output = String::from_utf8(buf).unwrap();
-    assert!(output.contains("hashdigest type='BLAKE3'") || output.contains("hashdigest type='blake3'") || output.contains("hashdigest"));
+    assert!(
+        output.contains("hashdigest type='BLAKE3'")
+            || output.contains("hashdigest type='blake3'")
+            || output.contains("hashdigest")
+    );
 }
 
 #[test]
@@ -195,7 +199,10 @@ fn sumfile_output_hash_two_spaces_path() {
     let mut buf = Vec::new();
     write_sumfile(&mut buf, &[result], &[Algorithm::Sha256]).unwrap();
     let output = String::from_utf8(buf).unwrap();
-    assert!(output.contains("  /evidence/test.bin"), "expected two-space separator");
+    assert!(
+        output.contains("  /evidence/test.bin"),
+        "expected two-space separator"
+    );
 }
 
 #[test]
@@ -203,7 +210,10 @@ fn sumfile_error_on_multiple_algorithms() {
     let mut buf = Vec::new();
     let result = sample_result();
     let err = write_sumfile(&mut buf, &[result], &[Algorithm::Blake3, Algorithm::Sha256]);
-    assert!(err.is_err(), "sumfile should error with multiple algorithms");
+    assert!(
+        err.is_err(),
+        "sumfile should error with multiple algorithms"
+    );
 }
 
 #[test]

@@ -4,8 +4,11 @@ use assert_cmd::Command;
 fn test_looks_like_manifest_hashdeep() {
     let dir = tempfile::tempdir().unwrap();
     let f = dir.path().join("hashes.hash");
-    std::fs::write(&f, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
-        .unwrap();
+    std::fs::write(
+        &f,
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n",
+    )
+    .unwrap();
     assert!(blazehash::manifest_loader::looks_like_manifest(&f));
 }
 
@@ -83,7 +86,10 @@ fn test_find_manifest_error_when_ambiguous() {
     )
     .unwrap();
     let result = blazehash::manifest_loader::find_manifest(&[dir.path()]);
-    assert!(result.is_err(), "expected error when multiple manifests found");
+    assert!(
+        result.is_err(),
+        "expected error when multiple manifests found"
+    );
     let msg = result.unwrap_err().to_string();
     assert!(msg.contains("ambiguous"));
 }
