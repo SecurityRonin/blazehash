@@ -183,18 +183,29 @@ the cost of simultaneous multi-algorithm computation in each tool.
 
 ## Extrapolation to 1 TiB
 
-Throughput was confirmed linear at 20 GiB (warm cache); the table below
-extrapolates from measured saturation throughput (CPU-bound regime):
+Two scenarios are relevant for forensic work:
 
-| Algorithm | blazehash est. | hashdeep est. |
-|-----------|----------------|---------------|
-| SHA-256 | ~492 MB/s → ~35 min | ~432 MB/s → ~40 min |
-| SHA-1 | ~1,222 MB/s → ~14 min | ~595 MB/s → ~29 min |
-| BLAKE3 | ~1,640 MB/s → ~10 min | N/A |
+**Cached (file fits in RAM)** — measured at 1 GiB warm cache, CPU-bound:
 
-Cold-disk NVMe at ~4-7 GB/s does not bottleneck SHA-256 (~492 MB/s) or
-SHA-1 (~1,222 MB/s). BLAKE3 at ~1,640 MB/s may approach NVMe saturation
-on slower drives.
+| Algorithm | blazehash | hashdeep | blazehash 1 TiB est. |
+|-----------|-----------|----------|----------------------|
+| BLAKE3 | ~1,640 MB/s | N/A | ~10 min |
+| SHA-1 | ~1,222 MB/s | ~595 MB/s | ~14 min |
+| SHA-256 | ~492 MB/s | ~432 MB/s | ~35 min |
+
+**Disk-bound (forensic scale, > available RAM)** — measured at 20 GiB with
+random data on this test machine (Apple M-series, NVMe internal SSD):
+
+| Algorithm | blazehash measured | 1 TiB est. |
+|-----------|--------------------|------------|
+| BLAKE3 | ~331 MB/s | ~53 min |
+| SHA-1 | ~289 MB/s | ~60 min |
+| SHA-256 | ~228 MB/s | ~77 min |
+
+At forensic scale (evidence images that exceed available RAM), throughput is
+limited by memory bandwidth and page-cache pressure rather than the CPU.
+Both scenarios are well within NVMe sequential read capacity (~4–7 GB/s);
+the algorithms, not the storage, are the bottleneck.
 
 ---
 
