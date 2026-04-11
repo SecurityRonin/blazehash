@@ -128,10 +128,7 @@ pub fn load_manifest(path: &Path) -> Result<Vec<ManifestRecord>> {
         ManifestFormat::Jsonl => parse_jsonl(&content),
         ManifestFormat::Csv => parse_csv(&content),
         ManifestFormat::Unknown => {
-            bail!(
-                "unrecognised manifest format in {}",
-                path.display()
-            );
+            bail!("unrecognised manifest format in {}", path.display());
         }
     }
 }

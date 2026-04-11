@@ -25,7 +25,7 @@ pub fn run(
 
     // ── Folder-vs-folder diff ─────────────────────────────────────────────────
     if left.is_dir() && right.is_dir() {
-        use blazehash::folder_diff::{CompareBy, diff_folders, print_entry, print_summary};
+        use blazehash::folder_diff::{diff_folders, print_entry, print_summary, CompareBy};
         let cmp = match compare_by {
             "paranoid" => CompareBy::Paranoid,
             "size-time" => CompareBy::SizeTime,
@@ -47,11 +47,21 @@ pub fn run(
     // path -> first hash value
     let before_map: HashMap<PathBuf, String> = before_records
         .iter()
-        .filter_map(|r| r.hashes.values().next().map(|h| (r.path.clone(), h.clone())))
+        .filter_map(|r| {
+            r.hashes
+                .values()
+                .next()
+                .map(|h| (r.path.clone(), h.clone()))
+        })
         .collect();
     let after_map: HashMap<PathBuf, String> = after_records
         .iter()
-        .filter_map(|r| r.hashes.values().next().map(|h| (r.path.clone(), h.clone())))
+        .filter_map(|r| {
+            r.hashes
+                .values()
+                .next()
+                .map(|h| (r.path.clone(), h.clone()))
+        })
         .collect();
 
     // hash -> path (for move detection)

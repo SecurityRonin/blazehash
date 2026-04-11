@@ -11,7 +11,10 @@ use blazehash::parallel_config::{ParallelConfig, DEFAULT_PARALLEL_THRESHOLD_BYTE
 #[test]
 fn test_default_threshold_is_64kib() {
     let cfg = ParallelConfig::default();
-    assert_eq!(cfg.parallel_threshold_bytes, DEFAULT_PARALLEL_THRESHOLD_BYTES);
+    assert_eq!(
+        cfg.parallel_threshold_bytes,
+        DEFAULT_PARALLEL_THRESHOLD_BYTES
+    );
     assert_eq!(DEFAULT_PARALLEL_THRESHOLD_BYTES, 64 * 1024);
 }
 
@@ -48,7 +51,10 @@ fn test_load_or_default_returns_default_when_no_config() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("parallel.toml");
     let cfg = ParallelConfig::load_or_default(&path);
-    assert_eq!(cfg.parallel_threshold_bytes, DEFAULT_PARALLEL_THRESHOLD_BYTES);
+    assert_eq!(
+        cfg.parallel_threshold_bytes,
+        DEFAULT_PARALLEL_THRESHOLD_BYTES
+    );
 }
 
 // ── 4. Save / load roundtrip ──────────────────────────────────────────────────

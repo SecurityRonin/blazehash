@@ -34,7 +34,9 @@ mod windows {
             "expected at least one ADS stream, got none"
         );
         assert!(
-            streams.iter().any(|p| p.to_string_lossy().contains("secret")),
+            streams
+                .iter()
+                .any(|p| p.to_string_lossy().contains("secret")),
             "expected stream named 'secret' in {streams:?}"
         );
     }
@@ -80,12 +82,7 @@ mod windows {
         );
 
         let stream_path = &streams[0];
-        let result = blazehash::hash::hash_file(
-            stream_path,
-            &[Algorithm::Blake3],
-            false,
-            false,
-        );
+        let result = blazehash::hash::hash_file(stream_path, &[Algorithm::Blake3], false, false);
         assert!(
             result.is_ok(),
             "hash_file should be able to hash an ADS stream path: {result:?}"

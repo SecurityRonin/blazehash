@@ -229,7 +229,9 @@ impl Cli {
         if raw.as_os_str() != "__auto__" {
             return Some(raw.clone());
         }
-        let name = self.paths.iter()
+        let name = self
+            .paths
+            .iter()
             .find(|p| p.is_dir() || p.exists())
             .and_then(|p| p.file_name())
             .and_then(|n| n.to_str())
@@ -273,7 +275,9 @@ impl Cli {
             Mode::NsrlBuildBloom
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("sign")) {
             Mode::Sign
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("verify-sig")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("verify-sig"))
+        {
             Mode::VerifySig
         } else if self.size_only {
             Mode::SizeOnly

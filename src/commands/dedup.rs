@@ -27,7 +27,9 @@ pub fn run(
     // is stable regardless of HashMap iteration order.
     let mut groups: HashMap<String, Vec<&FileHashResult>> = HashMap::new();
     for r in &results {
-        let hash = r.hashes.get(&Algorithm::Blake3)
+        let hash = r
+            .hashes
+            .get(&Algorithm::Blake3)
             .or_else(|| r.hashes.get(&Algorithm::Sha256))
             .or_else(|| r.hashes.get(&Algorithm::Sha1))
             .or_else(|| r.hashes.get(&Algorithm::Md5))

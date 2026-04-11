@@ -8,10 +8,13 @@ mod nsrl_tests {
         use rusqlite::Connection;
         let db_path = dir.join("NSRL.db");
         let conn = Connection::open(&db_path).unwrap();
-        conn.execute_batch("
+        conn.execute_batch(
+            "
             CREATE TABLE FILE (SHA256 TEXT, MD5 TEXT, FileName TEXT, ProductCode INTEGER);
             INSERT INTO FILE VALUES ('aabbcc', 'ddeeff', 'notepad.exe', 1);
-        ").unwrap();
+        ",
+        )
+        .unwrap();
         db_path
     }
 
@@ -42,11 +45,15 @@ mod nsrl_tests {
         blazehash::nsrl::build_bloom(&db, &bloom_path, 0.001).unwrap();
 
         match NsrlLookup::open(&bloom_path) {
-            Ok(_) => panic!("expected error opening .bloom file, got Ok — bloom should be rejected"),
+            Ok(_) => {
+                panic!("expected error opening .bloom file, got Ok — bloom should be rejected")
+            }
             Err(e) => {
                 let msg = e.to_string().to_lowercase();
                 assert!(
-                    msg.contains("bloom") || msg.contains("not supported") || msg.contains("sqlite"),
+                    msg.contains("bloom")
+                        || msg.contains("not supported")
+                        || msg.contains("sqlite"),
                     "error should mention bloom or sqlite, got: {msg}"
                 );
             }

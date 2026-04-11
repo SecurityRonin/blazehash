@@ -7,7 +7,13 @@ use tempfile::TempDir;
 #[test]
 fn walk_empty_directory() {
     let dir = TempDir::new().unwrap();
-    let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], false, &WalkFilter::default()).unwrap();
+    let output = walk_and_hash(
+        dir.path(),
+        &[Algorithm::Blake3],
+        false,
+        &WalkFilter::default(),
+    )
+    .unwrap();
     assert!(output.results.is_empty());
 }
 
@@ -17,7 +23,13 @@ fn walk_flat_directory() {
     fs::write(dir.path().join("a.txt"), b"aaa").unwrap();
     fs::write(dir.path().join("b.txt"), b"bbb").unwrap();
 
-    let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], false, &WalkFilter::default()).unwrap();
+    let output = walk_and_hash(
+        dir.path(),
+        &[Algorithm::Blake3],
+        false,
+        &WalkFilter::default(),
+    )
+    .unwrap();
     assert_eq!(output.results.len(), 2);
     for r in &output.results {
         assert_eq!(r.size, 3);
@@ -33,7 +45,13 @@ fn walk_recursive() {
     fs::create_dir(&sub).unwrap();
     fs::write(sub.join("nested.txt"), b"nested").unwrap();
 
-    let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], true, &WalkFilter::default()).unwrap();
+    let output = walk_and_hash(
+        dir.path(),
+        &[Algorithm::Blake3],
+        true,
+        &WalkFilter::default(),
+    )
+    .unwrap();
     assert_eq!(output.results.len(), 2);
 }
 
@@ -45,7 +63,13 @@ fn walk_non_recursive_skips_subdirs() {
     fs::create_dir(&sub).unwrap();
     fs::write(sub.join("nested.txt"), b"nested").unwrap();
 
-    let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], false, &WalkFilter::default()).unwrap();
+    let output = walk_and_hash(
+        dir.path(),
+        &[Algorithm::Blake3],
+        false,
+        &WalkFilter::default(),
+    )
+    .unwrap();
     assert_eq!(output.results.len(), 1);
 }
 
@@ -66,7 +90,13 @@ fn walk_skips_directories_and_symlinks() {
     fs::write(dir.path().join("file.txt"), b"content").unwrap();
     fs::create_dir(dir.path().join("subdir")).unwrap();
 
-    let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], true, &WalkFilter::default()).unwrap();
+    let output = walk_and_hash(
+        dir.path(),
+        &[Algorithm::Blake3],
+        true,
+        &WalkFilter::default(),
+    )
+    .unwrap();
     assert_eq!(output.results.len(), 1);
     assert!(output.results[0].path.ends_with("file.txt"));
 }
@@ -85,7 +115,13 @@ fn walk_reports_unreadable_files() {
     use std::os::unix::fs::PermissionsExt;
     fs::set_permissions(&bad, fs::Permissions::from_mode(0o000)).unwrap();
 
-    let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], false, &WalkFilter::default()).unwrap();
+    let output = walk_and_hash(
+        dir.path(),
+        &[Algorithm::Blake3],
+        false,
+        &WalkFilter::default(),
+    )
+    .unwrap();
     assert_eq!(output.results.len(), 1);
     assert!(
         !output.errors.is_empty(),
@@ -101,7 +137,13 @@ fn walk_output_has_no_errors_on_success() {
     let dir = TempDir::new().unwrap();
     fs::write(dir.path().join("a.txt"), b"aaa").unwrap();
 
-    let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], false, &WalkFilter::default()).unwrap();
+    let output = walk_and_hash(
+        dir.path(),
+        &[Algorithm::Blake3],
+        false,
+        &WalkFilter::default(),
+    )
+    .unwrap();
     assert_eq!(output.results.len(), 1);
     assert!(output.errors.is_empty());
 }
@@ -116,7 +158,13 @@ fn walk_deeply_nested_recursive() {
     fs::write(l3.join("deep.txt"), b"deep content").unwrap();
     fs::write(dir.path().join("root.txt"), b"root").unwrap();
 
-    let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], true, &WalkFilter::default()).unwrap();
+    let output = walk_and_hash(
+        dir.path(),
+        &[Algorithm::Blake3],
+        true,
+        &WalkFilter::default(),
+    )
+    .unwrap();
     assert_eq!(output.results.len(), 2);
     assert!(output.errors.is_empty());
 }
@@ -124,7 +172,13 @@ fn walk_deeply_nested_recursive() {
 #[test]
 fn walk_empty_directory_no_errors() {
     let dir = TempDir::new().unwrap();
-    let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], true, &WalkFilter::default()).unwrap();
+    let output = walk_and_hash(
+        dir.path(),
+        &[Algorithm::Blake3],
+        true,
+        &WalkFilter::default(),
+    )
+    .unwrap();
     assert!(output.results.is_empty());
     assert!(output.errors.is_empty());
 }
@@ -148,7 +202,13 @@ fn walk_symlink_to_file_is_skipped() {
     fs::write(&real_file, b"content").unwrap();
     std::os::unix::fs::symlink(&real_file, dir.path().join("link.txt")).unwrap();
 
-    let output = walk_and_hash(dir.path(), &[Algorithm::Blake3], false, &WalkFilter::default()).unwrap();
+    let output = walk_and_hash(
+        dir.path(),
+        &[Algorithm::Blake3],
+        false,
+        &WalkFilter::default(),
+    )
+    .unwrap();
     // walkdir follows symlinks by default, but we should get at least the real file
     // The symlink may or may not be followed depending on walkdir config
     assert!(!output.results.is_empty());

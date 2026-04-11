@@ -281,6 +281,12 @@ fn test_shake128_not_fuzzy_not_non_crypto() {
 
 #[test]
 fn test_shake_parse_from_str() {
-    assert_eq!("shake128".parse::<Algorithm>().unwrap(), Algorithm::Shake128);
-    assert_eq!("shake256".parse::<Algorithm>().unwrap(), Algorithm::Shake256);
+    assert_eq!(
+        "shake128".parse::<Algorithm>().unwrap(),
+        Algorithm::Shake128
+    );
+    assert_eq!(
+        "shake256".parse::<Algorithm>().unwrap(),
+        Algorithm::Shake256
+    );
 }

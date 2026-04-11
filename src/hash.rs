@@ -317,12 +317,8 @@ pub fn hash_file(
     // Full-read pass: crc32c/xxh3 (non-crypto) and shake128/shake256 (XOF) use hash_bytes
     // rather than the streaming DynHasher trait; read full file bytes if needed.
     if !full_read_algorithms.is_empty() {
-        let data = fs::read(path).with_context(|| {
-            format!(
-                "failed to read {} for full-read hashing",
-                path.display()
-            )
-        })?;
+        let data = fs::read(path)
+            .with_context(|| format!("failed to read {} for full-read hashing", path.display()))?;
         for algo in &full_read_algorithms {
             hashes.insert(*algo, crate::algorithm::hash_bytes(*algo, &data));
         }
@@ -334,7 +330,6 @@ pub fn hash_file(
         hashes,
     })
 }
-
 
 /// Attempt to hash GPU-eligible algorithms (SHA-256, MD5) on the GPU.
 /// Returns None if no GPU is available, thresholds are not met, or GPU is

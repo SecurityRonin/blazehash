@@ -402,12 +402,15 @@ fn cli_bare_o_derives_dirname_hash() {
         .unwrap()
         .arg("-r")
         .arg(&evidence)
-        .arg("-o")   // no filename — should auto-derive smith-2026.hash
+        .arg("-o") // no filename — should auto-derive smith-2026.hash
         .current_dir(dir.path())
         .assert()
         .success();
 
-    assert!(dir.path().join("smith-2026.hash").exists(), "smith-2026.hash not created");
+    assert!(
+        dir.path().join("smith-2026.hash").exists(),
+        "smith-2026.hash not created"
+    );
 }
 
 #[test]
@@ -423,7 +426,10 @@ fn cli_bare_o_falls_back_to_manifest_hash_for_dot() {
         .assert()
         .success();
 
-    assert!(dir.path().join("manifest.hash").exists(), "manifest.hash not created");
+    assert!(
+        dir.path().join("manifest.hash").exists(),
+        "manifest.hash not created"
+    );
 }
 
 #[test]

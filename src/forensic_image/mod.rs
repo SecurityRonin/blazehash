@@ -213,9 +213,7 @@ pub fn verify_image(path: &Path) -> Result<ImageVerification> {
         ImageFormat::RawDd => {
             // Delegate to the sidecar verifier; build a minimal ImageVerification
             // so callers get a consistent return type.
-            let size = std::fs::metadata(path)
-                .map(|m| m.len())
-                .unwrap_or(0);
+            let size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
             let sidecars = verify_raw_dd(path)?;
 
             // Populate the legacy fields from the first MD5/SHA1 sidecar if present.

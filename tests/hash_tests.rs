@@ -523,10 +523,7 @@ fn test_include_glob_filters_files() {
     std::fs::write(dir.path().join("file.exe"), b"exe content").unwrap();
     std::fs::write(dir.path().join("file.log"), b"log content").unwrap();
 
-    let filter = WalkFilter::builder()
-        .include("*.exe")
-        .build()
-        .unwrap();
+    let filter = WalkFilter::builder().include("*.exe").build().unwrap();
     let output = blazehash::walk::walk_and_hash(
         dir.path(),
         &[blazehash::algorithm::Algorithm::Blake3],
@@ -545,10 +542,7 @@ fn test_exclude_glob_filters_files() {
     std::fs::write(dir.path().join("file.exe"), b"exe").unwrap();
     std::fs::write(dir.path().join("file.log"), b"log").unwrap();
 
-    let filter = WalkFilter::builder()
-        .exclude("*.log")
-        .build()
-        .unwrap();
+    let filter = WalkFilter::builder().exclude("*.log").build().unwrap();
     let output = blazehash::walk::walk_and_hash(
         dir.path(),
         &[blazehash::algorithm::Algorithm::Blake3],
@@ -944,9 +938,19 @@ fn test_min_size_filter() {
     std::fs::write(dir.path().join("large.bin"), vec![0u8; 1024]).unwrap();
 
     let filter = WalkFilter::builder().min_size(100).build().unwrap();
-    let output = blazehash::walk::walk_and_hash(dir.path(), &[blazehash::algorithm::Algorithm::Blake3], false, &filter).unwrap();
+    let output = blazehash::walk::walk_and_hash(
+        dir.path(),
+        &[blazehash::algorithm::Algorithm::Blake3],
+        false,
+        &filter,
+    )
+    .unwrap();
     assert_eq!(output.results.len(), 1);
-    assert!(output.results[0].path.to_str().unwrap().ends_with("large.bin"));
+    assert!(output.results[0]
+        .path
+        .to_str()
+        .unwrap()
+        .ends_with("large.bin"));
 }
 
 #[test]
@@ -957,9 +961,19 @@ fn test_max_size_filter() {
     std::fs::write(dir.path().join("large.bin"), vec![0u8; 1024]).unwrap();
 
     let filter = WalkFilter::builder().max_size(10).build().unwrap();
-    let output = blazehash::walk::walk_and_hash(dir.path(), &[blazehash::algorithm::Algorithm::Blake3], false, &filter).unwrap();
+    let output = blazehash::walk::walk_and_hash(
+        dir.path(),
+        &[blazehash::algorithm::Algorithm::Blake3],
+        false,
+        &filter,
+    )
+    .unwrap();
     assert_eq!(output.results.len(), 1);
-    assert!(output.results[0].path.to_str().unwrap().ends_with("small.bin"));
+    assert!(output.results[0]
+        .path
+        .to_str()
+        .unwrap()
+        .ends_with("small.bin"));
 }
 
 // ---- Task 8: DFXML output format ----
@@ -971,13 +985,25 @@ fn test_dfxml_output_format() {
 
     let output = assert_cmd::Command::cargo_bin("blazehash")
         .unwrap()
-        .args([dir.path().to_str().unwrap(), "-c", "blake3", "--format", "dfxml"])
+        .args([
+            dir.path().to_str().unwrap(),
+            "-c",
+            "blake3",
+            "--format",
+            "dfxml",
+        ])
         .output()
         .unwrap();
     let stdout = String::from_utf8(output.stdout).unwrap();
-    assert!(stdout.contains("<?xml"), "expected XML declaration, got: {stdout}");
+    assert!(
+        stdout.contains("<?xml"),
+        "expected XML declaration, got: {stdout}"
+    );
     assert!(stdout.contains("<dfxml"), "expected dfxml root element");
-    assert!(stdout.contains("<fileobject>"), "expected fileobject element");
+    assert!(
+        stdout.contains("<fileobject>"),
+        "expected fileobject element"
+    );
     assert!(stdout.contains("blake3"), "expected blake3 hashdigest type");
 }
 
@@ -990,12 +1016,24 @@ fn test_sha256sum_output_format() {
 
     let output = assert_cmd::Command::cargo_bin("blazehash")
         .unwrap()
-        .args([dir.path().to_str().unwrap(), "-c", "sha256", "--format", "sha256sum"])
+        .args([
+            dir.path().to_str().unwrap(),
+            "-c",
+            "sha256",
+            "--format",
+            "sha256sum",
+        ])
         .output()
         .unwrap();
     let stdout = String::from_utf8(output.stdout).unwrap();
-    assert!(stdout.contains("  "), "expected two spaces between hash and path");
-    assert!(!stdout.contains("%%%%"), "sha256sum format must not contain hashdeep header");
+    assert!(
+        stdout.contains("  "),
+        "expected two spaces between hash and path"
+    );
+    assert!(
+        !stdout.contains("%%%%"),
+        "sha256sum format must not contain hashdeep header"
+    );
 }
 
 #[test]
@@ -1004,7 +1042,13 @@ fn test_sha256sum_rejects_multiple_algorithms() {
     std::fs::write(dir.path().join("f.bin"), b"x").unwrap();
     assert_cmd::Command::cargo_bin("blazehash")
         .unwrap()
-        .args([dir.path().to_str().unwrap(), "-c", "sha256,md5", "--format", "sha256sum"])
+        .args([
+            dir.path().to_str().unwrap(),
+            "-c",
+            "sha256,md5",
+            "--format",
+            "sha256sum",
+        ])
         .assert()
         .failure();
 }
@@ -1030,11 +1074,18 @@ fn test_include_glob_with_path_separator() {
     std::fs::write(subdir.join("audit.log"), b"log").unwrap();
     std::fs::write(dir.path().join("main.rs"), b"code").unwrap();
 
-    let filter = WalkFilter::builder()
-        .include("**/*.log")
-        .build()
-        .unwrap();
-    let output = blazehash::walk::walk_and_hash(dir.path(), &[blazehash::algorithm::Algorithm::Blake3], true, &filter).unwrap();
+    let filter = WalkFilter::builder().include("**/*.log").build().unwrap();
+    let output = blazehash::walk::walk_and_hash(
+        dir.path(),
+        &[blazehash::algorithm::Algorithm::Blake3],
+        true,
+        &filter,
+    )
+    .unwrap();
     assert_eq!(output.results.len(), 1);
-    assert!(output.results[0].path.to_str().unwrap().ends_with("audit.log"));
+    assert!(output.results[0]
+        .path
+        .to_str()
+        .unwrap()
+        .ends_with("audit.log"));
 }

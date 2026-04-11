@@ -97,11 +97,8 @@ fn test_enumerate_mft_c_root_nonempty() {
 #[test]
 #[ignore]
 fn test_enumerate_mft_windows_dir_recursive() {
-    let entries = blazehash::walk_windows_mft::enumerate_mft_sizes(
-        Path::new("C:\\Windows"),
-        true,
-    )
-    .expect("must run as Administrator");
+    let entries = blazehash::walk_windows_mft::enumerate_mft_sizes(Path::new("C:\\Windows"), true)
+        .expect("must run as Administrator");
     // C:\Windows has thousands of files
     assert!(entries.len() > 100, "expected many files under C:\\Windows");
     // All paths should start with C:\Windows

@@ -6,7 +6,7 @@
 use std::path::PathBuf;
 use tempfile::TempDir;
 
-use blazehash::folder_diff::{CompareBy, FolderDiffEntry, diff_folders};
+use blazehash::folder_diff::{diff_folders, CompareBy, FolderDiffEntry};
 
 fn make_file(dir: &TempDir, rel: &str, content: &[u8]) -> PathBuf {
     let path = dir.path().join(rel);
@@ -47,8 +47,16 @@ fn test_folder_diff_added_file() {
 
     let result = diff_folders(left.path(), right.path(), false, CompareBy::Content).unwrap();
     assert!(result.has_diff());
-    let added: Vec<_> = result.entries.iter()
-        .filter_map(|e| if let FolderDiffEntry::Added { path, .. } = e { Some(path.clone()) } else { None })
+    let added: Vec<_> = result
+        .entries
+        .iter()
+        .filter_map(|e| {
+            if let FolderDiffEntry::Added { path, .. } = e {
+                Some(path.clone())
+            } else {
+                None
+            }
+        })
         .collect();
     assert_eq!(added.len(), 1);
     assert_eq!(added[0], PathBuf::from("new.bin"));
@@ -65,8 +73,16 @@ fn test_folder_diff_removed_file() {
     make_file(&right, "a.txt", b"same");
 
     let result = diff_folders(left.path(), right.path(), false, CompareBy::Content).unwrap();
-    let removed: Vec<_> = result.entries.iter()
-        .filter_map(|e| if let FolderDiffEntry::Removed { path, .. } = e { Some(path.clone()) } else { None })
+    let removed: Vec<_> = result
+        .entries
+        .iter()
+        .filter_map(|e| {
+            if let FolderDiffEntry::Removed { path, .. } = e {
+                Some(path.clone())
+            } else {
+                None
+            }
+        })
         .collect();
     assert_eq!(removed.len(), 1);
     assert_eq!(removed[0], PathBuf::from("old.bin"));
@@ -82,8 +98,16 @@ fn test_folder_diff_modified_file() {
     make_file(&right, "config.json", b"{\"v\":2}");
 
     let result = diff_folders(left.path(), right.path(), false, CompareBy::Content).unwrap();
-    let mods: Vec<_> = result.entries.iter()
-        .filter_map(|e| if let FolderDiffEntry::Modified { path, .. } = e { Some(path.clone()) } else { None })
+    let mods: Vec<_> = result
+        .entries
+        .iter()
+        .filter_map(|e| {
+            if let FolderDiffEntry::Modified { path, .. } = e {
+                Some(path.clone())
+            } else {
+                None
+            }
+        })
         .collect();
     assert_eq!(mods.len(), 1);
     assert_eq!(mods[0], PathBuf::from("config.json"));
@@ -99,12 +123,27 @@ fn test_folder_diff_moved_file() {
     make_file(&right, "new_name.txt", b"unique content xyz");
 
     let result = diff_folders(left.path(), right.path(), false, CompareBy::Content).unwrap();
-    let moves: Vec<_> = result.entries.iter()
-        .filter_map(|e| if let FolderDiffEntry::Moved { from, to, .. } = e {
-            Some((from.clone(), to.clone()))
-        } else { None })
+    let moves: Vec<_> = result
+        .entries
+        .iter()
+        .filter_map(|e| {
+            if let FolderDiffEntry::Moved { from, to, .. } = e {
+                Some((from.clone(), to.clone()))
+            } else {
+                None
+            }
+        })
         .collect();
-    assert_eq!(moves.len(), 1, "expected 1 move, got {:?}", result.entries.iter().map(|e| format!("{e:?}")).collect::<Vec<_>>());
+    assert_eq!(
+        moves.len(),
+        1,
+        "expected 1 move, got {:?}",
+        result
+            .entries
+            .iter()
+            .map(|e| format!("{e:?}"))
+            .collect::<Vec<_>>()
+    );
     assert_eq!(moves[0].0, PathBuf::from("old_name.txt"));
     assert_eq!(moves[0].1, PathBuf::from("new_name.txt"));
 }
@@ -138,7 +177,10 @@ fn test_folder_diff_non_recursive_skips_subdirs() {
 
     let result = diff_folders(left.path(), right.path(), false, CompareBy::Content).unwrap();
     // Without recursive, sub/deep.txt is not compared
-    assert!(!result.has_diff(), "non-recursive diff should ignore subdirs");
+    assert!(
+        !result.has_diff(),
+        "non-recursive diff should ignore subdirs"
+    );
 }
 
 // ── 7. CompareBy::SizeTime ────────────────────────────────────────────────────
@@ -191,8 +233,8 @@ fn test_folder_diff_name_mode_same_names_is_identical() {
 fn test_folder_diff_summary_byte_counts() {
     let left = tempfile::tempdir().unwrap();
     let right = tempfile::tempdir().unwrap();
-    make_file(&left, "a.txt", b"12345");        // 5 bytes left
-    make_file(&right, "a.txt", b"1234567890");  // 10 bytes right (modified)
+    make_file(&left, "a.txt", b"12345"); // 5 bytes left
+    make_file(&right, "a.txt", b"1234567890"); // 10 bytes right (modified)
 
     let result = diff_folders(left.path(), right.path(), false, CompareBy::Content).unwrap();
     let s = result.summary();
@@ -293,7 +335,10 @@ fn test_folder_diff_paranoid_agrees_with_content_on_identical() {
     let r_content = diff_folders(left.path(), right.path(), false, CompareBy::Content).unwrap();
     let r_paranoid = diff_folders(left.path(), right.path(), false, CompareBy::Paranoid).unwrap();
     assert_eq!(r_content.has_diff(), r_paranoid.has_diff());
-    assert_eq!(r_content.summary().identical, r_paranoid.summary().identical);
+    assert_eq!(
+        r_content.summary().identical,
+        r_paranoid.summary().identical
+    );
 }
 
 #[test]

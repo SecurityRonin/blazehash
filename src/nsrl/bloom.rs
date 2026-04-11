@@ -11,8 +11,8 @@ pub struct BloomNsrl {
 impl BloomNsrl {
     pub fn open(path: &Path) -> Result<Self> {
         let bytes = std::fs::read(path)?;
-        let bloom: Bloom<String> = bincode::deserialize(&bytes)
-            .map_err(|e| anyhow::anyhow!("invalid bloom file: {e}"))?;
+        let bloom: Bloom<String> =
+            bincode::deserialize(&bytes).map_err(|e| anyhow::anyhow!("invalid bloom file: {e}"))?;
         Ok(BloomNsrl { bloom })
     }
 
@@ -27,11 +27,9 @@ impl BloomNsrl {
 
 pub fn build_bloom_from_sqlite(db_path: &Path, out_path: &Path, fp_rate: f64) -> Result<()> {
     let conn = Connection::open(db_path)?;
-    let count: i64 = conn.query_row(
-        "SELECT COUNT(SHA256) + COUNT(MD5) FROM FILE",
-        [],
-        |r| r.get(0),
-    )?;
+    let count: i64 = conn.query_row("SELECT COUNT(SHA256) + COUNT(MD5) FROM FILE", [], |r| {
+        r.get(0)
+    })?;
     // Bloom::new_for_fp_rate requires items_count > 0
     let items = (count as usize).max(1);
     let mut bloom: Bloom<String> = Bloom::new_for_fp_rate(items, fp_rate);

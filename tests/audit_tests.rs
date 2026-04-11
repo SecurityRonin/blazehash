@@ -389,7 +389,11 @@ fn test_load_manifest_hashdeep_format() {
     use blazehash::manifest_loader::load_manifest;
     let dir = tempfile::tempdir().unwrap();
     let manifest = dir.path().join("test.hash");
-    std::fs::write(&manifest, "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n## comment\n5,abc123,/file.bin\n").unwrap();
+    std::fs::write(
+        &manifest,
+        "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n## comment\n5,abc123,/file.bin\n",
+    )
+    .unwrap();
     let records = load_manifest(&manifest).unwrap();
     assert_eq!(records.len(), 1);
     assert_eq!(records[0].path, std::path::PathBuf::from("/file.bin"));
@@ -400,7 +404,11 @@ fn test_load_manifest_blazehash_format() {
     use blazehash::manifest_loader::load_manifest;
     let dir = tempfile::tempdir().unwrap();
     let manifest = dir.path().join("test.hash");
-    std::fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n## comment\n5,abc123,/file.bin\n").unwrap();
+    std::fs::write(
+        &manifest,
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n## comment\n5,abc123,/file.bin\n",
+    )
+    .unwrap();
     let records = load_manifest(&manifest).unwrap();
     assert_eq!(records.len(), 1);
     assert_eq!(records[0].path, std::path::PathBuf::from("/file.bin"));
@@ -411,7 +419,11 @@ fn test_find_manifest_finds_single_candidate() {
     use blazehash::manifest_loader::find_manifest;
     let dir = tempfile::tempdir().unwrap();
     let manifest = dir.path().join("manifest.hash");
-    std::fs::write(&manifest, "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n##\n").unwrap();
+    std::fs::write(
+        &manifest,
+        "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n##\n",
+    )
+    .unwrap();
     let found = find_manifest(&[dir.path()]).unwrap();
     assert_eq!(found, manifest);
 }
