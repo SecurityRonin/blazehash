@@ -73,25 +73,52 @@ blazehash sign manifest.hash
 
 ## Feature Comparison
 
-| Feature | blazehash | hashdeep | b3sum | sha256sum |
-|---------|:---------:|:--------:|:-----:|:---------:|
-| Audit mode | Y | Y | — | — |
-| Manifest signing (Ed25519) | Y | — | — | — |
-| Manifest diff | Y | — | — | — |
-| Duplicate detection | Y | — | — | — |
-| NSRL known-good filtering | Y | — | — | — |
-| Fuzzy / similarity hashing | Y | — | — | — |
-| Piecewise hashing | Y | Y | — | — |
-| Resume interrupted runs | Y | — | — | — |
-| EWF / E01 image verification | Y | — | — | — |
-| NTFS ADS hashing | Y | — | — | — |
-| MCP server (AI-assisted) | Y | — | — | — |
-| Multithreaded hashing | Y | — | Y | — |
-| GPU acceleration | Y | — | — | — |
-| Direct I/O (no page cache) | Y | — | — | — |
-| BLAKE3 | Y | — | Y | — |
-| 14 algorithms simultaneous | Y | — | — | — |
-| hashdeep / DFXML / CSV / JSON | Y | partial | — | — |
+### What hashdeep can't do
+
+These are the features that make blazehash irreplaceable in certain workflows —
+hashdeep returns an error or silently misses data in each case.
+
+| Feature | Notes |
+|---------|-------|
+| **EWF / E01 image verification** | hashdeep cannot open E01 images at all — use `blazehash --verify-image` instead of `ewfverify` |
+| **Resume interrupted runs** | Start over vs pick up where you left off on a 4 TB drive |
+| **NTFS Alternate Data Streams** | hashdeep silently skips ADS; malware routinely hides payloads there |
+| **Manifest signing (Ed25519)** | Cryptographic proof of chain of custody; hashdeep has no equivalent |
+| **Folder diff** | Compare two directory trees by content, size+time, or name |
+
+### Parity with hashdeep
+
+Everything you already rely on works as-is. Your scripts need no changes.
+
+| Feature | blazehash | hashdeep |
+|---------|:---------:|:--------:|
+| Audit mode (`-a -k`) | Y | Y |
+| Piecewise hashing (`-p`) | Y | Y |
+| hashdeep-compatible output | Y | Y |
+| DFXML / CSV / JSON output | Y | partial |
+| MD5 / SHA-1 / SHA-256 / Tiger / Whirlpool | Y | Y |
+
+### Additional capabilities
+
+| Feature | Notes |
+|---------|-------|
+| BLAKE3 (default) | ~1,640 MB/s; not in hashdeep |
+| GPU-accelerated SHA-256 / MD5 | Automatic when hardware is available |
+| NSRL known-good filtering | `--nsrl` with SQLite or Bloom filter — **see warning below** |
+| Fuzzy / similarity hashing | ssdeep + TLSH; useful for variant detection |
+| Duplicate detection | `blazehash dedup` |
+| Direct I/O (no page cache) | `--no-cache`; preserves RAM on large acquisitions |
+| MCP server | `blazehash mcp` for AI-assisted forensic workflows |
+
+> **Bloom filter warning — read before using `--nsrl` with a `.bloom` file.**
+> Bloom filters are probabilistic: they guarantee no false negatives (a known-good
+> file is never reported as unknown) but they **can produce false positives**
+> (an unknown file may be silently excluded as if it were known-good).
+> False positive rate depends on filter size and hash count — the default build
+> targets 0.1% FPR, meaning roughly 1 in 1,000 unknown files may be suppressed.
+> **Never use a Bloom filter when completeness is required** — use the SQLite
+> index (`--nsrl file.db`) instead. The `.bloom` format is provided for memory-
+> constrained environments only.
 
 ---
 
