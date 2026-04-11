@@ -68,5 +68,7 @@ jobs:
         uses: taiki-e/install-action@a402910a723481c4c80d006d75298c796a9c8695
         with:
           tool: cargo-vet
+      - name: Fetch dependencies
+        run: cargo fetch --locked
       - name: Check supply chain
         run: cargo vet check
