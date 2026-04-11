@@ -97,6 +97,67 @@ mod tests {
         assert!(display.contains("FAIL"));
     }
 
+    // --- Unit tests for has_sidecar and verify_raw_dd ---
+
+    #[test]
+    fn has_sidecar_returns_true_when_sidecar_exists() {
+        use blazehash::forensic_image::has_sidecar;
+        let dir = tempfile::tempdir().unwrap();
+        let image = dir.path().join("disk.dd");
+        std::fs::write(&image, b"data").unwrap();
+        std::fs::write(dir.path().join("disk.dd.md5"), "abc\n").unwrap();
+        assert!(has_sidecar(&image));
+    }
+
+    #[test]
+    fn has_sidecar_returns_false_when_no_sidecar() {
+        use blazehash::forensic_image::has_sidecar;
+        let dir = tempfile::tempdir().unwrap();
+        let image = dir.path().join("disk.dd");
+        std::fs::write(&image, b"data").unwrap();
+        assert!(!has_sidecar(&image));
+    }
+
+    #[test]
+    fn verify_raw_dd_pass_with_correct_sha256_sidecar() {
+        use blazehash::forensic_image::verify_raw_dd;
+        let dir = tempfile::tempdir().unwrap();
+        let image = dir.path().join("disk.dd");
+        let content = b"hello sidecar";
+        std::fs::write(&image, content).unwrap();
+        let expected = {
+            use blazehash::algorithm::{hash_bytes, Algorithm};
+            hash_bytes(Algorithm::Sha256, content)
+        };
+        std::fs::write(dir.path().join("disk.dd.sha256"), format!("{expected}\n")).unwrap();
+        let results = verify_raw_dd(&image).unwrap();
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].algo, "sha256");
+        assert!(results[0].is_match());
+    }
+
+    #[test]
+    fn verify_raw_dd_fail_with_wrong_hash() {
+        use blazehash::forensic_image::verify_raw_dd;
+        let dir = tempfile::tempdir().unwrap();
+        let image = dir.path().join("disk.dd");
+        std::fs::write(&image, b"hello sidecar").unwrap();
+        std::fs::write(dir.path().join("disk.dd.sha256"), "deadbeef\n").unwrap();
+        let results = verify_raw_dd(&image).unwrap();
+        assert_eq!(results.len(), 1);
+        assert!(!results[0].is_match());
+    }
+
+    #[test]
+    fn verify_raw_dd_error_when_no_sidecar() {
+        use blazehash::forensic_image::verify_raw_dd;
+        let dir = tempfile::tempdir().unwrap();
+        let image = dir.path().join("disk.dd");
+        std::fs::write(&image, b"data").unwrap();
+        let result = verify_raw_dd(&image);
+        assert!(result.is_err(), "expected error when no sidecar exists");
+    }
+
     // --- CLI e2e tests ---
 
     #[test]

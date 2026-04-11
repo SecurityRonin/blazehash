@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use blazehash::signing;
 use predicates;
 use std::fs;
 use tempfile::tempdir;
@@ -105,6 +106,76 @@ fn test_verify_sig_fails_on_tampered_manifest() {
         .assert()
         .failure()
         .stderr(predicates::str::contains("[!]"));
+}
+
+#[test]
+fn test_auto_verify_sidecar_no_sig() {
+    let dir = tempdir().unwrap();
+    let manifest = dir.path().join("manifest.hash");
+    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
+        .unwrap();
+    // No .sig file — should return Ok(false)
+    let result = signing::auto_verify_sidecar(&manifest, None).unwrap();
+    assert!(!result, "expected Ok(false) when no .sig exists");
+}
+
+#[test]
+fn test_auto_verify_sidecar_valid() {
+    let dir = tempdir().unwrap();
+    let manifest = dir.path().join("manifest.hash");
+    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
+        .unwrap();
+
+    // Sign to produce .sig
+    let sign_output = Command::cargo_bin("blazehash")
+        .unwrap()
+        .env("BLAZEHASH_SIGN_PASSWORD", "test-password-for-ci")
+        .args(["sign", manifest.to_str().unwrap()])
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8(sign_output.stderr).unwrap();
+    let pubkey = stderr
+        .lines()
+        .find(|l| l.contains("Public key:"))
+        .and_then(|l| l.split_whitespace().last())
+        .expect("public key not in stderr");
+
+    // auto_verify_sidecar with correct pubkey — should return Ok(true)
+    let result = signing::auto_verify_sidecar(&manifest, Some(pubkey)).unwrap();
+    assert!(result, "expected Ok(true) for valid sig");
+}
+
+#[test]
+fn test_auto_verify_sidecar_invalid() {
+    let dir = tempdir().unwrap();
+    let manifest = dir.path().join("manifest.hash");
+    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
+        .unwrap();
+
+    // Sign, then tamper
+    let sign_output = Command::cargo_bin("blazehash")
+        .unwrap()
+        .env("BLAZEHASH_SIGN_PASSWORD", "test-password-for-ci")
+        .args(["sign", manifest.to_str().unwrap()])
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8(sign_output.stderr).unwrap();
+    let pubkey = stderr
+        .lines()
+        .find(|l| l.contains("Public key:"))
+        .and_then(|l| l.split_whitespace().last())
+        .expect("public key not in stderr");
+
+    // Tamper the manifest
+    fs::write(
+        &manifest,
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,TAMPERED,/f.bin\n",
+    )
+    .unwrap();
+
+    // auto_verify_sidecar should return Err (invalid sig)
+    let result = signing::auto_verify_sidecar(&manifest, Some(pubkey));
+    assert!(result.is_err(), "expected Err for tampered manifest");
 }
 
 #[test]

@@ -1,6 +1,55 @@
 use assert_cmd::Command;
 
 #[test]
+fn test_looks_like_manifest_hashdeep() {
+    let dir = tempfile::tempdir().unwrap();
+    let f = dir.path().join("hashes.hash");
+    std::fs::write(&f, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
+        .unwrap();
+    assert!(blazehash::manifest_loader::looks_like_manifest(&f));
+}
+
+#[test]
+fn test_looks_like_manifest_json() {
+    let dir = tempfile::tempdir().unwrap();
+    let f = dir.path().join("hashes.json");
+    std::fs::write(
+        &f,
+        r#"[{"filename":"/a.bin","hashes":{"blake3":"aa"},"size":1}]"#,
+    )
+    .unwrap();
+    assert!(blazehash::manifest_loader::looks_like_manifest(&f));
+}
+
+#[test]
+fn test_looks_like_manifest_jsonl() {
+    let dir = tempfile::tempdir().unwrap();
+    let f = dir.path().join("hashes.jsonl");
+    std::fs::write(
+        &f,
+        "{\"filename\":\"/a.bin\",\"hashes\":{\"sha256\":\"bb\"},\"size\":2}\n",
+    )
+    .unwrap();
+    assert!(blazehash::manifest_loader::looks_like_manifest(&f));
+}
+
+#[test]
+fn test_looks_like_manifest_csv() {
+    let dir = tempfile::tempdir().unwrap();
+    let f = dir.path().join("hashes.csv");
+    std::fs::write(&f, "size,blake3,sha256,filename\n5,aa,bb,/f.bin\n").unwrap();
+    assert!(blazehash::manifest_loader::looks_like_manifest(&f));
+}
+
+#[test]
+fn test_looks_like_manifest_non_manifest() {
+    let dir = tempfile::tempdir().unwrap();
+    let f = dir.path().join("readme.txt");
+    std::fs::write(&f, "This is just a plain text file, not a manifest.\n").unwrap();
+    assert!(!blazehash::manifest_loader::looks_like_manifest(&f));
+}
+
+#[test]
 fn test_load_json_manifest() {
     let dir = tempfile::tempdir().unwrap();
     let manifest = dir.path().join("hashes.json");
