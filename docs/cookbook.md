@@ -172,18 +172,12 @@ blazehash reads the partial manifest, identifies which files were already hashed
 
 ## Skip known Windows system files (NSRL)
 
-The NIST NSRL catalogs hashes of known operating system and application files. Filter them out to focus on files that actually need examination.
-
-**One-time setup: build a bloom filter for fast lookups**
-
-```bash
-blazehash nsrl build-bloom NSRL.db --output nsrl.bloom
-```
+The NIST NSRL catalogs hashes of known operating system and application files. Filter them out to focus on files that actually need examination. Requires the SQLite NSRL database (`NSRL.db`).
 
 **Annotate known-good files:**
 
 ```bash
-blazehash -r /mnt/evidence -c sha256 --nsrl nsrl.bloom
+blazehash -r /mnt/evidence -c sha256 --nsrl NSRL.db
 ```
 
 Known-good files get a `[K]` prefix. Everything else is printed normally.
@@ -193,9 +187,6 @@ Known-good files get a `[K]` prefix. Everything else is printed normally.
 ```bash
 blazehash -r /mnt/evidence -c sha256 --nsrl NSRL.db --nsrl-exclude
 ```
-
-!!! warning
-    Use the SQLite database (not bloom filter) with `--nsrl-exclude`. Bloom filters have a ~0.1% false-positive rate, which means a small number of non-NSRL files could be silently suppressed.
 
 ---
 

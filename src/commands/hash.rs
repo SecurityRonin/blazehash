@@ -65,15 +65,6 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
 
     #[cfg(feature = "nsrl")]
     if let Some(nsrl_path) = nsrl {
-        if nsrl_exclude
-            && nsrl_path
-                .extension()
-                .and_then(|e| e.to_str())
-                .unwrap_or("")
-                == "bloom"
-        {
-            eprintln!("[!] Warning: --nsrl-exclude with a bloom filter may suppress evidence due to false positives. Confirm with a SQLite NSRL database.");
-        }
         let lookup = blazehash::nsrl::NsrlLookup::open(nsrl_path)?;
         let mut known_count = 0usize;
         all_results = all_results

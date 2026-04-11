@@ -122,7 +122,7 @@ pub struct Cli {
     #[arg(long = "dedup-dupes")]
     pub dedup_dupes: bool,
 
-    /// Path to NSRL database (.db SQLite or .bloom filter file)
+    /// Path to NSRL SQLite database (.db)
     #[arg(long = "nsrl", value_name = "FILE")]
     pub nsrl: Option<PathBuf>,
 

@@ -58,6 +58,20 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    // Unconditional bloom-file guard — runs even without the nsrl feature.
+    // Bloom filters are probabilistic (false positives) and must never be used
+    // for known-good filtering in a forensic context.
+    if let Some(ref nsrl_path) = cli.nsrl {
+        let ext = nsrl_path.extension().and_then(|e| e.to_str()).unwrap_or("");
+        if ext == "bloom" {
+            anyhow::bail!(
+                "bloom filter files are not supported for --nsrl. \
+                 Bloom filters are probabilistic and can produce false positives, \
+                 potentially suppressing evidence. Use a SQLite database (--nsrl file.db) instead."
+            );
+        }
+    }
+
     let algorithms = cli.flat_algorithms();
     let output = cli.resolve_output();
 

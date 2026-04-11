@@ -103,21 +103,12 @@ Everything you already rely on works as-is. Your scripts need no changes.
 |---------|-------|
 | BLAKE3 (default) | ~1,640 MB/s; not in hashdeep |
 | GPU-accelerated SHA-256 / MD5 | Automatic when hardware is available |
-| NSRL known-good filtering | `--nsrl` with SQLite or Bloom filter — **see warning below** |
+| NSRL known-good filtering | `--nsrl file.db` with a SQLite database |
 | Fuzzy / similarity hashing | ssdeep + TLSH; useful for variant detection |
 | Duplicate detection | `blazehash dedup` |
 | Direct I/O (no page cache) | `--no-cache`; preserves RAM on large acquisitions |
 | MCP server | `blazehash mcp` for AI-assisted forensic workflows |
 
-> **Bloom filter warning — read before using `--nsrl` with a `.bloom` file.**
-> Bloom filters are probabilistic: they guarantee no false negatives (a known-good
-> file is never reported as unknown) but they **can produce false positives**
-> (an unknown file may be silently excluded as if it were known-good).
-> False positive rate depends on filter size and hash count — the default build
-> targets 0.1% FPR, meaning roughly 1 in 1,000 unknown files may be suppressed.
-> **Never use a Bloom filter when completeness is required** — use the SQLite
-> index (`--nsrl file.db`) instead. The `.bloom` format is provided for memory-
-> constrained environments only.
 
 ---
 

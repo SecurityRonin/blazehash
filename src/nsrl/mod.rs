@@ -25,12 +25,16 @@ enum NsrlBackend {
 impl NsrlLookup {
     pub fn open(path: &std::path::Path) -> anyhow::Result<Self> {
         let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
-        let inner = if ext == "bloom" {
-            NsrlBackend::Bloom(bloom::BloomNsrl::open(path)?)
-        } else {
-            NsrlBackend::Sqlite(sqlite::SqliteNsrl::open(path)?)
-        };
-        Ok(NsrlLookup { inner })
+        if ext == "bloom" {
+            anyhow::bail!(
+                "bloom filter files are not supported for NSRL lookup. \
+                 Bloom filters are probabilistic and can produce false positives, \
+                 potentially suppressing evidence. Use a SQLite database (--nsrl file.db) instead."
+            );
+        }
+        Ok(NsrlLookup {
+            inner: NsrlBackend::Sqlite(sqlite::SqliteNsrl::open(path)?),
+        })
     }
 
     pub fn lookup(&self, hash: &str) -> NsrlResult {
