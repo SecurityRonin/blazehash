@@ -126,7 +126,11 @@ pub fn calibrate() -> ParallelConfig {
         let size_kib = size / 1024;
         eprintln!(
             "    {size_kib} KiB × {n_files}: seq={seq_us}µs  par={par_us}µs{}",
-            if par_us < seq_us { "  ← parallel wins" } else { "" }
+            if par_us < seq_us {
+                "  ← parallel wins"
+            } else {
+                ""
+            }
         );
 
         // Parallel wins by at least 10% → this is our threshold
@@ -194,7 +198,7 @@ fn cpu_info_string() -> String {
         if let Ok(content) = std::fs::read_to_string("/proc/cpuinfo") {
             for line in content.lines() {
                 if line.starts_with("model name") {
-                    if let Some(val) = line.splitn(2, ':').nth(1) {
+                    if let Some(val) = line.split_once(':').map(|x| x.1) {
                         return val.trim().to_string();
                     }
                 }

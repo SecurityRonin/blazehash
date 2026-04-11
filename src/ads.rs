@@ -51,9 +51,8 @@ pub fn enumerate_ads(path: &std::path::Path) -> Vec<std::path::PathBuf> {
             results.push(std::path::PathBuf::from(ads_path));
         }
 
-        let found = unsafe {
-            FindNextStreamW(handle, &mut data as *mut WIN32_FIND_STREAM_DATA as *mut _)
-        };
+        let found =
+            unsafe { FindNextStreamW(handle, &mut data as *mut WIN32_FIND_STREAM_DATA as *mut _) };
         if found == 0 {
             break;
         }

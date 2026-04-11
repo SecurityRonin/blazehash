@@ -97,7 +97,9 @@ pub struct FolderDiffResult {
 
 impl FolderDiffResult {
     pub fn has_diff(&self) -> bool {
-        self.entries.iter().any(|e| !matches!(e, FolderDiffEntry::Identical { .. }))
+        self.entries
+            .iter()
+            .any(|e| !matches!(e, FolderDiffEntry::Identical { .. }))
     }
 
     pub fn summary(&self) -> FolderDiffSummary {
@@ -109,7 +111,11 @@ impl FolderDiffResult {
                     s.left_bytes += size;
                     s.right_bytes += size;
                 }
-                FolderDiffEntry::Modified { left_size, right_size, .. } => {
+                FolderDiffEntry::Modified {
+                    left_size,
+                    right_size,
+                    ..
+                } => {
                     s.modified += 1;
                     s.left_bytes += left_size;
                     s.right_bytes += right_size;
@@ -180,7 +186,12 @@ fn collect(root: &Path, recursive: bool, compare_by: CompareBy) -> Vec<FileRecor
             } else {
                 None
             };
-            Some(FileRecord { rel, size, mtime, hash })
+            Some(FileRecord {
+                rel,
+                size,
+                mtime,
+                hash,
+            })
         })
         .collect()
 }
@@ -194,8 +205,8 @@ fn collect(root: &Path, recursive: bool, compare_by: CompareBy) -> Vec<FileRecor
 fn hash_xxh3(path: &Path) -> Result<u128> {
     use xxhash_rust::xxh3::Xxh3Default;
 
-    let file = std::fs::File::open(path)
-        .with_context(|| format!("cannot open {}", path.display()))?;
+    let file =
+        std::fs::File::open(path).with_context(|| format!("cannot open {}", path.display()))?;
     let meta = file.metadata()?;
     let len = meta.len() as usize;
 
@@ -234,14 +245,16 @@ fn hash_xxh3(path: &Path) -> Result<u128> {
 /// to 128 bits retains 2^64 collision resistance — still far beyond practical
 /// attack budgets.
 fn hash_blake3(path: &Path) -> Result<u128> {
-    let file = std::fs::File::open(path)
-        .with_context(|| format!("cannot open {}", path.display()))?;
+    let file =
+        std::fs::File::open(path).with_context(|| format!("cannot open {}", path.display()))?;
     let meta = file.metadata()?;
     let len = meta.len() as usize;
 
     if len == 0 {
         let hash = blake3::hash(&[]);
-        return Ok(u128::from_le_bytes(hash.as_bytes()[..16].try_into().unwrap()));
+        return Ok(u128::from_le_bytes(
+            hash.as_bytes()[..16].try_into().unwrap(),
+        ));
     }
 
     // mmap fast path
@@ -249,7 +262,9 @@ fn hash_blake3(path: &Path) -> Result<u128> {
         let mmap = unsafe { memmap2::Mmap::map(&file) };
         if let Ok(m) = mmap {
             let hash = blake3::hash(&m);
-            return Ok(u128::from_le_bytes(hash.as_bytes()[..16].try_into().unwrap()));
+            return Ok(u128::from_le_bytes(
+                hash.as_bytes()[..16].try_into().unwrap(),
+            ));
         }
     }
 
@@ -266,7 +281,9 @@ fn hash_blake3(path: &Path) -> Result<u128> {
         hasher.update(&buf[..n]);
     }
     let hash = hasher.finalize();
-    Ok(u128::from_le_bytes(hash.as_bytes()[..16].try_into().unwrap()))
+    Ok(u128::from_le_bytes(
+        hash.as_bytes()[..16].try_into().unwrap(),
+    ))
 }
 
 // ─── Core diff logic ──────────────────────────────────────────────────────────
@@ -293,20 +310,25 @@ pub fn diff_folders(
     );
 
     // Index by relative path
-    let left_map: HashMap<PathBuf, FileRecord> =
-        left_records.into_iter().map(|r| (r.rel.clone(), r)).collect();
-    let right_map: HashMap<PathBuf, FileRecord> =
-        right_records.into_iter().map(|r| (r.rel.clone(), r)).collect();
+    let left_map: HashMap<PathBuf, FileRecord> = left_records
+        .into_iter()
+        .map(|r| (r.rel.clone(), r))
+        .collect();
+    let right_map: HashMap<PathBuf, FileRecord> = right_records
+        .into_iter()
+        .map(|r| (r.rel.clone(), r))
+        .collect();
 
     // Build reverse hash→path map for move detection (content mode only)
-    let left_by_hash: HashMap<u128, &PathBuf> = if matches!(compare_by, CompareBy::Content | CompareBy::Paranoid) {
-        left_map
-            .iter()
-            .filter_map(|(p, r)| r.hash.map(|h| (h, p)))
-            .collect()
-    } else {
-        HashMap::new()
-    };
+    let left_by_hash: HashMap<u128, &PathBuf> =
+        if matches!(compare_by, CompareBy::Content | CompareBy::Paranoid) {
+            left_map
+                .iter()
+                .filter_map(|(p, r)| r.hash.map(|h| (h, p)))
+                .collect()
+        } else {
+            HashMap::new()
+        };
 
     let mut entries: Vec<FolderDiffEntry> = Vec::new();
     let mut moved_from: std::collections::HashSet<PathBuf> = Default::default();
@@ -418,7 +440,11 @@ pub fn print_entry(e: &FolderDiffEntry, show_identical: bool) {
         FolderDiffEntry::Removed { path, size } => {
             println!("[-] REMOVED   {}  ({})", path.display(), format_size(*size));
         }
-        FolderDiffEntry::Modified { path, left_size, right_size } => {
+        FolderDiffEntry::Modified {
+            path,
+            left_size,
+            right_size,
+        } => {
             println!(
                 "[≠] MODIFIED  {}  ({} → {})",
                 path.display(),
@@ -460,7 +486,11 @@ pub fn print_summary(left: &Path, right: &Path, result: &FolderDiffResult) {
         s.added,
         s.removed,
         s.moved,
-        if s.errors > 0 { format!(" | {} errors", s.errors) } else { String::new() }
+        if s.errors > 0 {
+            format!(" | {} errors", s.errors)
+        } else {
+            String::new()
+        }
     );
     println!(
         "    Left  {} — {}",

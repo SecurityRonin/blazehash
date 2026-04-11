@@ -15,7 +15,11 @@ fn main() -> Result<()> {
     // This path is taken when the process was spawned by spawn_elevated_mft_worker().
     #[cfg(target_os = "windows")]
     if let Some(ref output_file) = cli.mft_worker_output {
-        let root = cli.paths.first().cloned().unwrap_or_else(|| PathBuf::from("."));
+        let root = cli
+            .paths
+            .first()
+            .cloned()
+            .unwrap_or_else(|| PathBuf::from("."));
         blazehash::walk_windows_mft::run_mft_worker(&root, cli.recursive, output_file)?;
         return Ok(());
     }
@@ -80,13 +84,11 @@ fn main() -> Result<()> {
         #[cfg(feature = "nsrl")]
         {
             let db = cli.paths.get(2).ok_or_else(|| {
-                anyhow::anyhow!(
-                    "usage: blazehash nsrl build-bloom <input.db> --output <out.bloom>"
-                )
+                anyhow::anyhow!("usage: blazehash nsrl build-bloom <input.db> --output <out.bloom>")
             })?;
-            let out = output.as_ref().ok_or_else(|| {
-                anyhow::anyhow!("--output required for nsrl build-bloom")
-            })?;
+            let out = output
+                .as_ref()
+                .ok_or_else(|| anyhow::anyhow!("--output required for nsrl build-bloom"))?;
             blazehash::nsrl::build_bloom(db, out, 0.001)?;
             eprintln!("[+] Bloom filter written to {}", out.display());
             return Ok(());
@@ -102,23 +104,26 @@ fn main() -> Result<()> {
         Mode::Dedup => unreachable!(),
         Mode::NsrlBuildBloom => unreachable!(),
         Mode::Sign => {
-            let manifest = cli.paths.get(1)
+            let manifest = cli
+                .paths
+                .get(1)
                 .map(PathBuf::from)
                 .or_else(|| {
-                    {
-                        let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-                        blazehash::manifest_loader::find_manifest(&[cwd.as_path()]).ok()
-                    }
+                    let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+                    blazehash::manifest_loader::find_manifest(&[cwd.as_path()]).ok()
                 })
                 .ok_or_else(|| anyhow::anyhow!("usage: blazehash sign [manifest]"))?;
             blazehash::signing::sign(&manifest)?;
         }
         Mode::VerifySig => {
-            let manifest = PathBuf::from(cli.paths.get(1)
-                .ok_or_else(|| anyhow::anyhow!("usage: blazehash verify-sig <manifest> --expected-pubkey <hex>"))?);
+            let manifest = PathBuf::from(cli.paths.get(1).ok_or_else(|| {
+                anyhow::anyhow!("usage: blazehash verify-sig <manifest> --expected-pubkey <hex>")
+            })?);
             let pubkey = cli.expected_pubkey.as_deref().unwrap_or("");
             let valid = blazehash::signing::verify_sig(&manifest, pubkey)?;
-            if !valid { std::process::exit(1); }
+            if !valid {
+                std::process::exit(1);
+            }
         }
         Mode::SizeOnly => {
             commands::size_only::run(&cli.paths, cli.recursive, output.as_ref(), cli.mft)?;

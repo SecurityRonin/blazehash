@@ -28,7 +28,7 @@ use windows_sys::Win32::Storage::FileSystem::{
 use windows_sys::Win32::System::Threading::{
     GetCurrentProcess, OpenProcessToken, WaitForSingleObject, INFINITE,
 };
-use windows_sys::Win32::UI::Shell::{SEE_MASK_NOCLOSEPROCESS, SHELLEXECUTEINFOW, ShellExecuteExW};
+use windows_sys::Win32::UI::Shell::{ShellExecuteExW, SEE_MASK_NOCLOSEPROCESS, SHELLEXECUTEINFOW};
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -262,7 +262,9 @@ fn parse_record(buf: &[u8]) -> Option<RawRecord> {
                 if let Some(fi) = parse_filename_attr(buf, off, attr_len) {
                     let better = match &best_fn {
                         None => true,
-                        Some(prev) => namespace_priority(fi.namespace) > namespace_priority(prev.namespace),
+                        Some(prev) => {
+                            namespace_priority(fi.namespace) > namespace_priority(prev.namespace)
+                        }
                     };
                     if better {
                         best_fn = Some(fi);
@@ -351,10 +353,7 @@ pub fn enumerate_mft_sizes(root: &Path, recursive: bool) -> Result<Vec<MftEntry>
 
     // $MFT lives at the drive root, e.g. C:\$MFT
     let mft_path = format!("{}$MFT", drive_root.to_string_lossy());
-    let mft_path_w: Vec<u16> = mft_path
-        .encode_utf16()
-        .chain(std::iter::once(0))
-        .collect();
+    let mft_path_w: Vec<u16> = mft_path.encode_utf16().chain(std::iter::once(0)).collect();
 
     let handle = unsafe {
         CreateFileW(
@@ -414,10 +413,14 @@ pub fn enumerate_mft_sizes(root: &Path, recursive: bool) -> Result<Vec<MftEntry>
             path.starts_with(&root_canonical)
         } else {
             // Non-recursive: file's parent must equal root
-            path.parent().map_or(false, |p| p == root_canonical || p == root)
+            path.parent()
+                .map_or(false, |p| p == root_canonical || p == root)
         };
         if in_scope {
-            results.push(MftEntry { path, size: rec.size });
+            results.push(MftEntry {
+                path,
+                size: rec.size,
+            });
         }
     }
 
@@ -433,11 +436,7 @@ pub fn enumerate_mft_sizes(root: &Path, recursive: bool) -> Result<Vec<MftEntry>
 /// This function blocks until the subprocess exits, then returns.
 ///
 /// Returns `Err` if the user cancels the UAC dialog or the spawn fails.
-pub fn spawn_elevated_mft_worker(
-    root: &Path,
-    recursive: bool,
-    output_file: &Path,
-) -> Result<()> {
+pub fn spawn_elevated_mft_worker(root: &Path, recursive: bool, output_file: &Path) -> Result<()> {
     use std::os::windows::ffi::OsStrExt;
 
     let exe = std::env::current_exe().context("cannot determine current executable path")?;
@@ -510,8 +509,12 @@ pub fn read_mft_results(output_file: &Path) -> Result<Vec<MftEntry>> {
     let mut entries = Vec::new();
     for line in content.lines() {
         let mut parts = line.splitn(2, '\t');
-        let Some(size_str) = parts.next() else { continue };
-        let Some(path_str) = parts.next() else { continue };
+        let Some(size_str) = parts.next() else {
+            continue;
+        };
+        let Some(path_str) = parts.next() else {
+            continue;
+        };
         let size: u64 = size_str.parse().unwrap_or(0);
         entries.push(MftEntry {
             path: PathBuf::from(path_str),

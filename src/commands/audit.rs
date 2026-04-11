@@ -35,9 +35,8 @@ pub fn run(
             // Include cwd if no directory paths given
             if dirs.is_empty() {
                 static CWD_PATH: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
-                let cwd = CWD_PATH.get_or_init(|| {
-                    std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
-                });
+                let cwd = CWD_PATH
+                    .get_or_init(|| std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")));
                 dirs.push(cwd.as_path());
             }
             dirs

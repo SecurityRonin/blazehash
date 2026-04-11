@@ -57,6 +57,7 @@ dirs = { version = "5", optional = true }
 rusqlite = { version = "0.31", optional = true }
 bloomfilter = { version = "1", optional = true, features = ["serde"] }
 bincode = "1"
+tempfile = "3"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 libc = "0.2"
