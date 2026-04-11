@@ -6,7 +6,7 @@
 [![Release](https://github.com/SecurityRonin/blazehash/actions/workflows/release.yml/badge.svg)](https://github.com/SecurityRonin/blazehash/releases)
 [![Sponsor](https://img.shields.io/badge/sponsor-h4x0r-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/h4x0r)
 
-**The hashdeep you've been waiting for.**
+**Hashdeep, at 2026 speed.**
 
 BLAKE3 at 1,640 MB/s — 2.8× hashdeep's ceiling. GPU-accelerated SHA-256. Ed25519-signed chain of custody. EWF/E01 image verification. Drop-in compatible.
 
