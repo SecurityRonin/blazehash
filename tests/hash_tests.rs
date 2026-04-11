@@ -977,6 +977,56 @@ fn test_max_size_filter() {
         .ends_with("small.bin"));
 }
 
+// ---- newer_than filter ----
+
+#[test]
+fn test_newer_than_filter_excludes_old_files() {
+    use blazehash::walk_filter::WalkFilter;
+    use std::time::{Duration, SystemTime};
+
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("old.bin"), b"hello").unwrap();
+    // Use a threshold far in the future — old.bin was just created so it's older
+    let future = SystemTime::now() + Duration::from_secs(60 * 60 * 24 * 365 * 10);
+    let filter = WalkFilter::builder().newer_than(future).build().unwrap();
+    let output = blazehash::walk::walk_and_hash(
+        dir.path(),
+        &[blazehash::algorithm::Algorithm::Blake3],
+        false,
+        &filter,
+    )
+    .unwrap();
+    assert_eq!(
+        output.results.len(),
+        0,
+        "file created before threshold should be excluded"
+    );
+}
+
+#[test]
+fn test_newer_than_filter_includes_recent_files() {
+    use blazehash::walk_filter::WalkFilter;
+    use std::time::{Duration, SystemTime};
+
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("new.bin"), b"world").unwrap();
+    // Use a threshold far in the past — new.bin was just created so it's newer
+    let past = SystemTime::UNIX_EPOCH + Duration::from_secs(1);
+    let filter = WalkFilter::builder().newer_than(past).build().unwrap();
+    let output = blazehash::walk::walk_and_hash(
+        dir.path(),
+        &[blazehash::algorithm::Algorithm::Blake3],
+        false,
+        &filter,
+    )
+    .unwrap();
+    assert_eq!(
+        output.results.len(),
+        1,
+        "recently created file should pass newer_than filter"
+    );
+}
+
 // ---- Task 8: DFXML output format ----
 
 #[test]
