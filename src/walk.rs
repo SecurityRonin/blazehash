@@ -1,11 +1,16 @@
 use crate::algorithm::Algorithm;
-use crate::hash::{hash_file, FileHashResult};
+use crate::hash::FileHashResult;
 use crate::walk_filter::WalkFilter;
 use anyhow::Result;
-use rayon::prelude::*;
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
 use walkdir::WalkDir;
+
+#[cfg(not(target_os = "windows"))]
+use crate::hash::hash_file;
+#[cfg(not(target_os = "windows"))]
+use rayon::prelude::*;
+#[cfg(not(target_os = "windows"))]
+use std::sync::Mutex;
 
 /// Error encountered while walking/hashing a file.
 #[derive(Debug)]
@@ -62,7 +67,7 @@ pub fn walk_and_hash(
 ) -> Result<WalkOutput> {
     #[cfg(target_os = "windows")]
     {
-        return crate::walk_windows::walk_and_hash_windows(root, algorithms, recursive, filter);
+        crate::walk_windows::walk_and_hash_windows(root, algorithms, recursive, filter)
     }
 
     #[cfg(not(target_os = "windows"))]
