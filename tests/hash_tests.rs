@@ -778,6 +778,7 @@ fn test_manifest_roundtrip_with_ssdeep() {
         path: PathBuf::from("/evidence/file.bin"),
         size: 1234,
         hashes,
+        entropy: None,
     };
 
     let mut buf = Vec::new();
@@ -820,6 +821,7 @@ fn test_manifest_roundtrip_with_tlsh() {
         path: PathBuf::from("/evidence/sample.bin"),
         size: 5678,
         hashes,
+        entropy: None,
     };
 
     let mut buf = Vec::new();
@@ -917,14 +919,20 @@ fn test_entropy_two_values_equal() {
     let mut bytes = vec![0u8; 128];
     bytes.extend(vec![1u8; 128]);
     let h = blazehash::hash::compute_entropy(&bytes);
-    assert!((h - 1.0).abs() < 1e-9, "half-half binary must have entropy 1.0, got {h}");
+    assert!(
+        (h - 1.0).abs() < 1e-9,
+        "half-half binary must have entropy 1.0, got {h}"
+    );
 }
 
 #[test]
 fn test_entropy_uniform_256() {
     let bytes: Vec<u8> = (0u8..=255).collect();
     let h = blazehash::hash::compute_entropy(&bytes);
-    assert!((h - 8.0).abs() < 1e-9, "uniform 256-value must have entropy 8.0, got {h}");
+    assert!(
+        (h - 8.0).abs() < 1e-9,
+        "uniform 256-value must have entropy 8.0, got {h}"
+    );
 }
 
 #[test]

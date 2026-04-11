@@ -11,11 +11,17 @@ fn result_to_json(result: &FileHashResult, algorithms: &[Algorithm]) -> Value {
             hashes.insert(algo.hashdeep_name().to_string(), json!(hash));
         }
     }
-    json!({
-        "filename": result.path.display().to_string(),
-        "size": result.size,
-        "hashes": hashes,
-    })
+    let mut obj = serde_json::Map::new();
+    obj.insert(
+        "filename".to_string(),
+        json!(result.path.display().to_string()),
+    );
+    obj.insert("size".to_string(), json!(result.size));
+    obj.insert("hashes".to_string(), Value::Object(hashes));
+    if let Some(entropy) = result.entropy {
+        obj.insert("entropy".to_string(), json!(entropy));
+    }
+    Value::Object(obj)
 }
 
 pub fn write_json<W: Write>(

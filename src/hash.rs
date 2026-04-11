@@ -12,6 +12,25 @@ pub struct FileHashResult {
     pub path: PathBuf,
     pub size: u64,
     pub hashes: HashMap<Algorithm, String>,
+    pub entropy: Option<f64>,
+}
+
+/// Compute Shannon entropy for a byte slice.
+/// H = -Σ p_i * log2(p_i) where p_i is the fraction of bytes with value i.
+/// Range: 0.0 (all same byte) → 8.0 (perfectly uniform 256-value distribution).
+pub fn compute_entropy(bytes: &[u8]) -> f64 {
+    if bytes.is_empty() {
+        return 0.0;
+    }
+    let mut counts = [0u64; 256];
+    for &b in bytes {
+        counts[b as usize] += 1;
+    }
+    let len = bytes.len() as f64;
+    counts.iter().filter(|&&c| c > 0).fold(0.0, |acc, &c| {
+        let p = c as f64 / len;
+        acc - p * p.log2()
+    })
 }
 
 /// Threshold above which we use memory-mapped I/O (1 MiB).
@@ -328,6 +347,7 @@ pub fn hash_file(
         path: path.to_path_buf(),
         size,
         hashes,
+        entropy: None,
     })
 }
 

@@ -8,10 +8,15 @@ pub fn write_csv<W: Write>(
     results: &[FileHashResult],
     algorithms: &[Algorithm],
 ) -> Result<()> {
+    let has_entropy = results.iter().any(|r| r.entropy.is_some());
+
     // Header
     write!(w, "size")?;
     for algo in algorithms {
         write!(w, ",{}", algo.hashdeep_name())?;
+    }
+    if has_entropy {
+        write!(w, ",entropy")?;
     }
     writeln!(w, ",filename")?;
 
@@ -24,6 +29,12 @@ pub fn write_csv<W: Write>(
                 .get(algo)
                 .ok_or_else(|| anyhow::anyhow!("missing hash for algorithm {algo}"))?;
             write!(w, ",{hash}")?;
+        }
+        if has_entropy {
+            match result.entropy {
+                Some(e) => write!(w, ",{e}")?,
+                None => write!(w, ",")?,
+            }
         }
         writeln!(w, ",{}", result.path.display())?;
     }

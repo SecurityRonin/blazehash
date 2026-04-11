@@ -30,6 +30,7 @@ pub fn run(
         path: PathBuf::from("<stdin>"),
         size,
         hashes,
+        entropy: None,
     };
 
     match format {

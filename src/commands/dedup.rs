@@ -112,6 +112,7 @@ fn load_results(
                             path: rec.path,
                             size: rec.size,
                             hashes: rec.hashes,
+                            entropy: None,
                         });
                     }
                 }

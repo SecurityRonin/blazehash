@@ -32,6 +32,7 @@ fn write_record_single_algorithm() {
         path: PathBuf::from("/home/user/test.txt"),
         size: 11,
         hashes,
+        entropy: None,
     };
 
     let mut buf = Vec::new();
@@ -58,6 +59,7 @@ fn write_record_multiple_algorithms() {
         path: PathBuf::from("/home/user/test.txt"),
         size: 11,
         hashes,
+        entropy: None,
     };
 
     let mut buf = Vec::new();
@@ -91,6 +93,7 @@ fn filename_with_comma_preserved() {
         path: PathBuf::from("/home/user/file,with,commas.txt"),
         size: 42,
         hashes,
+        entropy: None,
     };
 
     let mut buf = Vec::new();
@@ -108,6 +111,7 @@ fn write_record_missing_algorithm_returns_error() {
         path: PathBuf::from("/test.txt"),
         size: 11,
         hashes,
+        entropy: None,
     };
 
     let mut buf = Vec::new();
@@ -180,6 +184,7 @@ fn write_record_zero_size_file() {
         path: PathBuf::from("/empty.txt"),
         size: 0,
         hashes,
+        entropy: None,
     };
 
     let mut buf = Vec::new();

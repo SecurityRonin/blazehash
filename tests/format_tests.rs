@@ -18,6 +18,7 @@ fn sample_result() -> FileHashResult {
         path: PathBuf::from("/evidence/test.txt"),
         size: 11,
         hashes,
+        entropy: None,
     }
 }
 
@@ -78,6 +79,7 @@ fn csv_missing_algorithm_returns_error() {
         path: PathBuf::from("/test.txt"),
         size: 11,
         hashes,
+        entropy: None,
     };
 
     let mut buf = Vec::new();
@@ -106,6 +108,7 @@ fn csv_multiple_results() {
         path: PathBuf::from("/evidence/other.txt"),
         size: 42,
         hashes: hashes2,
+        entropy: None,
     };
     let algos = vec![Algorithm::Blake3, Algorithm::Sha256];
     let mut buf = Vec::new();
@@ -195,6 +198,7 @@ fn sumfile_output_hash_two_spaces_path() {
         path: std::path::PathBuf::from("/evidence/test.bin"),
         size: 42,
         hashes,
+        entropy: None,
     };
     let mut buf = Vec::new();
     write_sumfile(&mut buf, &[result], &[Algorithm::Sha256]).unwrap();
@@ -226,6 +230,7 @@ fn json_missing_algorithm_silently_skipped() {
         path: PathBuf::from("/test.txt"),
         size: 11,
         hashes,
+        entropy: None,
     };
 
     let mut buf = Vec::new();
@@ -241,11 +246,11 @@ fn json_missing_algorithm_silently_skipped() {
 
 #[test]
 fn csv_entropy_column_present_when_set() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::format::write_csv;
+    use blazehash::hash::FileHashResult;
     use std::collections::HashMap;
     use std::path::PathBuf;
-    use blazehash::algorithm::Algorithm;
-    use blazehash::hash::FileHashResult;
-    use blazehash::format::write_csv;
 
     let mut hashes = HashMap::new();
     hashes.insert(Algorithm::Blake3, "abc".to_string());
@@ -259,17 +264,20 @@ fn csv_entropy_column_present_when_set() {
     let mut buf = Vec::new();
     write_csv(&mut buf, &[r], &algos).unwrap();
     let out = String::from_utf8(buf).unwrap();
-    assert!(out.contains("entropy"), "header must contain entropy column");
+    assert!(
+        out.contains("entropy"),
+        "header must contain entropy column"
+    );
     assert!(out.contains("7.9"), "data row must contain entropy value");
 }
 
 #[test]
 fn json_entropy_field_present_when_set() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::format::write_json;
+    use blazehash::hash::FileHashResult;
     use std::collections::HashMap;
     use std::path::PathBuf;
-    use blazehash::algorithm::Algorithm;
-    use blazehash::hash::FileHashResult;
-    use blazehash::format::write_json;
 
     let mut hashes = HashMap::new();
     hashes.insert(Algorithm::Blake3, "abc".to_string());
@@ -283,6 +291,9 @@ fn json_entropy_field_present_when_set() {
     write_json(&mut buf, &[r], &[Algorithm::Blake3]).unwrap();
     let out = String::from_utf8(buf).unwrap();
     let v: serde_json::Value = serde_json::from_str(&out).unwrap();
-    assert!(v[0].get("entropy").is_some(), "JSON must include entropy field");
+    assert!(
+        v[0].get("entropy").is_some(),
+        "JSON must include entropy field"
+    );
     assert_eq!(v[0]["entropy"], 3.5);
 }

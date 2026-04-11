@@ -159,6 +159,10 @@ pub struct Cli {
     /// This flag is passed automatically when spawning an elevated subprocess via UAC.
     #[arg(long = "_mft-worker", value_name = "FILE", hide = true)]
     pub mft_worker_output: Option<PathBuf>,
+
+    /// Compute Shannon entropy for each file (H = -Σ p_i log2(p_i), range 0.0–8.0)
+    #[arg(long = "entropy", help = "Compute Shannon entropy for each file")]
+    pub entropy: bool,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
