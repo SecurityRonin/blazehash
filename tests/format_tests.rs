@@ -1,5 +1,5 @@
 use blazehash::algorithm::Algorithm;
-use blazehash::format::{write_csv, write_json, write_jsonl};
+use blazehash::format::{write_csv, write_dfxml, write_json, write_jsonl, write_sumfile};
 use blazehash::hash::FileHashResult;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -146,6 +146,64 @@ fn jsonl_empty_results() {
     write_jsonl(&mut buf, &[], &[Algorithm::Blake3]).unwrap();
     let output = String::from_utf8(buf).unwrap();
     assert!(output.is_empty());
+}
+
+#[test]
+fn dfxml_output_has_root_element() {
+    let results = vec![sample_result()];
+    let algos = vec![Algorithm::Blake3, Algorithm::Sha256];
+    let mut buf = Vec::new();
+    write_dfxml(&mut buf, &results, &algos).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    assert!(output.contains("<dfxml"));
+    assert!(output.contains("</dfxml>"));
+    assert!(output.contains("<fileobject>"));
+    assert!(output.contains("<filesize>11</filesize>"));
+}
+
+#[test]
+fn dfxml_output_has_hash_digests() {
+    let results = vec![sample_result()];
+    let algos = vec![Algorithm::Blake3];
+    let mut buf = Vec::new();
+    write_dfxml(&mut buf, &results, &algos).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    assert!(output.contains("hashdigest type='BLAKE3'") || output.contains("hashdigest type='blake3'") || output.contains("hashdigest"));
+}
+
+#[test]
+fn dfxml_empty_results() {
+    let mut buf = Vec::new();
+    write_dfxml(&mut buf, &[], &[Algorithm::Blake3]).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    assert!(output.contains("<dfxml"));
+    assert!(!output.contains("<fileobject>"));
+}
+
+#[test]
+fn sumfile_output_hash_two_spaces_path() {
+    let mut hashes = std::collections::HashMap::new();
+    hashes.insert(
+        Algorithm::Sha256,
+        "abc123def456abc123def456abc123def456abc123def456abc123def456abc1".to_string(),
+    );
+    let result = FileHashResult {
+        path: std::path::PathBuf::from("/evidence/test.bin"),
+        size: 42,
+        hashes,
+    };
+    let mut buf = Vec::new();
+    write_sumfile(&mut buf, &[result], &[Algorithm::Sha256]).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    assert!(output.contains("  /evidence/test.bin"), "expected two-space separator");
+}
+
+#[test]
+fn sumfile_error_on_multiple_algorithms() {
+    let mut buf = Vec::new();
+    let result = sample_result();
+    let err = write_sumfile(&mut buf, &[result], &[Algorithm::Blake3, Algorithm::Sha256]);
+    assert!(err.is_err(), "sumfile should error with multiple algorithms");
 }
 
 #[test]
