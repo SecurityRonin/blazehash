@@ -349,7 +349,8 @@ fn test_windows_iocp_walk_100_files() {
         .unwrap();
 
     assert!(out.status.success());
-    let lines: Vec<_> = String::from_utf8_lossy(&out.stdout)
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    let lines: Vec<_> = stdout
         .lines()
         .filter(|l| !l.starts_with('%') && !l.is_empty())
         .collect::<Vec<_>>();
