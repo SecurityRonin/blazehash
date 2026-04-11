@@ -50,6 +50,45 @@ fn test_looks_like_manifest_non_manifest() {
 }
 
 #[test]
+fn test_find_manifest_finds_single_candidate() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join("hashes.hash"),
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n",
+    )
+    .unwrap();
+    let found = blazehash::manifest_loader::find_manifest(&[dir.path()]).unwrap();
+    assert_eq!(found.file_name().unwrap(), "hashes.hash");
+}
+
+#[test]
+fn test_find_manifest_error_when_none() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("readme.txt"), "not a manifest").unwrap();
+    let result = blazehash::manifest_loader::find_manifest(&[dir.path()]);
+    assert!(result.is_err(), "expected error when no manifest in dir");
+}
+
+#[test]
+fn test_find_manifest_error_when_ambiguous() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join("hashes1.hash"),
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n",
+    )
+    .unwrap();
+    std::fs::write(
+        dir.path().join("hashes2.hash"),
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n3,xyz,/g.bin\n",
+    )
+    .unwrap();
+    let result = blazehash::manifest_loader::find_manifest(&[dir.path()]);
+    assert!(result.is_err(), "expected error when multiple manifests found");
+    let msg = result.unwrap_err().to_string();
+    assert!(msg.contains("ambiguous"));
+}
+
+#[test]
 fn test_load_json_manifest() {
     let dir = tempfile::tempdir().unwrap();
     let manifest = dir.path().join("hashes.json");
