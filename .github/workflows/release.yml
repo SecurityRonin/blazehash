@@ -200,7 +200,7 @@ jobs:
 
       - name: Install Cloudsmith CLI
         run: |
-          pip install --user cloudsmith-cli
+          pip install --user cloudsmith-cli==1.16.0
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Push amd64 to Cloudsmith
