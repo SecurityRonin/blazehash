@@ -58,3 +58,15 @@ jobs:
           tool: cargo-deny
       - name: Check advisories, licenses, sources
         run: cargo deny check
+
+  vet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
+      - name: Install cargo-vet
+        uses: taiki-e/install-action@a402910a723481c4c80d006d75298c796a9c8695
+        with:
+          tool: cargo-vet
+      - name: Check supply chain
+        run: cargo vet check

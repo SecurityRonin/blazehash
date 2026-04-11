@@ -14,7 +14,7 @@
     {
       "matchManagers": ["cargo"],
       "automerge": true,
-      "matchUpdateTypes": ["patch"]
+      "matchUpdateTypes": ["patch", "minor"]
     }
   ]
 }

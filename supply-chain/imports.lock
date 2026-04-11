@@ -1,0 +1,7 @@
+
+# cargo-vet imports lock
+
+[[audits.mozilla.audits.option-ext]]
+who = "Nika Layzell <nika@thelayzells.com>"
+criteria = "safe-to-deploy"
+version = "0.2.0"
