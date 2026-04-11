@@ -65,39 +65,42 @@ pub fn walk_and_hash(
         return crate::walk_windows::walk_and_hash_windows(root, algorithms, recursive, filter);
     }
 
-    let (paths, walk_errors) = walk_paths(root, recursive);
+    #[cfg(not(target_os = "windows"))]
+    {
+        let (paths, walk_errors) = walk_paths(root, recursive);
 
-    // Apply filter to paths before hashing.
-    let filtered: Vec<PathBuf> = paths
-        .into_iter()
-        .filter(|path| {
-            let rel = path.strip_prefix(root).unwrap_or(path);
-            let size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
-            let mtime = std::fs::metadata(path).ok().and_then(|m| m.modified().ok());
-            filter.passes(&rel.to_string_lossy(), size, mtime)
-        })
-        .collect();
+        // Apply filter to paths before hashing.
+        let filtered: Vec<PathBuf> = paths
+            .into_iter()
+            .filter(|path| {
+                let rel = path.strip_prefix(root).unwrap_or(path);
+                let size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+                let mtime = std::fs::metadata(path).ok().and_then(|m| m.modified().ok());
+                filter.passes(&rel.to_string_lossy(), size, mtime)
+            })
+            .collect();
 
-    // File walks are I/O-bound: parallel always wins because it hides syscall
-    // latency across cores. The parallel_config threshold applies only to
-    // in-memory hashing (e.g., GPU vs CPU) — not to the directory walk.
-    let hash_errors = Mutex::new(Vec::new());
-    let results: Vec<FileHashResult> = filtered
-        .par_iter()
-        .filter_map(|path| match hash_file(path, algorithms, false, false) {
-            Ok(result) => Some(result),
-            Err(err) => {
-                hash_errors.lock().unwrap().push(WalkError {
-                    path: path.clone(),
-                    error: err.to_string(),
-                });
-                None
-            }
-        })
-        .collect();
+        // File walks are I/O-bound: parallel always wins because it hides syscall
+        // latency across cores. The parallel_config threshold applies only to
+        // in-memory hashing (e.g., GPU vs CPU) — not to the directory walk.
+        let hash_errors = Mutex::new(Vec::new());
+        let results: Vec<FileHashResult> = filtered
+            .par_iter()
+            .filter_map(|path| match hash_file(path, algorithms, false, false) {
+                Ok(result) => Some(result),
+                Err(err) => {
+                    hash_errors.lock().unwrap().push(WalkError {
+                        path: path.clone(),
+                        error: err.to_string(),
+                    });
+                    None
+                }
+            })
+            .collect();
 
-    let mut errors = walk_errors;
-    errors.extend(hash_errors.into_inner().unwrap());
+        let mut errors = walk_errors;
+        errors.extend(hash_errors.into_inner().unwrap());
 
-    Ok(WalkOutput { results, errors })
+        Ok(WalkOutput { results, errors })
+    }
 }

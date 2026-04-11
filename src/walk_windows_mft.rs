@@ -414,7 +414,7 @@ pub fn enumerate_mft_sizes(root: &Path, recursive: bool) -> Result<Vec<MftEntry>
         } else {
             // Non-recursive: file's parent must equal root
             path.parent()
-                .map_or(false, |p| p == root_canonical || p == root)
+                .is_some_and(|p| p == root_canonical || p == root)
         };
         if in_scope {
             results.push(MftEntry {
