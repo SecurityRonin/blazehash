@@ -206,9 +206,9 @@ jobs:
       - name: Push amd64 to Cloudsmith
         env:
           CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
-        run: cloudsmith push deb securityronin/blazehash/any/any debs/blazehash_*_amd64.deb
+        run: cloudsmith push deb securityronin/blazehash/any-distro/any debs/blazehash_*_amd64.deb
 
       - name: Push arm64 to Cloudsmith
         env:
           CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
-        run: cloudsmith push deb securityronin/blazehash/any/any debs/blazehash_*_arm64.deb
+        run: cloudsmith push deb securityronin/blazehash/any-distro/any debs/blazehash_*_arm64.deb
