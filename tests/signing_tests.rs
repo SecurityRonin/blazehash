@@ -109,6 +109,60 @@ fn test_verify_sig_fails_on_tampered_manifest() {
 }
 
 #[test]
+fn test_verify_sig_returns_true_for_valid_sig() {
+    let dir = tempdir().unwrap();
+    let manifest = dir.path().join("manifest.hash");
+    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
+        .unwrap();
+
+    let sign_output = Command::cargo_bin("blazehash")
+        .unwrap()
+        .env("BLAZEHASH_SIGN_PASSWORD", "test-password-for-ci")
+        .args(["sign", manifest.to_str().unwrap()])
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8(sign_output.stderr).unwrap();
+    let pubkey = stderr
+        .lines()
+        .find(|l| l.contains("Public key:"))
+        .and_then(|l| l.split_whitespace().last())
+        .expect("public key not in stderr");
+
+    let result = signing::verify_sig(&manifest, pubkey).unwrap();
+    assert!(result, "verify_sig should return true for valid sig");
+}
+
+#[test]
+fn test_verify_sig_returns_false_for_tampered_manifest() {
+    let dir = tempdir().unwrap();
+    let manifest = dir.path().join("manifest.hash");
+    fs::write(&manifest, "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n")
+        .unwrap();
+
+    let sign_output = Command::cargo_bin("blazehash")
+        .unwrap()
+        .env("BLAZEHASH_SIGN_PASSWORD", "test-password-for-ci")
+        .args(["sign", manifest.to_str().unwrap()])
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8(sign_output.stderr).unwrap();
+    let pubkey = stderr
+        .lines()
+        .find(|l| l.contains("Public key:"))
+        .and_then(|l| l.split_whitespace().last())
+        .expect("public key not in stderr");
+
+    fs::write(
+        &manifest,
+        "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,TAMPERED,/f.bin\n",
+    )
+    .unwrap();
+
+    let result = signing::verify_sig(&manifest, pubkey).unwrap();
+    assert!(!result, "verify_sig should return false for tampered manifest");
+}
+
+#[test]
 fn test_auto_verify_sidecar_no_sig() {
     let dir = tempdir().unwrap();
     let manifest = dir.path().join("manifest.hash");
