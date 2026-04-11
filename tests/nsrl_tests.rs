@@ -32,36 +32,24 @@ mod nsrl_tests {
     }
 
     #[test]
-    fn test_nsrl_bloom_build_and_query() {
+    fn test_nsrl_bloom_file_is_rejected() {
+        // Bloom filters are probabilistic and can produce false positives,
+        // silently suppressing evidence. They are not permitted for NSRL lookup.
+        // Build a valid bloom file from the test DB, then verify it is rejected.
         let dir = tempdir().unwrap();
         let db = make_test_db(dir.path());
         let bloom_path = dir.path().join("nsrl.bloom");
         blazehash::nsrl::build_bloom(&db, &bloom_path, 0.001).unwrap();
 
-        let lookup = NsrlLookup::open(&bloom_path).unwrap();
-        assert_eq!(lookup.lookup("aabbcc"), NsrlResult::KnownGood);
-    }
-
-    #[test]
-    fn test_nsrl_bloom_unknown() {
-        let dir = tempdir().unwrap();
-        let db = make_test_db(dir.path());
-        let bloom_path = dir.path().join("nsrl.bloom");
-        blazehash::nsrl::build_bloom(&db, &bloom_path, 0.001).unwrap();
-
-        let lookup = NsrlLookup::open(&bloom_path).unwrap();
-        assert_eq!(lookup.lookup("deadbeef"), NsrlResult::Unknown);
-    }
-
-    #[test]
-    fn test_nsrl_bloom_md5_known_good() {
-        let dir = tempdir().unwrap();
-        let db = make_test_db(dir.path());
-        let bloom_path = dir.path().join("nsrl.bloom");
-        blazehash::nsrl::build_bloom(&db, &bloom_path, 0.001).unwrap();
-
-        let lookup = NsrlLookup::open(&bloom_path).unwrap();
-        // "ddeeff" is the MD5 in the test DB fixture
-        assert_eq!(lookup.lookup("ddeeff"), NsrlResult::KnownGood);
+        match NsrlLookup::open(&bloom_path) {
+            Ok(_) => panic!("expected error opening .bloom file, got Ok — bloom should be rejected"),
+            Err(e) => {
+                let msg = e.to_string().to_lowercase();
+                assert!(
+                    msg.contains("bloom") || msg.contains("not supported") || msg.contains("sqlite"),
+                    "error should mention bloom or sqlite, got: {msg}"
+                );
+            }
+        }
     }
 }

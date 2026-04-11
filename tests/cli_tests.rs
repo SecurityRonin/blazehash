@@ -442,3 +442,20 @@ fn cli_explicit_o_filename_unchanged() {
 
     assert!(out.exists(), "custom.hash not created");
 }
+
+#[test]
+fn cli_nsrl_bloom_rejected() {
+    let dir = TempDir::new().unwrap();
+    let bloom = dir.path().join("nsrl.bloom");
+    fs::write(&bloom, b"fake").unwrap();
+    fs::write(dir.path().join("file.txt"), b"data").unwrap();
+
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .arg(dir.path())
+        .arg("--nsrl")
+        .arg(&bloom)
+        .assert()
+        .failure()
+        .stderr(predicate::str::is_match("(?i)bloom|not supported|sqlite").unwrap());
+}

@@ -58,6 +58,10 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    let algorithms = cli.flat_algorithms();
+    let output = cli.resolve_output();
+
+    // NsrlBuildBloom needs output before the main match
     if let Mode::NsrlBuildBloom = cli.mode() {
         #[cfg(feature = "nsrl")]
         {
@@ -71,17 +75,11 @@ fn main() -> Result<()> {
             })?;
             blazehash::nsrl::build_bloom(db, out, 0.001)?;
             eprintln!("[+] Bloom filter written to {}", out.display());
+            return Ok(());
         }
         #[cfg(not(feature = "nsrl"))]
-        {
-            anyhow::bail!(
-                "NSRL support requires the `nsrl` feature: cargo build --features nsrl"
-            );
-        }
+        anyhow::bail!("NSRL support requires the `nsrl` feature: cargo build --features nsrl");
     }
-
-    let algorithms = cli.flat_algorithms();
-    let output = cli.resolve_output();
 
     match cli.mode() {
         Mode::Mcp => unreachable!(),
