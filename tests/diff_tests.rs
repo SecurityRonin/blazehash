@@ -101,3 +101,67 @@ fn test_diff_exits_one_when_differences() {
         .assert()
         .code(1);
 }
+
+#[test]
+fn test_diff_patch_format_shows_unified_diff() {
+    let dir = tempdir().unwrap();
+    let before = dir.path().join("before.hash");
+    let after = dir.path().join("after.hash");
+    write_hashdeep(&before, &[("aaaa", "/file1.bin")]);
+    write_hashdeep(&after, &[("aaaa", "/file1.bin"), ("bbbb", "/file2.bin")]);
+
+    let output = assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["diff", before.to_str().unwrap(), after.to_str().unwrap(), "--patch"])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        stdout.contains("--- ") && stdout.contains("+++ "),
+        "patch output must have unified diff headers, got:\n{stdout}"
+    );
+    assert!(
+        stdout.contains("+5,bbbb,/file2.bin") || stdout.contains("+4,bbbb,/file2.bin"),
+        "added entries must be prefixed with +, got:\n{stdout}"
+    );
+}
+
+#[test]
+fn test_diff_patch_format_shows_removed() {
+    let dir = tempdir().unwrap();
+    let before = dir.path().join("before.hash");
+    let after = dir.path().join("after.hash");
+    write_hashdeep(&before, &[("aaaa", "/file1.bin"), ("bbbb", "/file2.bin")]);
+    write_hashdeep(&after, &[("aaaa", "/file1.bin")]);
+
+    let output = assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["diff", before.to_str().unwrap(), after.to_str().unwrap(), "--patch"])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        stdout.contains("-5,bbbb,/file2.bin") || stdout.contains("-4,bbbb,/file2.bin"),
+        "removed entries must be prefixed with -, got:\n{stdout}"
+    );
+}
+
+#[test]
+fn test_diff_patch_format_shows_modified() {
+    let dir = tempdir().unwrap();
+    let before = dir.path().join("before.hash");
+    let after = dir.path().join("after.hash");
+    write_hashdeep(&before, &[("aaaa", "/file1.bin")]);
+    write_hashdeep(&after, &[("zzzz", "/file1.bin")]);
+
+    let output = assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["diff", before.to_str().unwrap(), after.to_str().unwrap(), "--patch"])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        stdout.contains("-") && stdout.contains("aaaa") && stdout.contains("+") && stdout.contains("zzzz"),
+        "modified entries must show old (-) and new (+), got:\n{stdout}"
+    );
+}
