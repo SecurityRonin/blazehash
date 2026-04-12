@@ -7,6 +7,7 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Mode};
 use commands::merge::MergeArgs;
+use commands::update::UpdateArgs;
 use std::path::PathBuf;
 
 fn main() -> Result<()> {
@@ -105,6 +106,27 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Update = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash update <manifest> <path>"))?;
+        let path = cli
+            .paths
+            .get(2)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash update <manifest> <path>"))?;
+        let out = output.unwrap_or_else(|| manifest.clone());
+        commands::update::run_update(UpdateArgs {
+            manifest,
+            path,
+            algos: algorithms,
+            output: out,
+        })?;
+        return Ok(());
+    }
+
     match cli.mode() {
         Mode::Mcp => unreachable!(),
         Mode::Bench => unreachable!(),
@@ -112,6 +134,7 @@ fn main() -> Result<()> {
         Mode::Dedup => unreachable!(),
         Mode::NsrlBuildBloom => unreachable!(),
         Mode::Merge => unreachable!(),
+        Mode::Update => unreachable!(),
         Mode::Sign => {
             let manifest = cli
                 .paths

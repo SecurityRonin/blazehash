@@ -220,6 +220,7 @@ pub enum Mode {
     Sign,
     VerifySig,
     Merge,
+    Update,
     Hash,
 }
 
@@ -293,6 +294,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("merge"))
         {
             Mode::Merge
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("update"))
+        {
+            Mode::Update
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
