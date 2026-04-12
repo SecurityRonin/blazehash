@@ -214,6 +214,27 @@ fn parse_csv(content: &str) -> Result<Vec<ManifestRecord>> {
     Ok(records)
 }
 
+/// Returns `true` if `s` starts with `http://` or `https://`.
+pub fn is_remote_url(s: &str) -> bool {
+    s.starts_with("http://") || s.starts_with("https://")
+}
+
+/// Fetch `url` over HTTP/HTTPS and store the body in a temporary file.
+///
+/// The caller must keep the returned `NamedTempFile` alive for as long as the
+/// path is needed — dropping it deletes the file.
+pub fn fetch_remote_manifest(url: &str) -> anyhow::Result<tempfile::NamedTempFile> {
+    let response = ureq::get(url)
+        .call()
+        .map_err(|e| anyhow::anyhow!("HTTP fetch failed: {e}"))?;
+    let body = response
+        .into_string()
+        .map_err(|e| anyhow::anyhow!("failed to read HTTP body: {e}"))?;
+    let mut tmp = tempfile::NamedTempFile::new()?;
+    std::io::Write::write_all(&mut tmp, body.as_bytes())?;
+    Ok(tmp)
+}
+
 /// Scan `search_dirs` for manifest files (by extension + content sniff).
 ///
 /// Returns the single manifest path found, or an error if 0 or 2+ candidates exist.

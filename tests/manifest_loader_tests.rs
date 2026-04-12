@@ -183,12 +183,22 @@ fn test_fetch_remote_manifest_from_local_server() {
 
     thread::spawn(move || {
         if let Ok((mut stream, _)) = listener.accept() {
+            // Drain the HTTP request headers before sending the response,
+            // so the client's send buffer is not stalled.
+            let mut buf = [0u8; 4096];
+            use std::io::Read;
+            let _ = stream.read(&mut buf);
+
             let response = format!(
-                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/plain\r\n\r\n{}",
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\n{}",
                 body.len(),
                 body
             );
             stream.write_all(response.as_bytes()).ok();
+            stream.flush().ok();
+            // Graceful shutdown so the client sees EOF cleanly.
+            use std::net::Shutdown;
+            stream.shutdown(Shutdown::Both).ok();
         }
     });
 

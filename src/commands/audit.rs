@@ -48,6 +48,25 @@ pub fn run(
         known
     };
 
+    // Resolve each manifest path — fetch remote URLs into temp files first.
+    // The `_remote_tmps` vec keeps the NamedTempFile values alive for the full audit run.
+    let mut _remote_tmps: Vec<tempfile::NamedTempFile> = Vec::new();
+    let resolved_known: Vec<PathBuf> = effective_known
+        .iter()
+        .map(|p| {
+            let s = p.to_string_lossy();
+            if blazehash::manifest_loader::is_remote_url(&s) {
+                let tmp = blazehash::manifest_loader::fetch_remote_manifest(&s)?;
+                let resolved = tmp.path().to_path_buf();
+                _remote_tmps.push(tmp);
+                Ok(resolved)
+            } else {
+                Ok(p.clone())
+            }
+        })
+        .collect::<anyhow::Result<Vec<_>>>()?;
+    let effective_known: &[PathBuf] = &resolved_known;
+
     if !ignore_sig {
         for known in effective_known {
             let _ = blazehash::signing::auto_verify_sidecar(known, expected_pubkey.as_deref())?;
