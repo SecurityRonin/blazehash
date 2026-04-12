@@ -24,6 +24,7 @@ pub mod parallel_config;
 pub mod piecewise;
 pub mod progress;
 pub mod resume;
+pub mod pq_signing;
 pub mod signing;
 #[cfg(feature = "tui")]
 pub mod tui;
