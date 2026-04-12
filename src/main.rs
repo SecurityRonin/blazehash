@@ -246,10 +246,16 @@ fn main() -> Result<()> {
             .get(1)
             .cloned()
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash qr <manifest> -o <label.png>"))?;
-        let out = output
-            .ok_or_else(|| anyhow::anyhow!("blazehash qr requires -o <label.png>"))?;
-        blazehash::qr_label::generate_qr_png(&manifest, &out, None)?;
-        eprintln!("[+] QR label: {}", out.display());
+        match output {
+            Some(out) => {
+                blazehash::qr_label::generate_qr_png(&manifest, &out, None)?;
+                eprintln!("[+] QR label: {}", out.display());
+            }
+            None => {
+                let text = blazehash::qr_label::generate_qr_text(&manifest, None)?;
+                println!("{text}");
+            }
+        }
         return Ok(());
     }
 

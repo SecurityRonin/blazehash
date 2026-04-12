@@ -92,6 +92,17 @@ pub fn build_qr_content(
     Ok(format!("BLAZEHASH:{}", parts.join("&")))
 }
 
+/// Render a QR code as Unicode block characters (Dense1x2) for terminal/stdout output.
+pub fn generate_qr_text(manifest_path: &Path, pubkey_override: Option<&str>) -> Result<String> {
+    let content = build_qr_content(manifest_path, pubkey_override, None)?;
+    let code = qrcode::QrCode::with_error_correction_level(content.as_bytes(), qrcode::EcLevel::M)
+        .map_err(|e| anyhow::anyhow!("QR encoding error: {e:?}"))?;
+    Ok(code
+        .render::<qrcode::render::unicode::Dense1x2>()
+        .quiet_zone(true)
+        .build())
+}
+
 /// Generate a QR code PNG at `out_path` from the manifest at `manifest_path`.
 pub fn generate_qr_png(
     manifest_path: &Path,
