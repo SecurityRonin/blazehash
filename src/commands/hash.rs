@@ -142,6 +142,16 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         return Ok(());
     }
 
+    #[cfg(feature = "duckdb-output")]
+    if format == "duckdb" {
+        blazehash::format::write_duckdb(
+            output.ok_or_else(|| anyhow::anyhow!("--format duckdb requires -o <file>"))?,
+            &all_results,
+            algorithms,
+        )?;
+        return Ok(());
+    }
+
     let needs_header = !(bare || append);
     write_output(&mut writer, &all_results, algorithms, format, needs_header)?;
 
