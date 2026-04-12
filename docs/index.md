@@ -5,20 +5,22 @@
 The only open-source forensic hashing tool that answers every question a court asks about digital evidence — *what* changed, *who* handled it, *when* it was sealed, and *in what context* — in a single binary that's drop-in compatible with hashdeep.
 
 ```bash
-# Acquire with chain-of-custody metadata
+# Acquire evidence with chain-of-custody metadata
 blazehash -r /mnt/evidence -c blake3,sha256 \
   --case "CASE-2026-001" --examiner "Jane Smith" \
   -o evidence.hash --progress
 
-# Sign → cosign → timestamp → report
+# Sign (prompts for password)
 blazehash sign evidence.hash
-blazehash cosign evidence.hash
+# → evidence.hash.sig  (Ed25519 signature)
+# → evidence.hash.pub  (public key — record this)
+
+# Anchor to Bitcoin blockchain
 blazehash ots stamp evidence.hash
-blazehash report evidence.hash -o report.html
+# → evidence.hash.ots  (pending proof, confirmed ~1 hr)
 
 # Verify everything, months later
 blazehash verify-sig evidence.hash
-blazehash verify-msig evidence.hash --threshold 2
 blazehash ots verify evidence.hash
 blazehash -r /mnt/evidence -a -k evidence.hash
 ```
