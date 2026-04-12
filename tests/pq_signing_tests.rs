@@ -73,3 +73,40 @@ fn test_pq_verify_wrong_pubkey_fails() {
     let result = pq_verify_sig(manifest_path, &wrong_pubkey).unwrap();
     assert!(!result, "wrong expected pubkey must fail");
 }
+
+use assert_cmd::Command;
+
+#[test]
+fn test_cli_pq_sign_creates_pqsig() {
+    let dir = tempfile::tempdir().unwrap();
+    let manifest = dir.path().join("evidence.hash");
+    std::fs::write(&manifest, "%%blazehash-1.0\nblake3,path\nabc,/foo\n").unwrap();
+
+    let mut cmd = Command::cargo_bin("blazehash").unwrap();
+    cmd.env("BLAZEHASH_SIGN_PASSWORD", "testpass")
+       .arg("pq-sign")
+       .arg(&manifest);
+    cmd.assert().success();
+
+    let pqsig = dir.path().join("evidence.hash.pqsig");
+    assert!(pqsig.exists(), ".pqsig file must exist after pq-sign");
+}
+
+#[test]
+fn test_cli_pq_verify_sig_valid() {
+    let dir = tempfile::tempdir().unwrap();
+    let manifest = dir.path().join("evidence.hash");
+    std::fs::write(&manifest, "%%blazehash-1.0\nblake3,path\nabc,/foo\n").unwrap();
+
+    // First sign
+    let mut cmd = Command::cargo_bin("blazehash").unwrap();
+    cmd.env("BLAZEHASH_SIGN_PASSWORD", "testpass")
+       .arg("pq-sign")
+       .arg(&manifest);
+    cmd.assert().success();
+
+    // Then verify
+    let mut cmd = Command::cargo_bin("blazehash").unwrap();
+    cmd.arg("pq-verify-sig").arg(&manifest);
+    cmd.assert().success();
+}
