@@ -9,6 +9,7 @@ pub mod size_only;
 pub mod stdin;
 pub mod update;
 pub mod verify_image;
+pub mod vt;
 pub mod watch;
 
 use blazehash::walk::WalkError;

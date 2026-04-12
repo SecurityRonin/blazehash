@@ -173,6 +173,10 @@ pub struct Cli {
     #[cfg(feature = "yara")]
     #[arg(long = "yara", value_name = "FILE", help = "YARA rules file to scan files during hashing")]
     pub yara: Option<PathBuf>,
+
+    /// VirusTotal API key (for `blazehash vt`; falls back to VT_API_KEY env var)
+    #[arg(long = "api-key", value_name = "KEY")]
+    pub api_key: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -226,6 +230,7 @@ pub enum Mode {
     VerifySig,
     Merge,
     Update,
+    Vt,
     Watch,
     Hash,
 }
@@ -308,6 +313,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("watch"))
         {
             Mode::Watch
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("vt"))
+        {
+            Mode::Vt
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

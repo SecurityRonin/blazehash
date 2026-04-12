@@ -8,6 +8,7 @@ use clap::Parser;
 use cli::{Cli, Mode};
 use commands::merge::MergeArgs;
 use commands::update::UpdateArgs;
+use commands::vt::VtArgs;
 use commands::watch::WatchArgs;
 use std::path::PathBuf;
 
@@ -152,6 +153,23 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Vt = cli.mode() {
+        let manifest = cli
+            .paths
+            .into_iter()
+            .nth(1)
+            .ok_or_else(|| anyhow::anyhow!("vt requires a manifest path"))?;
+        let api_key = cli
+            .api_key
+            .clone()
+            .or_else(|| std::env::var("VT_API_KEY").ok())
+            .ok_or_else(|| {
+                anyhow::anyhow!("VT API key required (--api-key or VT_API_KEY env var)")
+            })?;
+        commands::vt::run_vt(VtArgs { manifest, api_key })?;
+        return Ok(());
+    }
+
     match cli.mode() {
         Mode::Mcp => unreachable!(),
         Mode::Bench => unreachable!(),
@@ -160,6 +178,7 @@ fn main() -> Result<()> {
         Mode::NsrlBuildBloom => unreachable!(),
         Mode::Merge => unreachable!(),
         Mode::Update => unreachable!(),
+        Mode::Vt => unreachable!(),
         Mode::Watch => unreachable!(),
         Mode::Sign => {
             let manifest = cli

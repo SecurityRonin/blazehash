@@ -22,6 +22,7 @@ pub mod walk;
 pub mod walk_filter;
 #[cfg(feature = "yara")]
 pub mod yara_scan;
+pub mod vt;
 pub mod watch;
 #[cfg(target_os = "windows")]
 pub mod walk_windows;
