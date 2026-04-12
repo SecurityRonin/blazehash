@@ -246,6 +246,7 @@ pub enum Mode {
     Watch,
     #[cfg(feature = "report")]
     Report,
+    Completions,
     Hash,
 }
 
@@ -330,6 +331,10 @@ impl Cli {
             Mode::Hash
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("vt")) {
             Mode::Vt
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("completions"))
+        {
+            Mode::Completions
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

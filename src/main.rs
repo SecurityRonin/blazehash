@@ -179,6 +179,14 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Completions = cli.mode() {
+        let shell = cli.paths.get(1).and_then(|p| p.to_str()).ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash completions <bash|zsh|fish|powershell>")
+        })?;
+        commands::completions::run(shell)?;
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -206,6 +214,7 @@ fn main() -> Result<()> {
         Mode::Update => unreachable!(),
         Mode::Vt => unreachable!(),
         Mode::Watch => unreachable!(),
+        Mode::Completions => unreachable!(),
         #[cfg(feature = "report")]
         Mode::Report => unreachable!(),
         Mode::Sign => {
