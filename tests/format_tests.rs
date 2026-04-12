@@ -220,6 +220,44 @@ fn sumfile_error_on_multiple_algorithms() {
     );
 }
 
+#[cfg(feature = "nsrl")]
+#[test]
+fn sqlite_output_queryable() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::format::write_sqlite;
+    use blazehash::hash::FileHashResult;
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+
+    let dir = tempfile::tempdir().unwrap();
+    let db_path = dir.path().join("out.db");
+
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Blake3, "deadbeef".to_string());
+    let result = FileHashResult {
+        path: PathBuf::from("/evidence/doc.pdf"),
+        size: 42,
+        hashes,
+        entropy: Some(6.5),
+    };
+
+    write_sqlite(&db_path, &[result], &[Algorithm::Blake3]).unwrap();
+    assert!(db_path.exists());
+
+    let conn = rusqlite::Connection::open(&db_path).unwrap();
+    let (path, size, blake3, entropy): (String, i64, String, f64) = conn
+        .query_row(
+            "SELECT path, size, blake3, entropy FROM files WHERE path = '/evidence/doc.pdf'",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
+        )
+        .unwrap();
+    assert_eq!(path, "/evidence/doc.pdf");
+    assert_eq!(size, 42);
+    assert_eq!(blake3, "deadbeef");
+    assert!((entropy - 6.5).abs() < 1e-6);
+}
+
 #[test]
 fn json_missing_algorithm_silently_skipped() {
     // json.rs uses `if let Some(hash)` — missing algo is silently omitted

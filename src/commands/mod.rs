@@ -3,6 +3,7 @@ pub mod bench;
 pub mod dedup;
 pub mod diff;
 pub mod hash;
+pub mod merge;
 pub mod piecewise;
 pub mod size_only;
 pub mod stdin;

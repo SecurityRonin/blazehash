@@ -6,6 +6,7 @@ mod mcp;
 use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Mode};
+use commands::merge::MergeArgs;
 use std::path::PathBuf;
 
 fn main() -> Result<()> {
@@ -97,12 +98,20 @@ fn main() -> Result<()> {
         anyhow::bail!("NSRL support requires the `nsrl` feature: cargo build --features nsrl");
     }
 
+    if let Mode::Merge = cli.mode() {
+        let inputs: Vec<PathBuf> = cli.paths[1..].to_vec();
+        let out = output.ok_or_else(|| anyhow::anyhow!("merge requires -o <output>"))?;
+        commands::merge::run_merge(MergeArgs { inputs, output: out })?;
+        return Ok(());
+    }
+
     match cli.mode() {
         Mode::Mcp => unreachable!(),
         Mode::Bench => unreachable!(),
         Mode::Diff => unreachable!(),
         Mode::Dedup => unreachable!(),
         Mode::NsrlBuildBloom => unreachable!(),
+        Mode::Merge => unreachable!(),
         Mode::Sign => {
             let manifest = cli
                 .paths
