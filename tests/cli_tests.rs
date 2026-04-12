@@ -543,3 +543,41 @@ mod ots_tests {
         );
     }
 }
+
+#[cfg(feature = "tui")]
+mod tui_tests {
+    #[test]
+    fn test_tui_event_channel_send_receive() {
+        use blazehash::tui::{HashProgress, TuiEvent};
+        use std::sync::mpsc;
+
+        let (tx, rx) = mpsc::channel::<TuiEvent>();
+
+        tx.send(TuiEvent::FileStarted {
+            path: "/test.bin".into(),
+        })
+        .unwrap();
+        tx.send(TuiEvent::FileCompleted(HashProgress {
+            path: "/test.bin".into(),
+            size: 1024,
+            hash_preview: "abc123...".to_string(),
+        }))
+        .unwrap();
+        tx.send(TuiEvent::Finished {
+            total_files: 1,
+            total_bytes: 1024,
+        })
+        .unwrap();
+
+        match rx.recv().unwrap() {
+            TuiEvent::FileStarted { path } => assert_eq!(path, "/test.bin"),
+            _ => panic!("expected FileStarted"),
+        }
+        match rx.recv().unwrap() {
+            TuiEvent::FileCompleted(p) => {
+                assert_eq!(p.size, 1024);
+            }
+            _ => panic!("expected FileCompleted"),
+        }
+    }
+}
