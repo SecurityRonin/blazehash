@@ -189,6 +189,10 @@ pub struct Cli {
     /// Case identifier for chain-of-custody metadata in manifest header and HTML report
     #[arg(long = "case", value_name = "ID")]
     pub case_id: Option<String>,
+
+    /// Force-enable progress bar (auto-enabled on TTY)
+    #[arg(long = "progress")]
+    pub progress: bool,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {

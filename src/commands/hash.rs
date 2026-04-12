@@ -5,6 +5,7 @@ use blazehash::format::{write_csv, write_dfxml, write_json, write_jsonl, write_s
 use blazehash::hash::{hash_file, FileHashResult};
 use blazehash::manifest::{write_header_with_metadata, write_record};
 use blazehash::output::make_writer;
+use blazehash::progress::walk_and_hash_with_progress;
 use blazehash::resume::ResumeState;
 use blazehash::walk::walk_and_hash_with_options;
 use blazehash::walk_filter::WalkFilter;
@@ -34,6 +35,7 @@ pub struct HashOptions<'a> {
     pub entropy: bool,
     pub case_id: Option<&'a str>,
     pub examiner: Option<&'a str>,
+    pub progress: bool,
 }
 
 pub fn run(opts: HashOptions<'_>) -> Result<()> {
@@ -55,6 +57,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         entropy,
         case_id,
         examiner,
+        progress,
         #[cfg(feature = "hashdb")]
         nsrl_hsh,
     } = opts;
@@ -73,6 +76,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         filter,
         ads,
         entropy,
+        progress,
     )?;
 
     #[cfg(feature = "hashdb")]
@@ -202,6 +206,7 @@ fn collect_results(
     filter: &WalkFilter,
     ads: bool,
     entropy: bool,
+    progress: bool,
 ) -> Result<Vec<FileHashResult>> {
     let mut all_results = Vec::new();
 
@@ -236,7 +241,11 @@ fn collect_results(
             }
             all_results.push(result);
         } else if path.is_dir() {
-            let output = walk_and_hash_with_options(path, algorithms, recursive, filter, entropy)?;
+            let output = if progress {
+                walk_and_hash_with_progress(path, algorithms, recursive, filter, entropy)?
+            } else {
+                walk_and_hash_with_options(path, algorithms, recursive, filter, entropy)?
+            };
             report_walk_errors(&output.errors);
             for r in output.results {
                 if resume_state.is_done(&r.path) {

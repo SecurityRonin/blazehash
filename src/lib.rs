@@ -18,6 +18,7 @@ pub mod nsrl;
 pub mod output;
 pub mod parallel_config;
 pub mod piecewise;
+pub mod progress;
 pub mod resume;
 pub mod signing;
 pub mod vt;
