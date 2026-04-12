@@ -104,6 +104,36 @@ fn main() -> Result<()> {
         anyhow::bail!("NSRL support requires the `hashdb` feature: cargo build --features hashdb");
     }
 
+    if let Mode::PqSign = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash pq-sign <manifest>"))?;
+        let password = std::env::var("BLAZEHASH_SIGN_PASSWORD").unwrap_or_default();
+        if password.is_empty() {
+            anyhow::bail!(
+                "pq-sign requires a password; set the BLAZEHASH_SIGN_PASSWORD environment variable"
+            );
+        }
+        blazehash::pq_signing::pq_sign_with_password(&manifest, &password)?;
+        return Ok(());
+    }
+
+    if let Mode::PqVerifySig = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash pq-verify-sig <manifest>"))?;
+        let pubkey = cli.expected_pubkey.as_deref().unwrap_or("");
+        let ok = blazehash::pq_signing::pq_verify_sig(&manifest, pubkey)?;
+        if !ok {
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
     if let Mode::Cosign = cli.mode() {
         let manifest = cli
             .paths
@@ -286,6 +316,8 @@ fn main() -> Result<()> {
         Mode::Report => unreachable!(),
         Mode::Cosign => unreachable!(),
         Mode::VerifyMsig => unreachable!(),
+        Mode::PqSign => unreachable!(),
+        Mode::PqVerifySig => unreachable!(),
         Mode::Sign => {
             let manifest = cli
                 .paths

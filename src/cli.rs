@@ -261,6 +261,8 @@ pub enum Mode {
     Stdin,
     Sign,
     VerifySig,
+    PqSign,
+    PqVerifySig,
     Cosign,
     VerifyMsig,
     Merge,
@@ -345,6 +347,14 @@ impl Cli {
             == Some(std::ffi::OsStr::new("verify-sig"))
         {
             Mode::VerifySig
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("pq-sign"))
+        {
+            Mode::PqSign
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("pq-verify-sig"))
+        {
+            Mode::PqVerifySig
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("cosign"))
         {
             Mode::Cosign
