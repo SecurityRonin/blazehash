@@ -11,8 +11,10 @@ mod nsrl_hsh_tests {
              \"AABBCCDDEEFF00112233445566778899AABBCCDD\"|\"00112233445566778899AABBCCDDEEFF\"|\"DEADBEEF\"|\"notepad.exe\"|\"69120\"|\"1\"|\"WIN\"|\"M\"\n"
         ).unwrap();
         let set = load_hsh(&hsh).unwrap();
-        assert!(set.contains("aabbccddeeff00112233445566778899aabbccdd"),
-            "SHA-1 should be in set (lowercased)");
+        assert!(
+            set.contains("aabbccddeeff00112233445566778899aabbccdd"),
+            "SHA-1 should be in set (lowercased)"
+        );
     }
 
     #[test]

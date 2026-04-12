@@ -1,13 +1,13 @@
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "sqlite")]
 use crate::algorithm::Algorithm;
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "sqlite")]
 use crate::hash::FileHashResult;
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "sqlite")]
 use anyhow::Result;
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "sqlite")]
 use std::path::Path;
 
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "sqlite")]
 pub fn write_sqlite(path: &Path, results: &[FileHashResult], algos: &[Algorithm]) -> Result<()> {
     use rusqlite::Connection;
 

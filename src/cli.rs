@@ -127,7 +127,7 @@ pub struct Cli {
     pub nsrl: Option<PathBuf>,
 
     /// NIST NSRL .hsh flat hashset file (pipe-delimited)
-    #[cfg(feature = "nsrl")]
+    #[cfg(feature = "hashdb")]
     #[arg(long = "nsrl-hsh", value_name = "FILE")]
     pub nsrl_hsh: Option<PathBuf>,
 
@@ -171,7 +171,11 @@ pub struct Cli {
 
     /// YARA rules file to scan files during hashing
     #[cfg(feature = "yara")]
-    #[arg(long = "yara", value_name = "FILE", help = "YARA rules file to scan files during hashing")]
+    #[arg(
+        long = "yara",
+        value_name = "FILE",
+        help = "YARA rules file to scan files during hashing"
+    )]
     pub yara: Option<PathBuf>,
 
     /// VirusTotal API key (for `blazehash vt`; falls back to VT_API_KEY env var)
@@ -313,28 +317,20 @@ impl Cli {
             == Some(std::ffi::OsStr::new("verify-sig"))
         {
             Mode::VerifySig
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("merge"))
-        {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("merge")) {
             Mode::Merge
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("update"))
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("update"))
         {
             Mode::Update
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("watch"))
-        {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("watch")) {
             Mode::Watch
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("report"))
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("report"))
         {
             #[cfg(feature = "report")]
             return Mode::Report;
             #[cfg(not(feature = "report"))]
             Mode::Hash
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("vt"))
-        {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("vt")) {
             Mode::Vt
         } else if self.size_only {
             Mode::SizeOnly

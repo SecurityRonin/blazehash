@@ -261,8 +261,8 @@ fn sqlite_output_queryable() {
 #[cfg(feature = "parquet-output")]
 #[test]
 fn parquet_output_creates_file() {
-    use blazehash::format::write_parquet;
     use blazehash::algorithm::Algorithm;
+    use blazehash::format::write_parquet;
     use blazehash::hash::FileHashResult;
     use std::collections::HashMap;
     use std::path::PathBuf;
@@ -281,7 +281,10 @@ fn parquet_output_creates_file() {
 
     write_parquet(&out, &[result], &[Algorithm::Blake3]).unwrap();
     assert!(out.exists(), "parquet file should be created");
-    assert!(out.metadata().unwrap().len() > 0, "parquet file should not be empty");
+    assert!(
+        out.metadata().unwrap().len() > 0,
+        "parquet file should not be empty"
+    );
 }
 
 #[test]
@@ -369,8 +372,8 @@ fn json_entropy_field_present_when_set() {
 fn sqlite_feature_is_independent_of_hashdb() {
     // write_sqlite is gated on `sqlite` feature, not `hashdb`.
     // If this compiles and runs, the feature split is correct.
-    use blazehash::format::write_sqlite;
     use blazehash::algorithm::Algorithm;
+    use blazehash::format::write_sqlite;
     use blazehash::hash::FileHashResult;
     use std::collections::HashMap;
     use std::path::PathBuf;
@@ -388,5 +391,8 @@ fn sqlite_feature_is_independent_of_hashdb() {
     };
 
     write_sqlite(&db_path, &[result], &[Algorithm::Blake3]).unwrap();
-    assert!(db_path.exists(), "sqlite output must be created under sqlite feature alone");
+    assert!(
+        db_path.exists(),
+        "sqlite output must be created under sqlite feature alone"
+    );
 }

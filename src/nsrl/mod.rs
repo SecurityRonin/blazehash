@@ -1,28 +1,33 @@
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "hashdb")]
 mod bloom;
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "hashdb")]
 mod sqlite;
 
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "hashdb")]
 #[derive(Debug, PartialEq, Eq)]
-pub enum NsrlResult {
+pub enum HashDbResult {
     KnownGood,
+    KnownBad,
     Unknown,
 }
 
-#[cfg(feature = "nsrl")]
+/// Backwards-compat alias so existing internal call sites don't need updating.
+#[cfg(feature = "hashdb")]
+pub type NsrlResult = HashDbResult;
+
+#[cfg(feature = "hashdb")]
 pub struct NsrlLookup {
     inner: NsrlBackend,
 }
 
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "hashdb")]
 #[allow(dead_code)] // Bloom variant kept for future .bloom import support
 enum NsrlBackend {
     Sqlite(sqlite::SqliteNsrl),
     Bloom(bloom::BloomNsrl),
 }
 
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "hashdb")]
 impl NsrlLookup {
     pub fn open(path: &std::path::Path) -> anyhow::Result<Self> {
         let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
@@ -48,7 +53,7 @@ impl NsrlLookup {
 
 /// Load a NIST NSRL flat `.hsh` file, returning all SHA-1 hashes (lowercased).
 /// Format: pipe-delimited, first column is quoted SHA-1, first line is header.
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "hashdb")]
 pub fn load_hsh(path: &std::path::Path) -> anyhow::Result<std::collections::HashSet<String>> {
     use std::io::{BufRead, BufReader};
     let f = std::fs::File::open(path)?;
@@ -71,7 +76,7 @@ pub fn load_hsh(path: &std::path::Path) -> anyhow::Result<std::collections::Hash
     Ok(set)
 }
 
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "hashdb")]
 pub fn build_bloom(
     db_path: &std::path::Path,
     out_path: &std::path::Path,

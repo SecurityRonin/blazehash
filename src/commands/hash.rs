@@ -27,7 +27,7 @@ pub struct HashOptions<'a> {
     pub filter: &'a WalkFilter,
     pub nsrl: Option<&'a PathBuf>,
     pub nsrl_exclude: bool,
-    #[cfg(feature = "nsrl")]
+    #[cfg(feature = "hashdb")]
     pub nsrl_hsh: Option<&'a std::path::PathBuf>,
     pub sign: bool,
     pub ads: bool,
@@ -51,7 +51,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         sign,
         ads,
         entropy,
-        #[cfg(feature = "nsrl")]
+        #[cfg(feature = "hashdb")]
         nsrl_hsh,
     } = opts;
     let mut resume_state = load_resume_state(resume, output)?;
@@ -71,7 +71,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         entropy,
     )?;
 
-    #[cfg(feature = "nsrl")]
+    #[cfg(feature = "hashdb")]
     {
         // Build a combined known-good set from .hsh flat file (SHA-1 hashes).
         let mut hsh_set: std::collections::HashSet<String> = std::collections::HashSet::new();
@@ -129,7 +129,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
             }
         }
     }
-    #[cfg(not(feature = "nsrl"))]
+    #[cfg(not(feature = "hashdb"))]
     let _ = (nsrl, nsrl_exclude);
 
     #[cfg(feature = "parquet-output")]
@@ -273,4 +273,3 @@ fn write_output<W: Write>(
     }
     Ok(())
 }
-

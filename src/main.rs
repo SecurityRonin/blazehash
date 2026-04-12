@@ -7,11 +7,11 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Mode};
 use commands::merge::MergeArgs;
+#[cfg(feature = "report")]
+use commands::report::ReportArgs;
 use commands::update::UpdateArgs;
 use commands::vt::VtArgs;
 use commands::watch::WatchArgs;
-#[cfg(feature = "report")]
-use commands::report::ReportArgs;
 use std::path::PathBuf;
 
 fn main() -> Result<()> {
@@ -87,7 +87,7 @@ fn main() -> Result<()> {
 
     // NsrlBuildBloom needs output before the main match
     if let Mode::NsrlBuildBloom = cli.mode() {
-        #[cfg(feature = "nsrl")]
+        #[cfg(feature = "hashdb")]
         {
             let db = cli.paths.get(2).ok_or_else(|| {
                 anyhow::anyhow!("usage: blazehash nsrl build-bloom <input.db> --output <out.bloom>")
@@ -99,14 +99,17 @@ fn main() -> Result<()> {
             eprintln!("[+] Bloom filter written to {}", out.display());
             return Ok(());
         }
-        #[cfg(not(feature = "nsrl"))]
-        anyhow::bail!("NSRL support requires the `nsrl` feature: cargo build --features nsrl");
+        #[cfg(not(feature = "hashdb"))]
+        anyhow::bail!("NSRL support requires the `hashdb` feature: cargo build --features hashdb");
     }
 
     if let Mode::Merge = cli.mode() {
         let inputs: Vec<PathBuf> = cli.paths[1..].to_vec();
         let out = output.ok_or_else(|| anyhow::anyhow!("merge requires -o <output>"))?;
-        commands::merge::run_merge(MergeArgs { inputs, output: out })?;
+        commands::merge::run_merge(MergeArgs {
+            inputs,
+            output: out,
+        })?;
         return Ok(());
     }
 
@@ -141,12 +144,8 @@ fn main() -> Result<()> {
             .known
             .first()
             .cloned()
-            .or_else(|| {
-                blazehash::manifest_loader::find_manifest(&[watch_path.as_path()]).ok()
-            })
-            .ok_or_else(|| {
-                anyhow::anyhow!("usage: blazehash watch <path> -k <manifest>")
-            })?;
+            .or_else(|| blazehash::manifest_loader::find_manifest(&[watch_path.as_path()]).ok())
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash watch <path> -k <manifest>"))?;
         commands::watch::run_watch(WatchArgs {
             path: watch_path,
             manifest,
@@ -157,11 +156,11 @@ fn main() -> Result<()> {
 
     #[cfg(feature = "report")]
     if let Mode::Report = cli.mode() {
-        let manifest = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash report <manifest> --examiner <name> --case <id> -o <out.html>"))?;
+        let manifest = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!(
+                "usage: blazehash report <manifest> --examiner <name> --case <id> -o <out.html>"
+            )
+        })?;
         let out = output.ok_or_else(|| anyhow::anyhow!("report requires -o <output.html>"))?;
         let examiner = cli
             .examiner
@@ -171,7 +170,12 @@ fn main() -> Result<()> {
             .case_id
             .clone()
             .ok_or_else(|| anyhow::anyhow!("report requires --case <id>"))?;
-        commands::report::run_report(ReportArgs { manifest, output: out, examiner, case_id })?;
+        commands::report::run_report(ReportArgs {
+            manifest,
+            output: out,
+            examiner,
+            case_id,
+        })?;
         return Ok(());
     }
 
@@ -272,7 +276,7 @@ fn main() -> Result<()> {
                 filter: &filter,
                 nsrl: cli.nsrl.as_ref(),
                 nsrl_exclude: cli.nsrl_exclude,
-                #[cfg(feature = "nsrl")]
+                #[cfg(feature = "hashdb")]
                 nsrl_hsh: cli.nsrl_hsh.as_ref(),
                 sign: cli.sign,
                 ads: cli.ads,

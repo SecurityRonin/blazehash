@@ -88,10 +88,11 @@ windows-sys = { version = "0.59", features = [
 tokio = { version = "1", features = ["rt-multi-thread", "fs", "sync", "macros"] }
 
 [features]
-default = ["forensic-image", "gpu"]
+default = ["forensic-image", "gpu", "sqlite", "parquet-output"]
 forensic-image = ["dep:ewf"]
 gpu = ["dep:wgpu", "dep:pollster", "dep:toml", "dep:dirs"]
-nsrl = ["dep:rusqlite", "dep:bloomfilter"]
+sqlite = ["dep:rusqlite"]
+hashdb = ["dep:bloomfilter", "sqlite"]
 yara    = ["dep:yara-x"]
 report  = ["dep:minijinja"]
 parquet-output = ["dep:parquet", "dep:arrow"]
