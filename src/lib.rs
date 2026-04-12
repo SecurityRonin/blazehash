@@ -8,6 +8,8 @@ pub mod format;
 pub mod fuzzy;
 #[cfg(feature = "gpu")]
 pub mod gpu;
+#[cfg(feature = "docker")]
+pub mod image;
 pub mod hash;
 pub mod manifest;
 pub mod manifest_loader;

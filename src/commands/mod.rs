@@ -7,6 +7,8 @@ pub mod merge;
 pub mod piecewise;
 #[cfg(feature = "report")]
 pub mod report;
+#[cfg(feature = "docker")]
+pub mod image;
 pub mod size_only;
 pub mod stdin;
 pub mod update;
