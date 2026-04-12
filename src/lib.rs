@@ -17,6 +17,8 @@ pub mod manifest;
 pub mod manifest_loader;
 #[cfg(feature = "hashdb")]
 pub mod nsrl;
+#[cfg(feature = "ots")]
+pub mod ots;
 pub mod output;
 pub mod parallel_config;
 pub mod piecewise;

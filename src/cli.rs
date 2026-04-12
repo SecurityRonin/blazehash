@@ -270,6 +270,10 @@ pub enum Mode {
     #[cfg(feature = "report")]
     Report,
     Completions,
+    #[cfg(feature = "ots")]
+    OtsStamp,
+    #[cfg(feature = "ots")]
+    OtsVerify,
     Hash,
 }
 
@@ -365,6 +369,22 @@ impl Cli {
             == Some(std::ffi::OsStr::new("completions"))
         {
             Mode::Completions
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
+            match self.paths.get(1).and_then(|p| p.to_str()) {
+                Some("stamp") => {
+                    #[cfg(feature = "ots")]
+                    return Mode::OtsStamp;
+                    #[cfg(not(feature = "ots"))]
+                    return Mode::Hash;
+                }
+                Some("verify") => {
+                    #[cfg(feature = "ots")]
+                    return Mode::OtsVerify;
+                    #[cfg(not(feature = "ots"))]
+                    return Mode::Hash;
+                }
+                _ => return Mode::Hash,
+            }
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

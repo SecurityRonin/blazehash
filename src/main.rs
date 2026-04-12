@@ -209,6 +209,31 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    #[cfg(feature = "ots")]
+    if let Mode::OtsStamp = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(2)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash ots stamp <manifest>"))?;
+        blazehash::ots::stamp(&manifest)?;
+        return Ok(());
+    }
+
+    #[cfg(feature = "ots")]
+    if let Mode::OtsVerify = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(2)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash ots verify <manifest>"))?;
+        let valid = blazehash::ots::verify(&manifest)?;
+        if !valid {
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -236,6 +261,10 @@ fn main() -> Result<()> {
         Mode::Update => unreachable!(),
         Mode::Vt => unreachable!(),
         Mode::Watch => unreachable!(),
+        #[cfg(feature = "ots")]
+        Mode::OtsStamp => unreachable!(),
+        #[cfg(feature = "ots")]
+        Mode::OtsVerify => unreachable!(),
         Mode::Completions => unreachable!(),
         #[cfg(feature = "report")]
         Mode::Report => unreachable!(),
