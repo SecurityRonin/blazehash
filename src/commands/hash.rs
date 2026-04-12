@@ -132,6 +132,16 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
     #[cfg(not(feature = "nsrl"))]
     let _ = (nsrl, nsrl_exclude);
 
+    #[cfg(feature = "parquet-output")]
+    if format == "parquet" {
+        blazehash::format::write_parquet(
+            output.ok_or_else(|| anyhow::anyhow!("--format parquet requires -o <output>"))?,
+            &all_results,
+            algorithms,
+        )?;
+        return Ok(());
+    }
+
     let needs_header = !(bare || append);
     write_output(&mut writer, &all_results, algorithms, format, needs_header)?;
 
@@ -245,3 +255,4 @@ fn write_output<W: Write>(
     }
     Ok(())
 }
+
