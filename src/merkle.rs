@@ -11,12 +11,15 @@ use sha2::{Digest, Sha256};
 /// A single sibling hash in a Merkle proof (32 bytes).
 pub type ProofStep = [u8; 32];
 
+/// Internal tree representation: levels of 32-byte hashes, plus a sorted leaf index.
+type TreeLevels = (Vec<Vec<[u8; 32]>>, Vec<([u8; 32], usize)>);
+
 /// Compute the leaf hash for (path, sha256_hex).
 fn leaf_hash(path: &str, sha256_hex: &str) -> [u8; 32] {
     let mut h = Sha256::new();
-    h.update(&[0x00]);
+    h.update([0x00]);
     h.update(path.as_bytes());
-    h.update(&[0x00]);
+    h.update([0x00]);
     h.update(sha256_hex.as_bytes());
     h.finalize().into()
 }
@@ -29,7 +32,7 @@ fn node_hash(left: &[u8; 32], right: &[u8; 32]) -> [u8; 32] {
         (right, left)
     };
     let mut h = Sha256::new();
-    h.update(&[0x01]);
+    h.update([0x01]);
     h.update(lo.as_slice());
     h.update(hi.as_slice());
     h.finalize().into()
@@ -38,9 +41,7 @@ fn node_hash(left: &[u8; 32], right: &[u8; 32]) -> [u8; 32] {
 /// Build the tree as a Vec of levels, bottom-up.
 /// Level 0 = leaves (sorted by leaf_hash for canonical ordering).
 /// Returns: (levels, sorted leaf hashes with original index)
-fn build_levels(
-    entries: &[(String, String, String)],
-) -> (Vec<Vec<[u8; 32]>>, Vec<([u8; 32], usize)>) {
+fn build_levels(entries: &[(String, String, String)]) -> TreeLevels {
     // Compute leaf hashes and keep original index
     let mut leaves: Vec<([u8; 32], usize)> = entries
         .iter()

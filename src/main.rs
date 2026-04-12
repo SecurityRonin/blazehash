@@ -278,6 +278,84 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Merkle = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash merkle <manifest>"))?;
+        let records = blazehash::manifest_loader::load_manifest(&manifest)?;
+        let entries: Vec<(String, String, String)> = records
+            .iter()
+            .filter_map(|r| {
+                let sha256 = r
+                    .hashes
+                    .get(&blazehash::algorithm::Algorithm::Sha256)
+                    .cloned()?;
+                let path = r.path.to_string_lossy().into_owned();
+                Some(("sha256".to_string(), path, sha256))
+            })
+            .collect();
+        let root = blazehash::merkle::merkle_root(&entries)?;
+        println!("{root}");
+        return Ok(());
+    }
+
+    if let Mode::MerkleProof = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash merkle-proof <manifest> --path <p>"))?;
+        let file_path = cli
+            .merkle_path
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("merkle-proof requires --path <file_path>"))?;
+        let records = blazehash::manifest_loader::load_manifest(&manifest)?;
+        let entries: Vec<(String, String, String)> = records
+            .iter()
+            .filter_map(|r| {
+                let sha256 = r
+                    .hashes
+                    .get(&blazehash::algorithm::Algorithm::Sha256)
+                    .cloned()?;
+                let path = r.path.to_string_lossy().into_owned();
+                Some(("sha256".to_string(), path, sha256))
+            })
+            .collect();
+        let proof = blazehash::merkle::generate_proof(&entries, file_path)?;
+        println!("{}", serde_json::to_string(&proof)?);
+        return Ok(());
+    }
+
+    if let Mode::MerkleVerify = cli.mode() {
+        let root = cli
+            .merkle_root
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("merkle-verify requires --root <hex>"))?;
+        let file_path = cli
+            .merkle_path
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("merkle-verify requires --path <path>"))?;
+        let sha256_hex = cli
+            .merkle_sha256
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("merkle-verify requires --sha256 <hex>"))?;
+        let proof_json = cli
+            .merkle_proof
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("merkle-verify requires --proof <json>"))?;
+        let proof: Vec<String> = serde_json::from_str(proof_json)
+            .map_err(|e| anyhow::anyhow!("invalid proof JSON: {e}"))?;
+        let ok = blazehash::merkle::verify_proof(root, file_path, sha256_hex, &proof)?;
+        if !ok {
+            eprintln!("proof verification FAILED");
+            std::process::exit(1);
+        }
+        println!("ok");
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -318,6 +396,9 @@ fn main() -> Result<()> {
         Mode::VerifyMsig => unreachable!(),
         Mode::PqSign => unreachable!(),
         Mode::PqVerifySig => unreachable!(),
+        Mode::Merkle => unreachable!(),
+        Mode::MerkleProof => unreachable!(),
+        Mode::MerkleVerify => unreachable!(),
         Mode::Sign => {
             let manifest = cli
                 .paths

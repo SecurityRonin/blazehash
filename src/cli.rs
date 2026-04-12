@@ -207,6 +207,22 @@ pub struct Cli {
     #[arg(long = "progress")]
     pub progress: bool,
 
+    /// File path for merkle-proof / merkle-verify subcommands
+    #[arg(long = "path", value_name = "PATH")]
+    pub merkle_path: Option<String>,
+
+    /// SHA-256 hex value for merkle-verify subcommand
+    #[arg(long = "sha256", value_name = "HEX")]
+    pub merkle_sha256: Option<String>,
+
+    /// JSON proof array for merkle-verify subcommand
+    #[arg(long = "proof", value_name = "JSON")]
+    pub merkle_proof: Option<String>,
+
+    /// Merkle root hex for merkle-verify subcommand
+    #[arg(long = "root", value_name = "HEX")]
+    pub merkle_root: Option<String>,
+
     /// Sector size for raw device hashing (default: 512)
     #[arg(long = "sector-size", default_value = "512")]
     pub sector_size: usize,
@@ -272,6 +288,9 @@ pub enum Mode {
     #[cfg(feature = "report")]
     Report,
     Completions,
+    Merkle,
+    MerkleProof,
+    MerkleVerify,
     #[cfg(feature = "ots")]
     OtsStamp,
     #[cfg(feature = "ots")]
@@ -386,6 +405,18 @@ impl Cli {
             return Mode::Tui;
             #[cfg(not(feature = "tui"))]
             return Mode::Hash;
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("merkle-proof"))
+        {
+            Mode::MerkleProof
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("merkle-verify"))
+        {
+            Mode::MerkleVerify
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("merkle"))
+        {
+            Mode::Merkle
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {
