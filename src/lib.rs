@@ -15,6 +15,7 @@ pub mod hash;
 pub mod image;
 pub mod manifest;
 pub mod manifest_loader;
+pub mod merkle;
 #[cfg(feature = "hashdb")]
 pub mod nsrl;
 #[cfg(feature = "ots")]
