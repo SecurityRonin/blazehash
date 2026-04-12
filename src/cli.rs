@@ -152,6 +152,10 @@ pub struct Cli {
     #[arg(long = "ignore-sig")]
     pub ignore_sig: bool,
 
+    /// Minimum number of valid cosignatures required by `verify-msig`
+    #[arg(long = "threshold", default_value = "1")]
+    pub threshold: usize,
+
     /// Output diff in unified patch format
     #[arg(long = "patch")]
     pub patch: bool,
@@ -257,6 +261,8 @@ pub enum Mode {
     Stdin,
     Sign,
     VerifySig,
+    Cosign,
+    VerifyMsig,
     Merge,
     Update,
     Vt,
@@ -333,6 +339,13 @@ impl Cli {
             == Some(std::ffi::OsStr::new("verify-sig"))
         {
             Mode::VerifySig
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("cosign"))
+        {
+            Mode::Cosign
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("verify-msig"))
+        {
+            Mode::VerifyMsig
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("merge")) {
             Mode::Merge
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("update"))

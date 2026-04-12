@@ -104,6 +104,27 @@ fn main() -> Result<()> {
         anyhow::bail!("NSRL support requires the `hashdb` feature: cargo build --features hashdb");
     }
 
+    if let Mode::Cosign = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash cosign <manifest>"))?;
+        blazehash::cosign::cosign(&manifest)?;
+        return Ok(());
+    }
+
+    if let Mode::VerifyMsig = cli.mode() {
+        let manifest = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash verify-msig <manifest> --threshold N")
+        })?;
+        let valid = blazehash::cosign::verify_msig(&manifest, cli.threshold)?;
+        if !valid {
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
     if let Mode::Merge = cli.mode() {
         let inputs: Vec<PathBuf> = cli.paths[1..].to_vec();
         let out = output.ok_or_else(|| anyhow::anyhow!("merge requires -o <output>"))?;
@@ -218,6 +239,8 @@ fn main() -> Result<()> {
         Mode::Completions => unreachable!(),
         #[cfg(feature = "report")]
         Mode::Report => unreachable!(),
+        Mode::Cosign => unreachable!(),
+        Mode::VerifyMsig => unreachable!(),
         Mode::Sign => {
             let manifest = cli
                 .paths

@@ -33,7 +33,7 @@ fn pub_path_for(manifest_path: &Path) -> std::path::PathBuf {
     p
 }
 
-fn derive_key(password: &str) -> Result<SigningKey> {
+pub fn derive_key_from_password(password: &str) -> Result<SigningKey> {
     let params =
         Params::new(65536, 3, 1, Some(32)).map_err(|e| anyhow::anyhow!("argon2 params: {e}"))?;
     let argon2 = Argon2::new(Argon2Algorithm::Argon2id, Version::V0x13, params);
@@ -60,7 +60,7 @@ pub fn read_password() -> Result<String> {
 /// Sign `manifest_path`. Writes `.sig` sidecar. Prints public key to stderr.
 pub fn sign(manifest_path: &Path) -> Result<()> {
     let password = read_password()?;
-    let signing_key = derive_key(&password)?;
+    let signing_key = derive_key_from_password(&password)?;
     let verifying_key = signing_key.verifying_key();
 
     let manifest_bytes = std::fs::read(manifest_path)

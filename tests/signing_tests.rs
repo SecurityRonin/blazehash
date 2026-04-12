@@ -300,8 +300,14 @@ fn test_cosign_creates_msig_file() {
 
     let content = std::fs::read_to_string(&msig_path).unwrap();
     let msig: serde_json::Value = serde_json::from_str(&content).expect("msig must be valid JSON");
-    let sigs = msig["signatures"].as_array().expect("must have signatures array");
-    assert_eq!(sigs.len(), 1, "first cosign should create 1 signature entry");
+    let sigs = msig["signatures"]
+        .as_array()
+        .expect("must have signatures array");
+    assert_eq!(
+        sigs.len(),
+        1,
+        "first cosign should create 1 signature entry"
+    );
 }
 
 #[test]
