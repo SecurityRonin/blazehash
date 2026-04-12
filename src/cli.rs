@@ -177,6 +177,16 @@ pub struct Cli {
     /// VirusTotal API key (for `blazehash vt`; falls back to VT_API_KEY env var)
     #[arg(long = "api-key", value_name = "KEY")]
     pub api_key: Option<String>,
+
+    /// Examiner name for HTML chain-of-custody report (`blazehash report`)
+    #[cfg(feature = "report")]
+    #[arg(long = "examiner", value_name = "NAME")]
+    pub examiner: Option<String>,
+
+    /// Case identifier for HTML chain-of-custody report (`blazehash report`)
+    #[cfg(feature = "report")]
+    #[arg(long = "case", value_name = "ID")]
+    pub case_id: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -232,6 +242,8 @@ pub enum Mode {
     Update,
     Vt,
     Watch,
+    #[cfg(feature = "report")]
+    Report,
     Hash,
 }
 
@@ -313,6 +325,13 @@ impl Cli {
             == Some(std::ffi::OsStr::new("watch"))
         {
             Mode::Watch
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("report"))
+        {
+            #[cfg(feature = "report")]
+            return Mode::Report;
+            #[cfg(not(feature = "report"))]
+            Mode::Hash
         } else if self.paths.first().map(|p| p.as_os_str())
             == Some(std::ffi::OsStr::new("vt"))
         {

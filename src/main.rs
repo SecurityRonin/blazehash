@@ -10,6 +10,8 @@ use commands::merge::MergeArgs;
 use commands::update::UpdateArgs;
 use commands::vt::VtArgs;
 use commands::watch::WatchArgs;
+#[cfg(feature = "report")]
+use commands::report::ReportArgs;
 use std::path::PathBuf;
 
 fn main() -> Result<()> {
@@ -153,6 +155,26 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    #[cfg(feature = "report")]
+    if let Mode::Report = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash report <manifest> --examiner <name> --case <id> -o <out.html>"))?;
+        let out = output.ok_or_else(|| anyhow::anyhow!("report requires -o <output.html>"))?;
+        let examiner = cli
+            .examiner
+            .clone()
+            .ok_or_else(|| anyhow::anyhow!("report requires --examiner <name>"))?;
+        let case_id = cli
+            .case_id
+            .clone()
+            .ok_or_else(|| anyhow::anyhow!("report requires --case <id>"))?;
+        commands::report::run_report(ReportArgs { manifest, output: out, examiner, case_id })?;
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -180,6 +202,8 @@ fn main() -> Result<()> {
         Mode::Update => unreachable!(),
         Mode::Vt => unreachable!(),
         Mode::Watch => unreachable!(),
+        #[cfg(feature = "report")]
+        Mode::Report => unreachable!(),
         Mode::Sign => {
             let manifest = cli
                 .paths
