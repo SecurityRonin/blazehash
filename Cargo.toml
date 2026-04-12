@@ -74,6 +74,10 @@ ratatui = { version = "0.29", optional = true }
 crossterm = { version = "0.28", optional = true }
 tempfile = "3"
 duckdb = { version = "1.4.4", features = ["bundled"], optional = true }
+ml-dsa = "0.1.0-rc.8"
+signature = "2"
+qrcode = { version = "0.14", optional = true }
+image = { version = "0.25", optional = true, default-features = false, features = ["png"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 libc = "0.2"
@@ -94,7 +98,7 @@ windows-sys = { version = "0.59", features = [
 tokio = { version = "1", features = ["rt-multi-thread", "fs", "sync", "macros"] }
 
 [features]
-default = ["forensic-image", "gpu", "sqlite", "parquet-output", "duckdb-output"]
+default = ["forensic-image", "gpu", "sqlite", "parquet-output", "duckdb-output", "pq", "qr"]
 forensic-image = ["dep:ewf"]
 gpu = ["dep:wgpu", "dep:pollster", "dep:toml", "dep:dirs"]
 sqlite = ["dep:rusqlite"]
@@ -106,6 +110,8 @@ docker  = ["dep:oci-distribution", "dep:flate2", "dep:tar", "dep:tokio"]
 duckdb-output = ["dep:duckdb"]
 tui = ["dep:ratatui", "dep:crossterm"]
 ots = []
+pq  = []
+qr  = ["dep:qrcode", "dep:image"]
 
 [package.metadata.deb]
 maintainer = "SecurityRonin <security-ronin@users.noreply.github.com>"

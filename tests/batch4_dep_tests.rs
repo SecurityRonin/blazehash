@@ -1,7 +1,7 @@
 #[test]
 fn ml_dsa_crate_available() {
     // If this compiles, the dep is present
-    let _ = std::mem::size_of::<ml_dsa::KeyPair<ml_dsa::MlDsa65>>();
+    let _ = std::mem::size_of::<ml_dsa::SigningKey<ml_dsa::MlDsa65>>();
 }
 
 #[cfg(feature = "qr")]
