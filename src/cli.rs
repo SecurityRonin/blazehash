@@ -244,8 +244,6 @@ pub enum Mode {
     Watch,
     #[cfg(feature = "report")]
     Report,
-    #[cfg(feature = "docker")]
-    Image,
     Hash,
 }
 
@@ -338,13 +336,6 @@ impl Cli {
             == Some(std::ffi::OsStr::new("vt"))
         {
             Mode::Vt
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("image"))
-        {
-            #[cfg(feature = "docker")]
-            return Mode::Image;
-            #[cfg(not(feature = "docker"))]
-            Mode::Hash
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

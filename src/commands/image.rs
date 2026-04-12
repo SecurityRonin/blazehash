@@ -1,5 +1,5 @@
-use blazehash::image::parse_image_ref;
 use blazehash::algorithm::{hash_bytes, Algorithm};
+use blazehash::hash::FileHashResult;
 use anyhow::Result;
 use oci_distribution::{
     client::{Client, ClientConfig},
@@ -7,19 +7,18 @@ use oci_distribution::{
     secrets::RegistryAuth,
     Reference,
 };
+use std::collections::HashMap;
 
-pub struct ImageArgs {
-    pub image_ref: String,
-    pub algorithms: Vec<Algorithm>,
-}
+use blazehash::image::{layer_path, parse_image_ref, strip_oci_prefix};
 
-pub fn run_image(args: ImageArgs) -> Result<()> {
+pub fn oci_results(uri: &str, algorithms: &[Algorithm]) -> Result<Vec<FileHashResult>> {
     let rt = tokio::runtime::Runtime::new()?;
-    rt.block_on(run_image_async(args))
+    rt.block_on(oci_results_async(uri, algorithms))
 }
 
-async fn run_image_async(args: ImageArgs) -> Result<()> {
-    let image_ref = parse_image_ref(&args.image_ref)?;
+async fn oci_results_async(uri: &str, algorithms: &[Algorithm]) -> Result<Vec<FileHashResult>> {
+    let ref_str = strip_oci_prefix(uri);
+    let image_ref = parse_image_ref(ref_str)?;
 
     let reference = Reference::with_tag(
         image_ref.registry.clone(),
@@ -28,7 +27,6 @@ async fn run_image_async(args: ImageArgs) -> Result<()> {
     );
 
     let client = Client::new(ClientConfig::default());
-
     let image_data = client
         .pull(
             &reference,
@@ -36,45 +34,18 @@ async fn run_image_async(args: ImageArgs) -> Result<()> {
             vec![IMAGE_LAYER_MEDIA_TYPE, IMAGE_LAYER_GZIP_MEDIA_TYPE],
         )
         .await
-        .map_err(|e| anyhow::anyhow!("failed to pull image {}: {e}", args.image_ref))?;
+        .map_err(|e| anyhow::anyhow!("OCI pull failed for {uri}: {e}"))?;
 
-    println!(
-        "# blazehash image -- {}",
-        args.image_ref
-    );
-    println!("# registry: {}", image_ref.registry);
-    println!("# repository: {}", image_ref.name);
-    if let Some(digest) = &image_data.digest {
-        println!("# manifest digest: {digest}");
-    }
-    println!(
-        "# algorithms: {}",
-        args.algorithms
-            .iter()
-            .map(|a| a.hashdeep_name())
-            .collect::<Vec<_>>()
-            .join(",")
-    );
-    println!("# layer count: {}", image_data.layers.len());
-    println!();
-
+    let mut results = Vec::new();
     for (i, layer) in image_data.layers.iter().enumerate() {
-        let layer_digest = layer.sha256_digest();
-        let label = format!("layer[{i}]:{layer_digest}");
-
-        let hashes: Vec<String> = args
-            .algorithms
-            .iter()
-            .map(|algo| hash_bytes(*algo, &layer.data))
-            .collect();
-
-        println!(
-            "{}\t{}\t{}",
-            hashes.join(","),
-            layer.data.len(),
-            label
-        );
+        let digest = layer.sha256_digest();
+        let path = layer_path(ref_str, i, &digest);
+        let size = layer.data.len() as u64;
+        let mut hashes = HashMap::new();
+        for algo in algorithms {
+            hashes.insert(*algo, hash_bytes(*algo, &layer.data));
+        }
+        results.push(FileHashResult { path, size, hashes, entropy: None });
     }
-
-    Ok(())
+    Ok(results)
 }

@@ -1,5 +1,17 @@
 use anyhow::Result;
 
+pub fn is_oci_uri(s: &str) -> bool {
+    s.starts_with("oci://")
+}
+
+pub fn strip_oci_prefix(s: &str) -> &str {
+    s.trim_start_matches("oci://")
+}
+
+pub fn layer_path(image_ref: &str, index: usize, digest: &str) -> std::path::PathBuf {
+    std::path::PathBuf::from(format!("oci://{image_ref}/layer[{index}]/{digest}"))
+}
+
 #[derive(Debug)]
 pub struct ImageRef {
     pub registry: String,

@@ -12,8 +12,6 @@ use commands::vt::VtArgs;
 use commands::watch::WatchArgs;
 #[cfg(feature = "report")]
 use commands::report::ReportArgs;
-#[cfg(feature = "docker")]
-use commands::image::ImageArgs;
 use std::path::PathBuf;
 
 fn main() -> Result<()> {
@@ -194,21 +192,6 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    #[cfg(feature = "docker")]
-    if let Mode::Image = cli.mode() {
-        let image_ref = cli
-            .paths
-            .get(1)
-            .and_then(|p| p.to_str())
-            .map(|s| s.to_string())
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash image <image-ref>"))?;
-        commands::image::run_image(ImageArgs {
-            image_ref,
-            algorithms,
-        })?;
-        return Ok(());
-    }
-
     match cli.mode() {
         Mode::Mcp => unreachable!(),
         Mode::Bench => unreachable!(),
@@ -221,8 +204,6 @@ fn main() -> Result<()> {
         Mode::Watch => unreachable!(),
         #[cfg(feature = "report")]
         Mode::Report => unreachable!(),
-        #[cfg(feature = "docker")]
-        Mode::Image => unreachable!(),
         Mode::Sign => {
             let manifest = cli
                 .paths

@@ -183,6 +183,24 @@ fn collect_results(
 ) -> Result<Vec<FileHashResult>> {
     let mut all_results = Vec::new();
 
+    #[cfg(feature = "docker")]
+    let (oci_paths, local_paths): (Vec<PathBuf>, Vec<PathBuf>) = paths
+        .iter()
+        .cloned()
+        .partition(|p| blazehash::image::is_oci_uri(&p.to_string_lossy()));
+
+    #[cfg(feature = "docker")]
+    {
+        for oci_uri in &oci_paths {
+            let uri_str = oci_uri.to_string_lossy();
+            let layers = super::image::oci_results(&uri_str, algorithms)?;
+            all_results.extend(layers);
+        }
+    }
+
+    #[cfg(feature = "docker")]
+    let paths = local_paths.as_slice();
+
     for path in paths {
         if path.is_file() {
             if resume_state.is_done(path) {
