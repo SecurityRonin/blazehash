@@ -220,7 +220,7 @@ fn sumfile_error_on_multiple_algorithms() {
     );
 }
 
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "sqlite")]
 #[test]
 fn sqlite_output_queryable() {
     use blazehash::algorithm::Algorithm;
@@ -360,4 +360,33 @@ fn json_entropy_field_present_when_set() {
         "JSON must include entropy field"
     );
     assert_eq!(v[0]["entropy"], 3.5);
+}
+
+/// sqlite feature must be available standalone (without hashdb).
+/// This test verifies write_sqlite is reachable when only `sqlite` is enabled.
+#[cfg(feature = "sqlite")]
+#[test]
+fn sqlite_feature_is_independent_of_hashdb() {
+    // write_sqlite is gated on `sqlite` feature, not `hashdb`.
+    // If this compiles and runs, the feature split is correct.
+    use blazehash::format::write_sqlite;
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::FileHashResult;
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+
+    let dir = tempfile::tempdir().unwrap();
+    let db_path = dir.path().join("standalone_sqlite.db");
+
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Blake3, "cafebabe".to_string());
+    let result = FileHashResult {
+        path: PathBuf::from("/test/standalone.bin"),
+        size: 100,
+        hashes,
+        entropy: None,
+    };
+
+    write_sqlite(&db_path, &[result], &[Algorithm::Blake3]).unwrap();
+    assert!(db_path.exists(), "sqlite output must be created under sqlite feature alone");
 }

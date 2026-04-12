@@ -1,4 +1,4 @@
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "hashdb")]
 mod nsrl_hsh_tests {
     use blazehash::nsrl::load_hsh;
 
@@ -27,7 +27,7 @@ mod nsrl_hsh_tests {
     }
 }
 
-#[cfg(feature = "nsrl")]
+#[cfg(feature = "hashdb")]
 mod nsrl_tests {
     use blazehash::nsrl::{NsrlLookup, NsrlResult};
     use std::path::PathBuf;
@@ -61,6 +61,15 @@ mod nsrl_tests {
         let db = make_test_db(dir.path());
         let lookup = NsrlLookup::open(&db).unwrap();
         assert_eq!(lookup.lookup("deadbeef"), NsrlResult::Unknown);
+    }
+
+    /// HashDbResult must expose a KnownBad variant (for future known-malicious sets).
+    #[test]
+    fn test_hashdb_result_has_known_bad_variant() {
+        // This test verifies the KnownBad variant exists and is distinct from KnownGood/Unknown.
+        let known_bad = NsrlResult::KnownBad;
+        assert_ne!(known_bad, NsrlResult::KnownGood);
+        assert_ne!(known_bad, NsrlResult::Unknown);
     }
 
     #[test]
