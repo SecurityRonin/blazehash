@@ -171,6 +171,8 @@ fn main() -> Result<()> {
                 filter: &filter,
                 nsrl: cli.nsrl.as_ref(),
                 nsrl_exclude: cli.nsrl_exclude,
+                #[cfg(feature = "nsrl")]
+                nsrl_hsh: cli.nsrl_hsh.as_ref(),
                 sign: cli.sign,
                 ads: cli.ads,
                 entropy: cli.entropy,

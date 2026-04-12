@@ -126,6 +126,11 @@ pub struct Cli {
     #[arg(long = "nsrl", value_name = "FILE")]
     pub nsrl: Option<PathBuf>,
 
+    /// NIST NSRL .hsh flat hashset file (pipe-delimited)
+    #[cfg(feature = "nsrl")]
+    #[arg(long = "nsrl-hsh", value_name = "FILE")]
+    pub nsrl_hsh: Option<PathBuf>,
+
     /// Suppress known-good files from output (requires --nsrl)
     #[arg(long = "nsrl-exclude")]
     pub nsrl_exclude: bool,

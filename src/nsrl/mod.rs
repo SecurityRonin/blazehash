@@ -46,6 +46,31 @@ impl NsrlLookup {
     }
 }
 
+/// Load a NIST NSRL flat `.hsh` file, returning all SHA-1 hashes (lowercased).
+/// Format: pipe-delimited, first column is quoted SHA-1, first line is header.
+#[cfg(feature = "nsrl")]
+pub fn load_hsh(path: &std::path::Path) -> anyhow::Result<std::collections::HashSet<String>> {
+    use std::io::{BufRead, BufReader};
+    let f = std::fs::File::open(path)?;
+    let mut set = std::collections::HashSet::new();
+    for (i, line) in BufReader::new(f).lines().enumerate() {
+        let line = line?;
+        if i == 0 {
+            continue; // skip header
+        }
+        let sha1 = line
+            .split('|')
+            .next()
+            .unwrap_or("")
+            .trim_matches('"')
+            .to_lowercase();
+        if sha1.len() == 40 {
+            set.insert(sha1);
+        }
+    }
+    Ok(set)
+}
+
 #[cfg(feature = "nsrl")]
 pub fn build_bloom(
     db_path: &std::path::Path,

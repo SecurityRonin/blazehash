@@ -27,6 +27,8 @@ pub struct HashOptions<'a> {
     pub filter: &'a WalkFilter,
     pub nsrl: Option<&'a PathBuf>,
     pub nsrl_exclude: bool,
+    #[cfg(feature = "nsrl")]
+    pub nsrl_hsh: Option<&'a std::path::PathBuf>,
     pub sign: bool,
     pub ads: bool,
     pub entropy: bool,
@@ -49,6 +51,8 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         sign,
         ads,
         entropy,
+        #[cfg(feature = "nsrl")]
+        nsrl_hsh,
     } = opts;
     let mut resume_state = load_resume_state(resume, output)?;
     let append = resume && output.is_some_and(|p| p.exists());
@@ -68,17 +72,31 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
     )?;
 
     #[cfg(feature = "nsrl")]
-    if let Some(nsrl_path) = nsrl {
-        let lookup = blazehash::nsrl::NsrlLookup::open(nsrl_path)?;
-        let mut known_count = 0usize;
-        all_results.retain(|r| {
+    {
+        // Build a combined known-good set from .hsh flat file (SHA-1 hashes).
+        let mut hsh_set: std::collections::HashSet<String> = std::collections::HashSet::new();
+        if let Some(hsh_path) = nsrl_hsh {
+            hsh_set = blazehash::nsrl::load_hsh(hsh_path)?;
+        }
+
+        if let Some(nsrl_path) = nsrl {
+            let lookup = blazehash::nsrl::NsrlLookup::open(nsrl_path)?;
+            let mut known_count = 0usize;
+            all_results.retain(|r| {
                 let hash_val = r
                     .hashes
                     .get(&Algorithm::Sha256)
                     .or_else(|| r.hashes.get(&Algorithm::Md5))
                     .map(|s| s.as_str())
                     .unwrap_or("");
-                if lookup.lookup(hash_val) == blazehash::nsrl::NsrlResult::KnownGood {
+                let sha1_val = r
+                    .hashes
+                    .get(&Algorithm::Sha1)
+                    .map(|s| s.as_str())
+                    .unwrap_or("");
+                let in_sqlite = lookup.lookup(hash_val) == blazehash::nsrl::NsrlResult::KnownGood;
+                let in_hsh = !hsh_set.is_empty() && hsh_set.contains(sha1_val);
+                if in_sqlite || in_hsh {
                     eprintln!("[K] {}  (NSRL known-good)", r.path.display());
                     known_count += 1;
                     !nsrl_exclude
@@ -86,8 +104,29 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
                     true
                 }
             });
-        if known_count > 0 {
-            eprintln!("[K] {known_count} file(s) matched NSRL");
+            if known_count > 0 {
+                eprintln!("[K] {known_count} file(s) matched NSRL");
+            }
+        } else if !hsh_set.is_empty() {
+            // .hsh only (no SQLite), filter by SHA-1
+            let mut known_count = 0usize;
+            all_results.retain(|r| {
+                let sha1_val = r
+                    .hashes
+                    .get(&Algorithm::Sha1)
+                    .map(|s| s.as_str())
+                    .unwrap_or("");
+                if hsh_set.contains(sha1_val) {
+                    eprintln!("[K] {}  (NSRL known-good)", r.path.display());
+                    known_count += 1;
+                    !nsrl_exclude
+                } else {
+                    true
+                }
+            });
+            if known_count > 0 {
+                eprintln!("[K] {known_count} file(s) matched NSRL");
+            }
         }
     }
     #[cfg(not(feature = "nsrl"))]
