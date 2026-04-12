@@ -168,6 +168,11 @@ pub struct Cli {
     /// Compute Shannon entropy for each file (H = -Σ p_i log2(p_i), range 0.0–8.0)
     #[arg(long = "entropy", help = "Compute Shannon entropy for each file")]
     pub entropy: bool,
+
+    /// YARA rules file to scan files during hashing
+    #[cfg(feature = "yara")]
+    #[arg(long = "yara", value_name = "FILE", help = "YARA rules file to scan files during hashing")]
+    pub yara: Option<PathBuf>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
