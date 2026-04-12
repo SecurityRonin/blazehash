@@ -39,3 +39,5 @@ pub mod walk_windows_mft;
 pub mod watch;
 #[cfg(feature = "yara")]
 pub mod yara_scan;
+#[cfg(feature = "qr")]
+pub mod qr_label;
