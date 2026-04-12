@@ -365,6 +365,52 @@ fn json_entropy_field_present_when_set() {
     assert_eq!(v[0]["entropy"], 3.5);
 }
 
+#[cfg(feature = "duckdb-output")]
+#[test]
+fn duckdb_output_creates_file() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::format::write_duckdb;
+    use blazehash::hash::FileHashResult;
+    use std::collections::HashMap;
+    use tempfile::tempdir;
+
+    let dir = tempdir().unwrap();
+    let out = dir.path().join("manifest.duckdb");
+
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Blake3, "abc123".to_string());
+
+    let results = vec![FileHashResult {
+        path: std::path::PathBuf::from("/tmp/test.bin"),
+        size: 42,
+        hashes,
+        entropy: Some(3.5),
+    }];
+
+    write_duckdb(&out, &results, &[Algorithm::Blake3]).unwrap();
+    assert!(out.exists(), "duckdb file should be created");
+
+    // Verify we can read it back
+    let conn = duckdb::Connection::open(&out).unwrap();
+    let count: i64 = conn
+        .query_row("SELECT COUNT(*) FROM files", [], |row| row.get(0))
+        .unwrap();
+    assert_eq!(count, 1);
+}
+
+#[cfg(feature = "duckdb-output")]
+#[test]
+fn duckdb_output_empty_results() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::format::write_duckdb;
+    use tempfile::tempdir;
+
+    let dir = tempdir().unwrap();
+    let out = dir.path().join("empty.duckdb");
+    write_duckdb(&out, &[], &[Algorithm::Blake3]).unwrap();
+    assert!(out.exists());
+}
+
 /// sqlite feature must be available standalone (without hashdb).
 /// This test verifies write_sqlite is reachable when only `sqlite` is enabled.
 #[cfg(feature = "sqlite")]
