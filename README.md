@@ -118,6 +118,17 @@ Everything you already rely on works as-is. Your scripts need no changes.
 | Parquet output | `--format parquet` (requires `--features parquet-output`) |
 | Direct I/O (no page cache) | `--no-cache`; preserves RAM on large acquisitions |
 | MCP server | `blazehash mcp` for AI-assisted forensic workflows |
+| Chain-of-custody metadata | `--case` / `--examiner` embed case ID and analyst name in the manifest header |
+| Shell completions | `blazehash completions <bash\|zsh\|fish>` generates shell completion scripts |
+| Progress bar | `--progress` shows a live progress bar; auto-enabled on TTY |
+| HashDB bad list | `--hashdb-bad <file>` flags matching files `[BAD]` (requires `--features hashdb`) |
+| Unified diff output | `blazehash diff --patch` emits unified diff format |
+| Raw device hashing | `--sector-size <n>` enables direct block-device hashing (e.g. `/dev/sda`) |
+| STIX 2.1 output | `--format stix` produces STIX 2.1 JSON bundles |
+| ECS NDJSON output | `--format ecs` produces Elastic Common Schema NDJSON for Elastic/Splunk ingestion |
+| Multi-party signing | `blazehash cosign` / `verify-msig --threshold N` — M-of-N co-signing |
+| OpenTimestamps notarization | `blazehash ots stamp/verify` — Bitcoin-anchored timestamp (requires `--features ots`) |
+| Interactive TUI | `blazehash tui` — live progress dashboard (requires `--features tui`) |
 
 
 ---
@@ -182,6 +193,105 @@ cargo install blazehash --features yara,report,docker,parquet-output
 | `report` | `blazehash report` HTML chain-of-custody report generation |
 | `docker` | `blazehash image` OCI/Docker container layer hashing |
 | `parquet-output` | `--format parquet` Apache Parquet output |
+| `ots` | `blazehash ots stamp/verify` OpenTimestamps Bitcoin-anchored notarization |
+| `tui` | `blazehash tui` interactive terminal progress dashboard |
+
+---
+
+## Feature Batch 3 — New Capabilities
+
+### Chain-of-custody metadata
+
+Embed a case identifier and examiner name directly in the manifest header with `--case` and `--examiner`. These fields appear in every downstream output format and HTML report.
+
+```bash
+blazehash hash -r /evidence -o evidence.hash --case "CASE-2026-001" --examiner "Jane Smith"
+```
+
+### Shell completions
+
+Generate tab-completion scripts for bash, zsh, or fish:
+
+```bash
+blazehash completions bash > /etc/bash_completion.d/blazehash
+blazehash completions zsh  > ~/.zsh/completions/_blazehash
+blazehash completions fish > ~/.config/fish/completions/blazehash.fish
+```
+
+### Progress bar
+
+`--progress` displays a live file-count and throughput bar. It is auto-enabled when stdout is a TTY, so CI pipelines stay clean without any extra flags.
+
+```bash
+blazehash hash -r /large-dir --progress
+```
+
+### HashDB bad list
+
+Supply a newline-delimited file of known-bad SHA-256 or SHA-1 hashes. Any file whose hash matches is flagged `[BAD]` in the manifest and report output. Requires `--features hashdb`.
+
+```bash
+blazehash hash -r /suspect --hashdb-bad known_malware.txt
+```
+
+### Unified diff output
+
+`blazehash diff --patch` emits a standard unified diff between two manifests, suitable for piping into `patch` or storing in version control.
+
+```bash
+blazehash diff baseline/ current/ --patch
+```
+
+### Raw device hashing
+
+Hash block devices directly by specifying `--sector-size`. Reads bypass the filesystem entirely, so deleted and slack-space data is included in the manifest.
+
+```bash
+blazehash hash /dev/sda --sector-size 512 -o disk.hash
+```
+
+### STIX 2.1 output
+
+`--format stix` serialises the manifest as a STIX 2.1 JSON bundle, ready for ingestion into threat-intel platforms and SIEM tools that support the OASIS standard.
+
+```bash
+blazehash hash -r /evidence --format stix -o evidence.stix.json
+```
+
+### ECS NDJSON output
+
+`--format ecs` writes one Elastic Common Schema record per file as newline-delimited JSON, compatible with Filebeat, Logstash, and Splunk HEC out of the box.
+
+```bash
+blazehash hash -r /evidence --format ecs -o evidence.ndjson
+```
+
+### Multi-party signing
+
+Multiple analysts can co-sign the same manifest. `verify-msig` enforces an M-of-N quorum so the manifest is only considered valid when enough parties have signed.
+
+```bash
+BLAZEHASH_SIGN_PASSWORD=alice blazehash cosign evidence.hash
+BLAZEHASH_SIGN_PASSWORD=bob   blazehash cosign evidence.hash
+blazehash verify-msig evidence.hash --threshold 2
+```
+
+### OpenTimestamps notarization
+
+`blazehash ots stamp` submits the manifest SHA-256 to the OpenTimestamps calendar and anchors it in the Bitcoin blockchain. `blazehash ots verify` confirms the timestamp later. Requires `--features ots`.
+
+```bash
+blazehash ots stamp  evidence.hash
+blazehash ots verify evidence.hash
+```
+
+### Interactive TUI
+
+`blazehash tui` opens a terminal dashboard showing per-file progress, throughput, and a running manifest preview. Press `q` or `Esc` to exit. Requires `--features tui`.
+
+```bash
+blazehash tui -r /large-dir
+```
 
 ---
 
