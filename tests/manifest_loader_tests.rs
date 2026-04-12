@@ -156,6 +156,51 @@ fn test_load_csv_manifest() {
 }
 
 #[test]
+fn test_is_remote_url_http() {
+    assert!(blazehash::manifest_loader::is_remote_url("http://example.com/manifest.hash"));
+}
+
+#[test]
+fn test_is_remote_url_https() {
+    assert!(blazehash::manifest_loader::is_remote_url("https://example.com/manifest.hash"));
+}
+
+#[test]
+fn test_is_remote_url_local_path() {
+    assert!(!blazehash::manifest_loader::is_remote_url("/tmp/manifest.hash"));
+    assert!(!blazehash::manifest_loader::is_remote_url("manifest.hash"));
+}
+
+#[test]
+fn test_fetch_remote_manifest_from_local_server() {
+    use std::io::Write;
+    use std::net::TcpListener;
+    use std::thread;
+
+    let body = "%%%% BLAZEHASH-1.0\n%%%% size,blake3,filename\n##\n5,abc,/f.bin\n";
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+
+    thread::spawn(move || {
+        if let Ok((mut stream, _)) = listener.accept() {
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/plain\r\n\r\n{}",
+                body.len(),
+                body
+            );
+            stream.write_all(response.as_bytes()).ok();
+        }
+    });
+
+    let tmp = blazehash::manifest_loader::fetch_remote_manifest(
+        &format!("http://127.0.0.1:{port}/manifest.hash"),
+    )
+    .unwrap();
+    let content = std::fs::read_to_string(tmp.path()).unwrap();
+    assert!(content.contains("BLAZEHASH-1.0"));
+}
+
+#[test]
 fn test_manifest_json_roundtrip() {
     // Hash a file, write JSON, load it back — all fields survive round-trip
     let dir = tempfile::tempdir().unwrap();
