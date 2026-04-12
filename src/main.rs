@@ -296,6 +296,7 @@ fn main() -> Result<()> {
                 case_id: cli.case_id.as_deref(),
                 examiner: cli.examiner.as_deref(),
                 progress: cli.progress || std::io::IsTerminal::is_terminal(&std::io::stdout()),
+                sector_size: cli.sector_size,
             })?;
         }
     }

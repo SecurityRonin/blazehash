@@ -202,6 +202,10 @@ pub struct Cli {
     /// Force-enable progress bar (auto-enabled on TTY)
     #[arg(long = "progress")]
     pub progress: bool,
+
+    /// Sector size for raw device hashing (default: 512)
+    #[arg(long = "sector-size", default_value = "512")]
+    pub sector_size: usize,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {

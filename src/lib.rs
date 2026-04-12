@@ -2,6 +2,7 @@ pub mod ads;
 pub mod algorithm;
 pub mod audit;
 pub mod config;
+pub mod device;
 pub mod folder_diff;
 pub mod forensic_image;
 pub mod format;

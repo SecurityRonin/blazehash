@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use blazehash::ads::enumerate_ads;
 use blazehash::algorithm::Algorithm;
+use blazehash::device::{hash_device, is_device_path};
 use blazehash::format::{
     write_csv, write_dfxml, write_ecs, write_json, write_jsonl, write_stix, write_sumfile,
 };
@@ -40,6 +41,7 @@ pub struct HashOptions<'a> {
     pub case_id: Option<&'a str>,
     pub examiner: Option<&'a str>,
     pub progress: bool,
+    pub sector_size: usize,
 }
 
 pub fn run(opts: HashOptions<'_>) -> Result<()> {
@@ -62,6 +64,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         case_id,
         examiner,
         progress,
+        sector_size,
         #[cfg(feature = "hashdb")]
         nsrl_hsh,
         #[cfg(feature = "hashdb")]
@@ -83,6 +86,7 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         ads,
         entropy,
         progress,
+        sector_size,
     )?;
 
     #[cfg(feature = "hashdb")]
@@ -230,6 +234,7 @@ fn collect_results(
     ads: bool,
     entropy: bool,
     progress: bool,
+    sector_size: usize,
 ) -> Result<Vec<FileHashResult>> {
     let mut all_results = Vec::new();
 
@@ -252,7 +257,15 @@ fn collect_results(
     let paths = local_paths.as_slice();
 
     for path in paths {
-        if path.is_file() {
+        if is_device_path(path) {
+            if resume_state.is_done(path) {
+                continue;
+            }
+            let result = hash_device(path, algorithms, sector_size)
+                .with_context(|| format!("failed to hash device {}", path.display()))?;
+            resume_state.mark_done(path.clone());
+            all_results.push(result);
+        } else if path.is_file() {
             if resume_state.is_done(path) {
                 continue;
             }
