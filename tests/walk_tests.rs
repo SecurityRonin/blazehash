@@ -194,6 +194,27 @@ fn walk_all_algorithms() {
     assert_eq!(output.results[0].hashes.len(), 8);
 }
 
+#[test]
+fn test_walk_and_hash_with_progress_returns_same_results() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::walk::walk_and_hash_with_options;
+    use blazehash::walk_filter::WalkFilter;
+
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("a.txt"), b"hello").unwrap();
+    std::fs::write(dir.path().join("b.txt"), b"world").unwrap();
+
+    let filter = WalkFilter::builder().build().unwrap();
+    let algos = [Algorithm::Blake3];
+
+    let standard = walk_and_hash_with_options(dir.path(), &algos, true, &filter, false).unwrap();
+    let with_progress =
+        blazehash::progress::walk_and_hash_with_progress(dir.path(), &algos, true, &filter, false)
+            .unwrap();
+
+    assert_eq!(standard.results.len(), with_progress.results.len());
+}
+
 #[cfg(unix)]
 #[test]
 fn walk_symlink_to_file_is_skipped() {
