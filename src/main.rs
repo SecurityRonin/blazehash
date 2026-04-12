@@ -46,6 +46,7 @@ fn main() -> Result<()> {
             cli.recursive,
             &cli.compare_by,
             cli.show_identical,
+            cli.patch,
         )?;
         if has_diff {
             std::process::exit(1);

@@ -425,7 +425,12 @@ fn test_stix_output_is_valid_bundle() {
         Algorithm::Sha256,
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855".to_string(),
     );
-    let r = FileHashResult { path: PathBuf::from("/evidence/malware.exe"), size: 4096, hashes, entropy: None };
+    let r = FileHashResult {
+        path: PathBuf::from("/evidence/malware.exe"),
+        size: 4096,
+        hashes,
+        entropy: None,
+    };
 
     let mut buf = Vec::new();
     blazehash::format::write_stix(&mut buf, &[r], &[Algorithm::Sha256]).unwrap();
@@ -437,11 +442,17 @@ fn test_stix_output_is_valid_bundle() {
     assert_eq!(objects.len(), 1);
     assert_eq!(objects[0]["type"], "file");
     assert_eq!(objects[0]["spec_version"], "2.1");
-    assert_eq!(objects[0]["hashes"]["SHA-256"], "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    assert_eq!(
+        objects[0]["hashes"]["SHA-256"],
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    );
     assert_eq!(objects[0]["size"], 4096);
     assert_eq!(objects[0]["name"], "malware.exe");
     let id = objects[0]["id"].as_str().unwrap();
-    assert!(id.starts_with("file--"), "STIX file SCO id must start with file--");
+    assert!(
+        id.starts_with("file--"),
+        "STIX file SCO id must start with file--"
+    );
 }
 
 #[test]
@@ -454,7 +465,12 @@ fn test_stix_output_multiple_algorithms() {
     let mut hashes = HashMap::new();
     hashes.insert(Algorithm::Sha256, "abc123".to_string());
     hashes.insert(Algorithm::Md5, "def456".to_string());
-    let r = FileHashResult { path: PathBuf::from("/test.bin"), size: 100, hashes, entropy: None };
+    let r = FileHashResult {
+        path: PathBuf::from("/test.bin"),
+        size: 100,
+        hashes,
+        entropy: None,
+    };
 
     let mut buf = Vec::new();
     blazehash::format::write_stix(&mut buf, &[r], &[Algorithm::Sha256, Algorithm::Md5]).unwrap();
@@ -475,8 +491,16 @@ fn test_ecs_output_has_correct_fields() {
     use std::path::PathBuf;
 
     let mut hashes = HashMap::new();
-    hashes.insert(Algorithm::Sha256, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855".to_string());
-    let r = FileHashResult { path: PathBuf::from("/evidence/file.bin"), size: 2048, hashes, entropy: Some(7.5) };
+    hashes.insert(
+        Algorithm::Sha256,
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855".to_string(),
+    );
+    let r = FileHashResult {
+        path: PathBuf::from("/evidence/file.bin"),
+        size: 2048,
+        hashes,
+        entropy: Some(7.5),
+    };
 
     let mut buf = Vec::new();
     blazehash::format::write_ecs(&mut buf, &[r], &[Algorithm::Sha256]).unwrap();
@@ -485,7 +509,10 @@ fn test_ecs_output_has_correct_fields() {
     let doc: serde_json::Value = serde_json::from_str(line).expect("must be valid JSON");
     assert!(doc["@timestamp"].is_string(), "must have @timestamp");
     assert_eq!(doc["file"]["path"], "/evidence/file.bin");
-    assert_eq!(doc["file"]["hash"]["sha256"], "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    assert_eq!(
+        doc["file"]["hash"]["sha256"],
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    );
     assert_eq!(doc["file"]["size"], 2048);
 }
 
@@ -496,11 +523,18 @@ fn test_ecs_output_is_ndjson() {
     use std::collections::HashMap;
     use std::path::PathBuf;
 
-    let results: Vec<FileHashResult> = (0..3).map(|i| {
-        let mut hashes = HashMap::new();
-        hashes.insert(Algorithm::Blake3, format!("hash{i}"));
-        FileHashResult { path: PathBuf::from(format!("/file{i}.bin")), size: i * 100, hashes, entropy: None }
-    }).collect();
+    let results: Vec<FileHashResult> = (0..3)
+        .map(|i| {
+            let mut hashes = HashMap::new();
+            hashes.insert(Algorithm::Blake3, format!("hash{i}"));
+            FileHashResult {
+                path: PathBuf::from(format!("/file{i}.bin")),
+                size: i * 100,
+                hashes,
+                entropy: None,
+            }
+        })
+        .collect();
 
     let mut buf = Vec::new();
     blazehash::format::write_ecs(&mut buf, &results, &[Algorithm::Blake3]).unwrap();

@@ -112,7 +112,12 @@ fn test_diff_patch_format_shows_unified_diff() {
 
     let output = assert_cmd::Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["diff", before.to_str().unwrap(), after.to_str().unwrap(), "--patch"])
+        .args([
+            "diff",
+            before.to_str().unwrap(),
+            after.to_str().unwrap(),
+            "--patch",
+        ])
         .output()
         .unwrap();
     let stdout = String::from_utf8(output.stdout).unwrap();
@@ -136,7 +141,12 @@ fn test_diff_patch_format_shows_removed() {
 
     let output = assert_cmd::Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["diff", before.to_str().unwrap(), after.to_str().unwrap(), "--patch"])
+        .args([
+            "diff",
+            before.to_str().unwrap(),
+            after.to_str().unwrap(),
+            "--patch",
+        ])
         .output()
         .unwrap();
     let stdout = String::from_utf8(output.stdout).unwrap();
@@ -156,12 +166,20 @@ fn test_diff_patch_format_shows_modified() {
 
     let output = assert_cmd::Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["diff", before.to_str().unwrap(), after.to_str().unwrap(), "--patch"])
+        .args([
+            "diff",
+            before.to_str().unwrap(),
+            after.to_str().unwrap(),
+            "--patch",
+        ])
         .output()
         .unwrap();
     let stdout = String::from_utf8(output.stdout).unwrap();
     assert!(
-        stdout.contains("-") && stdout.contains("aaaa") && stdout.contains("+") && stdout.contains("zzzz"),
+        stdout.contains("-")
+            && stdout.contains("aaaa")
+            && stdout.contains("+")
+            && stdout.contains("zzzz"),
         "modified entries must show old (-) and new (+), got:\n{stdout}"
     );
 }

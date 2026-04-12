@@ -152,6 +152,10 @@ pub struct Cli {
     #[arg(long = "ignore-sig")]
     pub ignore_sig: bool,
 
+    /// Output diff in unified patch format
+    #[arg(long = "patch")]
+    pub patch: bool,
+
     /// Folder diff comparison method: content (XXH3-128, default), paranoid (BLAKE3), size-time, name
     #[arg(long = "compare-by", default_value = "content", value_parser = ["content", "paranoid", "size-time", "name"])]
     pub compare_by: String,

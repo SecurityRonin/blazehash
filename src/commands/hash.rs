@@ -1,7 +1,9 @@
 use anyhow::{Context, Result};
 use blazehash::ads::enumerate_ads;
 use blazehash::algorithm::Algorithm;
-use blazehash::format::{write_csv, write_dfxml, write_json, write_jsonl, write_sumfile};
+use blazehash::format::{
+    write_csv, write_dfxml, write_ecs, write_json, write_jsonl, write_stix, write_sumfile,
+};
 use blazehash::hash::{hash_file, FileHashResult};
 use blazehash::manifest::{write_header_with_metadata, write_record};
 use blazehash::output::make_writer;
@@ -313,9 +315,11 @@ fn write_output<W: Write>(
     match format {
         "csv" => write_csv(writer, results, algorithms)?,
         "dfxml" => write_dfxml(writer, results, algorithms)?,
+        "ecs" => write_ecs(writer, results, algorithms)?,
         "json" => write_json(writer, results, algorithms)?,
         "jsonl" => write_jsonl(writer, results, algorithms)?,
         "sha256sum" | "md5sum" => write_sumfile(writer, results, algorithms)?,
+        "stix" => write_stix(writer, results, algorithms)?,
         _ => {
             if needs_header {
                 write_header_with_metadata(writer, algorithms, case_id, examiner)?;
