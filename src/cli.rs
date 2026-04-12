@@ -297,6 +297,8 @@ pub enum Mode {
     OtsVerify,
     #[cfg(feature = "tui")]
     Tui,
+    #[cfg(feature = "qr")]
+    Qr,
     Hash,
 }
 
@@ -417,6 +419,11 @@ impl Cli {
             == Some(std::ffi::OsStr::new("merkle"))
         {
             Mode::Merkle
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("qr")) {
+            #[cfg(feature = "qr")]
+            return Mode::Qr;
+            #[cfg(not(feature = "qr"))]
+            return Mode::Hash;
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {

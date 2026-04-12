@@ -3,8 +3,6 @@
 //! Encodes manifest metadata (SHA-256 of manifest bytes, optional Ed25519 pubkey,
 //! case ID, examiner name) into a QR code PNG for chain-of-custody labelling.
 
-#![cfg(feature = "qr")]
-
 use anyhow::Result;
 use std::path::Path;
 

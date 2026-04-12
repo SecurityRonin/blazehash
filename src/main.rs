@@ -239,6 +239,20 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    #[cfg(feature = "qr")]
+    if let Mode::Qr = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash qr <manifest> -o <label.png>"))?;
+        let out = output
+            .ok_or_else(|| anyhow::anyhow!("blazehash qr requires -o <label.png>"))?;
+        blazehash::qr_label::generate_qr_png(&manifest, &out, None)?;
+        eprintln!("[+] QR label: {}", out.display());
+        return Ok(());
+    }
+
     #[cfg(feature = "tui")]
     if let Mode::Tui = cli.mode() {
         let algorithms = cli.flat_algorithms();
@@ -399,6 +413,8 @@ fn main() -> Result<()> {
         Mode::Merkle => unreachable!(),
         Mode::MerkleProof => unreachable!(),
         Mode::MerkleVerify => unreachable!(),
+        #[cfg(feature = "qr")]
+        Mode::Qr => unreachable!(),
         Mode::Sign => {
             let manifest = cli
                 .paths
