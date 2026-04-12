@@ -100,3 +100,43 @@ mod nsrl_tests {
         }
     }
 }
+
+#[cfg(feature = "hashdb")]
+mod bad_list_tests {
+    use blazehash::nsrl::load_bad_list;
+
+    #[test]
+    fn test_load_bad_list_parses_sha256_hashes() {
+        let dir = tempfile::tempdir().unwrap();
+        let bad_file = dir.path().join("bad_hashes.txt");
+        std::fs::write(
+            &bad_file,
+            "# Known bad hashes\naabbccdd00112233445566778899aabbccddeeff00112233445566778899aabbcc\ndeadbeef00112233445566778899aabbccddeeff00112233445566778899deadbe\n",
+        )
+        .unwrap();
+        let set = load_bad_list(&bad_file).unwrap();
+        assert_eq!(set.len(), 2);
+        assert!(set.contains(
+            "aabbccdd00112233445566778899aabbccddeeff00112233445566778899aabbcc"
+        ));
+    }
+
+    #[test]
+    fn test_load_bad_list_skips_comments_and_empty() {
+        let dir = tempfile::tempdir().unwrap();
+        let bad_file = dir.path().join("bad_hashes.txt");
+        std::fs::write(&bad_file, "# comment\n\naabbccdd\n").unwrap();
+        let set = load_bad_list(&bad_file).unwrap();
+        assert!(set.is_empty(), "short hashes should be rejected");
+    }
+
+    #[test]
+    fn test_load_bad_list_accepts_sha1_length() {
+        let dir = tempfile::tempdir().unwrap();
+        let bad_file = dir.path().join("bad_hashes.txt");
+        std::fs::write(&bad_file, "aabbccddeeff00112233445566778899aabbccdd\n").unwrap();
+        let set = load_bad_list(&bad_file).unwrap();
+        assert_eq!(set.len(), 1);
+        assert!(set.contains("aabbccddeeff00112233445566778899aabbccdd"));
+    }
+}
