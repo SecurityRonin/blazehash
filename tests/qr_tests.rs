@@ -77,3 +77,51 @@ mod qr_cli_tests {
         assert_eq!(&bytes[..8], b"\x89PNG\r\n\x1a\n", "must be valid PNG");
     }
 }
+
+#[cfg(feature = "qr")]
+mod qr_text_tests {
+    use blazehash::qr_label::generate_qr_text;
+    use std::io::Write;
+    use tempfile::NamedTempFile;
+
+    fn write_temp_manifest(content: &str) -> NamedTempFile {
+        let mut f = NamedTempFile::new().unwrap();
+        f.write_all(content.as_bytes()).unwrap();
+        f
+    }
+
+    #[test]
+    fn test_generate_qr_text_is_non_empty() {
+        let manifest = write_temp_manifest("%%blazehash-1.0\nsha256,path\nabc,/foo\n");
+        let text = generate_qr_text(manifest.path(), None).unwrap();
+        assert!(!text.is_empty(), "text QR must be non-empty");
+        assert!(
+            text.contains('\u{2584}') || text.contains('\u{2580}') || text.contains('\u{2588}'),
+            "text QR must contain Unicode block chars"
+        );
+    }
+
+    #[test]
+    fn test_generate_qr_text_has_multiple_lines() {
+        let manifest = write_temp_manifest("%%blazehash-1.0\nsha256,path\nabc,/foo\n");
+        let text = generate_qr_text(manifest.path(), None).unwrap();
+        assert!(text.lines().count() > 5, "QR code must span multiple lines");
+    }
+
+    #[test]
+    fn test_cli_qr_text_stdout_no_output_flag() {
+        use assert_cmd::Command;
+        let dir = tempfile::tempdir().unwrap();
+        let manifest = dir.path().join("evidence.hash");
+        std::fs::write(&manifest, "%%blazehash-1.0\nsha256,path\nabc,/foo\n").unwrap();
+
+        let out = Command::cargo_bin("blazehash").unwrap()
+            .arg("qr").arg(&manifest)
+            .assert().success();
+        let stdout = String::from_utf8(out.get_output().stdout.clone()).unwrap();
+        assert!(
+            stdout.contains('\u{2584}') || stdout.contains('\u{2580}') || stdout.contains('\u{2588}'),
+            "no -o flag: stdout must contain Unicode QR"
+        );
+    }
+}
