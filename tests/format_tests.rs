@@ -411,6 +411,107 @@ fn duckdb_output_empty_results() {
     assert!(out.exists());
 }
 
+// ---- Task 6: STIX 2.1 output ----
+
+#[test]
+fn test_stix_output_is_valid_bundle() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::FileHashResult;
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+
+    let mut hashes = HashMap::new();
+    hashes.insert(
+        Algorithm::Sha256,
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855".to_string(),
+    );
+    let r = FileHashResult { path: PathBuf::from("/evidence/malware.exe"), size: 4096, hashes, entropy: None };
+
+    let mut buf = Vec::new();
+    blazehash::format::write_stix(&mut buf, &[r], &[Algorithm::Sha256]).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    let bundle: serde_json::Value = serde_json::from_str(&output).expect("must be valid JSON");
+    assert_eq!(bundle["type"], "bundle");
+    assert_eq!(bundle["spec_version"], "2.1");
+    let objects = bundle["objects"].as_array().expect("must be array");
+    assert_eq!(objects.len(), 1);
+    assert_eq!(objects[0]["type"], "file");
+    assert_eq!(objects[0]["spec_version"], "2.1");
+    assert_eq!(objects[0]["hashes"]["SHA-256"], "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    assert_eq!(objects[0]["size"], 4096);
+    assert_eq!(objects[0]["name"], "malware.exe");
+    let id = objects[0]["id"].as_str().unwrap();
+    assert!(id.starts_with("file--"), "STIX file SCO id must start with file--");
+}
+
+#[test]
+fn test_stix_output_multiple_algorithms() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::FileHashResult;
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Sha256, "abc123".to_string());
+    hashes.insert(Algorithm::Md5, "def456".to_string());
+    let r = FileHashResult { path: PathBuf::from("/test.bin"), size: 100, hashes, entropy: None };
+
+    let mut buf = Vec::new();
+    blazehash::format::write_stix(&mut buf, &[r], &[Algorithm::Sha256, Algorithm::Md5]).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    let bundle: serde_json::Value = serde_json::from_str(&output).unwrap();
+    let file_obj = &bundle["objects"][0];
+    assert!(file_obj["hashes"]["SHA-256"].is_string());
+    assert!(file_obj["hashes"]["MD5"].is_string());
+}
+
+// ---- Task 7: ECS NDJSON output ----
+
+#[test]
+fn test_ecs_output_has_correct_fields() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::FileHashResult;
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Sha256, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855".to_string());
+    let r = FileHashResult { path: PathBuf::from("/evidence/file.bin"), size: 2048, hashes, entropy: Some(7.5) };
+
+    let mut buf = Vec::new();
+    blazehash::format::write_ecs(&mut buf, &[r], &[Algorithm::Sha256]).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    let line = output.lines().next().expect("must have at least one line");
+    let doc: serde_json::Value = serde_json::from_str(line).expect("must be valid JSON");
+    assert!(doc["@timestamp"].is_string(), "must have @timestamp");
+    assert_eq!(doc["file"]["path"], "/evidence/file.bin");
+    assert_eq!(doc["file"]["hash"]["sha256"], "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    assert_eq!(doc["file"]["size"], 2048);
+}
+
+#[test]
+fn test_ecs_output_is_ndjson() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::FileHashResult;
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+
+    let results: Vec<FileHashResult> = (0..3).map(|i| {
+        let mut hashes = HashMap::new();
+        hashes.insert(Algorithm::Blake3, format!("hash{i}"));
+        FileHashResult { path: PathBuf::from(format!("/file{i}.bin")), size: i * 100, hashes, entropy: None }
+    }).collect();
+
+    let mut buf = Vec::new();
+    blazehash::format::write_ecs(&mut buf, &results, &[Algorithm::Blake3]).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    let lines: Vec<&str> = output.lines().collect();
+    assert_eq!(lines.len(), 3, "3 records must produce 3 NDJSON lines");
+    for line in lines {
+        serde_json::from_str::<serde_json::Value>(line).expect("each line must be valid JSON");
+    }
+}
+
 /// sqlite feature must be available standalone (without hashdb).
 /// This test verifies write_sqlite is reachable when only `sqlite` is enabled.
 #[cfg(feature = "sqlite")]
