@@ -465,3 +465,46 @@ fn cli_nsrl_bloom_rejected() {
         .failure()
         .stderr(predicate::str::is_match("(?i)bloom|not supported|sqlite").unwrap());
 }
+
+#[test]
+fn test_completions_bash_outputs_something() {
+    let output = assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["completions", "bash"])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        stdout.contains("blazehash") || stdout.contains("complete"),
+        "bash completions must contain shell content, got: {}",
+        &stdout[..stdout.len().min(200)]
+    );
+}
+
+#[test]
+fn test_completions_zsh_outputs_something() {
+    let output = assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["completions", "zsh"])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        stdout.contains("blazehash") || stdout.contains("compdef"),
+        "zsh completions must contain shell content"
+    );
+}
+
+#[test]
+fn test_completions_fish_outputs_something() {
+    let output = assert_cmd::Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["completions", "fish"])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(
+        stdout.contains("blazehash") || stdout.contains("complete"),
+        "fish completions must contain shell content"
+    );
+}
