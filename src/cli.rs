@@ -221,6 +221,7 @@ pub enum Mode {
     VerifySig,
     Merge,
     Update,
+    Watch,
     Hash,
 }
 
@@ -298,6 +299,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("update"))
         {
             Mode::Update
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("watch"))
+        {
+            Mode::Watch
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

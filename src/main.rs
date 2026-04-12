@@ -8,6 +8,7 @@ use clap::Parser;
 use cli::{Cli, Mode};
 use commands::merge::MergeArgs;
 use commands::update::UpdateArgs;
+use commands::watch::WatchArgs;
 use std::path::PathBuf;
 
 fn main() -> Result<()> {
@@ -127,6 +128,30 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Watch = cli.mode() {
+        let watch_path = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash watch <path> -k <manifest>"))?;
+        let manifest = cli
+            .known
+            .first()
+            .cloned()
+            .or_else(|| {
+                blazehash::manifest_loader::find_manifest(&[watch_path.as_path()]).ok()
+            })
+            .ok_or_else(|| {
+                anyhow::anyhow!("usage: blazehash watch <path> -k <manifest>")
+            })?;
+        commands::watch::run_watch(WatchArgs {
+            path: watch_path,
+            manifest,
+            algos: algorithms,
+        })?;
+        return Ok(());
+    }
+
     match cli.mode() {
         Mode::Mcp => unreachable!(),
         Mode::Bench => unreachable!(),
@@ -135,6 +160,7 @@ fn main() -> Result<()> {
         Mode::NsrlBuildBloom => unreachable!(),
         Mode::Merge => unreachable!(),
         Mode::Update => unreachable!(),
+        Mode::Watch => unreachable!(),
         Mode::Sign => {
             let manifest = cli
                 .paths

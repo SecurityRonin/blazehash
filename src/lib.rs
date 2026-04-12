@@ -20,6 +20,7 @@ pub mod resume;
 pub mod signing;
 pub mod walk;
 pub mod walk_filter;
+pub mod watch;
 #[cfg(target_os = "windows")]
 pub mod walk_windows;
 #[cfg(target_os = "windows")]
