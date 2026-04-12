@@ -1,4 +1,33 @@
 #[cfg(feature = "nsrl")]
+mod nsrl_hsh_tests {
+    use blazehash::nsrl::load_hsh;
+
+    #[test]
+    fn test_load_hsh_parses_sha1() {
+        let dir = tempfile::tempdir().unwrap();
+        let hsh = dir.path().join("NSRLFile.txt");
+        std::fs::write(&hsh,
+            "\"SHA-1\"|\"MD5\"|\"CRC32\"|\"FileName\"|\"FileSize\"|\"ProductCode\"|\"OpSystemCode\"|\"SpecialCode\"\n\
+             \"AABBCCDDEEFF00112233445566778899AABBCCDD\"|\"00112233445566778899AABBCCDDEEFF\"|\"DEADBEEF\"|\"notepad.exe\"|\"69120\"|\"1\"|\"WIN\"|\"M\"\n"
+        ).unwrap();
+        let set = load_hsh(&hsh).unwrap();
+        assert!(set.contains("aabbccddeeff00112233445566778899aabbccdd"),
+            "SHA-1 should be in set (lowercased)");
+    }
+
+    #[test]
+    fn test_load_hsh_empty_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let hsh = dir.path().join("empty.hsh");
+        std::fs::write(&hsh,
+            "\"SHA-1\"|\"MD5\"|\"CRC32\"|\"FileName\"|\"FileSize\"|\"ProductCode\"|\"OpSystemCode\"|\"SpecialCode\"\n"
+        ).unwrap();
+        let set = load_hsh(&hsh).unwrap();
+        assert!(set.is_empty());
+    }
+}
+
+#[cfg(feature = "nsrl")]
 mod nsrl_tests {
     use blazehash::nsrl::{NsrlLookup, NsrlResult};
     use std::path::PathBuf;
