@@ -40,8 +40,12 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
-  - CLI Reference: cli-reference.md
+  - Acquire Evidence: acquire.md
+  - Build Court-Ready Evidence: custody.md
+  - Hunt Threats: hunt.md
+  - SIEM & Analytics: siem.md
   - Cookbook: cookbook.md
+  - CLI Reference: cli-reference.md
   - Concepts: concepts.md
   - MCP Server: mcp.md
 

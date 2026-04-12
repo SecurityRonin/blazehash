@@ -1,21 +1,61 @@
 # blazehash
 
-**hashdeep, at 2026 speed.**
+**Hash. Sign. Timestamp. Prove.**
 
-Forensic file hashing with BLAKE3 by default, GPU acceleration, Ed25519 manifest signing, and full hashdeep compatibility. Point this at a folder. Get a manifest. Sign it. Done.
+The only open-source forensic hashing tool that answers every question a court asks about digital evidence — *what* changed, *who* handled it, *when* it was sealed, and *in what context* — in a single binary that's drop-in compatible with hashdeep.
 
 ```bash
-blazehash -r /mnt/evidence -c blake3,sha256 -o manifest.hash --sign
+# Acquire with chain-of-custody metadata
+blazehash -r /mnt/evidence -c blake3,sha256 \
+  --case "CASE-2026-001" --examiner "Jane Smith" \
+  -o evidence.hash --no-cache --progress
+
+# Sign → cosign → timestamp → report
+blazehash sign evidence.hash
+blazehash cosign evidence.hash
+blazehash ots stamp evidence.hash
+blazehash report evidence.hash -o report.html
+
+# Verify everything, months later
+blazehash verify-sig evidence.hash
+blazehash verify-msig evidence.hash --threshold 2
+blazehash ots verify evidence.hash
+blazehash -r /mnt/evidence -a -k evidence.hash
 ```
 
-```
-blazehash v0.3.0 — BLAKE3 + SHA-256, 16 threads, mmap I/O
-[*] Scanning /mnt/evidence recursively
-[+] 847,293 files hashed (2.14 TiB) in 38.7s
-[+] Manifest written to manifest.hash
-[+] Public key: a3f8e2... (record this for verification)
-[+] Signature:  manifest.hash.sig
-```
+No other open-source tool delivers all four in one binary.
+
+---
+
+## What Do You Need To Do?
+
+<div class="grid cards" markdown>
+
+-   **I'm acquiring evidence**
+
+    Hash a drive or folder with signed, timestamped, court-ready output.
+
+    [Acquire Evidence](acquire.md){ .md-button }
+
+-   **I need court-ready documentation**
+
+    Build a complete chain-of-custody package: sign, cosign, timestamp, report.
+
+    [Build Chain of Custody](custody.md){ .md-button }
+
+-   **I'm hunting threats**
+
+    Filter known-good, flag known-bad, scan YARA rules, check VirusTotal.
+
+    [Hunt Threats](hunt.md){ .md-button }
+
+-   **I'm feeding a SIEM**
+
+    Export to ECS NDJSON, STIX 2.1, Parquet, SQLite, or DuckDB.
+
+    [SIEM & Analytics](siem.md){ .md-button }
+
+</div>
 
 ---
 
@@ -50,52 +90,34 @@ blazehash v0.3.0 — BLAKE3 + SHA-256, 16 threads, mmap I/O
 
 ---
 
-## Quick Start
-
-**Hash a folder and save the results:**
-
-```bash
-blazehash -r /path/to/folder -o manifest.hash
-```
-
-**Check if anything changed:**
-
-```bash
-blazehash -r /path/to/folder -a -k manifest.hash
-```
-
-**Sign the manifest for chain of custody:**
-
-```bash
-blazehash sign manifest.hash
-```
-
-[Get started with the full walkthrough.](getting-started.md){ .md-button }
-
----
-
 ## Feature Comparison
 
 | Feature | blazehash | hashdeep | b3sum | sha256sum |
 |---------|:---------:|:--------:|:-----:|:---------:|
-| Audit mode | Y | Y | — | — |
-| Manifest signing (Ed25519) | Y | — | — | — |
-| Manifest diff | Y | — | — | — |
-| Duplicate detection | Y | — | — | — |
-| NSRL known-good filtering | Y | — | — | — |
-| Fuzzy / similarity hashing | Y | — | — | — |
-| Piecewise hashing | Y | Y | — | — |
-| Resume interrupted runs | Y | — | — | — |
-| EWF / E01 image verification | Y | — | — | — |
-| NTFS ADS hashing | Y | — | — | — |
-| MCP server (AI-assisted) | Y | — | — | — |
-| Multithreaded hashing | Y | — | Y | — |
-| Memory-mapped I/O | Y | — | Y | — |
-| GPU acceleration | Y | — | — | — |
-| Direct I/O (no page cache) | Y | — | — | — |
-| BLAKE3 | Y | — | Y | — |
-| 14 algorithms simultaneous | Y | — | — | — |
-| hashdeep / DFXML / CSV / JSON | Y | partial | — | — |
+| Audit mode (`-a -k`) | Y | Y | -- | -- |
+| Ed25519 manifest signing | Y | -- | -- | -- |
+| N-of-M cosigning | Y | -- | -- | -- |
+| Bitcoin timestamps (OTS) | Y | -- | -- | -- |
+| Case/examiner metadata | Y | -- | -- | -- |
+| HTML chain-of-custody report | Y | -- | -- | -- |
+| EWF / E01 image verification | Y | -- | -- | -- |
+| Manifest diff | Y | -- | -- | -- |
+| Duplicate detection | Y | -- | -- | -- |
+| NSRL known-good filtering | Y | -- | -- | -- |
+| Fuzzy / similarity hashing | Y | -- | -- | -- |
+| YARA rule scanning | Y | -- | -- | -- |
+| VirusTotal batch lookup | Y | -- | -- | -- |
+| Shannon entropy | Y | -- | -- | -- |
+| Resume interrupted runs | Y | -- | -- | -- |
+| Live monitoring (watch) | Y | -- | -- | -- |
+| BLAKE3 (1,640 MB/s) | Y | -- | Y | -- |
+| GPU-accelerated SHA-256/MD5 | Y | -- | -- | -- |
+| 14 algorithms simultaneous | Y | -- | -- | -- |
+| Direct I/O (no page cache) | Y | -- | -- | -- |
+| STIX 2.1 / ECS NDJSON output | Y | -- | -- | -- |
+| SQLite / Parquet / DuckDB | Y | -- | -- | -- |
+| Piecewise hashing | Y | Y | -- | -- |
+| hashdeep / DFXML / CSV / JSON | Y | partial | -- | -- |
 
 ---
 
@@ -104,10 +126,13 @@ blazehash sign manifest.hash
 Benchmarked on Apple M4 Pro (14-core, 48 GB RAM), warm cache. Full methodology: [benchmarks](benchmarks.md).
 
 | Workload | blazehash | hashdeep v4.4 | Speedup |
-|----------|----------:|----------:|--------:|
-| 256 MiB file, SHA-256 | 854 ms | 930 ms | **1.09x** |
-| 1,000 small files, SHA-256 | 20 ms | 69 ms | **3.43x** |
-| 256 MiB file, BLAKE3 | 187 ms | *n/a* | **~5x vs hashdeep SHA-256** |
+|----------|----------:|---------:|--------:|
+| 1 GiB, SHA-256 | 2,182 ms | 2,485 ms | **1.14x** |
+| 1 GiB, MD5 | 1,447 ms | 2,135 ms | **1.48x** |
+| 1 GiB, SHA-1 | 879 ms | 1,803 ms | **2.05x** |
+| 1 GiB, BLAKE3 | 655 ms | *n/a* | -- |
+
+BLAKE3 at **1,640-1,780 MB/s** — 2.8x faster than hashdeep's best algorithm and cryptographically stronger.
 
 ---
 
@@ -115,9 +140,7 @@ Benchmarked on Apple M4 Pro (14-core, 48 GB RAM), warm cache. Full methodology: 
 
 [hashdeep](https://github.com/jessek/hashdeep) — written by Jesse Kornbluth and Simson Garfinkel — gave the forensic community its canonical file hashing and audit tool. Court-tested workflows have depended on it for over a decade.
 
-But hashdeep hasn't had a release since v4.4. It doesn't support BLAKE3. It doesn't use multiple cores. It can't sign manifests. It can't filter by NSRL. It can't detect duplicates or diff two sessions.
-
-**blazehash** is a continuation, not a replacement. Every hashdeep flag works exactly as you expect. The output format is compatible. Your existing scripts and court-tested procedures keep working. We add what the community needs: speed, modern algorithms, signing, NSRL filtering, and the subcommands that forensic practitioners actually reach for.
+**blazehash** is a continuation, not a replacement. Every hashdeep flag works exactly as you expect. The output format is compatible. Your existing scripts and court-tested procedures keep working. We add what the community needs: speed, modern algorithms, signing with multi-party cosigning, Bitcoin-anchored timestamps, NSRL filtering, YARA scanning, and the subcommands forensic practitioners actually reach for.
 
 ---
 
