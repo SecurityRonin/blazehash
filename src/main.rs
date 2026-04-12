@@ -209,6 +209,20 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    #[cfg(feature = "tui")]
+    if let Mode::Tui = cli.mode() {
+        let algorithms = cli.flat_algorithms();
+        let filter = cli.build_walk_filter()?;
+        blazehash::tui::run_tui(
+            &cli.paths[1..],
+            &algorithms,
+            cli.recursive,
+            &filter,
+            cli.entropy,
+        )?;
+        return Ok(());
+    }
+
     #[cfg(feature = "ots")]
     if let Mode::OtsStamp = cli.mode() {
         let manifest = cli
@@ -265,6 +279,8 @@ fn main() -> Result<()> {
         Mode::OtsStamp => unreachable!(),
         #[cfg(feature = "ots")]
         Mode::OtsVerify => unreachable!(),
+        #[cfg(feature = "tui")]
+        Mode::Tui => unreachable!(),
         Mode::Completions => unreachable!(),
         #[cfg(feature = "report")]
         Mode::Report => unreachable!(),

@@ -25,6 +25,8 @@ pub mod piecewise;
 pub mod progress;
 pub mod resume;
 pub mod signing;
+#[cfg(feature = "tui")]
+pub mod tui;
 pub mod vt;
 pub mod walk;
 pub mod walk_filter;
