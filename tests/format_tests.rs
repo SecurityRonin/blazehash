@@ -258,6 +258,32 @@ fn sqlite_output_queryable() {
     assert!((entropy - 6.5).abs() < 1e-6);
 }
 
+#[cfg(feature = "parquet-output")]
+#[test]
+fn parquet_output_creates_file() {
+    use blazehash::format::write_parquet;
+    use blazehash::algorithm::Algorithm;
+    use blazehash::hash::FileHashResult;
+    use std::collections::HashMap;
+    use std::path::PathBuf;
+
+    let dir = tempfile::tempdir().unwrap();
+    let out = dir.path().join("out.parquet");
+
+    let mut hashes = HashMap::new();
+    hashes.insert(Algorithm::Blake3, "abc".to_string());
+    let result = FileHashResult {
+        path: PathBuf::from("/f.bin"),
+        size: 5,
+        hashes,
+        entropy: None,
+    };
+
+    write_parquet(&out, &[result], &[Algorithm::Blake3]).unwrap();
+    assert!(out.exists(), "parquet file should be created");
+    assert!(out.metadata().unwrap().len() > 0, "parquet file should not be empty");
+}
+
 #[test]
 fn json_missing_algorithm_silently_skipped() {
     // json.rs uses `if let Some(hash)` — missing algo is silently omitted
