@@ -8,7 +8,7 @@ The only open-source forensic hashing tool that answers every question a court a
 # Acquire with chain-of-custody metadata
 blazehash -r /mnt/evidence -c blake3,sha256 \
   --case "CASE-2026-001" --examiner "Jane Smith" \
-  -o evidence.hash --no-cache --progress
+  -o evidence.hash --progress
 
 # Sign → cosign → timestamp → report
 blazehash sign evidence.hash
