@@ -78,6 +78,8 @@ blazehash -r /mnt/evidence --format dfxml -o report.xml
 | `csv` | Comma-separated values |
 | `json` | JSON array |
 | `jsonl` | Newline-delimited JSON (one object per line) |
+| `sqlite` | SQLite database (requires `--features nsrl`) |
+| `parquet` | Apache Parquet columnar file (requires `--features parquet-output`) |
 
 ### `--sign`
 
@@ -304,6 +306,55 @@ Build a bloom filter from an NSRL SQLite database for faster lookups.
 blazehash nsrl build-bloom NSRL.db --output nsrl.bloom
 ```
 
+### `merge`
+
+Combine two or more manifests into one. Last-write-wins on duplicate paths.
+
+```bash
+blazehash merge a.hash b.hash -o merged.hash
+```
+
+### `update`
+
+Incrementally rehash only changed or new files against an existing manifest.
+
+```bash
+blazehash update manifest.hash /path/to/folder
+```
+
+### `watch`
+
+Live monitoring: continuously hash a path and alert on changes against a baseline manifest.
+
+```bash
+blazehash watch /path/to/folder -k manifest.hash
+```
+
+### `vt`
+
+Batch VirusTotal lookup for all hashes in a manifest. Requires a VT API key via `--api-key` or the `VT_API_KEY` environment variable. Requires `--features vt`.
+
+```bash
+blazehash vt manifest.hash --api-key YOUR_KEY
+VT_API_KEY=YOUR_KEY blazehash vt manifest.hash
+```
+
+### `report`
+
+Generate an HTML chain-of-custody report from a manifest. Requires `--features report`.
+
+```bash
+blazehash report manifest.hash --examiner "Jane Smith" --case "CASE-2026-001" -o report.html
+```
+
+### `image`
+
+Hash the layers of an OCI/Docker container image. Requires `--features docker`.
+
+```bash
+blazehash image nginx:latest
+```
+
 ---
 
 ## NSRL flags
@@ -314,6 +365,14 @@ Path to an NSRL database (`.db` SQLite) or bloom filter (`.bloom`) file. Annotat
 
 ```bash
 blazehash -r /mnt/evidence -c sha256 --nsrl NSRL.db
+```
+
+### `--nsrl-hsh`
+
+Path to a NIST NSRL flat `.hsh` hashset file (alternative to the SQLite `--nsrl` database).
+
+```bash
+blazehash -r /mnt/evidence -c sha256 --nsrl-hsh NSRLFile.hsh
 ```
 
 ### `--nsrl-exclude`
@@ -330,6 +389,22 @@ blazehash -r /mnt/evidence -c sha256 --nsrl NSRL.db --nsrl-exclude
 ---
 
 ## Advanced flags
+
+### `--entropy`
+
+Compute and display the Shannon entropy of each file alongside its hash. Values range 0.0–8.0; scores above 7.2 suggest encrypted, compressed, or packed content.
+
+```bash
+blazehash -r /mnt/evidence --entropy
+```
+
+### `--yara`
+
+Run YARA rule matching during the directory walk. Requires `--features yara`.
+
+```bash
+blazehash -r /mnt/evidence --yara rules.yar
+```
 
 ### `--no-cache`
 

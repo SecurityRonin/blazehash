@@ -103,9 +103,19 @@ Everything you already rely on works as-is. Your scripts need no changes.
 |---------|-------|
 | BLAKE3 (default) | ~1,640 MB/s; not in hashdeep |
 | GPU-accelerated SHA-256 / MD5 | Automatic when hardware is available |
-| NSRL known-good filtering | `--nsrl file.db` with a SQLite database |
+| NSRL known-good filtering | `--nsrl file.db` (SQLite) or `--nsrl-hsh NSRLFile.hsh` (flat .hsh hashset) |
 | Fuzzy / similarity hashing | ssdeep + TLSH; useful for variant detection |
+| Shannon entropy | `--entropy` column (0.0–8.0); values >7.2 suggest encrypted/packed content |
+| YARA rule scanning | `--yara rules.yar` during walk (requires `--features yara`) |
 | Duplicate detection | `blazehash dedup` |
+| Manifest merge | `blazehash merge a.hash b.hash -o merged.hash` — last-write-wins |
+| Incremental update | `blazehash update manifest.hash <path>` — rehash only changed/new files |
+| Live monitoring | `blazehash watch <path> -k manifest.hash` — alert on changes against baseline |
+| VirusTotal lookup | `blazehash vt manifest.hash` — batch lookup (requires `VT_API_KEY`) |
+| HTML chain-of-custody report | `blazehash report manifest.hash --examiner "Name" --case "ID" -o report.html` (requires `--features report`) |
+| OCI/Docker layer hashing | `blazehash image nginx:latest` (requires `--features docker`) |
+| SQLite output | `--format sqlite` (requires `--features nsrl`) |
+| Parquet output | `--format parquet` (requires `--features parquet-output`) |
 | Direct I/O (no page cache) | `--no-cache`; preserves RAM on large acquisitions |
 | MCP server | `blazehash mcp` for AI-assisted forensic workflows |
 
@@ -154,6 +164,24 @@ cryptographically stronger, with no length-extension vulnerability.
 [hashdeep](https://github.com/jessek/hashdeep) — written by Jesse Kornbluth and Simson Garfinkel — gave the forensic community its canonical file hashing and audit tool. Court-tested workflows have depended on it for over a decade. It is public domain, auditable, and honest.
 
 **blazehash** is a continuation, not a replacement. Every hashdeep flag works as expected. The output format is compatible. Your existing scripts keep working. We add what the community needs next: BLAKE3, EWF image verification, manifest signing, NSRL filtering, fuzzy hashing, deduplication, and more.
+
+---
+
+## Optional Features
+
+Some capabilities require opt-in Cargo feature flags:
+
+```bash
+cargo install blazehash --features yara,report,docker,parquet-output
+```
+
+| Feature flag | What it enables |
+|---|---|
+| `nsrl` | SQLite NSRL database support and `--format sqlite` output |
+| `yara` | `--yara <rules.yar>` YARA rule scanning during walk |
+| `report` | `blazehash report` HTML chain-of-custody report generation |
+| `docker` | `blazehash image` OCI/Docker container layer hashing |
+| `parquet-output` | `--format parquet` Apache Parquet output |
 
 ---
 
