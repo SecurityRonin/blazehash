@@ -105,6 +105,7 @@ parquet-output = ["dep:parquet", "dep:arrow"]
 docker  = ["dep:oci-distribution", "dep:flate2", "dep:tar", "dep:tokio"]
 duckdb-output = ["dep:duckdb"]
 tui = ["dep:ratatui", "dep:crossterm"]
+ots = []
 
 [package.metadata.deb]
 maintainer = "SecurityRonin <security-ronin@users.noreply.github.com>"
