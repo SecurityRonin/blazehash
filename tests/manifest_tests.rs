@@ -199,3 +199,42 @@ fn parse_header_not_hashdeep_file() {
     assert!(err.is_err());
     assert!(err.unwrap_err().to_string().contains("not a hashdeep file"));
 }
+
+#[test]
+fn test_write_header_with_metadata_includes_case_and_examiner() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::manifest::write_header_with_metadata;
+
+    let mut buf = Vec::new();
+    write_header_with_metadata(
+        &mut buf,
+        &[Algorithm::Blake3],
+        Some("CASE-2026-001"),
+        Some("Jane Doe"),
+    )
+    .unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    assert!(
+        output.contains("## Case: CASE-2026-001"),
+        "header must contain case ID, got:\n{output}"
+    );
+    assert!(
+        output.contains("## Examiner: Jane Doe"),
+        "header must contain examiner name, got:\n{output}"
+    );
+    assert!(output.contains("%%%% HASHDEEP-1.0"));
+    assert!(output.contains("%%%% size,blake3,filename"));
+}
+
+#[test]
+fn test_write_header_with_metadata_none_values() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::manifest::write_header_with_metadata;
+
+    let mut buf = Vec::new();
+    write_header_with_metadata(&mut buf, &[Algorithm::Sha256], None, None).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    assert!(!output.contains("## Case:"));
+    assert!(!output.contains("## Examiner:"));
+    assert!(output.contains("%%%% HASHDEEP-1.0"));
+}
