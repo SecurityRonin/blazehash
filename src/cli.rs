@@ -182,13 +182,11 @@ pub struct Cli {
     #[arg(long = "api-key", value_name = "KEY")]
     pub api_key: Option<String>,
 
-    /// Examiner name for HTML chain-of-custody report (`blazehash report`)
-    #[cfg(feature = "report")]
+    /// Examiner name for chain-of-custody metadata in manifest header and HTML report
     #[arg(long = "examiner", value_name = "NAME")]
     pub examiner: Option<String>,
 
-    /// Case identifier for HTML chain-of-custody report (`blazehash report`)
-    #[cfg(feature = "report")]
+    /// Case identifier for chain-of-custody metadata in manifest header and HTML report
     #[arg(long = "case", value_name = "ID")]
     pub case_id: Option<String>,
 }

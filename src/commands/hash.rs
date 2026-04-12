@@ -3,7 +3,7 @@ use blazehash::ads::enumerate_ads;
 use blazehash::algorithm::Algorithm;
 use blazehash::format::{write_csv, write_dfxml, write_json, write_jsonl, write_sumfile};
 use blazehash::hash::{hash_file, FileHashResult};
-use blazehash::manifest::{write_header, write_record};
+use blazehash::manifest::{write_header_with_metadata, write_record};
 use blazehash::output::make_writer;
 use blazehash::resume::ResumeState;
 use blazehash::walk::walk_and_hash_with_options;
@@ -32,6 +32,8 @@ pub struct HashOptions<'a> {
     pub sign: bool,
     pub ads: bool,
     pub entropy: bool,
+    pub case_id: Option<&'a str>,
+    pub examiner: Option<&'a str>,
 }
 
 pub fn run(opts: HashOptions<'_>) -> Result<()> {
@@ -51,6 +53,8 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         sign,
         ads,
         entropy,
+        case_id,
+        examiner,
         #[cfg(feature = "hashdb")]
         nsrl_hsh,
     } = opts;
@@ -153,7 +157,15 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
     }
 
     let needs_header = !(bare || append);
-    write_output(&mut writer, &all_results, algorithms, format, needs_header)?;
+    write_output(
+        &mut writer,
+        &all_results,
+        algorithms,
+        format,
+        needs_header,
+        case_id,
+        examiner,
+    )?;
 
     writer.flush()?;
 
@@ -265,6 +277,8 @@ fn write_output<W: Write>(
     algorithms: &[Algorithm],
     format: &str,
     needs_header: bool,
+    case_id: Option<&str>,
+    examiner: Option<&str>,
 ) -> Result<()> {
     match format {
         "csv" => write_csv(writer, results, algorithms)?,
@@ -274,7 +288,7 @@ fn write_output<W: Write>(
         "sha256sum" | "md5sum" => write_sumfile(writer, results, algorithms)?,
         _ => {
             if needs_header {
-                write_header(writer, algorithms)?;
+                write_header_with_metadata(writer, algorithms, case_id, examiner)?;
             }
             for result in results {
                 write_record(writer, result, algorithms)?;

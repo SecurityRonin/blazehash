@@ -23,6 +23,34 @@ pub fn write_header<W: Write>(w: &mut W, algorithms: &[Algorithm]) -> Result<()>
     Ok(())
 }
 
+/// Write the hashdeep-format header with optional chain-of-custody metadata.
+pub fn write_header_with_metadata<W: Write>(
+    w: &mut W,
+    algorithms: &[crate::algorithm::Algorithm],
+    case_id: Option<&str>,
+    examiner: Option<&str>,
+) -> anyhow::Result<()> {
+    writeln!(w, "%%%% HASHDEEP-1.0")?;
+    write!(w, "%%%% size")?;
+    for algo in algorithms {
+        write!(w, ",{}", algo.hashdeep_name())?;
+    }
+    writeln!(w, ",filename")?;
+    writeln!(
+        w,
+        "## Invoked from: blazehash v{}",
+        env!("CARGO_PKG_VERSION")
+    )?;
+    if let Some(case) = case_id {
+        writeln!(w, "## Case: {case}")?;
+    }
+    if let Some(name) = examiner {
+        writeln!(w, "## Examiner: {name}")?;
+    }
+    writeln!(w, "##")?;
+    Ok(())
+}
+
 /// Write a single hashdeep-format record.
 pub fn write_record<W: Write>(
     w: &mut W,

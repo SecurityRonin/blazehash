@@ -281,6 +281,8 @@ fn main() -> Result<()> {
                 sign: cli.sign,
                 ads: cli.ads,
                 entropy: cli.entropy,
+                case_id: cli.case_id.as_deref(),
+                examiner: cli.examiner.as_deref(),
             })?;
         }
     }
