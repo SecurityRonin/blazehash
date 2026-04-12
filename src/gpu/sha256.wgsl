@@ -6,9 +6,10 @@ struct Params {
     num_blocks: u32,
 }
 
-@group(0) @binding(0) var<storage, read>       msg:    array<u32>;
-@group(0) @binding(1) var<storage, read_write> digest: array<u32>;
-@group(0) @binding(2) var<uniform>             params: Params;
+@group(0) @binding(0) var<storage, read>       msg:        array<u32>;
+@group(0) @binding(1) var<storage, read_write> digest:     array<u32>;
+@group(0) @binding(2) var<uniform>             params:     Params;
+@group(0) @binding(3) var<storage, read>       init_state: array<u32>;
 
 fn k_val(i: u32) -> u32 {
     switch i {
@@ -90,14 +91,14 @@ fn sig1(x: u32) -> u32 { return rotr(x, 17u) ^ rotr(x, 19u) ^ (x >> 10u); }
 
 @compute @workgroup_size(1)
 fn main() {
-    var h0: u32 = 0x6a09e667u;
-    var h1: u32 = 0xbb67ae85u;
-    var h2: u32 = 0x3c6ef372u;
-    var h3: u32 = 0xa54ff53au;
-    var h4: u32 = 0x510e527fu;
-    var h5: u32 = 0x9b05688cu;
-    var h6: u32 = 0x1f83d9abu;
-    var h7: u32 = 0x5be0cd19u;
+    var h0: u32 = init_state[0];
+    var h1: u32 = init_state[1];
+    var h2: u32 = init_state[2];
+    var h3: u32 = init_state[3];
+    var h4: u32 = init_state[4];
+    var h5: u32 = init_state[5];
+    var h6: u32 = init_state[6];
+    var h7: u32 = init_state[7];
 
     for (var blk: u32 = 0u; blk < params.num_blocks; blk++) {
         let base: u32 = blk * 16u;
