@@ -1268,3 +1268,38 @@ fn test_include_glob_with_path_separator() {
         .unwrap()
         .ends_with("audit.log"));
 }
+
+// ---- Task 9 (batch 3): sector-level raw device hashing ----
+
+#[test]
+fn test_hash_device_on_regular_file() {
+    // hash_device should work on regular files too (reads sequentially)
+    use blazehash::algorithm::Algorithm;
+    use blazehash::device::hash_device;
+
+    let dir = tempfile::tempdir().unwrap();
+    let file = dir.path().join("test.bin");
+    std::fs::write(&file, vec![0u8; 4096]).unwrap();
+
+    let result = hash_device(&file, &[Algorithm::Blake3], 512).unwrap();
+    assert_eq!(result.size, 4096);
+    assert!(result.hashes.contains_key(&Algorithm::Blake3));
+    // Verify the hash matches the known BLAKE3 of 4096 zero bytes
+    let expected = blazehash::algorithm::hash_bytes(Algorithm::Blake3, &[0u8; 4096]);
+    assert_eq!(result.hashes[&Algorithm::Blake3], expected);
+}
+
+#[test]
+fn test_hash_device_synthetic_path() {
+    use blazehash::algorithm::Algorithm;
+    use blazehash::device::hash_device;
+
+    let dir = tempfile::tempdir().unwrap();
+    let file = dir.path().join("disk.img");
+    std::fs::write(&file, vec![0xABu8; 1024]).unwrap();
+
+    let result = hash_device(&file, &[Algorithm::Sha256], 512).unwrap();
+    // Path should be preserved as-is
+    assert_eq!(result.path, file);
+    assert_eq!(result.size, 1024);
+}
