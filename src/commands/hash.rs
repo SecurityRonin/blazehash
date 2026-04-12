@@ -30,6 +30,8 @@ pub struct HashOptions<'a> {
     pub nsrl_exclude: bool,
     #[cfg(feature = "hashdb")]
     pub nsrl_hsh: Option<&'a std::path::PathBuf>,
+    #[cfg(feature = "hashdb")]
+    pub hashdb_bad: Option<&'a std::path::PathBuf>,
     pub sign: bool,
     pub ads: bool,
     pub entropy: bool,
@@ -60,6 +62,8 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         progress,
         #[cfg(feature = "hashdb")]
         nsrl_hsh,
+        #[cfg(feature = "hashdb")]
+        hashdb_bad,
     } = opts;
     let mut resume_state = load_resume_state(resume, output)?;
     let append = resume && output.is_some_and(|p| p.exists());
@@ -134,6 +138,23 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
             });
             if known_count > 0 {
                 eprintln!("[K] {known_count} file(s) matched NSRL");
+            }
+        }
+
+        if let Some(bad_path) = hashdb_bad {
+            let bad_set = blazehash::nsrl::load_bad_list(bad_path)?;
+            if !bad_set.is_empty() {
+                for r in &all_results {
+                    let hash_val = r
+                        .hashes
+                        .get(&Algorithm::Sha256)
+                        .or_else(|| r.hashes.get(&Algorithm::Sha1))
+                        .map(|s| s.as_str())
+                        .unwrap_or("");
+                    if bad_set.contains(hash_val) {
+                        eprintln!("[BAD] {}  (known-bad hash)", r.path.display());
+                    }
+                }
             }
         }
     }

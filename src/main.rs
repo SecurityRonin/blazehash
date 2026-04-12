@@ -287,6 +287,8 @@ fn main() -> Result<()> {
                 nsrl_exclude: cli.nsrl_exclude,
                 #[cfg(feature = "hashdb")]
                 nsrl_hsh: cli.nsrl_hsh.as_ref(),
+                #[cfg(feature = "hashdb")]
+                hashdb_bad: cli.hashdb_bad.as_ref(),
                 sign: cli.sign,
                 ads: cli.ads,
                 entropy: cli.entropy,

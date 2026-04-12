@@ -76,6 +76,27 @@ pub fn load_hsh(path: &std::path::Path) -> anyhow::Result<std::collections::Hash
     Ok(set)
 }
 
+/// Load a flat bad-hash file: one SHA-256 (64 hex chars) or SHA-1 (40 hex chars) per line.
+/// Lines starting with `#` are comments. Empty lines are skipped.
+#[cfg(feature = "hashdb")]
+pub fn load_bad_list(path: &std::path::Path) -> anyhow::Result<std::collections::HashSet<String>> {
+    use std::io::{BufRead, BufReader};
+    let f = std::fs::File::open(path)?;
+    let mut set = std::collections::HashSet::new();
+    for line in BufReader::new(f).lines() {
+        let line = line?;
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+        let lower = trimmed.to_lowercase();
+        if lower.len() >= 32 && lower.chars().all(|c| c.is_ascii_hexdigit()) {
+            set.insert(lower);
+        }
+    }
+    Ok(set)
+}
+
 #[cfg(feature = "hashdb")]
 pub fn build_bloom(
     db_path: &std::path::Path,

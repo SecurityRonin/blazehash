@@ -131,6 +131,11 @@ pub struct Cli {
     #[arg(long = "nsrl-hsh", value_name = "FILE")]
     pub nsrl_hsh: Option<PathBuf>,
 
+    /// Known-bad hash list file (one SHA-256 or SHA-1 per line)
+    #[cfg(feature = "hashdb")]
+    #[arg(long = "hashdb-bad", value_name = "FILE")]
+    pub hashdb_bad: Option<std::path::PathBuf>,
+
     /// Suppress known-good files from output (requires --nsrl)
     #[arg(long = "nsrl-exclude")]
     pub nsrl_exclude: bool,
