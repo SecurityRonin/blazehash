@@ -10,15 +10,15 @@ The complete chain-of-custody workflow. Every step produces a specific artifact 
 # Step 1: Hash with case metadata
 blazehash -r /mnt/evidence -c blake3,sha256 \
   --case "CASE-2026-001" --examiner "Jane Smith" \
-  -o evidence.hash --no-cache --progress
+  -o evidence.hash --progress
 
-# Step 2: Sign
-BLAZEHASH_SIGN_PASSWORD="..." blazehash sign evidence.hash
+# Step 2: Sign (prompts for password)
+blazehash sign evidence.hash
 # -> evidence.hash.sig (detached signature)
 # -> evidence.hash.pub (public key)
 
-# Step 3: Second examiner cosigns
-BLAZEHASH_SIGN_PASSWORD="..." blazehash cosign evidence.hash
+# Step 3: Second examiner cosigns (prompts for their password)
+blazehash cosign evidence.hash
 # -> evidence.hash.msig (2 signatures)
 
 # Step 4: Bitcoin timestamp
@@ -74,18 +74,18 @@ Communicate the public key through a separate channel (case management system, e
 ```bash
 blazehash -r /mnt/evidence -c blake3,sha256 \
   --case "CASE-2026-001" --examiner "Jane Smith" \
-  -o evidence.hash --no-cache --progress
+  -o evidence.hash --progress
 ```
 
 - `--case` and `--examiner` embed identifiers in the manifest header. They propagate to every output format.
-- `--no-cache` uses direct I/O to avoid filling RAM with file data (critical on large acquisitions).
 - `--progress` shows a live progress bar with throughput and ETA.
 - `-c blake3,sha256` computes both algorithms simultaneously. BLAKE3 for speed, SHA-256 for universal court acceptance.
 
 ### Step 2: Sign the manifest
 
 ```bash
-BLAZEHASH_SIGN_PASSWORD="..." blazehash sign evidence.hash
+blazehash sign evidence.hash
+# Prompts: Enter signing password:
 ```
 
 blazehash derives an Ed25519 keypair from your password via Argon2id (memory-hard, brute-force resistant). Same password always produces the same key on any machine. No key files to manage or lose.
@@ -103,7 +103,8 @@ If you omit the environment variable, blazehash prompts interactively.
 ### Step 3: Cosign (multi-party)
 
 ```bash
-BLAZEHASH_SIGN_PASSWORD="..." blazehash cosign evidence.hash
+blazehash cosign evidence.hash
+# Prompts: Enter signing password:
 ```
 
 Each additional examiner runs `cosign` with their own password. Signatures accumulate in `evidence.hash.msig`.
