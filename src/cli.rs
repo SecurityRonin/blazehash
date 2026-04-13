@@ -211,9 +211,13 @@ pub struct Cli {
     #[arg(long = "path", value_name = "PATH")]
     pub merkle_path: Option<String>,
 
-    /// SHA-256 hex value for merkle-verify subcommand
+    /// SHA-256 hex value for merkle-verify / prove-membership subcommands
     #[arg(long = "sha256", value_name = "HEX")]
     pub merkle_sha256: Option<String>,
+
+    /// Comma-separated file paths for `disclose` subcommand
+    #[arg(long = "paths", value_name = "PATHS")]
+    pub disclose_paths: Option<String>,
 
     /// JSON proof array for merkle-verify subcommand
     #[arg(long = "proof", value_name = "JSON")]
@@ -291,6 +295,8 @@ pub enum Mode {
     Merkle,
     MerkleProof,
     MerkleVerify,
+    Disclose,
+    ProveMembership,
     #[cfg(feature = "ots")]
     OtsStamp,
     #[cfg(feature = "ots")]
@@ -424,6 +430,14 @@ impl Cli {
             return Mode::Qr;
             #[cfg(not(feature = "qr"))]
             return Mode::Hash;
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("disclose"))
+        {
+            Mode::Disclose
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("prove-membership"))
+        {
+            Mode::ProveMembership
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {

@@ -14,6 +14,27 @@ use commands::vt::VtArgs;
 use commands::watch::WatchArgs;
 use std::path::PathBuf;
 
+fn parse_manifest_entries(path: &std::path::Path) -> anyhow::Result<Vec<(String, String, String)>> {
+    let content = std::fs::read_to_string(path)?;
+    let mut entries = Vec::new();
+    for line in content.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        // Format: "<algo>  <hash>  <path>"
+        let parts: Vec<&str> = line.splitn(3, "  ").collect();
+        if parts.len() == 3 {
+            entries.push((
+                parts[0].trim().to_string(),
+                parts[2].trim().to_string(),
+                parts[1].trim().to_string(),
+            ));
+        }
+    }
+    Ok(entries)
+}
+
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
@@ -376,6 +397,47 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Disclose = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash disclose <manifest> --paths <p1,p2> [-o proof.json]"))?;
+        let paths_str = cli
+            .disclose_paths
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("disclose requires --paths <comma-separated-paths>"))?;
+        let disclosed_paths: Vec<&str> = paths_str.split(',').map(str::trim).collect();
+        let entries = parse_manifest_entries(&manifest)?;
+        let proof = blazehash::disclosure::generate_selective_proof(&entries, &disclosed_paths)?;
+        let json = serde_json::to_string_pretty(&proof)?;
+        match output {
+            Some(ref out) => std::fs::write(out, &json)?,
+            None => println!("{json}"),
+        }
+        return Ok(());
+    }
+
+    if let Mode::ProveMembership = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash prove-membership <manifest> --sha256 <hex> [-o proof.json]"))?;
+        let sha256_hex = cli
+            .merkle_sha256
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("prove-membership requires --sha256 <hex>"))?;
+        let entries = parse_manifest_entries(&manifest)?;
+        let proof = blazehash::disclosure::prove_hash_membership(&entries, sha256_hex)?;
+        let json = serde_json::to_string_pretty(&proof)?;
+        match output {
+            Some(ref out) => std::fs::write(out, &json)?,
+            None => println!("{json}"),
+        }
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -419,6 +481,8 @@ fn main() -> Result<()> {
         Mode::Merkle => unreachable!(),
         Mode::MerkleProof => unreachable!(),
         Mode::MerkleVerify => unreachable!(),
+        Mode::Disclose => unreachable!(),
+        Mode::ProveMembership => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
