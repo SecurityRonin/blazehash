@@ -17,7 +17,7 @@ fn test_export_csv_has_header_row() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
     let out = Command::cargo_bin("blazehash").unwrap()
-        .args(["export", manifest.to_str().unwrap(), "--format", "csv"])
+        .args(["export", manifest.to_str().unwrap(), "--export-format", "csv"])
         .output().unwrap();
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
@@ -32,7 +32,7 @@ fn test_export_csv_has_data_rows() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
     let out = Command::cargo_bin("blazehash").unwrap()
-        .args(["export", manifest.to_str().unwrap(), "--format", "csv"])
+        .args(["export", manifest.to_str().unwrap(), "--export-format", "csv"])
         .output().unwrap();
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
@@ -45,7 +45,7 @@ fn test_export_jsonl_one_json_object_per_line() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
     let out = Command::cargo_bin("blazehash").unwrap()
-        .args(["export", manifest.to_str().unwrap(), "--format", "jsonl"])
+        .args(["export", manifest.to_str().unwrap(), "--export-format", "jsonl"])
         .output().unwrap();
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
@@ -63,7 +63,7 @@ fn test_export_tsv_tab_separated() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
     let out = Command::cargo_bin("blazehash").unwrap()
-        .args(["export", manifest.to_str().unwrap(), "--format", "tsv"])
+        .args(["export", manifest.to_str().unwrap(), "--export-format", "tsv"])
         .output().unwrap();
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
@@ -78,7 +78,7 @@ fn test_export_unknown_format_fails() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
     Command::cargo_bin("blazehash").unwrap()
-        .args(["export", manifest.to_str().unwrap(), "--format", "xls"])
+        .args(["export", manifest.to_str().unwrap(), "--export-format", "xls"])
         .assert().failure();
 }
 
@@ -88,7 +88,7 @@ fn test_export_output_to_file() {
     let manifest = write_manifest(&dir);
     let out_path = dir.path().join("out.csv");
     Command::cargo_bin("blazehash").unwrap()
-        .args(["export", manifest.to_str().unwrap(), "--format", "csv",
+        .args(["export", manifest.to_str().unwrap(), "--export-format", "csv",
                "-o", out_path.to_str().unwrap()])
         .assert().success();
     let content = fs::read_to_string(&out_path).unwrap();

@@ -4,6 +4,7 @@ pub mod bench;
 pub mod completions;
 pub mod convert;
 pub mod dedup;
+pub mod export;
 pub mod diff;
 pub mod hash;
 pub mod head;

@@ -266,6 +266,10 @@ pub struct Cli {
     /// Case-insensitive search
     #[arg(long = "ignore-case", short = 'i')]
     pub ignore_case: bool,
+
+    /// Export format: csv, tsv, jsonl (for export subcommand)
+    #[arg(long = "export-format", value_name = "FORMAT")]
+    pub export_format: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -352,6 +356,7 @@ pub enum Mode {
     Convert,
     Head,
     Search,
+    Export,
     Hash,
 }
 
@@ -525,6 +530,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("search"))
         {
             Mode::Search
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("export"))
+        {
+            Mode::Export
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {

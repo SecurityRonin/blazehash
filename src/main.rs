@@ -621,6 +621,27 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Export = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash export <manifest> --format <csv|tsv|jsonl>"))?;
+        let fmt = cli
+            .export_format
+            .as_deref()
+            .unwrap_or("csv");
+        if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::export::export_manifest(&manifest, fmt, &mut f)?;
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::export::export_manifest(&manifest, fmt, &mut handle)?;
+        }
+        return Ok(());
+    }
+
     if let Mode::Lint = cli.mode() {
         let manifest = cli
             .paths
@@ -695,6 +716,7 @@ fn main() -> Result<()> {
         Mode::Convert => unreachable!(),
         Mode::Head => unreachable!(),
         Mode::Search => unreachable!(),
+        Mode::Export => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
