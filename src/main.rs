@@ -857,6 +857,21 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Rename = cli.mode() {
+        let from = cli.rename_from.as_deref()
+            .ok_or_else(|| anyhow::anyhow!("--rename-from is required for blazehash rename"))?;
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("blazehash rename requires a manifest path"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::rename_cmd::rename_manifest(
+            manifest.as_ref(),
+            from,
+            &cli.rename_to,
+            &mut out,
+        )?;
+        return Ok(());
+    }
+
     if let Mode::Pivot = cli.mode() {
         let algo = cli.pivot_algo.as_deref()
             .ok_or_else(|| anyhow::anyhow!("--pivot-algo is required for blazehash pivot"))?;
@@ -940,6 +955,7 @@ fn main() -> Result<()> {
         Mode::Uniq => unreachable!(),
         Mode::Checksum => unreachable!(),
         Mode::Pivot => unreachable!(),
+        Mode::Rename => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

@@ -294,6 +294,14 @@ pub struct Cli {
     /// Algorithm to pivot on (for `blazehash pivot`)
     #[arg(long = "pivot-algo")]
     pub pivot_algo: Option<String>,
+
+    /// Substring to replace in paths (for `blazehash rename`)
+    #[arg(long = "rename-from")]
+    pub rename_from: Option<String>,
+
+    /// Replacement string for --rename-from (default: empty string)
+    #[arg(long = "rename-to", default_value = "")]
+    pub rename_to: String,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -397,6 +405,7 @@ pub enum Mode {
     Uniq,
     Checksum,
     Pivot,
+    Rename,
     Hash,
 }
 
@@ -624,6 +633,8 @@ impl Cli {
             Mode::Checksum
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("pivot")) {
             Mode::Pivot
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("rename")) {
+            Mode::Rename
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
