@@ -352,6 +352,7 @@ pub enum Mode {
     Timeline,
     Lint,
     Redact,
+    Sample,
     Stats,
     Filter,
     Normalize,
@@ -505,6 +506,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("redact"))
         {
             Mode::Redact
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("sample"))
+        {
+            Mode::Sample
         } else if self.paths.first().map(|p| p.as_os_str())
             == Some(std::ffi::OsStr::new("stats"))
         {

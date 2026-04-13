@@ -17,6 +17,7 @@ pub mod piecewise;
 pub mod search;
 pub mod selfcheck;
 pub mod redact;
+pub mod sample;
 pub mod filter;
 pub mod stats;
 #[cfg(feature = "report")]

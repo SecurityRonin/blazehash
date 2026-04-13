@@ -462,6 +462,23 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Sample = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash sample <manifest> [--count N]"))?;
+        if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::sample::sample_manifest(&manifest, cli.count, &mut f)?;
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::sample::sample_manifest(&manifest, cli.count, &mut handle)?;
+        }
+        return Ok(());
+    }
+
     if let Mode::Timeline = cli.mode() {
         let manifest_path = cli
             .paths
@@ -726,6 +743,7 @@ fn main() -> Result<()> {
         Mode::Timeline => unreachable!(),
         Mode::Lint => unreachable!(),
         Mode::Redact => unreachable!(),
+        Mode::Sample => unreachable!(),
         Mode::Stats => unreachable!(),
         Mode::Filter => unreachable!(),
         Mode::Normalize => unreachable!(),
