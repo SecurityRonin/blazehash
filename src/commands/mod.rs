@@ -29,6 +29,7 @@ pub mod size_only;
 pub mod sort;
 pub mod stdin;
 pub mod update;
+pub mod verify;
 pub mod verify_image;
 pub mod vt;
 pub mod watch;

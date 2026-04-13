@@ -274,6 +274,10 @@ pub struct Cli {
     /// Field to sort by for sort subcommand: path, hash, algo, ext (default: path)
     #[arg(long = "sort-by", value_name = "FIELD", default_value = "path")]
     pub sort_by: String,
+
+    /// Filter by algorithm name for verify subcommand
+    #[arg(long = "verify-algo", value_name = "ALGO")]
+    pub verify_algo: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -366,6 +370,7 @@ pub enum Mode {
     Intersect,
     Subtract,
     ApplyPatch,
+    Verify,
     Hash,
 }
 
@@ -555,6 +560,8 @@ impl Cli {
             Mode::Subtract
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("apply-patch")) {
             Mode::ApplyPatch
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("verify")) {
+            Mode::Verify
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {

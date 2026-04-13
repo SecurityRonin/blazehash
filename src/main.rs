@@ -745,6 +745,22 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Verify = cli.mode() {
+        let manifest_path = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("verify: missing manifest path"))?;
+        let stdout = std::io::stdout();
+        let mut out = stdout.lock();
+        let result = commands::verify::verify_manifest(
+            manifest_path,
+            cli.verify_algo.as_deref(),
+            &mut out,
+        )?;
+        if result.failed > 0 {
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -807,6 +823,7 @@ fn main() -> Result<()> {
         Mode::Intersect => unreachable!(),
         Mode::Subtract => unreachable!(),
         Mode::ApplyPatch => unreachable!(),
+        Mode::Verify => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
