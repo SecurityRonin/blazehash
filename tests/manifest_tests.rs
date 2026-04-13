@@ -33,6 +33,8 @@ fn write_record_single_algorithm() {
         size: 11,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();
@@ -60,6 +62,8 @@ fn write_record_multiple_algorithms() {
         size: 11,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();
@@ -94,6 +98,8 @@ fn filename_with_comma_preserved() {
         size: 42,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();
@@ -112,6 +118,8 @@ fn write_record_missing_algorithm_returns_error() {
         size: 11,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();
@@ -185,6 +193,8 @@ fn write_record_zero_size_file() {
         size: 0,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();

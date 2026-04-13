@@ -113,6 +113,8 @@ fn load_results(
                             size: rec.size,
                             hashes: rec.hashes,
                             entropy: None,
+                            #[cfg(feature = "yara")]
+                            yara_matches: None,
                         });
                     }
                 }

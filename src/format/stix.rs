@@ -60,10 +60,43 @@ pub fn write_stix<W: Write>(
     results: &[FileHashResult],
     algorithms: &[Algorithm],
 ) -> Result<()> {
-    let objects: Vec<Value> = results
+    let mut objects: Vec<Value> = results
         .iter()
         .map(|r| result_to_stix_sco(r, algorithms))
         .collect();
+
+    // Enrich with x-mitre-attack extension objects for any YARA matches.
+    #[cfg(feature = "yara")]
+    {
+        use crate::attack::lookup_attack;
+        for result in results {
+            if let Some(ref matches) = result.yara_matches {
+                let file_name = result
+                    .path
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("");
+                let file_path = result.path.to_string_lossy();
+                for rule_name in matches {
+                    if let Some(technique) = lookup_attack(rule_name) {
+                        let id_input = format!("{}-{}", file_path, technique.technique_id);
+                        let uuid = Uuid::new_v5(&Uuid::NAMESPACE_URL, id_input.as_bytes());
+                        objects.push(json!({
+                            "type": "x-mitre-attack",
+                            "id": format!("x-mitre-attack--{uuid}"),
+                            "spec_version": "2.1",
+                            "technique_id": technique.technique_id,
+                            "tactic": technique.tactic,
+                            "technique_name": technique.name,
+                            "yara_rule": rule_name,
+                            "related_file": file_name,
+                        }));
+                    }
+                }
+            }
+        }
+    }
+
     let bundle_uuid = Uuid::new_v5(
         &STIX_SCO_NAMESPACE,
         format!("blazehash-bundle-{}", objects.len()).as_bytes(),

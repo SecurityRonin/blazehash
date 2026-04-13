@@ -19,6 +19,8 @@ fn sample_result() -> FileHashResult {
         size: 11,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     }
 }
 
@@ -80,6 +82,8 @@ fn csv_missing_algorithm_returns_error() {
         size: 11,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();
@@ -109,6 +113,8 @@ fn csv_multiple_results() {
         size: 42,
         hashes: hashes2,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
     let algos = vec![Algorithm::Blake3, Algorithm::Sha256];
     let mut buf = Vec::new();
@@ -199,6 +205,8 @@ fn sumfile_output_hash_two_spaces_path() {
         size: 42,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
     let mut buf = Vec::new();
     write_sumfile(&mut buf, &[result], &[Algorithm::Sha256]).unwrap();
@@ -239,6 +247,8 @@ fn sqlite_output_queryable() {
         size: 42,
         hashes,
         entropy: Some(6.5),
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     write_sqlite(&db_path, &[result], &[Algorithm::Blake3]).unwrap();
@@ -277,6 +287,8 @@ fn parquet_output_creates_file() {
         size: 5,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     write_parquet(&out, &[result], &[Algorithm::Blake3]).unwrap();
@@ -298,6 +310,8 @@ fn json_missing_algorithm_silently_skipped() {
         size: 11,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();
@@ -326,6 +340,8 @@ fn csv_entropy_column_present_when_set() {
         size: 10,
         hashes,
         entropy: Some(7.9),
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
     let algos = vec![Algorithm::Blake3];
     let mut buf = Vec::new();
@@ -353,6 +369,8 @@ fn json_entropy_field_present_when_set() {
         size: 10,
         hashes,
         entropy: Some(3.5),
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
     let mut buf = Vec::new();
     write_json(&mut buf, &[r], &[Algorithm::Blake3]).unwrap();
@@ -385,6 +403,8 @@ fn duckdb_output_creates_file() {
         size: 42,
         hashes,
         entropy: Some(3.5),
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     }];
 
     write_duckdb(&out, &results, &[Algorithm::Blake3]).unwrap();
@@ -430,6 +450,8 @@ fn test_stix_output_is_valid_bundle() {
         size: 4096,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();
@@ -470,6 +492,8 @@ fn test_stix_output_multiple_algorithms() {
         size: 100,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();
@@ -500,6 +524,8 @@ fn test_ecs_output_has_correct_fields() {
         size: 2048,
         hashes,
         entropy: Some(7.5),
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();
@@ -532,6 +558,8 @@ fn test_ecs_output_is_ndjson() {
                 size: i * 100,
                 hashes,
                 entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
             }
         })
         .collect();
@@ -569,6 +597,8 @@ fn sqlite_feature_is_independent_of_hashdb() {
         size: 100,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     write_sqlite(&db_path, &[result], &[Algorithm::Blake3]).unwrap();

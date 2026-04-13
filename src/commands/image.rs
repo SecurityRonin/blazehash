@@ -1,6 +1,6 @@
+use anyhow::Result;
 use blazehash::algorithm::{hash_bytes, Algorithm};
 use blazehash::hash::FileHashResult;
-use anyhow::Result;
 use oci_distribution::{
     client::{Client, ClientConfig},
     manifest::{IMAGE_LAYER_GZIP_MEDIA_TYPE, IMAGE_LAYER_MEDIA_TYPE},
@@ -45,7 +45,14 @@ async fn oci_results_async(uri: &str, algorithms: &[Algorithm]) -> Result<Vec<Fi
         for algo in algorithms {
             hashes.insert(*algo, hash_bytes(*algo, &layer.data));
         }
-        results.push(FileHashResult { path, size, hashes, entropy: None });
+        results.push(FileHashResult {
+            path,
+            size,
+            hashes,
+            entropy: None,
+            #[cfg(feature = "yara")]
+            yara_matches: None,
+        });
     }
     Ok(results)
 }

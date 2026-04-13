@@ -13,6 +13,9 @@ pub struct FileHashResult {
     pub size: u64,
     pub hashes: HashMap<Algorithm, String>,
     pub entropy: Option<f64>,
+    /// YARA rule names that matched this file (populated only when --yara is used).
+    #[cfg(feature = "yara")]
+    pub yara_matches: Option<Vec<String>>,
 }
 
 /// Compute Shannon entropy for a byte slice.
@@ -363,6 +366,8 @@ pub fn hash_file(
         size,
         hashes,
         entropy,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     })
 }
 

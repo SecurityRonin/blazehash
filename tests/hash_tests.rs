@@ -783,6 +783,8 @@ fn test_manifest_roundtrip_with_ssdeep() {
         size: 1234,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();
@@ -826,6 +828,8 @@ fn test_manifest_roundtrip_with_tlsh() {
         size: 5678,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     let mut buf = Vec::new();

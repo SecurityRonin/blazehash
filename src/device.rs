@@ -194,5 +194,7 @@ pub fn hash_device(
         size: total_bytes,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     })
 }

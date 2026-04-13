@@ -31,6 +31,8 @@ pub fn run(
         size,
         hashes,
         entropy: None,
+        #[cfg(feature = "yara")]
+        yara_matches: None,
     };
 
     match format {
