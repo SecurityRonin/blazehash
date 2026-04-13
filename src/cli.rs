@@ -411,6 +411,7 @@ pub enum Mode {
     Pivot,
     Rename,
     Slice,
+    Stamp,
     Hash,
 }
 
@@ -642,6 +643,8 @@ impl Cli {
             Mode::Rename
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("slice")) {
             Mode::Slice
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("stamp")) {
+            Mode::Stamp
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

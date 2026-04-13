@@ -895,6 +895,14 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Stamp = cli.mode() {
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("blazehash stamp requires a manifest path"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::stamp::stamp_manifest(manifest.as_ref(), &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -970,6 +978,7 @@ fn main() -> Result<()> {
         Mode::Pivot => unreachable!(),
         Mode::Rename => unreachable!(),
         Mode::Slice => unreachable!(),
+        Mode::Stamp => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

@@ -1,4 +1,5 @@
 pub mod apply_patch;
+pub mod stamp;
 pub mod cat;
 pub mod checksum;
 pub mod count;
