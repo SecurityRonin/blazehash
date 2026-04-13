@@ -596,6 +596,31 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Search = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash search <manifest> [--search-path QUERY] [--hash PREFIX]"))?;
+        let opts = commands::search::SearchOpts {
+            path_query: cli.search_path.as_deref(),
+            hash_query: cli.search_hash.as_deref(),
+            ignore_case: cli.ignore_case,
+        };
+        let matched = if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::search::search_manifest(&manifest, &opts, &mut f)?
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::search::search_manifest(&manifest, &opts, &mut handle)?
+        };
+        if matched == 0 {
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
     if let Mode::Lint = cli.mode() {
         let manifest = cli
             .paths
@@ -669,6 +694,7 @@ fn main() -> Result<()> {
         Mode::Archive => unreachable!(),
         Mode::Convert => unreachable!(),
         Mode::Head => unreachable!(),
+        Mode::Search => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

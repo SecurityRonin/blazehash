@@ -13,6 +13,7 @@ pub mod lint;
 pub mod merge;
 pub mod normalize;
 pub mod piecewise;
+pub mod search;
 pub mod selfcheck;
 pub mod redact;
 pub mod filter;

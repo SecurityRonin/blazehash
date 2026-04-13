@@ -254,6 +254,18 @@ pub struct Cli {
     /// Number of entries to output for head subcommand (default: 10)
     #[arg(long = "count", short = 'n', default_value = "10")]
     pub count: usize,
+
+    /// Path substring to search for (search subcommand)
+    #[arg(long = "search-path", value_name = "QUERY")]
+    pub search_path: Option<String>,
+
+    /// Hash prefix to search for (search subcommand)
+    #[arg(long = "hash", value_name = "PREFIX")]
+    pub search_hash: Option<String>,
+
+    /// Case-insensitive search
+    #[arg(long = "ignore-case", short = 'i')]
+    pub ignore_case: bool,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -339,6 +351,7 @@ pub enum Mode {
     Archive,
     Convert,
     Head,
+    Search,
     Hash,
 }
 
@@ -508,6 +521,10 @@ impl Cli {
             Mode::Convert
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("head")) {
             Mode::Head
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("search"))
+        {
+            Mode::Search
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {
