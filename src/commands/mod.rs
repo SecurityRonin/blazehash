@@ -11,6 +11,7 @@ pub mod export;
 pub mod diff;
 pub mod hash;
 pub mod head;
+pub mod tail;
 #[cfg(feature = "docker")]
 pub mod image;
 pub mod lint;

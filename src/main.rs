@@ -613,6 +613,20 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Tail = cli.mode() {
+        let manifest_path = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("tail: missing manifest path"))?;
+        if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::tail::tail_manifest(manifest_path, cli.count, &mut f)?;
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::tail::tail_manifest(manifest_path, cli.count, &mut handle)?;
+        }
+        return Ok(());
+    }
+
     if let Mode::Search = cli.mode() {
         let manifest = cli
             .paths
@@ -817,6 +831,7 @@ fn main() -> Result<()> {
         Mode::Archive => unreachable!(),
         Mode::Convert => unreachable!(),
         Mode::Head => unreachable!(),
+        Mode::Tail => unreachable!(),
         Mode::Search => unreachable!(),
         Mode::Export => unreachable!(),
         Mode::Sort => unreachable!(),

@@ -364,6 +364,7 @@ pub enum Mode {
     Archive,
     Convert,
     Head,
+    Tail,
     Search,
     Export,
     Sort,
@@ -544,6 +545,8 @@ impl Cli {
             Mode::Convert
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("head")) {
             Mode::Head
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("tail")) {
+            Mode::Tail
         } else if self.paths.first().map(|p| p.as_os_str())
             == Some(std::ffi::OsStr::new("search"))
         {
