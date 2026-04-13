@@ -38,6 +38,7 @@ pub mod size_only;
 pub mod sort;
 pub mod stdin;
 pub mod update;
+pub mod pivot;
 pub mod verify;
 pub mod verify_image;
 pub mod vt;

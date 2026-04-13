@@ -290,6 +290,10 @@ pub struct Cli {
     /// Number of entries per chunk file for split subcommand (default: 1000)
     #[arg(long = "chunk", default_value = "1000")]
     pub split_chunk: usize,
+
+    /// Algorithm to pivot on (for `blazehash pivot`)
+    #[arg(long = "pivot-algo")]
+    pub pivot_algo: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -392,6 +396,7 @@ pub enum Mode {
     Split,
     Uniq,
     Checksum,
+    Pivot,
     Hash,
 }
 
@@ -617,6 +622,8 @@ impl Cli {
             Mode::Uniq
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("checksum")) {
             Mode::Checksum
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("pivot")) {
+            Mode::Pivot
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
