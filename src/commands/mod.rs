@@ -8,6 +8,7 @@ pub mod hash;
 pub mod image;
 pub mod merge;
 pub mod piecewise;
+pub mod redact;
 #[cfg(feature = "report")]
 pub mod report;
 pub mod size_only;

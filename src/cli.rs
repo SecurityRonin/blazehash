@@ -306,6 +306,7 @@ pub enum Mode {
     #[cfg(feature = "qr")]
     Qr,
     Timeline,
+    Redact,
     Hash,
 }
 
@@ -443,6 +444,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("timeline"))
         {
             Mode::Timeline
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("redact"))
+        {
+            Mode::Redact
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {

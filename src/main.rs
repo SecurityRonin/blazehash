@@ -440,6 +440,18 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Redact = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash redact <manifest> -o <redacted.hash>"))?;
+        let out = output
+            .ok_or_else(|| anyhow::anyhow!("redact requires -o <output>"))?;
+        commands::redact::redact_manifest(&manifest, &out)?;
+        return Ok(());
+    }
+
     if let Mode::Timeline = cli.mode() {
         let manifest_path = cli
             .paths
@@ -510,6 +522,7 @@ fn main() -> Result<()> {
         Mode::Disclose => unreachable!(),
         Mode::ProveMembership => unreachable!(),
         Mode::Timeline => unreachable!(),
+        Mode::Redact => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
