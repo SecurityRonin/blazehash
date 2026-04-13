@@ -476,6 +476,16 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Stats = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash stats <manifest>"))?;
+        commands::stats::run_stats(&manifest, cli.json)?;
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -523,6 +533,7 @@ fn main() -> Result<()> {
         Mode::ProveMembership => unreachable!(),
         Mode::Timeline => unreachable!(),
         Mode::Redact => unreachable!(),
+        Mode::Stats => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

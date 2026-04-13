@@ -230,6 +230,10 @@ pub struct Cli {
     /// Sector size for raw device hashing (default: 512)
     #[arg(long = "sector-size", default_value = "512")]
     pub sector_size: usize,
+
+    /// Output as JSON (for stats subcommand)
+    #[arg(long = "json")]
+    pub json: bool,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -307,6 +311,7 @@ pub enum Mode {
     Qr,
     Timeline,
     Redact,
+    Stats,
     Hash,
 }
 
@@ -448,6 +453,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("redact"))
         {
             Mode::Redact
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("stats"))
+        {
+            Mode::Stats
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {
