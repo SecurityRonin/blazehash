@@ -234,6 +234,10 @@ pub struct Cli {
     /// Output as JSON (for stats subcommand)
     #[arg(long = "json")]
     pub json: bool,
+
+    /// Filter by algorithm name (for filter subcommand)
+    #[arg(long = "algo", value_name = "ALGO")]
+    pub filter_algo: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -312,6 +316,7 @@ pub enum Mode {
     Timeline,
     Redact,
     Stats,
+    Filter,
     Hash,
 }
 
@@ -457,6 +462,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("stats"))
         {
             Mode::Stats
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("filter"))
+        {
+            Mode::Filter
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {

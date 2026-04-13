@@ -486,6 +486,30 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Filter = cli.mode() {
+        let manifest_path = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash filter <manifest> [--include GLOB]... [--algo ALGO] [-o output]"))?;
+        if !manifest_path.exists() {
+            anyhow::bail!("manifest not found: {}", manifest_path.display());
+        }
+        let opts = commands::filter::FilterOpts {
+            include: if cli.include.is_empty() { None } else { Some(&cli.include) },
+            algo: cli.filter_algo.as_deref(),
+        };
+        if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::filter::filter_manifest(&manifest_path, &opts, &mut f)?;
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::filter::filter_manifest(&manifest_path, &opts, &mut handle)?;
+        }
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -534,6 +558,7 @@ fn main() -> Result<()> {
         Mode::Timeline => unreachable!(),
         Mode::Redact => unreachable!(),
         Mode::Stats => unreachable!(),
+        Mode::Filter => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
