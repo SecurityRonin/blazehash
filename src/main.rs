@@ -642,6 +642,24 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Sort = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash sort <manifest> [--sort-by path|hash|algo|ext]"))?;
+        commands::sort::validate_sort_by(&cli.sort_by)?;
+        if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::sort::sort_manifest(&manifest, &cli.sort_by, &mut f)?;
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::sort::sort_manifest(&manifest, &cli.sort_by, &mut handle)?;
+        }
+        return Ok(());
+    }
+
     if let Mode::Lint = cli.mode() {
         let manifest = cli
             .paths
@@ -717,6 +735,7 @@ fn main() -> Result<()> {
         Mode::Head => unreachable!(),
         Mode::Search => unreachable!(),
         Mode::Export => unreachable!(),
+        Mode::Sort => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

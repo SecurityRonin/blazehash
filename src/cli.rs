@@ -270,6 +270,10 @@ pub struct Cli {
     /// Export format: csv, tsv, jsonl (for export subcommand)
     #[arg(long = "export-format", value_name = "FORMAT")]
     pub export_format: Option<String>,
+
+    /// Field to sort by for sort subcommand: path, hash, algo, ext (default: path)
+    #[arg(long = "sort-by", value_name = "FIELD", default_value = "path")]
+    pub sort_by: String,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -357,6 +361,7 @@ pub enum Mode {
     Head,
     Search,
     Export,
+    Sort,
     Hash,
 }
 
@@ -534,6 +539,8 @@ impl Cli {
             == Some(std::ffi::OsStr::new("export"))
         {
             Mode::Export
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("sort")) {
+            Mode::Sort
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {

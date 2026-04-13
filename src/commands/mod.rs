@@ -22,6 +22,7 @@ pub mod stats;
 #[cfg(feature = "report")]
 pub mod report;
 pub mod size_only;
+pub mod sort;
 pub mod stdin;
 pub mod update;
 pub mod verify_image;
