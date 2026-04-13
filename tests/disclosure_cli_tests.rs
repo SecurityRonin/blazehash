@@ -80,3 +80,16 @@ fn test_cli_disclose_multiple_paths_comma_separated() {
     let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(json["disclosed"].as_array().unwrap().len(), 2);
 }
+
+#[test]
+fn test_cli_prove_membership_stdout_when_no_output_flag() {
+    let dir = TempDir::new().unwrap();
+    let manifest = write_manifest(&dir);
+    let output = Command::cargo_bin("blazehash").unwrap()
+        .args(["prove-membership", manifest.to_str().unwrap(),
+               "--sha256", &"a".repeat(64)])
+        .output().unwrap();
+    assert!(output.status.success());
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(json["root"].as_str().is_some());
+}
