@@ -30,6 +30,8 @@ fn parse_manifest_entries(path: &std::path::Path) -> anyhow::Result<Vec<(String,
                 parts[2].trim().to_string(),
                 parts[1].trim().to_string(),
             ));
+        } else {
+            eprintln!("warning: skipping unparseable manifest line: {line}");
         }
     }
     Ok(entries)

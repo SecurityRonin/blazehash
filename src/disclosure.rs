@@ -45,6 +45,7 @@ fn node_hash_hex(a: &str, b: &str) -> String {
     let (lo, hi) = if a <= b { (a, b) } else { (b, a) };
     let mut h = Sha256::new();
     h.update([0x01]);
+    // Safety: lo and hi are always hex strings produced by leaf_hash() or node_hash() — never externally sourced
     h.update(hex::decode(lo).unwrap_or_default());
     h.update(hex::decode(hi).unwrap_or_default());
     hex::encode(h.finalize())
@@ -96,6 +97,10 @@ fn merkle_proof_path(levels: &[Vec<String>], leaf_idx: usize) -> Vec<String> {
 fn verify_proof_path(leaf_hash_hex: &str, proof_path: &[String], root: &str) -> bool {
     let mut current = leaf_hash_hex.to_string();
     for sibling in proof_path {
+        // Validate sibling is valid hex before hashing
+        if hex::decode(sibling).is_err() {
+            return false;
+        }
         current = node_hash_hex(&current, sibling);
     }
     current == root
