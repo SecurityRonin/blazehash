@@ -9,6 +9,7 @@ pub mod image;
 pub mod merge;
 pub mod normalize;
 pub mod piecewise;
+pub mod selfcheck;
 pub mod redact;
 pub mod filter;
 pub mod stats;

@@ -262,6 +262,16 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Selfcheck = cli.mode() {
+        let result = commands::selfcheck::selfcheck()?;
+        if cli.json {
+            println!("{}", serde_json::to_string_pretty(&result)?);
+        } else {
+            commands::selfcheck::print_selfcheck(&result);
+        }
+        return Ok(());
+    }
+
     #[cfg(feature = "qr")]
     if let Mode::Qr = cli.mode() {
         let manifest = cli
@@ -584,6 +594,7 @@ fn main() -> Result<()> {
         Mode::Stats => unreachable!(),
         Mode::Filter => unreachable!(),
         Mode::Normalize => unreachable!(),
+        Mode::Selfcheck => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

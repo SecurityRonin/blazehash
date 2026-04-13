@@ -326,6 +326,7 @@ pub enum Mode {
     Stats,
     Filter,
     Normalize,
+    Selfcheck,
     Hash,
 }
 
@@ -479,6 +480,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("normalize"))
         {
             Mode::Normalize
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("selfcheck"))
+        {
+            Mode::Selfcheck
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {
