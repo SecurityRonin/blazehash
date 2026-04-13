@@ -32,7 +32,7 @@ pub fn verify_manifest(
             .hashes
             .iter()
             .filter(|(algo, _)| {
-                filter_algo.map_or(true, |fa| **algo == fa)
+                filter_algo.is_none_or(|fa| **algo == fa)
             })
             .map(|(algo, hash)| (*algo, hash.as_str()))
             .collect();
