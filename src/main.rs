@@ -659,6 +659,22 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::ApplyPatch = cli.mode() {
+        let manifest = cli.paths.get(1).cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash apply-patch <manifest> <patch-file>"))?;
+        let patch_file = cli.paths.get(2).cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash apply-patch <manifest> <patch-file>"))?;
+        if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::apply_patch::apply_patch(&manifest, &patch_file, &mut f)?;
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::apply_patch::apply_patch(&manifest, &patch_file, &mut handle)?;
+        }
+        return Ok(());
+    }
+
     if let Mode::Subtract = cli.mode() {
         let left = cli.paths.get(1).cloned()
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash subtract <manifest_a> <manifest_b>"))?;
@@ -790,6 +806,7 @@ fn main() -> Result<()> {
         Mode::Sort => unreachable!(),
         Mode::Intersect => unreachable!(),
         Mode::Subtract => unreachable!(),
+        Mode::ApplyPatch => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

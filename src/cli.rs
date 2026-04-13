@@ -365,6 +365,7 @@ pub enum Mode {
     Sort,
     Intersect,
     Subtract,
+    ApplyPatch,
     Hash,
 }
 
@@ -552,6 +553,8 @@ impl Cli {
             Mode::Intersect
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("subtract")) {
             Mode::Subtract
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("apply-patch")) {
+            Mode::ApplyPatch
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {
