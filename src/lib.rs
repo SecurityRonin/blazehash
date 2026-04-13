@@ -37,6 +37,7 @@ pub mod walk_filter;
 pub mod walk_windows;
 #[cfg(target_os = "windows")]
 pub mod walk_windows_mft;
+pub mod timeline;
 pub mod watch;
 #[cfg(feature = "yara")]
 pub mod yara_scan;
