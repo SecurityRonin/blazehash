@@ -799,6 +799,7 @@ dependencies = [
  "rand 0.8.5",
  "ratatui",
  "rayon",
+ "regex",
  "rpassword",
  "rusqlite",
  "serde",
