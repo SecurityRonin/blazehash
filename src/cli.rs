@@ -364,6 +364,7 @@ pub enum Mode {
     Export,
     Sort,
     Intersect,
+    Subtract,
     Hash,
 }
 
@@ -549,6 +550,8 @@ impl Cli {
             Mode::Sort
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("intersect")) {
             Mode::Intersect
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("subtract")) {
+            Mode::Subtract
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {

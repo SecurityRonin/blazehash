@@ -659,6 +659,23 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Subtract = cli.mode() {
+        let left = cli.paths.get(1).cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash subtract <manifest_a> <manifest_b>"))?;
+        let right = cli.paths.get(2).cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash subtract <manifest_a> <manifest_b>"))?;
+        let kept = if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::subtract::subtract_manifests(&left, &right, &mut f)?
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::subtract::subtract_manifests(&left, &right, &mut handle)?
+        };
+        if kept == 0 { std::process::exit(1); }
+        return Ok(());
+    }
+
     if let Mode::Intersect = cli.mode() {
         let left = cli.paths.get(1).cloned()
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash intersect <manifest_a> <manifest_b>"))?;
@@ -772,6 +789,7 @@ fn main() -> Result<()> {
         Mode::Export => unreachable!(),
         Mode::Sort => unreachable!(),
         Mode::Intersect => unreachable!(),
+        Mode::Subtract => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
