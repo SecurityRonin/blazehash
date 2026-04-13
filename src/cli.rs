@@ -278,6 +278,14 @@ pub struct Cli {
     /// Filter by algorithm name for verify subcommand
     #[arg(long = "verify-algo", value_name = "ALGO")]
     pub verify_algo: Option<String>,
+
+    /// Set a header key=value (tag subcommand, repeatable)
+    #[arg(long = "set", value_name = "KEY=VALUE")]
+    pub tag_set: Vec<String>,
+
+    /// Remove a header key (tag subcommand, repeatable)
+    #[arg(long = "unset", value_name = "KEY")]
+    pub tag_unset: Vec<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -372,6 +380,9 @@ pub enum Mode {
     Subtract,
     ApplyPatch,
     Verify,
+    Info,
+    Missing,
+    Tag,
     Hash,
 }
 
@@ -581,6 +592,12 @@ impl Cli {
                 }
                 _ => return Mode::Hash,
             }
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("info")) {
+            Mode::Info
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("missing")) {
+            Mode::Missing
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("tag")) {
+            Mode::Tag
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

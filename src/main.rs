@@ -759,6 +759,46 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Info = cli.mode() {
+        let manifest_path = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("info: missing manifest path"))?;
+        let stdout = std::io::stdout();
+        let mut out: Box<dyn std::io::Write> = match &cli.output {
+            Some(p) => Box::new(std::fs::File::create(p)?),
+            None => Box::new(stdout.lock()),
+        };
+        commands::info::run_info(manifest_path, cli.json, &mut out)?;
+        return Ok(());
+    }
+
+    if let Mode::Missing = cli.mode() {
+        let manifest_path = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("missing: missing manifest path"))?;
+        let root = cli.merkle_root.as_deref().map(std::path::Path::new);
+        let stdout = std::io::stdout();
+        let mut out: Box<dyn std::io::Write> = match &cli.output {
+            Some(p) => Box::new(std::fs::File::create(p)?),
+            None => Box::new(stdout.lock()),
+        };
+        let n = commands::missing::find_missing(manifest_path, root, &mut out)?;
+        if n > 0 {
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
+    if let Mode::Tag = cli.mode() {
+        let manifest_path = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("tag: missing manifest path"))?;
+        let stdout = std::io::stdout();
+        let mut out: Box<dyn std::io::Write> = match &cli.output {
+            Some(p) => Box::new(std::fs::File::create(p)?),
+            None => Box::new(stdout.lock()),
+        };
+        commands::tag::tag_manifest(manifest_path, &cli.tag_set, &cli.tag_unset, &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Verify = cli.mode() {
         let manifest_path = cli.paths.get(1)
             .ok_or_else(|| anyhow::anyhow!("verify: missing manifest path"))?;
@@ -839,6 +879,9 @@ fn main() -> Result<()> {
         Mode::Subtract => unreachable!(),
         Mode::ApplyPatch => unreachable!(),
         Mode::Verify => unreachable!(),
+        Mode::Info => unreachable!(),
+        Mode::Missing => unreachable!(),
+        Mode::Tag => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

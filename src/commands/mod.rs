@@ -1,4 +1,7 @@
 pub mod apply_patch;
+pub mod info;
+pub mod missing;
+pub mod tag;
 pub mod archive;
 pub mod audit;
 pub mod intersect;
