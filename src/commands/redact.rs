@@ -34,14 +34,18 @@ pub fn redact_manifest(manifest_path: &Path, out_path: &Path) -> Result<()> {
         .iter()
         .map(|(algo, path, hash)| (algo.clone(), path.clone(), hash.clone()))
         .collect();
-    let root = blazehash::merkle::merkle_root(&merkle_entries).unwrap_or_default();
+    let root = if hash_entries.is_empty() {
+        None
+    } else {
+        Some(blazehash::merkle::merkle_root(&merkle_entries)?)
+    };
 
     let mut out = std::fs::File::create(out_path)?;
 
     for h in &headers {
         writeln!(out, "{h}")?;
     }
-    if !root.is_empty() {
+    if let Some(root) = root {
         writeln!(out, "## merkle_root: {root}")?;
     }
 
