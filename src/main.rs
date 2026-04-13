@@ -440,6 +440,30 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Timeline = cli.mode() {
+        let manifest_path = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash timeline <manifest> [-o report.html]"))?;
+        if !manifest_path.exists() {
+            anyhow::bail!("manifest not found: {}", manifest_path.display());
+        }
+        let events = blazehash::timeline::build_timeline(&manifest_path)?;
+        match &output {
+            Some(out) => {
+                let content = if out.extension().map(|e| e == "html").unwrap_or(false) {
+                    blazehash::timeline::render_timeline_html(&events, &manifest_path)?
+                } else {
+                    serde_json::to_string_pretty(&events)?
+                };
+                std::fs::write(out, content)?;
+            }
+            None => println!("{}", serde_json::to_string_pretty(&events)?),
+        }
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -485,6 +509,7 @@ fn main() -> Result<()> {
         Mode::MerkleVerify => unreachable!(),
         Mode::Disclose => unreachable!(),
         Mode::ProveMembership => unreachable!(),
+        Mode::Timeline => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
