@@ -69,3 +69,29 @@ fn test_membership_proof_wrong_hash_fails() {
     let proof = prove_hash_membership(&entries, &"bbbb".repeat(16)).unwrap();
     assert!(!verify_membership_proof(&proof, &"dead".repeat(16)).unwrap());
 }
+
+#[test]
+fn test_selective_proof_odd_leaf_count() {
+    // 4 entries → even leaves, verify the boundary case too
+    let entries = vec![
+        ("sha256".into(), "a.bin".into(), "aaaa".repeat(16)),
+        ("sha256".into(), "b.bin".into(), "bbbb".repeat(16)),
+        ("sha256".into(), "c.bin".into(), "cccc".repeat(16)),
+        ("sha256".into(), "d.bin".into(), "dddd".repeat(16)),
+    ];
+    // Request last entry to exercise odd-position proof path
+    let proof = generate_selective_proof(&entries, &["d.bin"]).unwrap();
+    assert!(verify_selective_proof(&proof).unwrap());
+}
+
+#[test]
+fn test_selective_proof_two_entries() {
+    let entries = vec![
+        ("sha256".into(), "x.bin".into(), "eeee".repeat(16)),
+        ("sha256".into(), "y.bin".into(), "ffff".repeat(16)),
+    ];
+    let proof = generate_selective_proof(&entries, &["x.bin"]).unwrap();
+    assert!(verify_selective_proof(&proof).unwrap());
+    let root = merkle_root(&entries).unwrap();
+    assert_eq!(proof.root, root);
+}

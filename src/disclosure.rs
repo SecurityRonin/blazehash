@@ -80,10 +80,13 @@ fn merkle_proof_path(levels: &[Vec<String>], leaf_idx: usize) -> Vec<String> {
     let mut idx = leaf_idx;
     for level in &levels[..levels.len() - 1] {
         let sibling_idx = if idx % 2 == 0 { idx + 1 } else { idx - 1 };
-        if sibling_idx < level.len() {
-            path.push(level[sibling_idx].clone());
-        }
-        // If no sibling (odd leaf at end), nothing is pushed — matches merkle.rs
+        let sibling = if sibling_idx < level.len() {
+            level[sibling_idx].clone()
+        } else {
+            // Odd leaf: pair with itself (matches merkle.rs behaviour)
+            level[idx].clone()
+        };
+        path.push(sibling);
         idx /= 2;
     }
     path
@@ -98,28 +101,22 @@ fn verify_proof_path(leaf_hash_hex: &str, proof_path: &[String], root: &str) -> 
     current == root
 }
 
-// ── Nonce generation (no external rand dep) ───────────────────────────────────
+// ── Nonce generation ─────────────────────────────────────────────────────────
 
 fn rand_nonce() -> [u8; 16] {
-    use std::collections::hash_map::DefaultHasher;
-    use std::hash::{Hash, Hasher};
-    let mut h = DefaultHasher::new();
-    std::time::SystemTime::now().hash(&mut h);
-    std::thread::current().id().hash(&mut h);
-    let v = h.finish();
+    use rand::RngCore;
     let mut buf = [0u8; 16];
-    buf[..8].copy_from_slice(&v.to_le_bytes());
-    buf[8..].copy_from_slice(&v.wrapping_add(1).to_le_bytes());
+    rand::thread_rng().fill_bytes(&mut buf);
     buf
 }
 
-// ── Helper: filter sha256 entries and sort by leaf hash (matching merkle.rs) ──
+// ── Helper: build sorted leaf set matching merkle.rs exactly ─────────────────
 
-/// Returns (path, sha256) pairs sorted by their leaf hash — exactly as merkle.rs does.
+/// Returns (path, hash) pairs sorted by their leaf hash — exactly as merkle.rs does.
+/// Uses ALL entries regardless of algorithm, matching `merkle.rs::build_levels`.
 fn sorted_sha256_entries(entries: &[(String, String, String)]) -> Vec<(String, String)> {
     let mut pairs: Vec<(String, String, String)> = entries
         .iter()
-        .filter(|(algo, _, _)| algo == "sha256")
         .map(|(_, path, hash)| {
             let lh = leaf_hash_hex(path, hash);
             (lh, path.clone(), hash.clone())
@@ -143,9 +140,6 @@ pub fn generate_selective_proof(
     }
 
     let sorted = sorted_sha256_entries(entries);
-    if sorted.is_empty() {
-        bail!("no sha256 entries in manifest");
-    }
 
     let leaves: Vec<String> = sorted
         .iter()
@@ -202,9 +196,6 @@ pub fn prove_hash_membership(
     }
 
     let sorted = sorted_sha256_entries(entries);
-    if sorted.is_empty() {
-        bail!("no sha256 entries in manifest");
-    }
 
     // Find the position of the target hash
     let pos = sorted
