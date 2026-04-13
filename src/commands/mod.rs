@@ -8,6 +8,7 @@ pub mod diff;
 pub mod hash;
 #[cfg(feature = "docker")]
 pub mod image;
+pub mod lint;
 pub mod merge;
 pub mod normalize;
 pub mod piecewise;

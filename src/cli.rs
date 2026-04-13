@@ -326,6 +326,7 @@ pub enum Mode {
     #[cfg(feature = "qr")]
     Qr,
     Timeline,
+    Lint,
     Redact,
     Stats,
     Filter,
@@ -470,6 +471,8 @@ impl Cli {
             == Some(std::ffi::OsStr::new("timeline"))
         {
             Mode::Timeline
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("lint")) {
+            Mode::Lint
         } else if self.paths.first().map(|p| p.as_os_str())
             == Some(std::ffi::OsStr::new("redact"))
         {

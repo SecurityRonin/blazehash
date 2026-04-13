@@ -579,6 +579,24 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Lint = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash lint <manifest>"))?;
+        let report = commands::lint::lint_manifest(&manifest)?;
+        if cli.json {
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        } else {
+            commands::lint::print_report(&report);
+        }
+        if !report.ok() {
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -625,6 +643,7 @@ fn main() -> Result<()> {
         Mode::Disclose => unreachable!(),
         Mode::ProveMembership => unreachable!(),
         Mode::Timeline => unreachable!(),
+        Mode::Lint => unreachable!(),
         Mode::Redact => unreachable!(),
         Mode::Stats => unreachable!(),
         Mode::Filter => unreachable!(),
