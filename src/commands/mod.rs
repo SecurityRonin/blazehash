@@ -1,3 +1,4 @@
+pub mod archive;
 pub mod audit;
 pub mod bench;
 pub mod completions;

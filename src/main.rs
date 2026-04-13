@@ -544,6 +544,20 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Archive = cli.mode() {
+        let archive_path = std::path::Path::new(
+            cli.paths.get(1).map(|s| s.as_os_str()).unwrap_or_default(),
+        );
+        if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::archive::hash_archive(archive_path, &mut f)?;
+        } else {
+            let stdout = std::io::stdout();
+            commands::archive::hash_archive(archive_path, &mut stdout.lock())?;
+        }
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -595,6 +609,7 @@ fn main() -> Result<()> {
         Mode::Filter => unreachable!(),
         Mode::Normalize => unreachable!(),
         Mode::Selfcheck => unreachable!(),
+        Mode::Archive => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
