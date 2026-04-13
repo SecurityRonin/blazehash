@@ -246,6 +246,10 @@ pub struct Cli {
     /// Add path prefix to all entries (for normalize subcommand)
     #[arg(long = "add-prefix", value_name = "PREFIX")]
     pub add_prefix: Option<String>,
+
+    /// Source format for convert subcommand (sha256sum, md5sum, sha1sum, hashdeep, sfv)
+    #[arg(long = "from", value_name = "FORMAT")]
+    pub from_format: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -328,6 +332,7 @@ pub enum Mode {
     Normalize,
     Selfcheck,
     Archive,
+    Convert,
     Hash,
 }
 
@@ -489,6 +494,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("archive"))
         {
             Mode::Archive
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("convert"))
+        {
+            Mode::Convert
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {

@@ -2,6 +2,7 @@ pub mod archive;
 pub mod audit;
 pub mod bench;
 pub mod completions;
+pub mod convert;
 pub mod dedup;
 pub mod diff;
 pub mod hash;

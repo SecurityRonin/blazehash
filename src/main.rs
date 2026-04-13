@@ -558,6 +558,27 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Convert = cli.mode() {
+        let input = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash convert <file> --from <format> [-o output]"))?;
+        let format = cli
+            .from_format
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("--from <format> is required (sha256sum, md5sum, sha1sum, hashdeep, sfv)"))?;
+        if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::convert::convert_manifest(&input, format, &mut f)?;
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::convert::convert_manifest(&input, format, &mut handle)?;
+        }
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -610,6 +631,7 @@ fn main() -> Result<()> {
         Mode::Normalize => unreachable!(),
         Mode::Selfcheck => unreachable!(),
         Mode::Archive => unreachable!(),
+        Mode::Convert => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
