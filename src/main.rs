@@ -815,6 +815,48 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Count = cli.mode() {
+        let manifest_path = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("count: missing manifest path"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        commands::count::count_entries(manifest_path, &mut out)?;
+        return Ok(());
+    }
+
+    if let Mode::Cat = cli.mode() {
+        let input_paths: Vec<&std::path::Path> = cli.paths[1..].iter()
+            .map(|p| p.as_path())
+            .collect();
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        commands::cat::cat_manifests(&input_paths, &mut out)?;
+        return Ok(());
+    }
+
+    if let Mode::Split = cli.mode() {
+        let manifest_path = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("split: missing manifest path"))?;
+        let out_base = cli.output.as_deref()
+            .ok_or_else(|| anyhow::anyhow!("split: -o <base> is required"))?;
+        commands::split::split_manifest(manifest_path, cli.split_chunk, out_base)?;
+        return Ok(());
+    }
+
+    if let Mode::Uniq = cli.mode() {
+        let manifest_path = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("uniq: missing manifest path"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        commands::uniq::uniq_manifest(manifest_path, &mut out)?;
+        return Ok(());
+    }
+
+    if let Mode::Checksum = cli.mode() {
+        let manifest_path = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("checksum: missing manifest path"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        commands::checksum::checksum_manifest(manifest_path, cli.json, &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -882,6 +924,11 @@ fn main() -> Result<()> {
         Mode::Info => unreachable!(),
         Mode::Missing => unreachable!(),
         Mode::Tag => unreachable!(),
+        Mode::Count => unreachable!(),
+        Mode::Cat => unreachable!(),
+        Mode::Split => unreachable!(),
+        Mode::Uniq => unreachable!(),
+        Mode::Checksum => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

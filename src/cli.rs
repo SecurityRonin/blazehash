@@ -286,6 +286,10 @@ pub struct Cli {
     /// Remove a header key (tag subcommand, repeatable)
     #[arg(long = "unset", value_name = "KEY")]
     pub tag_unset: Vec<String>,
+
+    /// Number of entries per chunk file for split subcommand (default: 1000)
+    #[arg(long = "chunk", default_value = "1000")]
+    pub split_chunk: usize,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -383,6 +387,11 @@ pub enum Mode {
     Info,
     Missing,
     Tag,
+    Count,
+    Cat,
+    Split,
+    Uniq,
+    Checksum,
     Hash,
 }
 
@@ -598,6 +607,16 @@ impl Cli {
             Mode::Missing
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("tag")) {
             Mode::Tag
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("count")) {
+            Mode::Count
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("cat")) {
+            Mode::Cat
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("split")) {
+            Mode::Split
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("uniq")) {
+            Mode::Uniq
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("checksum")) {
+            Mode::Checksum
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
