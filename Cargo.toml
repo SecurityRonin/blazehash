@@ -62,6 +62,7 @@ parquet = { version = "54", optional = true }
 arrow = { version = "54", optional = true }
 oci-distribution = { version = "0.11", optional = true }
 flate2 = { version = "1", optional = true }
+zip = { version = "2", optional = true }
 tar = { version = "0.4", optional = true }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"], optional = true }
 notify = "6"
@@ -98,7 +99,7 @@ windows-sys = { version = "0.59", features = [
 tokio = { version = "1", features = ["rt-multi-thread", "fs", "sync", "macros"] }
 
 [features]
-default = ["forensic-image", "gpu", "sqlite", "parquet-output", "duckdb-output", "pq", "qr"]
+default = ["forensic-image", "gpu", "sqlite", "parquet-output", "duckdb-output", "pq", "qr", "archive"]
 forensic-image = ["dep:ewf"]
 gpu = ["dep:wgpu", "dep:pollster", "dep:toml", "dep:dirs"]
 sqlite = ["dep:rusqlite"]
@@ -107,6 +108,7 @@ yara    = ["dep:yara-x"]
 report  = ["dep:minijinja"]
 parquet-output = ["dep:parquet", "dep:arrow"]
 docker  = ["dep:oci-distribution", "dep:flate2", "dep:tar", "dep:tokio"]
+archive = ["dep:zip", "dep:flate2", "dep:tar"]
 duckdb-output = ["dep:duckdb"]
 tui = ["dep:ratatui", "dep:crossterm"]
 ots = []
@@ -133,3 +135,4 @@ tempfile = "3"
 assert_cmd = "2"
 predicates = "3"
 regex = "1"
+zip = "2"
