@@ -238,6 +238,14 @@ pub struct Cli {
     /// Filter by algorithm name (for filter subcommand)
     #[arg(long = "algo", value_name = "ALGO")]
     pub filter_algo: Option<String>,
+
+    /// Strip path prefix from all entries (for normalize subcommand)
+    #[arg(long = "strip-prefix", value_name = "PREFIX")]
+    pub strip_prefix: Option<String>,
+
+    /// Add path prefix to all entries (for normalize subcommand)
+    #[arg(long = "add-prefix", value_name = "PREFIX")]
+    pub add_prefix: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -317,6 +325,7 @@ pub enum Mode {
     Redact,
     Stats,
     Filter,
+    Normalize,
     Hash,
 }
 
@@ -466,6 +475,10 @@ impl Cli {
             == Some(std::ffi::OsStr::new("filter"))
         {
             Mode::Filter
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("normalize"))
+        {
+            Mode::Normalize
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {

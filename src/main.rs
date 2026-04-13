@@ -510,6 +510,30 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Normalize = cli.mode() {
+        let manifest_path = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash normalize <manifest> [--strip-prefix PREFIX] [--add-prefix PREFIX] [-o output]"))?;
+        if !manifest_path.exists() {
+            anyhow::bail!("manifest not found: {}", manifest_path.display());
+        }
+        let opts = commands::normalize::NormalizeOpts {
+            strip_prefix: cli.strip_prefix.as_deref(),
+            add_prefix: cli.add_prefix.as_deref(),
+        };
+        if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::normalize::normalize_manifest(&manifest_path, &opts, &mut f)?;
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::normalize::normalize_manifest(&manifest_path, &opts, &mut handle)?;
+        }
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -559,6 +583,7 @@ fn main() -> Result<()> {
         Mode::Redact => unreachable!(),
         Mode::Stats => unreachable!(),
         Mode::Filter => unreachable!(),
+        Mode::Normalize => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
