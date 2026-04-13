@@ -579,6 +579,23 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Head = cli.mode() {
+        let manifest = cli
+            .paths
+            .get(1)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash head <manifest> [--count N]"))?;
+        if let Some(out_path) = &output {
+            let mut f = std::fs::File::create(out_path)?;
+            commands::head::head_manifest(&manifest, cli.count, &mut f)?;
+        } else {
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            commands::head::head_manifest(&manifest, cli.count, &mut handle)?;
+        }
+        return Ok(());
+    }
+
     if let Mode::Lint = cli.mode() {
         let manifest = cli
             .paths
@@ -651,6 +668,7 @@ fn main() -> Result<()> {
         Mode::Selfcheck => unreachable!(),
         Mode::Archive => unreachable!(),
         Mode::Convert => unreachable!(),
+        Mode::Head => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

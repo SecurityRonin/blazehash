@@ -6,6 +6,7 @@ pub mod convert;
 pub mod dedup;
 pub mod diff;
 pub mod hash;
+pub mod head;
 #[cfg(feature = "docker")]
 pub mod image;
 pub mod lint;

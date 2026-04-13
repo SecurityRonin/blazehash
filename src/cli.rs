@@ -250,6 +250,10 @@ pub struct Cli {
     /// Source format for convert subcommand (sha256sum, md5sum, sha1sum, hashdeep, sfv)
     #[arg(long = "from", value_name = "FORMAT")]
     pub from_format: Option<String>,
+
+    /// Number of entries to output for head subcommand (default: 10)
+    #[arg(long = "count", short = 'n', default_value = "10")]
+    pub count: usize,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -334,6 +338,7 @@ pub enum Mode {
     Selfcheck,
     Archive,
     Convert,
+    Head,
     Hash,
 }
 
@@ -501,6 +506,8 @@ impl Cli {
             == Some(std::ffi::OsStr::new("convert"))
         {
             Mode::Convert
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("head")) {
+            Mode::Head
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
                 Some("stamp") => {
