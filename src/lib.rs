@@ -1,4 +1,5 @@
 pub mod ads;
+pub mod disclosure;
 pub mod algorithm;
 pub mod audit;
 pub mod config;
