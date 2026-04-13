@@ -1,5 +1,6 @@
 pub mod archive;
 pub mod audit;
+pub mod intersect;
 pub mod bench;
 pub mod completions;
 pub mod convert;
