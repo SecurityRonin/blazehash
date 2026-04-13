@@ -40,6 +40,7 @@ pub mod stdin;
 pub mod update;
 pub mod pivot;
 pub mod rename_cmd;
+pub mod slice_cmd;
 pub mod verify;
 pub mod verify_image;
 pub mod vt;

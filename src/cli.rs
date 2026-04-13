@@ -302,6 +302,10 @@ pub struct Cli {
     /// Replacement string for --rename-from (default: empty string)
     #[arg(long = "rename-to", default_value = "")]
     pub rename_to: String,
+
+    /// Offset for slice subcommand (skip first N entries)
+    #[arg(long = "offset", default_value = "0")]
+    pub slice_offset: usize,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -406,6 +410,7 @@ pub enum Mode {
     Checksum,
     Pivot,
     Rename,
+    Slice,
     Hash,
 }
 
@@ -635,6 +640,8 @@ impl Cli {
             Mode::Pivot
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("rename")) {
             Mode::Rename
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("slice")) {
+            Mode::Slice
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

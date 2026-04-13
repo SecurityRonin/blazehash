@@ -872,6 +872,19 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Slice = cli.mode() {
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("blazehash slice requires a manifest path"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::slice_cmd::slice_manifest(
+            manifest.as_ref(),
+            cli.slice_offset,
+            cli.count,
+            &mut out,
+        )?;
+        return Ok(());
+    }
+
     if let Mode::Pivot = cli.mode() {
         let algo = cli.pivot_algo.as_deref()
             .ok_or_else(|| anyhow::anyhow!("--pivot-algo is required for blazehash pivot"))?;
@@ -956,6 +969,7 @@ fn main() -> Result<()> {
         Mode::Checksum => unreachable!(),
         Mode::Pivot => unreachable!(),
         Mode::Rename => unreachable!(),
+        Mode::Slice => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
