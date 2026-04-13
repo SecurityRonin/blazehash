@@ -79,7 +79,7 @@ pub fn write_stix<W: Write>(
                 let file_path = result.path.to_string_lossy();
                 for rule_name in matches {
                     if let Some(technique) = lookup_attack(rule_name) {
-                        let id_input = format!("{}-{}", file_path, technique.technique_id);
+                        let id_input = format!("{}-{}-{}", file_path, technique.technique_id, rule_name);
                         let uuid = Uuid::new_v5(&Uuid::NAMESPACE_URL, id_input.as_bytes());
                         objects.push(json!({
                             "type": "x-mitre-attack",
