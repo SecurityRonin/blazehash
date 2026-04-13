@@ -91,3 +91,18 @@ fn test_render_timeline_html_contains_table() {
     assert!(html.contains("<table"));
     assert!(html.contains("<tr"));
 }
+
+#[test]
+fn test_timeline_none_timestamp_sorts_last() {
+    let mut events = vec![
+        TimelineEvent { kind: TimelineEventKind::Timestamped, timestamp: None, description: "no ts".into() },
+        TimelineEvent { kind: TimelineEventKind::Acquired, timestamp: Some("2026-04-13T00:00:00Z".into()), description: "has ts".into() },
+    ];
+    events.sort_by(|a, b| match (&a.timestamp, &b.timestamp) {
+        (None, None) => std::cmp::Ordering::Equal,
+        (None, Some(_)) => std::cmp::Ordering::Greater,
+        (Some(_), None) => std::cmp::Ordering::Less,
+        (Some(x), Some(y)) => x.cmp(y),
+    });
+    assert!(events.last().unwrap().timestamp.is_none(), "None timestamp must sort last");
+}

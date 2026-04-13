@@ -32,7 +32,7 @@ fn file_mtime_iso(path: &Path) -> Option<String> {
 
 fn read_sidecar_meta(path: &Path, key: &str) -> Option<String> {
     let content = std::fs::read_to_string(path).ok()?;
-    let prefix = format!("# {}: ", key);
+    let prefix = format!("# {key}: ");
     for line in content.lines().take(10) {
         if let Some(rest) = line.strip_prefix(&prefix) {
             return Some(rest.trim().to_string());
@@ -41,13 +41,13 @@ fn read_sidecar_meta(path: &Path, key: &str) -> Option<String> {
     None
 }
 
-fn sidecar_path(manifest_path: &Path, ext: &str) -> std::path::PathBuf {
-    let name = format!(
-        "{}.{}",
-        manifest_path.file_name().unwrap().to_string_lossy(),
-        ext
-    );
-    manifest_path.parent().unwrap_or(Path::new(".")).join(name)
+fn sidecar_path(manifest_path: &Path, ext: &str) -> anyhow::Result<std::path::PathBuf> {
+    let base = manifest_path
+        .file_name()
+        .ok_or_else(|| anyhow::anyhow!("manifest path has no file name"))?
+        .to_string_lossy();
+    let name = format!("{base}.{ext}");
+    Ok(manifest_path.parent().unwrap_or(Path::new(".")).join(name))
 }
 
 pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
@@ -64,19 +64,19 @@ pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
     });
 
     // 2. .sig sidecar
-    let sig_path = sidecar_path(manifest_path, "sig");
+    let sig_path = sidecar_path(manifest_path, "sig")?;
     if sig_path.exists() {
         let signed_at = read_sidecar_meta(&sig_path, "signed_at");
         let pubkey = read_sidecar_meta(&sig_path, "pubkey").unwrap_or_default();
         events.push(TimelineEvent {
             kind: TimelineEventKind::Signed { pubkey: pubkey.clone() },
             timestamp: signed_at,
-            description: format!("Ed25519 signature by pubkey {}", pubkey),
+            description: format!("Ed25519 signature by pubkey {pubkey}"),
         });
     }
 
     // 3. .msig sidecar
-    let msig_path = sidecar_path(manifest_path, "msig");
+    let msig_path = sidecar_path(manifest_path, "msig")?;
     if msig_path.exists() {
         if let Ok(content) = std::fs::read_to_string(&msig_path) {
             if let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) {
@@ -94,7 +94,7 @@ pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
                         events.push(TimelineEvent {
                             kind: TimelineEventKind::Cosigned { pubkey: pubkey.clone() },
                             timestamp: signed_at,
-                            description: format!("Co-signed by pubkey {}", pubkey),
+                            description: format!("Co-signed by pubkey {pubkey}"),
                         });
                     }
                 }
@@ -103,7 +103,7 @@ pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
     }
 
     // 4. .ots sidecar
-    let ots_path = sidecar_path(manifest_path, "ots");
+    let ots_path = sidecar_path(manifest_path, "ots")?;
     if ots_path.exists() {
         events.push(TimelineEvent {
             kind: TimelineEventKind::Timestamped,
@@ -113,7 +113,7 @@ pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
     }
 
     // 5. .pqsig sidecar
-    let pqsig_path = sidecar_path(manifest_path, "pqsig");
+    let pqsig_path = sidecar_path(manifest_path, "pqsig")?;
     if pqsig_path.exists() {
         let signed_at = read_sidecar_meta(&pqsig_path, "signed_at");
         let pubkey = read_sidecar_meta(&pqsig_path, "pubkey").unwrap_or_default();
@@ -121,18 +121,31 @@ pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
         events.push(TimelineEvent {
             kind: TimelineEventKind::PqSigned { pubkey_prefix: pubkey_prefix.clone() },
             timestamp: signed_at,
-            description: format!("ML-DSA post-quantum signature by pubkey prefix {}", pubkey_prefix),
+            description: format!("ML-DSA post-quantum signature by pubkey prefix {pubkey_prefix}"),
         });
     }
 
     // Sort by timestamp (None sorts last)
-    events.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+    events.sort_by(|a, b| match (&a.timestamp, &b.timestamp) {
+        (None, None) => std::cmp::Ordering::Equal,
+        (None, Some(_)) => std::cmp::Ordering::Greater,
+        (Some(_), None) => std::cmp::Ordering::Less,
+        (Some(x), Some(y)) => x.cmp(y),
+    });
 
     Ok(events)
 }
 
+fn html_escape(s: &str) -> String {
+    s.replace('&', "&amp;")
+     .replace('<', "&lt;")
+     .replace('>', "&gt;")
+     .replace('"', "&quot;")
+     .replace('\'', "&#39;")
+}
+
 pub fn render_timeline_html(events: &[TimelineEvent], manifest_path: &Path) -> Result<String> {
-    let manifest_name = manifest_path
+    let manifest = manifest_path
         .file_name()
         .unwrap_or_default()
         .to_string_lossy();
@@ -142,16 +155,16 @@ pub fn render_timeline_html(events: &[TimelineEvent], manifest_path: &Path) -> R
         let ts = event.timestamp.as_deref().unwrap_or("—");
         let kind = match &event.kind {
             TimelineEventKind::Acquired => "Acquired".to_string(),
-            TimelineEventKind::Signed { pubkey } => format!("Signed ({})", pubkey),
-            TimelineEventKind::Cosigned { pubkey } => format!("Cosigned ({})", pubkey),
+            TimelineEventKind::Signed { pubkey } => format!("Signed ({pubkey})"),
+            TimelineEventKind::Cosigned { pubkey } => format!("Cosigned ({pubkey})"),
             TimelineEventKind::Timestamped => "Timestamped".to_string(),
             TimelineEventKind::PqSigned { pubkey_prefix } => {
-                format!("PQ-Signed ({}…)", pubkey_prefix)
+                format!("PQ-Signed ({pubkey_prefix}…)")
             }
         };
         rows.push_str(&format!(
             "<tr><td>{}</td><td>{}</td><td>{}</td></tr>\n",
-            ts, kind, event.description
+            html_escape(ts), html_escape(&kind), html_escape(&event.description)
         ));
     }
 
@@ -179,8 +192,6 @@ pub fn render_timeline_html(events: &[TimelineEvent], manifest_path: &Path) -> R
 </body>
 </html>
 "#,
-        manifest = manifest_name,
-        rows = rows,
     );
 
     Ok(html)
