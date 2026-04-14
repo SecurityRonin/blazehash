@@ -79,6 +79,7 @@ ml-dsa = "0.1.0-rc.8"
 signature = "2"
 qrcode = { version = "0.14", optional = true }
 image = { version = "0.25", optional = true, default-features = false, features = ["png"] }
+regex = "1"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 libc = "0.2"

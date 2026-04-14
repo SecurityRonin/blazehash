@@ -903,6 +903,21 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Grep = cli.mode() {
+        let pattern = cli.grep_pattern.as_deref()
+            .ok_or_else(|| anyhow::anyhow!("--pattern is required for blazehash grep"))?;
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("blazehash grep requires a manifest path"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::grep_cmd::grep_manifest(
+            manifest.as_ref(),
+            pattern,
+            cli.ignore_case,
+            &mut out,
+        )?;
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -979,6 +994,7 @@ fn main() -> Result<()> {
         Mode::Rename => unreachable!(),
         Mode::Slice => unreachable!(),
         Mode::Stamp => unreachable!(),
+        Mode::Grep => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

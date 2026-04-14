@@ -306,6 +306,10 @@ pub struct Cli {
     /// Offset for slice subcommand (skip first N entries)
     #[arg(long = "offset", default_value = "0")]
     pub slice_offset: usize,
+
+    /// Regex pattern to match against path or hash (for `blazehash grep`)
+    #[arg(long = "pattern")]
+    pub grep_pattern: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -412,6 +416,7 @@ pub enum Mode {
     Rename,
     Slice,
     Stamp,
+    Grep,
     Hash,
 }
 
@@ -645,6 +650,8 @@ impl Cli {
             Mode::Slice
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("stamp")) {
             Mode::Stamp
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("grep")) {
+            Mode::Grep
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
