@@ -47,6 +47,7 @@ pub mod contains_cmd;
 pub mod grep_cmd;
 pub mod rename_cmd;
 pub mod slice_cmd;
+pub mod duplicates;
 pub mod tally;
 pub mod verify;
 pub mod verify_image;

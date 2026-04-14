@@ -435,6 +435,7 @@ pub enum Mode {
     Contains,
     PathOnly,
     HashOnly,
+    Duplicates,
     Hash,
 }
 
@@ -680,6 +681,8 @@ impl Cli {
             Mode::PathOnly
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("hash-only")) {
             Mode::HashOnly
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("duplicates")) {
+            Mode::Duplicates
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

@@ -971,6 +971,14 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Duplicates = cli.mode() {
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash duplicates <manifest>"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::duplicates::duplicates_manifest(manifest.as_ref(), &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -1053,6 +1061,7 @@ fn main() -> Result<()> {
         Mode::Contains => unreachable!(),
         Mode::PathOnly => unreachable!(),
         Mode::HashOnly => unreachable!(),
+        Mode::Duplicates => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
