@@ -936,6 +936,19 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Contains = cli.mode() {
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash contains <manifest> <term>"))?;
+        let term = cli.paths.get(2).and_then(|p| p.to_str())
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash contains <manifest> <term>"))?;
+        let found = crate::commands::contains_cmd::contains_manifest(manifest.as_ref(), term)?;
+        if !found {
+            println!("NOT FOUND");
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -1015,6 +1028,7 @@ fn main() -> Result<()> {
         Mode::Grep => unreachable!(),
         Mode::Tally => unreachable!(),
         Mode::Exclude => unreachable!(),
+        Mode::Contains => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
