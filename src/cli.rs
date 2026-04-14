@@ -436,6 +436,7 @@ pub enum Mode {
     PathOnly,
     HashOnly,
     Duplicates,
+    Repair,
     Hash,
 }
 
@@ -683,6 +684,8 @@ impl Cli {
             Mode::HashOnly
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("duplicates")) {
             Mode::Duplicates
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("repair")) {
+            Mode::Repair
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

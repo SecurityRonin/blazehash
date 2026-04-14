@@ -30,6 +30,7 @@ pub mod piecewise;
 pub mod search;
 pub mod selfcheck;
 pub mod redact;
+pub mod repair;
 pub mod sample;
 pub mod exclude;
 pub mod filter;
