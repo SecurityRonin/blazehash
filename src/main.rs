@@ -738,6 +738,16 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::SymDiff = cli.mode() {
+        let a = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash sym-diff <manifest-a> <manifest-b>"))?;
+        let b = cli.paths.get(2)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash sym-diff <manifest-a> <manifest-b>"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::sym_diff::sym_diff_manifests(a.as_ref(), b.as_ref(), &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Intersect = cli.mode() {
         let left = cli.paths.get(1).cloned()
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash intersect <manifest_a> <manifest_b>"))?;
@@ -1071,6 +1081,7 @@ fn main() -> Result<()> {
         Mode::HashOnly => unreachable!(),
         Mode::Duplicates => unreachable!(),
         Mode::Repair => unreachable!(),
+        Mode::SymDiff => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

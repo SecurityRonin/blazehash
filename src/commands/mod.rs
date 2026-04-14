@@ -32,6 +32,7 @@ pub mod selfcheck;
 pub mod redact;
 pub mod repair;
 pub mod sample;
+pub mod sym_diff;
 pub mod exclude;
 pub mod filter;
 pub mod stats;
