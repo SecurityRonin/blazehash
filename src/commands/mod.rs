@@ -31,6 +31,7 @@ pub mod search;
 pub mod selfcheck;
 pub mod redact;
 pub mod sample;
+pub mod exclude;
 pub mod filter;
 pub mod stats;
 #[cfg(feature = "report")]

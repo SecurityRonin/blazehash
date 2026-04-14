@@ -537,6 +537,16 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Exclude = cli.mode() {
+        let pattern = cli.exclude_pattern.as_deref()
+            .ok_or_else(|| anyhow::anyhow!("--exclude-pattern is required for blazehash exclude"))?;
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash exclude <manifest> --exclude-pattern <GLOB>"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::exclude::exclude_manifest(manifest.as_ref(), pattern, &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Normalize = cli.mode() {
         let manifest_path = cli
             .paths
@@ -1004,6 +1014,7 @@ fn main() -> Result<()> {
         Mode::Stamp => unreachable!(),
         Mode::Grep => unreachable!(),
         Mode::Tally => unreachable!(),
+        Mode::Exclude => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

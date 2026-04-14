@@ -315,6 +315,10 @@ pub struct Cli {
     #[arg(long = "tally-by", value_name = "FIELD", default_value = "ext",
           value_parser = ["ext", "dir", "algo"])]
     pub tally_by: String,
+
+    /// Glob pattern to exclude entries for exclude subcommand
+    #[arg(long = "exclude-pattern", value_name = "GLOB")]
+    pub exclude_pattern: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -423,6 +427,7 @@ pub enum Mode {
     Stamp,
     Grep,
     Tally,
+    Exclude,
     Hash,
 }
 
@@ -660,6 +665,8 @@ impl Cli {
             Mode::Grep
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("tally")) {
             Mode::Tally
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("exclude")) {
+            Mode::Exclude
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
