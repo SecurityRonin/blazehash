@@ -310,6 +310,11 @@ pub struct Cli {
     /// Regex pattern to match against path or hash (for `blazehash grep`)
     #[arg(long = "pattern")]
     pub grep_pattern: Option<String>,
+
+    /// Key to group entries by for tally subcommand (ext, dir, algo)
+    #[arg(long = "tally-by", value_name = "FIELD", default_value = "ext",
+          value_parser = ["ext", "dir", "algo"])]
+    pub tally_by: String,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -417,6 +422,7 @@ pub enum Mode {
     Slice,
     Stamp,
     Grep,
+    Tally,
     Hash,
 }
 
@@ -652,6 +658,8 @@ impl Cli {
             Mode::Stamp
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("grep")) {
             Mode::Grep
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("tally")) {
+            Mode::Tally
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

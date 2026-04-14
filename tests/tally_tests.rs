@@ -1,5 +1,6 @@
-use std::io::Write;
-use tempfile::NamedTempFile;
+use assert_cmd::Command;
+use std::fs;
+use tempfile::TempDir;
 
 const MANIFEST: &str = "\
 ## case: TALLY-TEST
@@ -10,23 +11,31 @@ sha256  dddd4444444444444444444444444444444444444444444444444444444444444444  /d
 blake3  eeee5555555555555555555555555555555555555555555555555555555555555555  /no_extension_file
 ";
 
-fn write_manifest() -> NamedTempFile {
-    let mut f = NamedTempFile::new().unwrap();
-    f.write_all(MANIFEST.as_bytes()).unwrap();
-    f.flush().unwrap();
-    f
+fn write_manifest(dir: &TempDir) -> std::path::PathBuf {
+    let p = dir.path().join("test.hash");
+    fs::write(&p, MANIFEST).unwrap();
+    p
 }
 
 #[test]
 fn test_tally_by_ext_default() {
-    let manifest = write_manifest();
-    let mut out = Vec::new();
-    blazehash::commands::tally::tally_manifest(manifest.path(), "ext", &mut out).unwrap();
-    let text = String::from_utf8(out).unwrap();
+    let dir = TempDir::new().unwrap();
+    let manifest = write_manifest(&dir);
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["tally", manifest.to_str().unwrap()])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "tally should succeed");
+    let text = String::from_utf8(output.stdout).unwrap();
     let lines: Vec<&str> = text.lines().collect();
     // First line must be "2\t.exe"
-    assert_eq!(lines[0], "2\t.exe", "first line should be 2\t.exe, got: {:?}", lines);
-    // Output must contain .txt, .pdf, (none)
+    assert_eq!(
+        lines.first().copied(),
+        Some("2\t.exe"),
+        "first line should be 2\\t.exe, got: {:?}",
+        lines
+    );
     assert!(text.contains(".txt"), "output should contain .txt\n{text}");
     assert!(text.contains(".pdf"), "output should contain .pdf\n{text}");
     assert!(text.contains("(none)"), "output should contain (none)\n{text}");
@@ -34,45 +43,77 @@ fn test_tally_by_ext_default() {
 
 #[test]
 fn test_tally_by_algo() {
-    let manifest = write_manifest();
-    let mut out = Vec::new();
-    blazehash::commands::tally::tally_manifest(manifest.path(), "algo", &mut out).unwrap();
-    let text = String::from_utf8(out).unwrap();
+    let dir = TempDir::new().unwrap();
+    let manifest = write_manifest(&dir);
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["tally", manifest.to_str().unwrap(), "--tally-by", "algo"])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "tally --tally-by algo should succeed");
+    let text = String::from_utf8(output.stdout).unwrap();
     let lines: Vec<&str> = text.lines().collect();
     assert!(lines.len() >= 2, "expected at least 2 lines, got: {:?}", lines);
-    assert_eq!(lines[0], "3\tsha256", "first line should be 3\tsha256, got: {:?}", lines[0]);
-    assert_eq!(lines[1], "2\tblake3", "second line should be 2\tblake3, got: {:?}", lines[1]);
+    assert_eq!(
+        lines.first().copied(),
+        Some("3\tsha256"),
+        "first line should be 3\\tsha256, got: {:?}",
+        lines
+    );
+    assert_eq!(
+        lines.get(1).copied(),
+        Some("2\tblake3"),
+        "second line should be 2\\tblake3, got: {:?}",
+        lines
+    );
 }
 
 #[test]
 fn test_tally_by_dir() {
-    let manifest = write_manifest();
-    let mut out = Vec::new();
-    blazehash::commands::tally::tally_manifest(manifest.path(), "dir", &mut out).unwrap();
-    let text = String::from_utf8(out).unwrap();
+    let dir = TempDir::new().unwrap();
+    let manifest = write_manifest(&dir);
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["tally", manifest.to_str().unwrap(), "--tally-by", "dir"])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "tally --tally-by dir should succeed");
+    let text = String::from_utf8(output.stdout).unwrap();
     assert!(text.contains("/evidence"), "output should contain /evidence\n{text}");
     assert!(text.contains("/docs"), "output should contain /docs\n{text}");
 }
 
 #[test]
 fn test_tally_missing_manifest_fails() {
-    let mut out = Vec::new();
-    let result = blazehash::commands::tally::tally_manifest(
-        std::path::Path::new("/nonexistent/path/manifest.hash"),
-        "ext",
-        &mut out,
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args(["tally", "/nonexistent/path/manifest.hash"])
+        .output()
+        .unwrap();
+    assert!(
+        !output.status.success(),
+        "tally should fail on missing manifest"
     );
-    assert!(result.is_err(), "should fail on missing manifest");
 }
 
 #[test]
 fn test_tally_output_to_file() {
-    let manifest = write_manifest();
-    let out_file = NamedTempFile::new().unwrap();
-    let mut out = std::fs::File::create(out_file.path()).unwrap();
-    blazehash::commands::tally::tally_manifest(manifest.path(), "algo", &mut out).unwrap();
-    drop(out);
-    let text = std::fs::read_to_string(out_file.path()).unwrap();
+    let dir = TempDir::new().unwrap();
+    let manifest = write_manifest(&dir);
+    let out_path = dir.path().join("tally_out.txt");
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([
+            "tally",
+            manifest.to_str().unwrap(),
+            "--tally-by",
+            "algo",
+            "-o",
+            out_path.to_str().unwrap(),
+        ])
+        .assert()
+        .success();
+    let text = fs::read_to_string(&out_path).unwrap();
     assert!(text.contains("sha256"), "output file should contain sha256\n{text}");
     assert!(text.contains("blake3"), "output file should contain blake3\n{text}");
 }

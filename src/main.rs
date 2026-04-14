@@ -918,6 +918,14 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Tally = cli.mode() {
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash tally <manifest> [--tally-by ext|dir|algo]"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::tally::tally_manifest(manifest.as_ref(), &cli.tally_by, &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -995,6 +1003,7 @@ fn main() -> Result<()> {
         Mode::Slice => unreachable!(),
         Mode::Stamp => unreachable!(),
         Mode::Grep => unreachable!(),
+        Mode::Tally => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
