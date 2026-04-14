@@ -997,6 +997,14 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::First = cli.mode() {
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash first <manifest>"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::first_cmd::first_manifest(manifest.as_ref(), &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Vt = cli.mode() {
         let manifest = cli
             .paths
@@ -1082,6 +1090,7 @@ fn main() -> Result<()> {
         Mode::Duplicates => unreachable!(),
         Mode::Repair => unreachable!(),
         Mode::SymDiff => unreachable!(),
+        Mode::First => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

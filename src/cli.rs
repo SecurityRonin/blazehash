@@ -438,6 +438,7 @@ pub enum Mode {
     Duplicates,
     Repair,
     SymDiff,
+    First,
     Hash,
 }
 
@@ -689,6 +690,8 @@ impl Cli {
             Mode::Repair
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("sym-diff")) {
             Mode::SymDiff
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("first")) {
+            Mode::First
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
