@@ -1,3 +1,4 @@
+pub mod annotate;
 pub mod apply_patch;
 pub mod stamp;
 pub mod cat;

@@ -323,6 +323,10 @@ pub struct Cli {
     /// Filter by algorithm for hash-only subcommand
     #[arg(long = "hash-only-algo", value_name = "ALGO")]
     pub hash_only_algo: Option<String>,
+
+    /// Note message for blazehash annotate
+    #[arg(long = "note")]
+    pub annotate_note: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -439,6 +443,7 @@ pub enum Mode {
     Repair,
     SymDiff,
     First,
+    Annotate,
     Hash,
 }
 
@@ -692,6 +697,8 @@ impl Cli {
             Mode::SymDiff
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("first")) {
             Mode::First
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("annotate")) {
+            Mode::Annotate
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

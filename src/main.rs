@@ -484,6 +484,16 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Annotate = cli.mode() {
+        let note = cli.annotate_note.as_deref()
+            .ok_or_else(|| anyhow::anyhow!("--note is required for blazehash annotate"))?;
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash annotate <manifest> --note <message>"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::annotate::annotate_manifest(manifest.as_ref(), note, &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Sample = cli.mode() {
         let manifest = cli
             .paths
@@ -1091,6 +1101,7 @@ fn main() -> Result<()> {
         Mode::Repair => unreachable!(),
         Mode::SymDiff => unreachable!(),
         Mode::First => unreachable!(),
+        Mode::Annotate => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
