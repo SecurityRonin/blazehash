@@ -460,6 +460,18 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::HashOnly = cli.mode() {
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash hash-only <manifest> [--hash-only-algo ALGO]"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::hash_only::hash_only_manifest(
+            manifest.as_ref(),
+            cli.hash_only_algo.as_deref(),
+            &mut out,
+        )?;
+        return Ok(());
+    }
+
     if let Mode::Redact = cli.mode() {
         let manifest = cli
             .paths
@@ -1040,6 +1052,7 @@ fn main() -> Result<()> {
         Mode::Exclude => unreachable!(),
         Mode::Contains => unreachable!(),
         Mode::PathOnly => unreachable!(),
+        Mode::HashOnly => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

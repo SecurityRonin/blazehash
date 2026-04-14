@@ -319,6 +319,10 @@ pub struct Cli {
     /// Glob pattern to exclude entries for exclude subcommand
     #[arg(long = "exclude-pattern", value_name = "GLOB")]
     pub exclude_pattern: Option<String>,
+
+    /// Filter by algorithm for hash-only subcommand
+    #[arg(long = "hash-only-algo", value_name = "ALGO")]
+    pub hash_only_algo: Option<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -430,6 +434,7 @@ pub enum Mode {
     Exclude,
     Contains,
     PathOnly,
+    HashOnly,
     Hash,
 }
 
@@ -673,6 +678,8 @@ impl Cli {
             Mode::Contains
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("path-only")) {
             Mode::PathOnly
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("hash-only")) {
+            Mode::HashOnly
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
