@@ -429,6 +429,7 @@ pub enum Mode {
     Tally,
     Exclude,
     Contains,
+    PathOnly,
     Hash,
 }
 
@@ -670,6 +671,8 @@ impl Cli {
             Mode::Exclude
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("contains")) {
             Mode::Contains
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("path-only")) {
+            Mode::PathOnly
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

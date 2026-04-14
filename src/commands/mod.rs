@@ -36,6 +36,7 @@ pub mod filter;
 pub mod stats;
 #[cfg(feature = "report")]
 pub mod report;
+pub mod path_only;
 pub mod size_only;
 pub mod sort;
 pub mod stdin;
