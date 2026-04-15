@@ -327,6 +327,10 @@ pub struct Cli {
     /// Note message for blazehash annotate
     #[arg(long = "note")]
     pub annotate_note: Option<String>,
+
+    /// Seed for blazehash shuffle (reproducible output)
+    #[arg(long = "seed")]
+    pub shuffle_seed: Option<u64>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
@@ -444,6 +448,7 @@ pub enum Mode {
     SymDiff,
     First,
     Annotate,
+    Shuffle,
     Hash,
 }
 
@@ -699,6 +704,8 @@ impl Cli {
             Mode::First
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("annotate")) {
             Mode::Annotate
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("shuffle")) {
+            Mode::Shuffle
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

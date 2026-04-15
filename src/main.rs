@@ -494,6 +494,14 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Shuffle = cli.mode() {
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash shuffle <manifest>"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::shuffle::shuffle_manifest(manifest.as_ref(), cli.shuffle_seed, &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Sample = cli.mode() {
         let manifest = cli
             .paths
@@ -1102,6 +1110,7 @@ fn main() -> Result<()> {
         Mode::SymDiff => unreachable!(),
         Mode::First => unreachable!(),
         Mode::Annotate => unreachable!(),
+        Mode::Shuffle => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

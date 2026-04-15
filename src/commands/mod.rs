@@ -57,6 +57,7 @@ pub mod verify;
 pub mod verify_image;
 pub mod vt;
 pub mod watch;
+pub mod shuffle;
 
 use anyhow::Result;
 use blazehash::walk::WalkError;
