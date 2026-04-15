@@ -502,6 +502,14 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Reverse = cli.mode() {
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash reverse <manifest>"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::reverse::reverse_manifest(manifest.as_ref(), &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Sample = cli.mode() {
         let manifest = cli
             .paths
@@ -1111,6 +1119,7 @@ fn main() -> Result<()> {
         Mode::First => unreachable!(),
         Mode::Annotate => unreachable!(),
         Mode::Shuffle => unreachable!(),
+        Mode::Reverse => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
