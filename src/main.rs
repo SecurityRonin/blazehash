@@ -518,6 +518,19 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Balance = cli.mode() {
+        let parts = cli.balance_parts
+            .ok_or_else(|| anyhow::anyhow!("--parts is required for blazehash balance"))?;
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash balance <manifest> --parts <N>"))?;
+        let out_dir = cli.output.as_deref();
+        let paths = crate::commands::balance::balance_manifest(manifest.as_ref(), parts, out_dir)?;
+        for p in paths {
+            println!("{}", p.display());
+        }
+        return Ok(());
+    }
+
     if let Mode::Sample = cli.mode() {
         let manifest = cli
             .paths
@@ -1129,6 +1142,7 @@ fn main() -> Result<()> {
         Mode::Shuffle => unreachable!(),
         Mode::Reverse => unreachable!(),
         Mode::UniqueHash => unreachable!(),
+        Mode::Balance => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

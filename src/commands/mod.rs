@@ -60,6 +60,7 @@ pub mod watch;
 pub mod shuffle;
 pub mod reverse;
 pub mod unique_hash;
+pub mod balance;
 
 use anyhow::Result;
 use blazehash::walk::WalkError;

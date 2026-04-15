@@ -291,6 +291,10 @@ pub struct Cli {
     #[arg(long = "chunk", default_value = "1000")]
     pub split_chunk: usize,
 
+    /// Number of parts for blazehash balance
+    #[arg(long = "parts")]
+    pub balance_parts: Option<usize>,
+
     /// Algorithm to pivot on (for `blazehash pivot`)
     #[arg(long = "pivot-algo")]
     pub pivot_algo: Option<String>,
@@ -451,6 +455,7 @@ pub enum Mode {
     Shuffle,
     Reverse,
     UniqueHash,
+    Balance,
     Hash,
 }
 
@@ -712,6 +717,8 @@ impl Cli {
             Mode::Reverse
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("unique-hash")) {
             Mode::UniqueHash
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("balance")) {
+            Mode::Balance
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
