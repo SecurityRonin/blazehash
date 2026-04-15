@@ -510,6 +510,14 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::UniqueHash = cli.mode() {
+        let manifest = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash unique-hash <manifest>"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::unique_hash::unique_hash_manifest(manifest.as_ref(), &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Sample = cli.mode() {
         let manifest = cli
             .paths
@@ -1120,6 +1128,7 @@ fn main() -> Result<()> {
         Mode::Annotate => unreachable!(),
         Mode::Shuffle => unreachable!(),
         Mode::Reverse => unreachable!(),
+        Mode::UniqueHash => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {

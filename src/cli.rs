@@ -450,6 +450,7 @@ pub enum Mode {
     Annotate,
     Shuffle,
     Reverse,
+    UniqueHash,
     Hash,
 }
 
@@ -709,6 +710,8 @@ impl Cli {
             Mode::Shuffle
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("reverse")) {
             Mode::Reverse
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("unique-hash")) {
+            Mode::UniqueHash
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {
