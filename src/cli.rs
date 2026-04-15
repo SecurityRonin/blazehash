@@ -456,6 +456,7 @@ pub enum Mode {
     Reverse,
     UniqueHash,
     Balance,
+    Interleave,
     Hash,
 }
 
@@ -719,6 +720,8 @@ impl Cli {
             Mode::UniqueHash
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("balance")) {
             Mode::Balance
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("interleave")) {
+            Mode::Interleave
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

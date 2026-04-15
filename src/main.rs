@@ -531,6 +531,16 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    if let Mode::Interleave = cli.mode() {
+        let a = cli.paths.get(1)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash interleave <manifest-a> <manifest-b>"))?;
+        let b = cli.paths.get(2)
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash interleave <manifest-a> <manifest-b>"))?;
+        let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+        crate::commands::interleave::interleave_manifests(a.as_ref(), b.as_ref(), &mut out)?;
+        return Ok(());
+    }
+
     if let Mode::Sample = cli.mode() {
         let manifest = cli
             .paths
@@ -1143,6 +1153,7 @@ fn main() -> Result<()> {
         Mode::Reverse => unreachable!(),
         Mode::UniqueHash => unreachable!(),
         Mode::Balance => unreachable!(),
+        Mode::Interleave => unreachable!(),
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
