@@ -110,7 +110,7 @@ windows-sys = { version = "0.59", features = [
 tokio = { version = "1", features = ["rt-multi-thread", "fs", "sync", "macros"] }
 
 [features]
-default = ["forensic-image", "gpu", "sqlite", "parquet-output", "duckdb-output", "pq", "qr", "archive"]
+default = ["forensic-image", "gpu", "sqlite", "parquet-output", "duckdb-output", "pq", "qr", "archive", "remote"]
 forensic-image = ["dep:ewf"]
 gpu = ["dep:wgpu", "dep:pollster", "dep:toml", "dep:dirs"]
 sqlite = ["dep:rusqlite"]
@@ -125,7 +125,7 @@ tui = ["dep:ratatui", "dep:crossterm"]
 ots = []
 pq  = []
 qr  = ["dep:qrcode", "dep:image"]
-remote = ["dep:opendal"]
+remote = ["dep:opendal", "dep:tokio"]
 
 [package.metadata.deb]
 maintainer = "SecurityRonin <security-ronin@users.noreply.github.com>"
