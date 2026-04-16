@@ -60,6 +60,7 @@ pub fn write_stix<W: Write>(
     results: &[FileHashResult],
     algorithms: &[Algorithm],
 ) -> Result<()> {
+    #[cfg_attr(not(feature = "yara"), allow(unused_mut))]
     let mut objects: Vec<Value> = results
         .iter()
         .map(|r| result_to_stix_sco(r, algorithms))
