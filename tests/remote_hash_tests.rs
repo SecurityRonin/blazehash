@@ -17,8 +17,21 @@ mod remote_hash_tests {
 
     #[test]
     fn test_hash_remote_walk_module_exists() {
-        // Verify the remote::walk module compiles
-        let _ = blazehash::remote::walk::hash_remote_prefix;
+        // Verify the remote::walk module compiles by calling it with a sink
+        use blazehash::algorithm::Algorithm;
+        use blazehash::remote::walk::hash_remote_prefix;
+
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        let _guard = rt.enter();
+        let async_op = Operator::new(services::Memory::default())
+            .unwrap()
+            .finish();
+        let op = opendal::blocking::Operator::new(async_op).unwrap();
+        let mut sink = Vec::<u8>::new();
+        let _ = hash_remote_prefix(&op, "empty/", &[Algorithm::Blake3], &mut sink);
     }
 
     #[test]

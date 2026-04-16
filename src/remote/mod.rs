@@ -4,6 +4,8 @@ pub mod writer;
 pub mod reader;
 #[cfg(feature = "remote")]
 pub mod operator;
+#[cfg(feature = "remote")]
+pub mod walk;
 
 /// Returns true if the string has a known remote URI scheme.
 pub fn is_remote_uri(s: &str) -> bool {
