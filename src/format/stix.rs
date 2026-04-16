@@ -69,7 +69,7 @@ pub fn write_stix<W: Write>(
     // Enrich with x-mitre-attack extension objects for any YARA matches.
     #[cfg(feature = "yara")]
     {
-        use crate::attack::lookup_attack;
+        use crate::attack::lookup_attack_for_match;
         for result in results {
             if let Some(ref matches) = result.yara_matches {
                 let file_name = result
@@ -78,9 +78,9 @@ pub fn write_stix<W: Write>(
                     .and_then(|n| n.to_str())
                     .unwrap_or("");
                 let file_path = result.path.to_string_lossy();
-                for rule_name in matches {
-                    if let Some(technique) = lookup_attack(rule_name) {
-                        let id_input = format!("{}-{}-{}", file_path, technique.technique_id, rule_name);
+                for rule_match in matches {
+                    if let Some(technique) = lookup_attack_for_match(rule_match) {
+                        let id_input = format!("{}-{}-{}", file_path, technique.technique_id, rule_match.rule_name);
                         let uuid = Uuid::new_v5(&Uuid::NAMESPACE_URL, id_input.as_bytes());
                         objects.push(json!({
                             "type": "x-mitre-attack",
@@ -89,7 +89,7 @@ pub fn write_stix<W: Write>(
                             "technique_id": technique.technique_id,
                             "tactic": technique.tactic,
                             "technique_name": technique.name,
-                            "yara_rule": rule_name,
+                            "yara_rule": rule_match.rule_name,
                             "related_file": file_name,
                         }));
                     }

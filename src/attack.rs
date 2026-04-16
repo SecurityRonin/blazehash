@@ -5,6 +5,35 @@ pub struct AttackTechnique {
     pub name: String,
 }
 
+/// Look up an ATT&CK technique for a YARA match.
+/// Priority: technique tag (T####) > name prefix table.
+#[cfg(feature = "yara")]
+pub fn lookup_attack_for_match(m: &crate::yara_scan::YaraMatch) -> Option<AttackTechnique> {
+    // 1. Check tags for T#### pattern (e.g. T1486, T1059.001)
+    for tag in &m.tags {
+        if is_technique_id(tag) {
+            return Some(AttackTechnique {
+                technique_id: tag.clone(),
+                tactic: "unknown".to_string(),
+                name: tag.clone(),
+            });
+        }
+    }
+    // 2. Fall back to name-prefix table
+    lookup_attack(&m.rule_name)
+}
+
+fn is_technique_id(s: &str) -> bool {
+    // Matches T1234 or T1234.001
+    let s = s.trim();
+    if !s.starts_with('T') {
+        return false;
+    }
+    let rest = &s[1..];
+    let base = rest.split('.').next().unwrap_or("");
+    base.len() == 4 && base.chars().all(|c| c.is_ascii_digit())
+}
+
 /// Static prefix → technique mapping entries.
 static ATTACK_PREFIXES: &[(&str, &str, &str, &str)] = &[
     ("rat_",          "T1219",     "command-and-control", "Remote Access Software"),

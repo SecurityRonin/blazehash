@@ -49,7 +49,10 @@ fn test_stix_output_includes_attack_extension_when_yara_matches() {
         hashes,
         size: 1024,
         entropy: None,
-        yara_matches: Some(vec!["RAT_QuasarRat".to_string()]),
+        yara_matches: Some(vec![blazehash::yara_scan::YaraMatch {
+            rule_name: "RAT_QuasarRat".to_string(),
+            tags: vec![],
+        }]),
     };
     let mut buf = Vec::new();
     write_stix(&mut buf, &[result], &[Algorithm::Blake3]).unwrap();
