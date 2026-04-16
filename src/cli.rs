@@ -335,6 +335,11 @@ pub struct Cli {
     /// Seed for blazehash shuffle (reproducible output)
     #[arg(long = "seed")]
     pub shuffle_seed: Option<u64>,
+
+    /// Remote backend config overrides (KEY=VALUE, repeatable).
+    /// Example: --remote-config region=eu-west-1 --remote-config endpoint=http://localhost:9000
+    #[arg(long = "remote-config", value_name = "KEY=VALUE")]
+    pub remote_config: Vec<String>,
 }
 
 pub fn parse_chunk_size(s: &str) -> Result<usize, String> {
