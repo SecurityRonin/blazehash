@@ -74,9 +74,9 @@ pub fn report_walk_errors(errors: &[WalkError]) {
 }
 
 /// Return a writer for `path` (file) or stdout when `path` is `None`.
+///
+/// When the `remote` feature is enabled and `path` is a remote URI (e.g. `s3://`, `mem://`),
+/// returns a buffered [`blazehash::remote::writer::RemoteWriter`] that uploads atomically on drop.
 pub fn output_writer(path: Option<&std::path::Path>) -> Result<Box<dyn std::io::Write>> {
-    match path {
-        Some(p) => Ok(Box::new(std::fs::File::create(p)?)),
-        None => Ok(Box::new(std::io::stdout())),
-    }
+    blazehash::output::output_writer(path)
 }

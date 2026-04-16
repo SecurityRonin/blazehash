@@ -87,6 +87,7 @@ opendal = { version = "0.55.0", optional = true, features = [
     "services-webdav",
     "services-memory",
     "services-fs",
+    "services-http",
     "blocking",
 ] }
 
