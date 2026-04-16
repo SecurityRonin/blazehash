@@ -343,3 +343,101 @@ blazehash tui -r /large-dir
 ```
 
 Live progress dashboard showing per-file progress, throughput, and a running manifest preview. Press `q` to exit.
+
+---
+
+## Remote storage — hash from and to the cloud
+
+blazehash speaks S3, GCS, Azure Blob, WebDAV, SFTP, and HTTP/S natively. Auth comes from the standard environment variables for each backend.
+
+```bash
+# Hash objects under an S3 prefix
+blazehash hash s3://dfir-bucket/case-001/
+
+# Hash an S3 prefix and write the manifest back to S3
+blazehash hash s3://dfir-bucket/case-001/ \
+  -o s3://dfir-bucket/case-001.hash
+
+# Hash local evidence, write manifest to GCS
+blazehash hash /mnt/evidence \
+  -o gcs://my-bucket/manifests/case-001.hash
+
+# Hash local evidence, write manifest to Azure Blob
+blazehash hash /mnt/evidence \
+  -o azblob://dfir-container/case-001.hash
+
+# Audit local evidence against a manifest stored on S3
+blazehash -r /mnt/evidence -a -k s3://dfir-bucket/case-001.hash
+
+# Merge two S3 manifests and write the result to S3
+blazehash merge s3://dfir-bucket/part-a.hash s3://dfir-bucket/part-b.hash \
+  -o s3://dfir-bucket/merged.hash
+```
+
+**S3 auth (AWS / MinIO / R2):**
+```bash
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_DEFAULT_REGION=us-east-1
+# For S3-compatible endpoints (MinIO, R2, Wasabi):
+export AWS_ENDPOINT_URL=https://s3.example.com
+```
+
+**GCS auth:**
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+```
+
+**Azure Blob auth:**
+```bash
+export AZURE_STORAGE_ACCOUNT=myaccount
+export AZURE_STORAGE_ACCESS_KEY=...
+# Or with SAS token:
+export AZURE_STORAGE_SAS_TOKEN=...
+```
+
+---
+
+## Manifest analysis and cleanup
+
+```bash
+# Find content-identical files (same hash, different paths)
+blazehash duplicates manifest.hash
+
+# Opposite: keep only one entry per unique hash
+blazehash unique-hash manifest.hash -o deduped.hash
+
+# Normalize formatting — strip blank lines, fix spacing, drop malformed lines
+blazehash repair manifest.hash -o clean.hash
+
+# Symmetric difference of two manifests (paths in A or B but not both)
+blazehash sym-diff before.hash after.hash
+
+# Keep first occurrence of each path (drop later duplicates)
+blazehash first manifest.hash -o first.hash
+
+# Tag a manifest with a freeform note
+blazehash annotate manifest.hash --note "Approved by Jane Smith 2026-04-16"
+```
+
+---
+
+## Manifest ordering and splitting
+
+```bash
+# Randomly shuffle entries (useful for random sampling)
+blazehash shuffle manifest.hash
+
+# Reproducible shuffle with fixed seed
+blazehash shuffle manifest.hash --seed 42 -o shuffled.hash
+
+# Reverse entry order
+blazehash reverse manifest.hash
+
+# Split into 3 equal parts
+blazehash balance manifest.hash --parts 3
+# → manifest_part001.hash, manifest_part002.hash, manifest_part003.hash
+
+# Interleave two manifests (A₁ B₁ A₂ B₂ …)
+blazehash interleave part-a.hash part-b.hash -o interleaved.hash
+```

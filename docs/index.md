@@ -4,11 +4,16 @@
 
 The only open-source forensic hashing tool that answers every question a court asks about digital evidence — *what* changed, *who* handled it, *when* it was sealed, and *in what context* — in a single binary that's drop-in compatible with hashdeep.
 
+Now with **50+ remote storage backends** built in via Apache OpenDAL: hash from S3, GCS, Azure Blob, WebDAV, SFTP, and more — no extra flags required.
+
 ```bash
 # Acquire evidence with chain-of-custody metadata
 blazehash -r /mnt/evidence -c blake3,sha256 \
   --case "CASE-2026-001" --examiner "Jane Smith" \
   -o evidence.hash --progress
+
+# Hash evidence on S3, write manifest back to S3
+blazehash hash s3://dfir-bucket/case-001/ -o s3://dfir-bucket/case-001.hash
 
 # Sign (prompts for password)
 blazehash sign evidence.hash
@@ -120,6 +125,7 @@ No other open-source tool delivers all four in one binary.
 | SQLite / Parquet / DuckDB | Y | -- | -- | -- |
 | Piecewise hashing | Y | Y | -- | -- |
 | hashdeep / DFXML / CSV / JSON | Y | partial | -- | -- |
+| Remote storage (S3/GCS/Azure/WebDAV) | Y | -- | -- | -- |
 
 ---
 

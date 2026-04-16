@@ -355,6 +355,128 @@ Hash the layers of an OCI/Docker container image. Requires `--features docker`.
 blazehash image nginx:latest
 ```
 
+### `duplicates`
+
+Emit all manifest entries whose hash value appears more than once (content-identical files).
+
+```bash
+blazehash duplicates manifest.hash
+blazehash duplicates manifest.hash -o dupes.hash
+```
+
+### `unique-hash`
+
+Keep only the first entry per unique hash value — complement to `duplicates`.
+
+```bash
+blazehash unique-hash manifest.hash -o deduped.hash
+```
+
+### `repair`
+
+Normalize manifest formatting: strip blank lines, normalize separators to exactly two spaces, drop malformed data lines.
+
+```bash
+blazehash repair manifest.hash -o clean.hash
+```
+
+### `sym-diff`
+
+Symmetric difference of two manifests by path — entries whose path appears in A or B but not both.
+
+```bash
+blazehash sym-diff before.hash after.hash
+blazehash sym-diff before.hash after.hash -o changes.hash
+```
+
+### `first`
+
+Keep the first occurrence of each path; drop subsequent duplicate path entries. Complement to `uniq` (which keeps the last).
+
+```bash
+blazehash first manifest.hash -o first.hash
+```
+
+### `annotate`
+
+Add or replace a `## note:` header in a manifest. Requires `--note`.
+
+```bash
+blazehash annotate manifest.hash --note "Reviewed by Jane Smith"
+blazehash annotate manifest.hash --note "Reviewed by Jane Smith" -o annotated.hash
+```
+
+### `shuffle`
+
+Randomly reorder manifest entries. Use `--seed` for reproducible output.
+
+```bash
+blazehash shuffle manifest.hash
+blazehash shuffle manifest.hash --seed 42 -o shuffled.hash
+```
+
+### `reverse`
+
+Reverse the entry order of a manifest.
+
+```bash
+blazehash reverse manifest.hash -o reversed.hash
+```
+
+### `balance`
+
+Split a manifest into N roughly equal parts. Requires `--parts`.
+
+```bash
+blazehash balance manifest.hash --parts 4
+# → manifest_part001.hash ... manifest_part004.hash
+```
+
+### `interleave`
+
+Merge two manifests in alternating A B A B order. Remaining entries from the longer manifest are appended.
+
+```bash
+blazehash interleave part-a.hash part-b.hash -o interleaved.hash
+```
+
+---
+
+## Remote storage
+
+blazehash accepts remote URIs for both input paths and `-o` output. Supported schemes:
+
+| Scheme | Backend |
+|--------|---------|
+| `s3://bucket/key` | AWS S3 and S3-compatible (MinIO, R2, Wasabi, B2) |
+| `gcs://bucket/key` | Google Cloud Storage |
+| `azblob://container/key` | Azure Blob Storage |
+| `webdav://host/path` | WebDAV (Nextcloud, Box, SharePoint) |
+| `sftp://user@host/path` | SFTP |
+| `http://` / `https://` | HTTP/S (read-only) |
+| `file:///abs/path` | Explicit local filesystem |
+
+Auth is read from standard environment variables:
+
+| Backend | Environment variables |
+|---------|-----------------------|
+| S3 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_ENDPOINT_URL` |
+| GCS | `GOOGLE_APPLICATION_CREDENTIALS` |
+| Azure | `AZURE_STORAGE_ACCOUNT`, `AZURE_STORAGE_ACCESS_KEY` or `AZURE_STORAGE_SAS_TOKEN` |
+| SFTP | `SFTP_PASSWORD` or `SFTP_KEY_PATH` |
+| WebDAV | `WEBDAV_USERNAME`, `WEBDAV_PASSWORD` |
+
+```bash
+# Hash an S3 prefix
+blazehash hash s3://dfir-bucket/case-001/
+
+# Write manifest output to S3
+blazehash hash /mnt/evidence -o s3://dfir-bucket/case-001.hash
+
+# Audit against a manifest on S3
+blazehash -r /mnt/evidence -a -k s3://dfir-bucket/case-001.hash
+```
+
 ---
 
 ## NSRL flags
