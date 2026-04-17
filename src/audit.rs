@@ -59,7 +59,7 @@ pub fn audit(
     let mut seen_known_paths: HashSet<&Path> = HashSet::new();
 
     for path in paths {
-        let file_result = hash_file(path, &known_algos, false, false, false)
+        let file_result = hash_file(path, &known_algos, false, false, false, crate::hash::YaraOpts::no_yara())
             .with_context(|| format!("failed to hash {} during audit", path.display()))?;
 
         if let Some(known) = known_by_path.get(path.as_path()) {

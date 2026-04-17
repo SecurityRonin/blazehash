@@ -18,7 +18,7 @@ pub fn check_file_against_baseline(
     baseline: &HashMap<PathBuf, ManifestRecord>,
     algos: &[Algorithm],
 ) -> Result<ChangeStatus> {
-    let result = hash_file(path, algos, false, false, false)?;
+    let result = hash_file(path, algos, false, false, false, crate::hash::YaraOpts::no_yara())?;
     match baseline.get(path) {
         None => Ok(ChangeStatus::New),
         Some(rec) => {

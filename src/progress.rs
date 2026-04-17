@@ -1,7 +1,7 @@
 //! Progress bar support for directory walks using `indicatif`.
 
 use crate::algorithm::Algorithm;
-use crate::hash::{hash_file, FileHashResult};
+use crate::hash::{hash_file, FileHashResult, YaraOpts};
 use crate::walk::{walk_paths, WalkError, WalkOutput};
 use crate::walk_filter::WalkFilter;
 use anyhow::Result;
@@ -51,7 +51,7 @@ pub fn walk_and_hash_with_progress(
         .par_iter()
         .filter_map(|path| {
             let file_size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
-            match hash_file(path, algorithms, false, false, compute_entropy) {
+            match hash_file(path, algorithms, false, false, compute_entropy, YaraOpts::no_yara()) {
                 Ok(result) => {
                     pb.inc(file_size);
                     Some(result)

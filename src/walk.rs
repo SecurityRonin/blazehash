@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
 #[cfg(not(target_os = "windows"))]
-use crate::hash::hash_file;
+use crate::hash::{hash_file, YaraOpts};
 #[cfg(not(target_os = "windows"))]
 use rayon::prelude::*;
 #[cfg(not(target_os = "windows"))]
@@ -110,7 +110,7 @@ pub fn walk_and_hash_with_options(
         let results: Vec<FileHashResult> = filtered
             .par_iter()
             .filter_map(
-                |path| match hash_file(path, algorithms, false, false, compute_entropy) {
+                |path| match hash_file(path, algorithms, false, false, compute_entropy, YaraOpts::no_yara()) {
                     Ok(result) => Some(result),
                     Err(err) => {
                         hash_errors.lock().unwrap().push(WalkError {

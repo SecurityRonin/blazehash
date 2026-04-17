@@ -400,9 +400,9 @@ fn test_gpu_hash_file_sha256_matches_cpu() {
     f.write_all(&vec![0x77u8; 1024 * 1024]).unwrap();
     f.flush().unwrap();
 
-    let result1 = hash_file(f.path(), &[Algorithm::Sha256], false, false, false).unwrap();
+    let result1 = hash_file(f.path(), &[Algorithm::Sha256], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
     // Call again — must produce identical result (GPU or CPU, both correct)
-    let result2 = hash_file(f.path(), &[Algorithm::Sha256], false, false, false).unwrap();
+    let result2 = hash_file(f.path(), &[Algorithm::Sha256], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
     assert_eq!(
         result1.hashes[&Algorithm::Sha256],
         result2.hashes[&Algorithm::Sha256],

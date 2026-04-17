@@ -83,7 +83,7 @@ mod windows {
 
         let stream_path = &streams[0];
         let result =
-            blazehash::hash::hash_file(stream_path, &[Algorithm::Blake3], false, false, false);
+            blazehash::hash::hash_file(stream_path, &[Algorithm::Blake3], false, false, false, blazehash::hash::YaraOpts::no_yara());
         assert!(
             result.is_ok(),
             "hash_file should be able to hash an ADS stream path: {result:?}"

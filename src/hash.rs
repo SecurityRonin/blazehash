@@ -253,22 +253,53 @@ fn open_file_no_cache(path: &Path) -> Result<std::fs::File> {
     Ok(file)
 }
 
+/// Options controlling YARA scanning within `hash_file`.
+///
+/// When the `yara` feature is disabled this is a zero-sized unit struct with a
+/// phantom lifetime so the function signature stays uniform across feature flags.
+pub struct YaraOpts<'a> {
+    #[cfg(feature = "yara")]
+    /// Optional scanner; when `None` YARA scanning is skipped.
+    pub scanner: Option<&'a crate::yara_scan::YaraScanner>,
+    #[cfg(feature = "yara")]
+    /// Files larger than this many megabytes skip YARA (emit a stderr warning).
+    pub max_size_mb: u64,
+    #[cfg(not(feature = "yara"))]
+    _phantom: std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a> YaraOpts<'a> {
+    /// Construct a no-op `YaraOpts` (no YARA scanning).
+    /// Works regardless of whether the `yara` feature is enabled.
+    pub fn no_yara() -> Self {
+        #[cfg(feature = "yara")]
+        { YaraOpts { scanner: None, max_size_mb: 256 } }
+        #[cfg(not(feature = "yara"))]
+        { YaraOpts { _phantom: std::marker::PhantomData } }
+    }
+}
+
 /// Hash a file with one or more algorithms simultaneously.
 ///
 /// `no_gpu`: when true, skip GPU acceleration even if available (pass `false`
 /// for callers that don't expose this flag — GPU is already gated by feature flag).
 /// `entropy_flag`: when true, compute Shannon entropy from the file bytes and
 /// set `result.entropy = Some(h)`. Pass `false` for callers that don't need it.
+/// `yara_opts`: controls optional YARA scanning (zero-cost when `yara` feature disabled).
 pub fn hash_file(
     path: &Path,
     algorithms: &[Algorithm],
     no_cache: bool,
     no_gpu: bool,
     entropy_flag: bool,
+    yara_opts: YaraOpts<'_>,
 ) -> Result<FileHashResult> {
     // no_gpu is only consumed by the gpu feature block below; suppress the warning otherwise.
     #[cfg(not(feature = "gpu"))]
     let _ = no_gpu;
+    // yara_opts is only consumed by the yara feature block below; suppress the warning otherwise.
+    #[cfg(not(feature = "yara"))]
+    let _ = yara_opts;
     let metadata = fs::metadata(path)
         .with_context(|| format!("failed to read metadata for {}", path.display()))?;
     let size = metadata.len();
@@ -361,13 +392,54 @@ pub fn hash_file(
         None
     };
 
+    // YARA scanning — three-branch strategy based on file size:
+    //   1. scanner is Some && size > threshold → skip YARA, warn to stderr
+    //   2. scanner is Some && size <= threshold && regular file → mmap + YARA
+    //   3. scanner is Some && size <= threshold && non-regular → read to Vec + YARA
+    #[cfg(feature = "yara")]
+    let yara_matches: Option<Vec<crate::yara_scan::YaraMatch>> = {
+        if let Some(scanner) = yara_opts.scanner {
+            let threshold_bytes = yara_opts.max_size_mb.saturating_mul(1024 * 1024);
+            if size > threshold_bytes {
+                eprintln!(
+                    "[warn] YARA skipped for {} ({} MB > {} MB threshold)",
+                    path.display(),
+                    size / (1024 * 1024),
+                    yara_opts.max_size_mb
+                );
+                None
+            } else if metadata.file_type().is_file() {
+                // Regular file: use mmap for zero-copy YARA scan.
+                let file = fs::File::open(path)
+                    .with_context(|| format!("failed to open {} for YARA mmap", path.display()))?;
+                if size == 0 {
+                    // mmap of an empty file is undefined; scan empty slice instead.
+                    Some(scanner.scan(&[])?)
+                } else {
+                    let mmap = unsafe {
+                        memmap2::Mmap::map(&file)
+                            .with_context(|| format!("failed to mmap {} for YARA", path.display()))?
+                    };
+                    Some(scanner.scan(&mmap[..])?)
+                }
+            } else {
+                // Non-regular file (pipe, device, etc.): read to Vec and scan.
+                let data = fs::read(path)
+                    .with_context(|| format!("failed to read {} for YARA buffered scan", path.display()))?;
+                Some(scanner.scan(&data)?)
+            }
+        } else {
+            None
+        }
+    };
+
     Ok(FileHashResult {
         path: path.to_path_buf(),
         size,
         hashes,
         entropy,
         #[cfg(feature = "yara")]
-        yara_matches: None,
+        yara_matches,
     })
 }
 

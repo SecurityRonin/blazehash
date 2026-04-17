@@ -191,6 +191,16 @@ pub struct Cli {
     )]
     pub yara: Option<PathBuf>,
 
+    /// Maximum file size in MB for YARA scanning; files above this are skipped (default: 256)
+    #[cfg(feature = "yara")]
+    #[arg(
+        long = "yara-max-size",
+        value_name = "MB",
+        default_value = "256",
+        help = "Maximum file size (MB) for YARA scanning; larger files skip YARA"
+    )]
+    pub yara_max_size: u64,
+
     /// VirusTotal API key (for `blazehash vt`; falls back to VT_API_KEY env var)
     #[arg(long = "api-key", value_name = "KEY")]
     pub api_key: Option<String>,

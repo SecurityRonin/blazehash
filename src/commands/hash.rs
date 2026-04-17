@@ -5,7 +5,7 @@ use blazehash::device::{hash_device, is_device_path};
 use blazehash::format::{
     write_csv, write_dfxml, write_ecs, write_json, write_jsonl, write_stix, write_sumfile,
 };
-use blazehash::hash::{hash_file, FileHashResult};
+use blazehash::hash::{hash_file, FileHashResult, YaraOpts};
 use blazehash::manifest::{write_header_with_metadata, write_record};
 use blazehash::output::make_writer;
 use blazehash::progress::walk_and_hash_with_progress;
@@ -42,6 +42,10 @@ pub struct HashOptions<'a> {
     pub examiner: Option<&'a str>,
     pub progress: bool,
     pub sector_size: usize,
+    #[cfg(feature = "yara")]
+    pub yara_scanner: Option<&'a blazehash::yara_scan::YaraScanner>,
+    #[cfg(feature = "yara")]
+    pub yara_max_size_mb: u64,
 }
 
 pub fn run(opts: HashOptions<'_>) -> Result<()> {
@@ -69,6 +73,10 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         nsrl_hsh,
         #[cfg(feature = "hashdb")]
         hashdb_bad,
+        #[cfg(feature = "yara")]
+        yara_scanner,
+        #[cfg(feature = "yara")]
+        yara_max_size_mb,
     } = opts;
     let mut resume_state = load_resume_state(resume, output)?;
     let append = resume && output.is_some_and(|p| p.exists());
@@ -87,6 +95,10 @@ pub fn run(opts: HashOptions<'_>) -> Result<()> {
         entropy,
         progress,
         sector_size,
+        #[cfg(feature = "yara")]
+        yara_scanner,
+        #[cfg(feature = "yara")]
+        yara_max_size_mb,
     )?;
 
     #[cfg(feature = "hashdb")]
@@ -235,6 +247,8 @@ fn collect_results(
     entropy: bool,
     progress: bool,
     sector_size: usize,
+    #[cfg(feature = "yara")] yara_scanner: Option<&blazehash::yara_scan::YaraScanner>,
+    #[cfg(feature = "yara")] yara_max_size_mb: u64,
 ) -> Result<Vec<FileHashResult>> {
     let mut all_results = Vec::new();
 
@@ -269,8 +283,18 @@ fn collect_results(
             if resume_state.is_done(path) {
                 continue;
             }
-            let result = hash_file(path, algorithms, no_cache, no_gpu, entropy)
-                .with_context(|| format!("failed to hash {}", path.display()))?;
+            let result = hash_file(
+                path,
+                algorithms,
+                no_cache,
+                no_gpu,
+                entropy,
+                #[cfg(feature = "yara")]
+                YaraOpts { scanner: yara_scanner, max_size_mb: yara_max_size_mb },
+                #[cfg(not(feature = "yara"))]
+                YaraOpts::no_yara(),
+            )
+            .with_context(|| format!("failed to hash {}", path.display()))?;
             resume_state.mark_done(path.clone());
             if ads {
                 hash_ads_streams(path, algorithms, no_cache, no_gpu, &mut all_results);
@@ -309,7 +333,7 @@ fn hash_ads_streams(
     results: &mut Vec<FileHashResult>,
 ) {
     for stream_path in enumerate_ads(path) {
-        match hash_file(&stream_path, algorithms, no_cache, no_gpu, false) {
+        match hash_file(&stream_path, algorithms, no_cache, no_gpu, false, YaraOpts::no_yara()) {
             Ok(r) => results.push(r),
             Err(e) => eprintln!("[!] Failed to hash ADS {}: {e}", stream_path.display()),
         }

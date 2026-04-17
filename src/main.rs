@@ -3,7 +3,7 @@ mod commands;
 mod handlers;
 mod mcp;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::Parser;
 use cli::{Cli, Mode};
 use commands::merge::MergeArgs;
@@ -1079,6 +1079,18 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    // Build YARA scanner once if --yara was given (requires `yara` feature).
+    #[cfg(feature = "yara")]
+    let yara_scanner_instance: Option<blazehash::yara_scan::YaraScanner> =
+        if let Some(ref rules_path) = cli.yara {
+            Some(
+                blazehash::yara_scan::YaraScanner::new(rules_path)
+                    .with_context(|| format!("failed to compile YARA rules from {}", rules_path.display()))?,
+            )
+        } else {
+            None
+        };
+
     match cli.mode() {
         Mode::Mcp => unreachable!(),
         Mode::Bench => unreachable!(),
@@ -1235,6 +1247,10 @@ fn main() -> Result<()> {
                 examiner: cli.examiner.as_deref(),
                 progress: cli.progress || std::io::IsTerminal::is_terminal(&std::io::stdout()),
                 sector_size: cli.sector_size,
+                #[cfg(feature = "yara")]
+                yara_scanner: yara_scanner_instance.as_ref(),
+                #[cfg(feature = "yara")]
+                yara_max_size_mb: cli.yara_max_size,
             })?;
         }
     }
