@@ -6,6 +6,7 @@ pub mod reader;
 pub mod operator;
 #[cfg(feature = "remote")]
 pub mod walk;
+pub mod gdrive;
 
 /// Returns true if the string has a known remote URI scheme.
 pub fn is_remote_uri(s: &str) -> bool {
@@ -13,7 +14,7 @@ pub fn is_remote_uri(s: &str) -> bool {
     matches!(
         s.split_once("://").map(|(scheme, _)| scheme),
         Some("s3" | "gcs" | "azblob" | "sftp" | "webdav" | "hdfs"
-            | "http" | "https" | "mem" | "file")
+            | "http" | "https" | "mem" | "file" | "gdrive")
     )
 }
 
@@ -22,6 +23,7 @@ pub enum UriScheme {
     S3,
     Gcs,
     AzBlob,
+    GDrive,
     Sftp,
     WebDav,
     Hdfs,
@@ -38,6 +40,7 @@ impl UriScheme {
             "s3"     => Some(Self::S3),
             "gcs"    => Some(Self::Gcs),
             "azblob" => Some(Self::AzBlob),
+            "gdrive" => Some(Self::GDrive),
             "sftp"   => Some(Self::Sftp),
             "webdav" => Some(Self::WebDav),
             "hdfs"   => Some(Self::Hdfs),
