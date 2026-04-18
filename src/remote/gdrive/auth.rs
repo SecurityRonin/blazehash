@@ -1,23 +1,23 @@
-/// Google Drive OAuth2 auth flow.
-///
-/// Auth priority (highest to lowest):
-///   1. Service account JSON — env GOOGLE_APPLICATION_CREDENTIALS
-///   2. Stored user OAuth token — ~/.config/blazehash/gdrive_token.json
-///   3. Public (unauthenticated) — share-link files only
-///
-/// Browser flow — just run:
-///   blazehash gdrive auth login
-///
-/// Embedded OAuth credentials are used by default (registered under SecurityRonin).
-/// Power users can override with BLAZEHASH_GDRIVE_CLIENT_ID / BLAZEHASH_GDRIVE_CLIENT_SECRET.
-///
-/// ## Why embedded credentials are safe for a desktop CLI
-///
-/// Google classifies "Desktop app" OAuth clients as non-secret. The security
-/// model relies on the redirect URI being localhost (only the local user can
-/// receive it) and codes being short-lived, not on the client secret being
-/// secret. This is the same approach used by `gh`, `gcloud`, `fly`, etc.
-/// See: https://developers.google.com/identity/protocols/oauth2/native-app
+//! Google Drive OAuth2 auth flow.
+//!
+//! Auth priority (highest to lowest):
+//!   1. Service account JSON — env GOOGLE_APPLICATION_CREDENTIALS
+//!   2. Stored user OAuth token — ~/.config/blazehash/gdrive_token.json
+//!   3. Public (unauthenticated) — share-link files only
+//!
+//! Browser flow — just run:
+//!   blazehash gdrive auth login
+//!
+//! Embedded OAuth credentials are used by default (registered under SecurityRonin).
+//! Power users can override with BLAZEHASH_GDRIVE_CLIENT_ID / BLAZEHASH_GDRIVE_CLIENT_SECRET.
+//!
+//! ## Why embedded credentials are safe for a desktop CLI
+//!
+//! Google classifies "Desktop app" OAuth clients as non-secret. The security
+//! model relies on the redirect URI being localhost (only the local user can
+//! receive it) and codes being short-lived, not on the client secret being
+//! secret. This is the same approach used by `gh`, `gcloud`, `fly`, etc.
+//! See: https://developers.google.com/identity/protocols/oauth2/native-app
 
 /// Embedded OAuth client ID (SecurityRonin / blazehash Desktop app).
 /// Users can override with BLAZEHASH_GDRIVE_CLIENT_ID env var.

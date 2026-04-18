@@ -472,6 +472,7 @@ pub enum Mode {
     UniqueHash,
     Balance,
     Interleave,
+    GDriveCollect,
     Hash,
 }
 
@@ -737,6 +738,19 @@ impl Cli {
             Mode::Balance
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("interleave")) {
             Mode::Interleave
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("gdrive-collect"))
+        {
+            #[cfg(feature = "remote")]
+            return Mode::GDriveCollect;
+            #[cfg(not(feature = "remote"))]
+            {
+                eprintln!(
+                    "error: gdrive-collect requires the `remote` feature \
+                     — recompile with --features remote"
+                );
+                std::process::exit(1);
+            }
         } else if self.size_only {
             Mode::SizeOnly
         } else if self.audit {

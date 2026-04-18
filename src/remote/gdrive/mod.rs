@@ -15,7 +15,6 @@ pub mod auth;
 /// Public share links require no credentials. For private files, set
 /// `GOOGLE_APPLICATION_CREDENTIALS` to a service account JSON key path.
 /// Authenticated access uses the `services-gdrive` opendal backend.
-
 use std::io::Write;
 
 /// Result of a Google Drive download+hash operation.

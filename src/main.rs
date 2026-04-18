@@ -1166,6 +1166,23 @@ fn main() -> Result<()> {
         Mode::UniqueHash => unreachable!(),
         Mode::Balance => unreachable!(),
         Mode::Interleave => unreachable!(),
+        #[cfg(feature = "remote")]
+        Mode::GDriveCollect => {
+            let input = cli
+                .paths
+                .get(1)
+                .map(|p| p.to_string_lossy().to_string())
+                .unwrap_or_default();
+            let file_id = blazehash::remote::gdrive::parse_file_id(&input)
+                .ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "Could not parse a Google Drive file ID from: {input}"
+                    )
+                })?;
+            let mut out = crate::commands::output_writer(cli.output.as_deref())?;
+            blazehash::remote::gdrive::hash_gdrive_file(&file_id, &algorithms, &mut *out)
+                .map_err(|e| anyhow::anyhow!("{e}"))?;
+        }
         #[cfg(feature = "qr")]
         Mode::Qr => unreachable!(),
         Mode::Sign => {
