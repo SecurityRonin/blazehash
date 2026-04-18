@@ -10,7 +10,9 @@
 ///   (register at console.cloud.google.com → APIs & Services → Credentials).
 ///   Run `blazehash gdrive auth login` to initiate.
 
-use std::path::PathBuf;
+use std::io::{BufRead, BufReader, Write as IoWrite};
+use std::net::{TcpListener, TcpStream};
+use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
@@ -91,11 +93,147 @@ pub fn token_cache_path() -> PathBuf {
     base.join("blazehash").join("gdrive_token.json")
 }
 
-/// Load a cached OAuth token from disk, if one exists.
-pub fn load_token() -> Option<OAuthToken> {
-    let path = token_cache_path();
+/// Save an OAuth token to a specific path, creating parent directories as needed.
+pub fn save_token(token: &OAuthToken, path: &Path) -> Result<(), std::io::Error> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    let json = serde_json::to_string_pretty(token)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+    std::fs::write(path, json)
+}
+
+/// Load a cached OAuth token from a specific path.
+pub fn load_token_from(path: &Path) -> Option<OAuthToken> {
     let data = std::fs::read_to_string(path).ok()?;
     serde_json::from_str(&data).ok()
+}
+
+/// Load a cached OAuth token from the default cache path.
+pub fn load_token() -> Option<OAuthToken> {
+    load_token_from(&token_cache_path())
+}
+
+/// Find an available TCP port by binding to port 0 and reading the assigned port.
+pub fn find_available_port() -> Result<u16, std::io::Error> {
+    let listener = TcpListener::bind("127.0.0.1:0")?;
+    Ok(listener.local_addr()?.port())
+}
+
+/// Exchange an OAuth2 authorization code for an access token.
+///
+/// Posts to `token_endpoint` (default: `https://oauth2.googleapis.com/token`).
+/// Pass a custom endpoint in tests to point at a local mock server.
+pub fn exchange_code_for_token(
+    client_id: &str,
+    client_secret: &str,
+    code: &str,
+    redirect_uri: &str,
+    token_endpoint: &str,
+) -> Result<OAuthToken, Box<dyn std::error::Error>> {
+    let body = format!(
+        "grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}\
+         &code={code}&redirect_uri={redirect_uri}"
+    );
+    let response = ureq::post(token_endpoint)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .send_string(&body)?;
+
+    if response.status() != 200 {
+        return Err(format!(
+            "token endpoint returned HTTP {}: {}",
+            response.status(),
+            response.into_string().unwrap_or_default()
+        )
+        .into());
+    }
+
+    let token: OAuthToken = response.into_json()?;
+    Ok(token)
+}
+
+/// Initiate an OAuth2 browser flow to authenticate with Google Drive.
+///
+/// 1. Reads `BLAZEHASH_GDRIVE_CLIENT_ID` and `BLAZEHASH_GDRIVE_CLIENT_SECRET`.
+/// 2. Binds a temporary localhost HTTP server on an ephemeral port.
+/// 3. Prints the auth URL and attempts to open the browser automatically.
+///    In SSH/headless environments the user copies the URL manually.
+/// 4. Waits for the browser redirect, captures the `code=` param.
+/// 5. Exchanges the code for tokens and saves them to `token_cache_path()`.
+///
+/// Pass `Some(token_endpoint)` to override the Google token URL (for tests).
+/// Returns the access token string on success.
+pub fn initiate_browser_auth(
+    token_endpoint: Option<&str>,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let client_id = std::env::var("BLAZEHASH_GDRIVE_CLIENT_ID").map_err(|_| {
+        "BLAZEHASH_GDRIVE_CLIENT_ID is not set — register OAuth credentials at \
+         console.cloud.google.com → APIs & Services → Credentials"
+    })?;
+    let client_secret = std::env::var("BLAZEHASH_GDRIVE_CLIENT_SECRET").map_err(|_| {
+        "BLAZEHASH_GDRIVE_CLIENT_SECRET is not set"
+    })?;
+
+    // Bind the callback server before building the URL so we know the port
+    let listener = TcpListener::bind("127.0.0.1:0")?;
+    let port = listener.local_addr()?.port();
+    let redirect_uri = format!("http://localhost:{port}/callback");
+    let state = format!("blazehash-{}", std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs());
+
+    let auth_url = build_oauth_auth_url(&client_id, &redirect_uri, &state);
+
+    // Try to open the browser; fall back to printing the URL
+    eprintln!("\nOpen this URL to authorise blazehash to access Google Drive:");
+    eprintln!("\n  {auth_url}\n");
+    let _ = std::process::Command::new("open").arg(&auth_url).status()
+        .or_else(|_| std::process::Command::new("xdg-open").arg(&auth_url).status())
+        .or_else(|_| std::process::Command::new("start").arg(&auth_url).status());
+    eprintln!("Waiting for browser redirect...");
+
+    // Accept one connection — the browser redirect
+    let (stream, _) = listener.accept()?;
+    let code = read_code_from_callback(stream)?;
+
+    let endpoint = token_endpoint.unwrap_or("https://oauth2.googleapis.com/token");
+    let token = exchange_code_for_token(&client_id, &client_secret, &code, &redirect_uri, endpoint)?;
+
+    // Persist token and return access token
+    let cache = token_cache_path();
+    save_token(&token, &cache)?;
+    let access_token = token.access_token.clone();
+    eprintln!("Authentication successful. Token cached at {}", cache.display());
+    Ok(access_token)
+}
+
+/// Read the authorization code from the browser's GET /callback?code=... request.
+fn read_code_from_callback(stream: TcpStream) -> Result<String, Box<dyn std::error::Error>> {
+    let mut reader = BufReader::new(&stream);
+    let mut request_line = String::new();
+    reader.read_line(&mut request_line)?;
+
+    // Request line: "GET /callback?code=XYZ&state=... HTTP/1.1"
+    let path = request_line
+        .split_whitespace()
+        .nth(1)
+        .ok_or("malformed HTTP request")?;
+
+    let full_url = format!("http://localhost{path}");
+    let code = parse_auth_code_from_redirect(&full_url)
+        .ok_or("no authorization code in callback URL")?;
+
+    // Send a minimal success response so the browser tab closes cleanly
+    let html = b"<html><body><h1>blazehash: authorised.</h1><p>You may close this tab.</p></body></html>";
+    let response = format!(
+        "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+        html.len()
+    );
+    (&stream).write_all(response.as_bytes())?;
+    (&stream).write_all(html)?;
+
+    Ok(code)
 }
 
 /// Determine the auth mode to use based on environment and cached credentials.
