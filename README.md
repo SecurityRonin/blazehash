@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/blazehash-icon-256.png" alt="blazehash" width="120" />
+</p>
+
 # blazehash
 
 [![Crates.io](https://img.shields.io/crates/v/blazehash.svg)](https://crates.io/crates/blazehash)
