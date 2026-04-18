@@ -15,8 +15,9 @@
 // (register at console.cloud.google.com → APIs & Services → Credentials).
 
 use blazehash::remote::gdrive::auth::{
-    build_oauth_auth_url, parse_auth_code_from_redirect, resolve_auth_mode, token_cache_path,
-    GDriveAuthMode, OAuthToken,
+    build_oauth_auth_url, exchange_code_for_token, find_available_port,
+    initiate_browser_auth, load_token_from, parse_auth_code_from_redirect,
+    resolve_auth_mode, save_token, token_cache_path, GDriveAuthMode, OAuthToken,
 };
 
 // ── build_oauth_auth_url ─────────────────────────────────────────────────────
@@ -212,4 +213,200 @@ impl Drop for EnvGuard {
             None => std::env::remove_var(&self.key),
         }
     }
+}
+
+// ── save_token / load_token_from ─────────────────────────────────────────────
+
+#[test]
+fn save_token_persists_access_token_to_disk() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("gdrive_token.json");
+    let token = OAuthToken {
+        access_token: "ya29.saved".to_string(),
+        refresh_token: None,
+        expires_in: Some(3600),
+    };
+    save_token(&token, &path).expect("save should succeed");
+    let back = load_token_from(&path).expect("load should return token");
+    assert_eq!(back.access_token, "ya29.saved");
+}
+
+#[test]
+fn save_token_creates_parent_directories() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("nested").join("deep").join("gdrive_token.json");
+    let token = OAuthToken {
+        access_token: "ya29.nested".to_string(),
+        refresh_token: None,
+        expires_in: None,
+    };
+    save_token(&token, &path).expect("save should create parent dirs and succeed");
+    assert!(path.exists());
+}
+
+#[test]
+fn load_token_from_returns_none_when_file_missing() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("nonexistent.json");
+    assert!(load_token_from(&path).is_none());
+}
+
+#[test]
+fn load_token_from_returns_none_for_malformed_json() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("bad.json");
+    std::fs::write(&path, b"not json at all {{{").unwrap();
+    assert!(load_token_from(&path).is_none());
+}
+
+#[test]
+fn save_and_load_token_round_trips_refresh_token() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("token.json");
+    let token = OAuthToken {
+        access_token: "access".to_string(),
+        refresh_token: Some("1//refresh_token".to_string()),
+        expires_in: Some(3599),
+    };
+    save_token(&token, &path).unwrap();
+    let back = load_token_from(&path).unwrap();
+    assert_eq!(back.refresh_token.as_deref(), Some("1//refresh_token"));
+    assert_eq!(back.expires_in, Some(3599));
+}
+
+// ── find_available_port ──────────────────────────────────────────────────────
+
+#[test]
+fn find_available_port_returns_nonzero_port() {
+    let port = find_available_port().expect("should find an available port");
+    assert!(port > 0, "port should be > 0, got {port}");
+}
+
+#[test]
+fn find_available_port_returns_valid_range() {
+    let port = find_available_port().expect("should find an available port");
+    // Ephemeral ports are typically in 1024-65535
+    assert!(port >= 1024, "port should be in ephemeral range, got {port}");
+}
+
+// ── exchange_code_for_token ──────────────────────────────────────────────────
+//
+// Uses a real in-process TCP server on an ephemeral port — no mocking library
+// needed. The server responds with a hardcoded JSON payload so we test the
+// actual HTTP POST → JSON parse path end-to-end.
+
+#[test]
+fn exchange_code_parses_access_token_from_valid_response() {
+    use std::io::{Read, Write};
+    use std::net::TcpListener;
+
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let endpoint = format!("http://127.0.0.1:{port}");
+
+    std::thread::spawn(move || {
+        let (mut stream, _) = listener.accept().unwrap();
+        let mut buf = [0u8; 4096];
+        let _ = stream.read(&mut buf);
+        let body = r#"{"access_token":"ya29.mock","token_type":"Bearer","expires_in":3600,"refresh_token":"1//mock_refresh"}"#;
+        let response = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+            body.len(),
+            body
+        );
+        stream.write_all(response.as_bytes()).unwrap();
+    });
+
+    let token = exchange_code_for_token(
+        "client_id",
+        "client_secret",
+        "auth_code_xyz",
+        "http://localhost:9876/callback",
+        &endpoint,
+    )
+    .expect("should succeed with mock server");
+
+    assert_eq!(token.access_token, "ya29.mock");
+    assert_eq!(token.refresh_token.as_deref(), Some("1//mock_refresh"));
+    assert_eq!(token.expires_in, Some(3600));
+}
+
+#[test]
+fn exchange_code_returns_error_on_non_200_response() {
+    use std::io::{Read, Write};
+    use std::net::TcpListener;
+
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let endpoint = format!("http://127.0.0.1:{port}");
+
+    std::thread::spawn(move || {
+        let (mut stream, _) = listener.accept().unwrap();
+        let mut buf = [0u8; 4096];
+        let _ = stream.read(&mut buf);
+        let body = r#"{"error":"invalid_grant"}"#;
+        let response = format!(
+            "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+            body.len(),
+            body
+        );
+        stream.write_all(response.as_bytes()).unwrap();
+    });
+
+    let result = exchange_code_for_token(
+        "client_id",
+        "client_secret",
+        "bad_code",
+        "http://localhost/cb",
+        &endpoint,
+    );
+
+    assert!(result.is_err(), "expected error on 400 response");
+}
+
+// ── initiate_browser_auth ────────────────────────────────────────────────────
+
+#[test]
+fn initiate_browser_auth_errors_without_client_id_env() {
+    let _cid = EnvGuard::remove("BLAZEHASH_GDRIVE_CLIENT_ID");
+    let _csecret = EnvGuard::remove("BLAZEHASH_GDRIVE_CLIENT_SECRET");
+
+    let result = initiate_browser_auth(None);
+    assert!(
+        result.is_err(),
+        "should error when BLAZEHASH_GDRIVE_CLIENT_ID is not set"
+    );
+    let msg = result.unwrap_err().to_string();
+    assert!(
+        msg.contains("BLAZEHASH_GDRIVE_CLIENT_ID") || msg.contains("client_id"),
+        "error should mention the missing env var, got: {msg}"
+    );
+}
+
+#[test]
+fn initiate_browser_auth_errors_without_client_secret_env() {
+    let dir = tempfile::tempdir().unwrap();
+    let _cid = EnvGuard::set("BLAZEHASH_GDRIVE_CLIENT_ID", "my-client-id");
+    let _csecret = EnvGuard::remove("BLAZEHASH_GDRIVE_CLIENT_SECRET");
+    // Redirect output to a temp dir so we don't actually open a browser
+    let _home = EnvGuard::set("HOME", dir.path().to_str().unwrap());
+
+    let result = initiate_browser_auth(None);
+    assert!(
+        result.is_err(),
+        "should error when BLAZEHASH_GDRIVE_CLIENT_SECRET is not set"
+    );
+}
+
+#[test]
+fn auth_url_with_localhost_port_has_correct_redirect_uri() {
+    let url = build_oauth_auth_url("cid", "http://localhost:54321/callback", "state");
+    assert!(
+        url.contains("localhost") || url.contains("localhost%3A"),
+        "url: {url}"
+    );
+    assert!(
+        url.contains("54321") || url.contains("%3A54321"),
+        "port 54321 should be in URL: {url}"
+    );
 }
