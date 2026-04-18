@@ -13,7 +13,7 @@ mod hash_auth_tests {
 
     use blazehash::algorithm::Algorithm;
     use blazehash::remote::gdrive::auth::GDriveAuthMode;
-    use blazehash::remote::gdrive::hash_gdrive_file_with_auth;
+    use blazehash::remote::gdrive::hash_gdrive_file_with_auth_at as hash_gdrive_file_with_auth;
 
     // ── helper ───────────────────────────────────────────────────────────────
 
@@ -191,7 +191,7 @@ mod hash_auth_tests {
         );
 
         assert!(result.is_err(), "service account mode should return error");
-        let msg = result.unwrap_err().to_string().to_lowercase();
+        let msg = result.err().unwrap().to_string().to_lowercase();
         assert!(
             msg.contains("service account") || msg.contains("not yet") || msg.contains("gdrive auth"),
             "error should explain service account is not yet supported, got: {msg}"
