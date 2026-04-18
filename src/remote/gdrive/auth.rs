@@ -5,10 +5,28 @@
 ///   2. Stored user OAuth token — ~/.config/blazehash/gdrive_token.json
 ///   3. Public (unauthenticated) — share-link files only
 ///
-/// Browser flow:
-///   Set BLAZEHASH_GDRIVE_CLIENT_ID + BLAZEHASH_GDRIVE_CLIENT_SECRET
-///   (register at console.cloud.google.com → APIs & Services → Credentials).
-///   Run `blazehash gdrive auth login` to initiate.
+/// Browser flow — just run:
+///   blazehash gdrive auth login
+///
+/// Embedded OAuth credentials are used by default (registered under SecurityRonin).
+/// Power users can override with BLAZEHASH_GDRIVE_CLIENT_ID / BLAZEHASH_GDRIVE_CLIENT_SECRET.
+///
+/// ## Why embedded credentials are safe for a desktop CLI
+///
+/// Google classifies "Desktop app" OAuth clients as non-secret. The security
+/// model relies on the redirect URI being localhost (only the local user can
+/// receive it) and codes being short-lived, not on the client secret being
+/// secret. This is the same approach used by `gh`, `gcloud`, `fly`, etc.
+/// See: https://developers.google.com/identity/protocols/oauth2/native-app
+
+/// Embedded OAuth client ID (SecurityRonin / blazehash Desktop app).
+/// Users can override with BLAZEHASH_GDRIVE_CLIENT_ID env var.
+pub const DEFAULT_CLIENT_ID: &str =
+    "29377375716-g3p5kvq5v2vde0mb0fc7kdc534e59ljd.apps.googleusercontent.com";
+
+/// Embedded OAuth client secret (non-sensitive for Desktop app type).
+/// Users can override with BLAZEHASH_GDRIVE_CLIENT_SECRET env var.
+pub const DEFAULT_CLIENT_SECRET: &str = "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";
 
 use std::io::{BufRead, BufReader, Write as IoWrite};
 use std::net::{TcpListener, TcpStream};
@@ -166,13 +184,10 @@ pub fn exchange_code_for_token(
 pub fn initiate_browser_auth(
     token_endpoint: Option<&str>,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let client_id = std::env::var("BLAZEHASH_GDRIVE_CLIENT_ID").map_err(|_| {
-        "BLAZEHASH_GDRIVE_CLIENT_ID is not set — register OAuth credentials at \
-         console.cloud.google.com → APIs & Services → Credentials"
-    })?;
-    let client_secret = std::env::var("BLAZEHASH_GDRIVE_CLIENT_SECRET").map_err(|_| {
-        "BLAZEHASH_GDRIVE_CLIENT_SECRET is not set"
-    })?;
+    let client_id = std::env::var("BLAZEHASH_GDRIVE_CLIENT_ID")
+        .unwrap_or_else(|_| DEFAULT_CLIENT_ID.to_string());
+    let client_secret = std::env::var("BLAZEHASH_GDRIVE_CLIENT_SECRET")
+        .unwrap_or_else(|_| DEFAULT_CLIENT_SECRET.to_string());
 
     // Bind the callback server before building the URL so we know the port
     let listener = TcpListener::bind("127.0.0.1:0")?;
