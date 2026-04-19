@@ -160,3 +160,7 @@ BLAKE3 at **1,640-1,780 MB/s** — 2.8x faster than hashdeep's best algorithm an
 **Simson Garfinkel** co-authored hashdeep and created [DFXML](https://github.com/simsong/dfxml), the Digital Forensics XML standard.
 
 The [BLAKE3 team](https://github.com/BLAKE3-team/BLAKE3) — Jack O'Connor, Samuel Neves, Jean-Philippe Aumasson, and Zooko Wilcox-O'Hearn — designed the hash function that makes blazehash fast enough to matter.
+
+---
+
+[Privacy Policy](privacy.md) · [Terms of Service](terms.md) · [GitHub](https://github.com/SecurityRonin/blazehash) · © 2026 Security Ronin Ltd

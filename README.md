@@ -188,3 +188,7 @@ cargo install blazehash --all-features
 **Simson Garfinkel** co-authored hashdeep and created [DFXML](https://github.com/simsong/dfxml), the Digital Forensics XML standard.
 
 The [BLAKE3 team](https://github.com/BLAKE3-team/BLAKE3) — Jack O'Connor, Samuel Neves, Jean-Philippe Aumasson, and Zooko Wilcox-O'Hearn.
+
+---
+
+[Privacy Policy](https://securityronin.github.io/blazehash/privacy/) · [Terms of Service](https://securityronin.github.io/blazehash/terms/) · © 2026 Security Ronin Ltd
