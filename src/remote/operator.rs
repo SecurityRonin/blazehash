@@ -375,7 +375,17 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             let op = Operator::new(builder)?.finish();
             Ok((op, path.to_string()))
         }
-        "hdfs" => bail!("unsupported URI scheme: hdfs://"),
+        "hdfs" => {
+            // hdfs://namenode:port/path — pure-Rust HDFS native client (no Java required)
+            // Uses services-hdfs-native (hdfs-native crate), not the JVM-bound hdrs.
+            let (hostport, path) = rest.split_once('/').unwrap_or((rest, ""));
+            let name_node = format!("hdfs://{hostport}");
+            let builder = services::HdfsNative::default()
+                .name_node(&name_node)
+                .root("/");
+            let op = Operator::new(builder)?.finish();
+            Ok((op, path.to_string()))
+        }
         "lakefs" => {
             // lakefs://repo/branch/path — creds from LAKEFS_ACCESS_KEY_ID / LAKEFS_SECRET_ACCESS_KEY
             let mut parts = rest.splitn(3, '/');
