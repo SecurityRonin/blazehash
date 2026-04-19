@@ -485,3 +485,35 @@ fn test_fuzzy_audit_unrelated_file_is_new() {
     );
     assert_eq!(audit_result.matched, 0, "must not be a full match");
 }
+
+// ── --fail-on-unknown RED TESTS ──────────────────────────────────────────────
+
+#[test]
+fn fail_on_unknown_exits_nonzero_when_files_not_in_manifest() {
+    use std::fs;
+    use tempfile::TempDir;
+
+    let dir = TempDir::new().unwrap();
+    // Create a minimal manifest with no entries
+    let manifest = dir.path().join("test.hash");
+    fs::write(&manifest, "%%%% HASHDEEP-1.0\n%%%% size,blake3,filename\n").unwrap();
+    // Create a file NOT in the manifest
+    let unknown = dir.path().join("unknown.txt");
+    fs::write(&unknown, b"hello").unwrap();
+
+    let status = std::process::Command::new(env!("CARGO_BIN_EXE_blazehash"))
+        .args([
+            "-a",
+            "-k",
+            manifest.to_str().unwrap(),
+            "--fail-on-unknown",
+            unknown.to_str().unwrap(),
+        ])
+        .status()
+        .unwrap();
+    assert_ne!(
+        status.code().unwrap_or(0),
+        0,
+        "--fail-on-unknown should exit non-zero when file is not in manifest"
+    );
+}
