@@ -149,17 +149,75 @@ blazehash gdrive://1ABC...
 blazehash https://drive.google.com/file/d/1ABC.../view
 ```
 
+**Cloud object storage**
+
 | Scheme | Backend |
 |--------|---------|
-| `s3://bucket/key` | AWS S3, MinIO, Cloudflare R2, Wasabi, Backblaze B2 |
+| `s3://bucket/key` | AWS S3, MinIO, Cloudflare R2, Wasabi, Backblaze B2 (S3-compat) |
 | `gcs://bucket/key` | Google Cloud Storage |
 | `azblob://container/key` | Azure Blob Storage |
+| `azdls://filesystem/path` | Azure Data Lake Storage Gen2 |
+| `azfile://share/path` | Azure Files |
+| `b2://bucket/key` | Backblaze B2 (native API) |
+| `cos://bucket/key` | Tencent Cloud COS |
+| `obs://bucket/key` | Huawei Cloud OBS |
+| `oss://bucket/key` | Alibaba Cloud OSS |
+| `swift://container/path` | OpenStack Swift |
+| `upyun://bucket/key` | Upyun CDN storage |
+
+**Cloud drives**
+
+| Scheme | Backend |
+|--------|---------|
+| `gdrive://file-id` | Google Drive (OAuth2; run `blazehash gdrive auth login` once) |
+| `onedrive://path` | Microsoft OneDrive (`ONEDRIVE_ACCESS_TOKEN`) |
+| `dropbox://path` | Dropbox (`DROPBOX_ACCESS_TOKEN`) |
+| `aliyun-drive://path` | Aliyun Drive (`ALIYUN_DRIVE_ACCESS_TOKEN`) |
+| `yandex-disk://path` | Yandex Disk (`YANDEX_DISK_ACCESS_TOKEN`) |
+| `pcloud://path` | pCloud (`PCLOUD_USERNAME` / `PCLOUD_PASSWORD`) |
+| `koofr://path` | Koofr (`KOOFR_EMAIL` / `KOOFR_PASSWORD`) |
+| `seafile://server/repo/path` | Seafile (`SEAFILE_USERNAME` / `SEAFILE_PASSWORD`) |
+
+**Developer / ML / infra**
+
+| Scheme | Backend |
+|--------|---------|
+| `github://owner/repo/path` | GitHub (`GITHUB_TOKEN`) |
+| `huggingface://owner/repo/path` | HuggingFace datasets / models (`HUGGINGFACE_TOKEN`) |
+| `vercel-blob://key` | Vercel Blob (`BLOB_READ_WRITE_TOKEN`) |
+| `alluxio://host:port/path` | Alluxio data orchestration |
+| `webhdfs://host:port/path` | WebHDFS REST (Hadoop, no JVM required) |
+| `lakefs://repo/branch/path` | LakeFS data versioning (`LAKEFS_ACCESS_KEY_ID`) |
+| `dbfs://path` | Databricks DBFS (`DATABRICKS_TOKEN`) |
+| `ipfs://CID/path` | IPFS (via local or remote gateway) |
+| `ipmfs:///path` | IPFS Mutable File System |
+
+**Network KV / databases**
+
+| Scheme | Backend |
+|--------|---------|
+| `redis://host/key` | Redis |
+| `memcached://host/key` | Memcached |
+| `etcd://host/key` | etcd |
+| `tikv://pd-host/key` | TiKV |
+| `mongodb://host/db/coll/key` | MongoDB |
+| `mysql://host/db/key` | MySQL / MariaDB |
+| `postgresql://host/db/key` | PostgreSQL |
+| `sqlite://path/to.db/key` | SQLite |
+| `cloudflare-kv://namespace/key` | Cloudflare KV (`CLOUDFLARE_API_TOKEN`) |
+| `d1://database-id/key` | Cloudflare D1 (`CLOUDFLARE_API_TOKEN`) |
+
+**Filesystem / protocols**
+
+| Scheme | Backend |
+|--------|---------|
+| `sftp://user@host/path` | SFTP (`BLAZEHASH_SFTP_KEY_PATH` for key auth) |
+| `ftp://user:pass@host/path` | FTP / FTPS |
 | `webdav://host/path` | WebDAV (Nextcloud, Box, SharePoint) |
-| `gdrive://file-id` | Google Drive (OAuth2 or public share links) |
 | `http://` / `https://` | HTTP/S (read-only) |
 | `file:///abs/path` | Explicit local filesystem |
 
-Auth is picked up from standard environment variables (`AWS_ACCESS_KEY_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, `AZURE_STORAGE_ACCOUNT`). For Google Drive, run `blazehash gdrive auth login` once to cache a token.
+Auth is picked up from standard environment variables (see table above). Cloud provider SDKs also honour their standard env vars: `AWS_ACCESS_KEY_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, `AZURE_STORAGE_ACCOUNT`, etc.
 
 ---
 
