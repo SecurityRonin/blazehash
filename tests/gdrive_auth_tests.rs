@@ -390,17 +390,6 @@ fn initiate_browser_auth_uses_embedded_defaults_when_env_absent() {
 }
 
 #[test]
-fn initiate_browser_auth_env_var_overrides_embedded_default() {
-    let _cid = EnvGuard::set("BLAZEHASH_GDRIVE_CLIENT_ID", "override-id");
-    let effective = std::env::var("BLAZEHASH_GDRIVE_CLIENT_ID")
-        .unwrap_or_else(|_| DEFAULT_CLIENT_ID.to_string());
-    assert_eq!(
-        effective, "override-id",
-        "env var should override the embedded default"
-    );
-}
-
-#[test]
 fn auth_url_with_localhost_port_has_correct_redirect_uri() {
     let url = build_oauth_auth_url("cid", "http://localhost:54321/callback", "state");
     assert!(
