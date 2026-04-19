@@ -1,7 +1,5 @@
 <p align="center">
-  <img src="assets/blazehash-icon-256.png" alt="blazehash" width="80" style="vertical-align:middle;" />
-  &nbsp;&nbsp;
-  <span style="font-size:2.5em; font-weight:bold; vertical-align:middle;">Blazehash</span>
+  <img src="assets/blazehash-banner.png" alt="Blazehash" width="520" />
 </p>
 
 [![Crates.io](https://img.shields.io/crates/v/blazehash.svg)](https://crates.io/crates/blazehash)
