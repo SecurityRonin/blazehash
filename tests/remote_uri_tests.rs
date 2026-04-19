@@ -471,4 +471,52 @@ mod operator_tests {
     fn operator_vercel_blob_not_unsupported() {
         assert_not_unsupported("vercel-blob://key");
     }
+
+    // ── sftp path extraction (TDD redo) ───────────────────────────────────────
+
+    #[test]
+    fn sftp_path_extracted_correctly() {
+        let (_, path) = operator_for_uri("sftp://user@192.168.1.10/evidence/disk.dd")
+            .expect("sftp:// should be supported");
+        assert_eq!(path, "evidence/disk.dd");
+    }
+
+    #[test]
+    fn sftp_nested_path_extracted_correctly() {
+        let (_, path) = operator_for_uri("sftp://analyst@server.corp/cases/2026/image.dd")
+            .expect("sftp:// should be supported");
+        assert_eq!(path, "cases/2026/image.dd");
+    }
+
+    #[test]
+    fn sftp_userpass_path_extracted_correctly() {
+        // sftp://user:pass@host/path — password stripped, path still correct
+        let (_, path) = operator_for_uri("sftp://admin:secret@10.0.0.1/data/forensics/dump.dd")
+            .expect("sftp:// with password should be supported");
+        assert_eq!(path, "data/forensics/dump.dd");
+    }
+
+    // ── ftp path extraction (TDD redo) ────────────────────────────────────────
+
+    #[test]
+    fn ftp_path_extracted_correctly() {
+        let (_, path) = operator_for_uri("ftp://user:pass@ftpserver.example.com/data/malware.zip")
+            .expect("ftp:// should be supported");
+        assert_eq!(path, "data/malware.zip");
+    }
+
+    #[test]
+    fn ftps_path_extracted_correctly() {
+        let (_, path) = operator_for_uri("ftps://user:pass@secure.example.com/evidence/image.dd")
+            .expect("ftps:// should be supported");
+        assert_eq!(path, "evidence/image.dd");
+    }
+
+    #[test]
+    fn ftp_no_credentials_path_extracted() {
+        // ftp://host/path — no credentials in URI
+        let (_, path) = operator_for_uri("ftp://public.example.com/pub/forensics/file.zip")
+            .expect("ftp:// without credentials should be supported");
+        assert_eq!(path, "pub/forensics/file.zip");
+    }
 }

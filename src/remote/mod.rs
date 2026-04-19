@@ -34,7 +34,7 @@ pub fn is_remote_uri(s: &str) -> bool {
             // Misc
             | "cloudflare-kv" | "d1"
             // Filesystem / network protocols
-            | "http" | "https" | "webdav" | "sftp" | "ftp" | "ftps"
+            | "http" | "https" | "webdav"
             | "mem" | "file"
         )
     )
@@ -95,9 +95,6 @@ pub enum UriScheme {
     Http,
     Https,
     WebDav,
-    Sftp,
-    Ftp,
-    Ftps,
     Mem,
     File,
     // Hdfs (for future reference)
@@ -153,9 +150,6 @@ impl UriScheme {
             "http"              => Some(Self::Http),
             "https"             => Some(Self::Https),
             "webdav"            => Some(Self::WebDav),
-            "sftp"              => Some(Self::Sftp),
-            "ftp"               => Some(Self::Ftp),
-            "ftps"              => Some(Self::Ftps),
             "mem"               => Some(Self::Mem),
             "file"              => Some(Self::File),
             "hdfs"              => Some(Self::Hdfs),

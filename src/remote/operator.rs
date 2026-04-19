@@ -552,36 +552,8 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             let op = Operator::new(builder)?.finish();
             Ok((op, path.to_string()))
         }
-        "sftp" => {
-            // sftp://user@host/path  (authenticates via SSH agent or key file)
-            // Optional env override: BLAZEHASH_SFTP_KEY_PATH, BLAZEHASH_SFTP_KNOWN_HOSTS
-            let (userinfo, hostpath) = rest.split_once('@').unwrap_or(("", rest));
-            let (host, path) = hostpath.split_once('/').unwrap_or((hostpath, ""));
-            let user = userinfo.split_once(':').map(|(u, _)| u).unwrap_or(userinfo);
-            let mut builder = services::Sftp::default()
-                .endpoint(&format!("ssh://{host}"))
-                .user(user);
-            if let Ok(key) = std::env::var("BLAZEHASH_SFTP_KEY_PATH") {
-                builder = builder.key(&key);
-            }
-            let known_hosts = std::env::var("BLAZEHASH_SFTP_KNOWN_HOSTS_STRATEGY")
-                .unwrap_or_else(|_| "add".into());
-            builder = builder.known_hosts_strategy(&known_hosts);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
-        "ftp" | "ftps" => {
-            // ftp://user:password@host/path
-            let (userinfo, hostpath) = rest.split_once('@').unwrap_or(("", rest));
-            let (host, path) = hostpath.split_once('/').unwrap_or((hostpath, ""));
-            let (user, password) = userinfo.split_once(':').unwrap_or((userinfo, ""));
-            let builder = services::Ftp::default()
-                .endpoint(&format!("{scheme}://{host}"))
-                .user(user)
-                .password(password);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
+        "sftp" => bail!("unsupported URI scheme: sftp://"),
+        "ftp" | "ftps" => bail!("unsupported URI scheme: ftp://"),
         "file" => {
             let (dir, file) = rest.rsplit_once('/').unwrap_or(("/", rest));
             let builder = services::Fs::default().root(dir);
