@@ -470,3 +470,46 @@ fn env_var_overrides_default_client_id() {
         .unwrap_or_else(|_| DEFAULT_CLIENT_ID.to_string());
     assert_eq!(effective, "override-client-id");
 }
+
+// ── Consent screen smoke test ────────────────────────────────────────────────
+//
+// Hits the real Google authorization endpoint to verify that the embedded
+// OAuth app has drive.readonly registered on its consent screen.
+//
+// Run with:
+//   cargo test --all-features -- --ignored oauth_consent_screen_has_drive_readonly_scope
+
+#[test]
+#[ignore = "requires network — validates drive.readonly scope is registered in GCP consent screen"]
+fn oauth_consent_screen_has_drive_readonly_scope() {
+    let url = build_oauth_auth_url(
+        DEFAULT_CLIENT_ID,
+        "http://localhost:9999/callback",
+        "smoke-test-state",
+    );
+
+    let response = ureq::get(&url)
+        .call()
+        .expect("should reach accounts.google.com");
+
+    // Google returns 200 HTML in all cases; errors appear as text in the body.
+    // "invalid_scope"  → scope not registered on the consent screen
+    // "invalid_client" → client ID does not exist or has been deleted
+    // "Error 400"      → generic bad-request indicator
+    let body = response.into_string().expect("response body");
+
+    assert!(
+        !body.contains("invalid_scope"),
+        "drive.readonly scope is not registered on the GCP OAuth consent screen.\n\
+         Fix: console.cloud.google.com → APIs & Services → OAuth consent screen → \
+         Add or remove scopes → drive.readonly"
+    );
+    assert!(
+        !body.contains("invalid_client"),
+        "OAuth client ID is not recognised by Google — check DEFAULT_CLIENT_ID in auth.rs"
+    );
+    assert!(
+        !body.contains("Error 400"),
+        "Google returned Error 400 for the auth URL: {url}"
+    );
+}
