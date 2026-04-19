@@ -30,7 +30,7 @@ pub fn is_remote_uri(s: &str) -> bool {
             // Network KV / databases
             | "redis" | "rediss" | "memcached" | "etcd" | "tikv"
             | "mongodb" | "mysql" | "postgresql" | "sqlite"
-            | "surrealdb"
+            | "surrealdb" | "rocksdb"
             // Misc
             | "cloudflare-kv" | "d1"
             // Filesystem / network protocols
@@ -90,6 +90,8 @@ pub enum UriScheme {
     PostgreSQL,
     SQLite,
     SurrealDB,
+    #[cfg(feature = "rocksdb-storage")]
+    RocksDb,
     // Misc
     CloudflareKv,
     D1,
@@ -153,6 +155,8 @@ impl UriScheme {
             "postgresql"        => Some(Self::PostgreSQL),
             "sqlite"            => Some(Self::SQLite),
             "surrealdb"         => Some(Self::SurrealDB),
+            #[cfg(feature = "rocksdb-storage")]
+            "rocksdb"           => Some(Self::RocksDb),
             "cloudflare-kv"     => Some(Self::CloudflareKv),
             "d1"                => Some(Self::D1),
             "http"              => Some(Self::Http),

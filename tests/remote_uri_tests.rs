@@ -577,13 +577,13 @@ mod operator_tests {
     #[cfg(feature = "rocksdb-storage")]
     #[test]
     fn operator_rocksdb_not_unsupported() {
-        assert_not_unsupported("rocksdb:///var/lib/evidence/manifest");
+        assert_not_unsupported("rocksdb:///tmp/bh-rocksdb-test-a/evidence/manifest");
     }
 
     #[cfg(feature = "rocksdb-storage")]
     #[test]
     fn rocksdb_path_extracted_correctly() {
-        let (_, key) = operator_for_uri("rocksdb:///var/lib/evidence/case-001")
+        let (_, key) = operator_for_uri("rocksdb:///tmp/bh-rocksdb-test-b/evidence/case-001")
             .expect("rocksdb:// should be supported with rocksdb-storage feature");
         assert_eq!(key, "case-001");
     }

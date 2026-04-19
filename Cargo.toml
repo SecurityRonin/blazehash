@@ -187,6 +187,7 @@ ots = []
 pq  = []
 qr  = ["dep:qrcode", "dep:image"]
 remote = ["dep:opendal", "dep:tokio"]
+rocksdb-storage = ["remote", "opendal/services-rocksdb"]
 
 [package.metadata.deb]
 maintainer = "SecurityRonin <security-ronin@users.noreply.github.com>"

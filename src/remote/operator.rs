@@ -426,6 +426,15 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
         }
 
         // ── Network KV / databases ────────────────────────────────────────────
+        #[cfg(feature = "rocksdb-storage")]
+        "rocksdb" => {
+            // rocksdb:///path/to/db/key — RocksDB embedded KV
+            // split_once("://") on "rocksdb:///path/to/db/key" gives rest="/path/to/db/key"
+            let (db_path, key) = rest.rsplit_once('/').unwrap_or((rest, ""));
+            let builder = services::Rocksdb::default().datadir(db_path);
+            let op = Operator::new(builder)?.finish();
+            Ok((op, key.to_string()))
+        }
         "rediss" => {
             // rediss://host:port/key — Redis with TLS
             let (hostport, key) = rest.split_once('/').unwrap_or((rest, ""));
