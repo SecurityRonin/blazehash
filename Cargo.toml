@@ -146,6 +146,8 @@ opendal = { version = "0.55.0", optional = true, features = [
     "services-webdav",
     "services-sftp",
     "services-ftp",
+    "services-hdfs-native", # HDFS pure-Rust native client (no Java/libhdfs required)
+    "services-compfs",  # compio-based async filesystem
     "blocking",
 ] }
 

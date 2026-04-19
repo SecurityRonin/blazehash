@@ -553,7 +553,7 @@ mod operator_tests {
 
     #[test]
     fn compfs_path_extracted_correctly() {
-        let (_, path) = operator_for_uri("compfs:///evidence/disk.dd")
+        let (_, path) = operator_for_uri("compfs:///tmp/evidence/disk.dd")
             .expect("compfs:// should be supported");
         assert_eq!(path, "disk.dd");
     }

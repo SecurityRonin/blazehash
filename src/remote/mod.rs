@@ -24,7 +24,7 @@ pub fn is_remote_uri(s: &str) -> bool {
             | "github" | "huggingface"
             | "vercel-blob" | "vercel-artifacts"
             // Distributed / big data
-            | "alluxio" | "webhdfs" | "lakefs" | "dbfs" | "ghac"
+            | "alluxio" | "webhdfs" | "hdfs" | "lakefs" | "dbfs" | "ghac"
             // Decentralized
             | "ipfs" | "ipmfs"
             // Network KV / databases
@@ -35,6 +35,7 @@ pub fn is_remote_uri(s: &str) -> bool {
             | "cloudflare-kv" | "d1"
             // Filesystem / network protocols
             | "http" | "https" | "webdav" | "sftp" | "ftp" | "ftps"
+            | "compfs"
             | "mem" | "file"
         )
     )
@@ -99,6 +100,7 @@ pub enum UriScheme {
     Sftp,
     Ftp,
     Ftps,
+    Compfs,
     Mem,
     File,
     // Hdfs (for future reference)
@@ -158,6 +160,7 @@ impl UriScheme {
             "sftp"              => Some(Self::Sftp),
             "ftp"               => Some(Self::Ftp),
             "ftps"              => Some(Self::Ftps),
+            "compfs"            => Some(Self::Compfs),
             "mem"               => Some(Self::Mem),
             "file"              => Some(Self::File),
             "hdfs"              => Some(Self::Hdfs),

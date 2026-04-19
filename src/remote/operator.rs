@@ -375,6 +375,16 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             let op = Operator::new(builder)?.finish();
             Ok((op, path.to_string()))
         }
+        "hdfs" => {
+            // hdfs://namenode:port/path — pure-Rust HDFS native client (no Java required)
+            let (hostport, path) = rest.split_once('/').unwrap_or((rest, ""));
+            let name_node = format!("hdfs://{hostport}");
+            let builder = services::HdfsNative::default()
+                .name_node(&name_node)
+                .root("/");
+            let op = Operator::new(builder)?.finish();
+            Ok((op, path.to_string()))
+        }
         "lakefs" => {
             // lakefs://repo/branch/path — creds from LAKEFS_ACCESS_KEY_ID / LAKEFS_SECRET_ACCESS_KEY
             let mut parts = rest.splitn(3, '/');
@@ -589,6 +599,15 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
                 .password(password);
             let op = Operator::new(builder)?.finish();
             Ok((op, path.to_string()))
+        }
+        "compfs" => {
+            // compfs:///abs/path/to/dir — compio-based async filesystem
+            // rest = "/abs/path/to/dir/file" → root="/abs/path/to/dir", path="file"
+            let full = format!("/{rest}"); // restore leading slash stripped by split_once("://")
+            let (dir, file) = full.rsplit_once('/').unwrap_or(("/", &full));
+            let builder = services::Compfs::default().root(dir);
+            let op = Operator::new(builder)?.finish();
+            Ok((op, file.to_string()))
         }
         "file" => {
             let (dir, file) = rest.rsplit_once('/').unwrap_or(("/", rest));
