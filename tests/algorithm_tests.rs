@@ -436,5 +436,97 @@ fn crc64_is_non_cryptographic() {
     assert!(Algorithm::Crc64.is_non_cryptographic());
 }
 
+// ── Digest-compatible wrappers ────────────────────────────────────────────────
+// These tests confirm the wrappers implement digest::Digest and produce the
+// same bytes as the existing hash_bytes() dispatch arms.
+
+use blazehash::digest_wrappers::{
+    Adler32Digest, Crc32cDigest, Crc64Digest, K12Fixed,
+    Shake128Fixed, Shake256Fixed, Xxh3Digest,
+};
+use digest::Digest;
+
+#[test]
+fn shake128_wrapper_matches_hash_bytes() {
+    let data = b"shake128 wrapper test";
+    let wrapper = hex::encode(Shake128Fixed::digest(data));
+    let direct = hash_bytes(Algorithm::Shake128, data);
+    assert_eq!(wrapper, direct, "Shake128Fixed must match hash_bytes");
+}
+
+#[test]
+fn shake256_wrapper_matches_hash_bytes() {
+    let data = b"shake256 wrapper test";
+    let wrapper = hex::encode(Shake256Fixed::digest(data));
+    let direct = hash_bytes(Algorithm::Shake256, data);
+    assert_eq!(wrapper, direct, "Shake256Fixed must match hash_bytes");
+}
+
+#[test]
+fn k12_wrapper_matches_hash_bytes() {
+    let data = b"k12 wrapper test";
+    let wrapper = hex::encode(K12Fixed::digest(data));
+    let direct = hash_bytes(Algorithm::K12, data);
+    assert_eq!(wrapper, direct, "K12Fixed must match hash_bytes");
+}
+
+#[test]
+fn crc32c_wrapper_matches_hash_bytes() {
+    let data = b"crc32c wrapper test";
+    let wrapper = hex::encode(Crc32cDigest::digest(data));
+    let direct = hash_bytes(Algorithm::Crc32c, data);
+    assert_eq!(wrapper, direct, "Crc32cDigest must match hash_bytes");
+}
+
+#[test]
+fn crc64_wrapper_matches_hash_bytes() {
+    let data = b"crc64 wrapper test";
+    let wrapper = hex::encode(Crc64Digest::digest(data));
+    let direct = hash_bytes(Algorithm::Crc64, data);
+    assert_eq!(wrapper, direct, "Crc64Digest must match hash_bytes");
+}
+
+#[test]
+fn adler32_wrapper_matches_hash_bytes() {
+    let data = b"adler32 wrapper test";
+    let wrapper = hex::encode(Adler32Digest::digest(data));
+    let direct = hash_bytes(Algorithm::Adler32, data);
+    assert_eq!(wrapper, direct, "Adler32Digest must match hash_bytes");
+}
+
+#[test]
+fn xxh3_wrapper_matches_hash_bytes() {
+    let data = b"xxh3 wrapper test";
+    let wrapper = hex::encode(Xxh3Digest::digest(data));
+    let direct = hash_bytes(Algorithm::Xxh3, data);
+    assert_eq!(wrapper, direct, "Xxh3Digest must match hash_bytes");
+}
+
+#[test]
+fn shake128_wrapper_incremental_matches_oneshot() {
+    use digest::Update;
+    let part1 = b"hello ";
+    let part2 = b"world";
+    let oneshot = hex::encode(Shake128Fixed::digest([part1, part2].concat().as_slice()));
+    let mut h = Shake128Fixed::new();
+    h.update(part1);
+    h.update(part2);
+    let incremental = hex::encode(h.finalize());
+    assert_eq!(incremental, oneshot, "incremental must equal one-shot for Shake128");
+}
+
+#[test]
+fn crc32c_wrapper_incremental_matches_oneshot() {
+    use digest::Update;
+    let part1 = b"hello ";
+    let part2 = b"world";
+    let oneshot = hex::encode(Crc32cDigest::digest([part1, part2].concat().as_slice()));
+    let mut h = Crc32cDigest::new();
+    h.update(part1);
+    h.update(part2);
+    let incremental = hex::encode(h.finalize());
+    assert_eq!(incremental, oneshot, "incremental must equal one-shot for Crc32c");
+}
+
 // nilsimsa is skipped: the `nilsimsa` crate (0.2.1) requires #![feature()] and does not
 // compile on stable Rust toolchains.
