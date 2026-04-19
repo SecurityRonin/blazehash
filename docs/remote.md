@@ -104,11 +104,22 @@ blazehash onedrive://Documents/CaseFiles/image.dd
 
 ### Hadoop / HDFS
 
-Use `webhdfs://` for Hadoop clusters — it speaks the WebHDFS REST API, requires no JVM or Hadoop native libs, and works with any Hadoop 2.x+ namenode:
+Two schemes are available depending on your cluster setup:
+
+| Scheme | Backend | Notes |
+|--------|---------|-------|
+| `hdfs://namenode:port/path` | HDFS (pure-Rust native client) | No JVM, no `libhdfs` — uses `hdfs-native` crate speaking Hadoop RPC |
+| `webhdfs://namenode:port/path` | WebHDFS REST API | No JVM, works with any Hadoop 2.x+ namenode |
 
 ```bash
+# Pure-Rust HDFS native client (no Java required)
+blazehash hdfs://namenode.corp:8020/user/evidence/case-001/
+
+# WebHDFS REST (also no Java required)
 blazehash webhdfs://namenode.corp:50070/user/evidence/case-001/
 ```
+
+`hdfs://` is preferred when the cluster exposes the native Hadoop RPC port (default 8020/9000). `webhdfs://` is the fallback when only the HTTP REST endpoint is reachable.
 
 ### GitHub (code forensics)
 
@@ -183,8 +194,51 @@ blazehash sftp://admin@192.168.1.10/evidence/disk.dd
 | Scheme | Backend | Notes |
 |--------|---------|-------|
 | `mem://bucket/key` | In-process memory | Ephemeral; useful in tests and pipeline stages |
-| `redis://...` | Redis | Also serves as fast shared cache between pipeline stages |
+| `redis://...` | Redis (plaintext) | Also serves as fast shared cache between pipeline stages |
+| `rediss://host:port/key` | Redis with TLS | Same as `redis://` but over an encrypted connection |
 | `sqlite://path/db/key` | SQLite file | Lightweight embedded KV; good for offline pipelines |
+| `rocksdb:///path/to/db/key` | RocksDB embedded KV | Requires `--features rocksdb-storage` (compile-time opt-in) |
+
+### Redis TLS (`rediss://`)
+
+The `rediss://` scheme (double-s) connects to Redis over TLS — useful when your Redis instance requires encrypted connections (e.g. Redis Cloud, Upstash, or self-hosted with TLS).
+
+```bash
+# Hash a value stored in Redis over TLS
+blazehash rediss://redis.cloud.example.com:6380/evidence:case-001:hash
+```
+
+### RocksDB (`rocksdb://`)
+
+RocksDB support is an optional compile-time feature — it pulls in the RocksDB C++ library at build time. Not included in the default binary; build with:
+
+```bash
+cargo install blazehash --features rocksdb-storage
+```
+
+```bash
+# Hash a value stored in a local RocksDB database
+blazehash rocksdb:///var/lib/evidence/casedb/artifact-001
+```
+
+## Compio / Monoio Async Filesystems
+
+These backends replace the standard OS filesystem (`file://`) with alternative async I/O runtimes for workloads where kernel-level async matters.
+
+| Scheme | Backend | Platform |
+|--------|---------|----------|
+| `compfs:///abs/path/file` | compio filesystem | macOS, Linux, Windows (io_uring / kqueue / IOCP) |
+| `monoiofs:///abs/path/file` | monoio filesystem | Linux only (io_uring) |
+
+```bash
+# Hash via compio (cross-platform async I/O)
+blazehash compfs:///mnt/evidence/disk.dd
+
+# Hash via monoio (Linux io_uring — lower overhead for large sequential reads)
+blazehash monoiofs:///mnt/evidence/disk.dd
+```
+
+In practice, for most forensic workloads the default filesystem is sufficient. These backends are relevant when integrating blazehash into a compio or monoio async pipeline.
 
 ---
 

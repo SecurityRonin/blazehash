@@ -521,9 +521,10 @@ blazehash sftp://admin@192.168.1.10/evidence/disk.dd
 
 Supported schemes include: `s3`, `gcs`, `azblob`, `azdls`, `azfile`, `b2`, `cos`, `obs`, `oss`,
 `swift`, `upyun`, `gdrive`, `onedrive`, `dropbox`, `aliyun-drive`, `yandex-disk`, `pcloud`,
-`koofr`, `seafile`, `github`, `huggingface`, `vercel-blob`, `alluxio`, `webhdfs`, `lakefs`,
-`ipfs`, `ipmfs`, `redis`, `memcached`, `etcd`, `tikv`, `mongodb`, `mysql`, `postgresql`,
-`sqlite`, `cloudflare-kv`, `d1`, `sftp`, `ftp`, `ftps`, `webdav`, `http`, `https`, `file`, `mem`.
+`koofr`, `seafile`, `github`, `huggingface`, `vercel-blob`, `alluxio`, `hdfs`, `webhdfs`, `lakefs`,
+`ipfs`, `ipmfs`, `redis`, `rediss`, `memcached`, `etcd`, `tikv`, `mongodb`, `mysql`, `postgresql`,
+`sqlite`, `rocksdb` (opt-in), `cloudflare-kv`, `d1`, `sftp`, `ftp`, `ftps`, `webdav`, `http`,
+`https`, `compfs`, `monoiofs` (Linux), `file`, `mem`.
 
 ---
 
