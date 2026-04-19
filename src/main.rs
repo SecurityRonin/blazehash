@@ -1168,9 +1168,7 @@ fn main() -> Result<()> {
         Mode::Interleave => unreachable!(),
         #[cfg(feature = "remote")]
         Mode::GDriveCollect => {
-            let input = cli
-                .paths
-                .get(1)
+            let input = cli.paths.first()
                 .map(|p| p.to_string_lossy().to_string())
                 .unwrap_or_default();
             let file_id = blazehash::remote::gdrive::parse_file_id(&input)

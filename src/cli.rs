@@ -738,15 +738,19 @@ impl Cli {
             Mode::Balance
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("interleave")) {
             Mode::Interleave
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("gdrive-collect"))
+        } else if self.paths.first().map(|p| {
+                let s = p.to_string_lossy();
+                s.starts_with("gdrive://")
+                    || s.starts_with("https://drive.google.com/")
+                    || s.starts_with("http://drive.google.com/")
+            }) == Some(true)
         {
             #[cfg(feature = "remote")]
             return Mode::GDriveCollect;
             #[cfg(not(feature = "remote"))]
             {
                 eprintln!(
-                    "error: gdrive-collect requires the `remote` feature \
+                    "error: gdrive requires the `remote` feature \
                      — recompile with --features remote"
                 );
                 std::process::exit(1);
