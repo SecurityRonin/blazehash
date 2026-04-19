@@ -592,3 +592,60 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
         other => bail!("unsupported URI scheme: {other}://"),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn hdfs_uri_is_not_unsupported() {
+        // hdfs:// should not return "unsupported URI scheme: hdfs://"
+        let result = operator_for_uri("hdfs://namenode:9000/data/evidence.zip");
+        // Currently fails RED: bails with "unsupported URI scheme: hdfs://"
+        assert!(
+            result.is_ok() || result
+                .as_ref()
+                .unwrap_err()
+                .to_string()
+                .contains("unsupported URI scheme: hdfs://")
+                .then(|| false)
+                .unwrap_or(true),
+            "hdfs:// should not return unsupported-scheme error"
+        );
+    }
+
+    #[test]
+    fn hdfs_uri_path_extraction() {
+        // After implementation, the path component should be extracted correctly.
+        let (_, path) = operator_for_uri("hdfs://namenode:9000/data/evidence.zip")
+            .expect("hdfs:// should be supported");
+        assert_eq!(path, "data/evidence.zip");
+    }
+
+    #[test]
+    fn hdfs_is_recognised_as_remote() {
+        assert!(
+            crate::remote::is_remote_uri("hdfs://namenode:9000/path"),
+            "hdfs:// should be recognised as a remote URI"
+        );
+    }
+
+    #[test]
+    fn sftp_uri_is_supported() {
+        // sftp:// already in operator; verify it does NOT return unsupported error
+        let result = operator_for_uri("sftp://user@host/path/file.zip");
+        assert!(
+            result.is_ok() || !result.unwrap_err().to_string().contains("unsupported"),
+            "sftp:// should be supported"
+        );
+    }
+
+    #[test]
+    fn webhdfs_uri_is_supported() {
+        let result = operator_for_uri("webhdfs://namenode:50070/path/file");
+        assert!(
+            result.is_ok() || !result.unwrap_err().to_string().contains("unsupported"),
+            "webhdfs:// should be supported"
+        );
+    }
+}
