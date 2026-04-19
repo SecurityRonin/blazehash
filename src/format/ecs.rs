@@ -20,6 +20,17 @@ fn ecs_hash_name(algo: &Algorithm) -> &'static str {
         Algorithm::Xxh3 => "xxh3",
         Algorithm::Shake128 => "shake128",
         Algorithm::Shake256 => "shake256",
+        Algorithm::Blake2b => "blake2b",
+        Algorithm::Blake2s => "blake2s",
+        Algorithm::Sm3 => "sm3",
+        Algorithm::Streebog256 => "streebog256",
+        Algorithm::Streebog512 => "streebog512",
+        Algorithm::Ripemd160 => "ripemd160",
+        Algorithm::Sha512_256 => "sha512_256",
+        Algorithm::Sha512_224 => "sha512_224",
+        Algorithm::K12 => "k12",
+        Algorithm::Adler32 => "adler32",
+        Algorithm::Crc64 => "crc64",
     }
 }
 

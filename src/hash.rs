@@ -635,5 +635,32 @@ fn make_hasher(algo: Algorithm) -> Box<dyn DynHasher> {
         Algorithm::Shake128 | Algorithm::Shake256 => {
             panic!("XOF algorithms (shake128/shake256) cannot be used via make_hasher; use algorithm::hash_bytes instead")
         }
+        Algorithm::Blake2b => Box::new(DigestHasher {
+            inner: blake2::Blake2b512::new(),
+        }),
+        Algorithm::Blake2s => Box::new(DigestHasher {
+            inner: blake2::Blake2s256::new(),
+        }),
+        Algorithm::Sm3 => Box::new(DigestHasher {
+            inner: sm3::Sm3::new(),
+        }),
+        Algorithm::Streebog256 => Box::new(DigestHasher {
+            inner: streebog::Streebog256::new(),
+        }),
+        Algorithm::Streebog512 => Box::new(DigestHasher {
+            inner: streebog::Streebog512::new(),
+        }),
+        Algorithm::Ripemd160 => Box::new(DigestHasher {
+            inner: ripemd::Ripemd160::new(),
+        }),
+        Algorithm::Sha512_256 => Box::new(DigestHasher {
+            inner: sha2::Sha512_256::new(),
+        }),
+        Algorithm::Sha512_224 => Box::new(DigestHasher {
+            inner: sha2::Sha512_224::new(),
+        }),
+        Algorithm::K12 | Algorithm::Adler32 | Algorithm::Crc64 => {
+            panic!("algorithms (k12/adler32/crc64) cannot stream; use algorithm::hash_bytes instead")
+        }
     }
 }

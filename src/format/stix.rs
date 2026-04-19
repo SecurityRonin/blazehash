@@ -26,6 +26,17 @@ fn stix_hash_name(algo: &Algorithm) -> &'static str {
         Algorithm::Xxh3 => "XXH3",
         Algorithm::Shake128 => "SHAKE128",
         Algorithm::Shake256 => "SHAKE256",
+        Algorithm::Blake2b => "BLAKE2B",
+        Algorithm::Blake2s => "BLAKE2S",
+        Algorithm::Sm3 => "SM3",
+        Algorithm::Streebog256 => "STREEBOG-256",
+        Algorithm::Streebog512 => "STREEBOG-512",
+        Algorithm::Ripemd160 => "RIPEMD-160",
+        Algorithm::Sha512_256 => "SHA-512/256",
+        Algorithm::Sha512_224 => "SHA-512/224",
+        Algorithm::K12 => "K12",
+        Algorithm::Adler32 => "ADLER32",
+        Algorithm::Crc64 => "CRC64",
     }
 }
 

@@ -436,18 +436,5 @@ fn crc64_is_non_cryptographic() {
     assert!(Algorithm::Crc64.is_non_cryptographic());
 }
 
-#[test]
-fn nilsimsa_parses_from_str() {
-    assert!("nilsimsa".parse::<Algorithm>().is_ok());
-}
-
-#[test]
-fn nilsimsa_hash_bytes_length() {
-    let h = hash_bytes(Algorithm::Nilsimsa, b"abc");
-    assert_eq!(h.len(), 64, "nilsimsa output should be 64 hex chars");
-}
-
-#[test]
-fn nilsimsa_is_fuzzy() {
-    assert!(Algorithm::Nilsimsa.is_fuzzy());
-}
+// nilsimsa is skipped: the `nilsimsa` crate (0.2.1) requires #![feature()] and does not
+// compile on stable Rust toolchains.
