@@ -600,6 +600,22 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             let op = Operator::new(builder)?.finish();
             Ok((op, path.to_string()))
         }
+        "monoiofs" => {
+            // monoiofs:///abs/path — monoio-based async fs (Linux io_uring only)
+            let full = format!("/{rest}");
+            let (dir, file) = full.rsplit_once('/').unwrap_or(("/", &full));
+            #[cfg(target_os = "linux")]
+            {
+                let builder = services::Monoiofs::default().root(dir);
+                let op = Operator::new(builder)?.finish();
+                Ok((op, file.to_string()))
+            }
+            #[cfg(not(target_os = "linux"))]
+            {
+                let _ = (dir, file);
+                bail!("monoiofs:// is only supported on Linux (io_uring required)")
+            }
+        }
         "compfs" => {
             // compfs:///abs/path/to/dir — compio-based async filesystem
             // rest = "/abs/path/to/dir/file" → root="/abs/path/to/dir", path="file"
