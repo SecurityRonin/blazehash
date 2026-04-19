@@ -81,14 +81,70 @@ qrcode = { version = "0.14", optional = true }
 image = { version = "0.25", optional = true, default-features = false, features = ["png"] }
 regex = "1"
 opendal = { version = "0.55.0", optional = true, features = [
-    "services-s3",
-    "services-gcs",
-    "services-azblob",
-    "services-gdrive",
-    "services-webdav",
+    # Cloud object storage
+    "services-s3",          # AWS S3, MinIO, R2, Wasabi, Backblaze B2 (S3-compat)
+    "services-gcs",         # Google Cloud Storage
+    "services-azblob",      # Azure Blob Storage
+    "services-azdls",       # Azure Data Lake Storage Gen2
+    "services-azfile",      # Azure Files
+    "services-b2",          # Backblaze B2 (native API)
+    "services-cos",         # Tencent Cloud COS
+    "services-obs",         # Huawei Cloud OBS
+    "services-oss",         # Alibaba Cloud OSS
+    "services-swift",       # OpenStack Swift
+    "services-upyun",       # Upyun CDN storage
+    # Consumer / enterprise cloud drives
+    "services-gdrive",      # Google Drive
+    "services-onedrive",    # Microsoft OneDrive
+    "services-dropbox",     # Dropbox
+    "services-aliyun-drive",# Aliyun Drive (Alibaba)
+    "services-yandex-disk", # Yandex Disk
+    "services-pcloud",      # pCloud
+    "services-koofr",       # Koofr
+    "services-seafile",     # Seafile
+    # Developer / ML / infra
+    "services-github",      # GitHub (code forensics)
+    "services-huggingface", # HuggingFace datasets/models
+    "services-vercel-artifacts", # Vercel build cache
+    "services-vercel-blob", # Vercel Blob
+    # Distributed / big data
+    "services-alluxio",     # Alluxio data orchestration
+    "services-webhdfs",     # WebHDFS REST (no JVM needed)
+    "services-lakefs",      # LakeFS data versioning
+    "services-dbfs",        # Databricks DBFS
+    "services-ghac",        # GitHub Actions Cache (useful in CI forensics)
+    # Decentralized
+    "services-ipfs",        # IPFS (content-addressed, prost dep is pure Rust)
+    "services-ipmfs",       # IPFS Mutable File System
+    # In-memory / embedded (useful for testing + pipeline)
     "services-memory",
+    "services-dashmap",     # Concurrent in-memory map
+    "services-mini-moka",   # Bounded in-memory cache
+    "services-moka",        # Full-featured in-memory cache with TTL
+    "services-redb",        # Embedded key-value (pure Rust, ACID)
+    "services-sled",        # Embedded key-value (pure Rust)
+    "services-cacache",     # Content-addressable disk cache
+    # Network key-value / databases
+    "services-redis",       # Redis
+    "services-memcached",   # Memcached
+    "services-etcd",        # etcd (gRPC, pure Rust)
+    "services-tikv",        # TiKV distributed KV
+    "services-mongodb",     # MongoDB (pure Rust driver)
+    "services-gridfs",      # MongoDB GridFS
+    "services-mysql",       # MySQL / MariaDB (sqlx, pure Rust)
+    "services-postgresql",  # PostgreSQL (sqlx, pure Rust)
+    "services-sqlite",      # SQLite (sqlx, pure Rust)
+    # "services-surrealdb" — excluded: pulls async-graphql@7.2.1 which requires rustc 1.89
+    "services-persy",       # Persy embedded (pure Rust)
+    # Misc
+    "services-cloudflare-kv",   # Cloudflare KV (via REST)
+    "services-d1",          # Cloudflare D1 SQLite (via REST)
+    # Filesystem
     "services-fs",
     "services-http",
+    "services-webdav",
+    "services-sftp",
+    "services-ftp",
     "blocking",
 ] }
 
