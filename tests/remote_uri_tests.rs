@@ -332,6 +332,18 @@ fn scheme_detect_vercel_blob() {
     assert_eq!(UriScheme::detect("vercel-blob://key"), Some(UriScheme::VercelBlob));
 }
 
+// ── Compio filesystem (compfs) ────────────────────────────────────────────────
+
+#[test]
+fn compfs_uri_is_detected() {
+    assert!(is_remote_uri("compfs:///tmp/evidence/file.bin"));
+}
+
+#[test]
+fn scheme_detect_compfs() {
+    assert_eq!(UriScheme::detect("compfs:///path/to/file"), Some(UriScheme::Compfs));
+}
+
 // ── Redis TLS (rediss) ────────────────────────────────────────────────────────
 
 #[test]
@@ -530,6 +542,20 @@ mod operator_tests {
         let (_, path) = operator_for_uri("ftp://public.example.com/pub/forensics/file.zip")
             .expect("ftp:// without credentials should be supported");
         assert_eq!(path, "pub/forensics/file.zip");
+    }
+
+    // ── compfs:// (compio filesystem) ─────────────────────────────────────────
+
+    #[test]
+    fn operator_compfs_not_unsupported() {
+        assert_not_unsupported("compfs:///tmp/evidence");
+    }
+
+    #[test]
+    fn compfs_path_extracted_correctly() {
+        let (_, path) = operator_for_uri("compfs:///evidence/disk.dd")
+            .expect("compfs:// should be supported");
+        assert_eq!(path, "disk.dd");
     }
 
     // ── rediss:// (Redis with TLS) ─────────────────────────────────────────────
