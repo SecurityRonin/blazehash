@@ -504,26 +504,28 @@ fn xxh3_wrapper_matches_hash_bytes() {
 
 #[test]
 fn shake128_wrapper_incremental_matches_oneshot() {
-    use digest::Update;
-    let part1 = b"hello ";
-    let part2 = b"world";
-    let oneshot = hex::encode(Shake128Fixed::digest([part1, part2].concat().as_slice()));
+    let part1: &[u8] = b"hello ";
+    let part2: &[u8] = b"world";
+    let mut all = part1.to_vec();
+    all.extend_from_slice(part2);
+    let oneshot = hex::encode(Shake128Fixed::digest(all.as_slice()));
     let mut h = Shake128Fixed::new();
-    h.update(part1);
-    h.update(part2);
+    Digest::update(&mut h, part1);
+    Digest::update(&mut h, part2);
     let incremental = hex::encode(h.finalize());
     assert_eq!(incremental, oneshot, "incremental must equal one-shot for Shake128");
 }
 
 #[test]
 fn crc32c_wrapper_incremental_matches_oneshot() {
-    use digest::Update;
-    let part1 = b"hello ";
-    let part2 = b"world";
-    let oneshot = hex::encode(Crc32cDigest::digest([part1, part2].concat().as_slice()));
+    let part1: &[u8] = b"hello ";
+    let part2: &[u8] = b"world";
+    let mut all = part1.to_vec();
+    all.extend_from_slice(part2);
+    let oneshot = hex::encode(Crc32cDigest::digest(all.as_slice()));
     let mut h = Crc32cDigest::new();
-    h.update(part1);
-    h.update(part2);
+    Digest::update(&mut h, part1);
+    Digest::update(&mut h, part2);
     let incremental = hex::encode(h.finalize());
     assert_eq!(incremental, oneshot, "incremental must equal one-shot for Crc32c");
 }

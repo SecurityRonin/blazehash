@@ -3,6 +3,7 @@ pub mod remote;
 pub mod attack;
 pub mod disclosure;
 pub mod algorithm;
+pub mod digest_wrappers;
 pub mod audit;
 pub mod config;
 pub mod cosign;
