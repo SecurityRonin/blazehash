@@ -290,3 +290,164 @@ fn test_shake_parse_from_str() {
         Algorithm::Shake256
     );
 }
+
+// ── NEW ALGORITHM RED TESTS ──────────────────────────────────────────────────
+
+#[test]
+fn blake2b_parses_from_str() {
+    assert!("blake2b".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn blake2b_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Blake2b, b"abc");
+    assert_eq!(h.len(), 128, "blake2b output should be 128 hex chars");
+}
+
+#[test]
+fn blake2b_hash_bytes_nonempty_hex() {
+    let h = hash_bytes(Algorithm::Blake2b, b"");
+    assert!(!h.is_empty());
+    assert!(h.chars().all(|c| c.is_ascii_hexdigit()));
+}
+
+#[test]
+fn blake2s_parses_from_str() {
+    assert!("blake2s".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn blake2s_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Blake2s, b"abc");
+    assert_eq!(h.len(), 64, "blake2s output should be 64 hex chars");
+}
+
+#[test]
+fn sm3_parses_from_str() {
+    assert!("sm3".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn sm3_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Sm3, b"abc");
+    assert_eq!(h.len(), 64, "sm3 output should be 64 hex chars");
+}
+
+#[test]
+fn streebog256_parses_from_str() {
+    assert!("streebog256".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn streebog256_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Streebog256, b"abc");
+    assert_eq!(h.len(), 64, "streebog256 output should be 64 hex chars");
+}
+
+#[test]
+fn streebog512_parses_from_str() {
+    assert!("streebog512".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn streebog512_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Streebog512, b"abc");
+    assert_eq!(h.len(), 128, "streebog512 output should be 128 hex chars");
+}
+
+#[test]
+fn ripemd160_parses_from_str() {
+    assert!("ripemd160".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn ripemd160_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Ripemd160, b"abc");
+    assert_eq!(h.len(), 40, "ripemd160 output should be 40 hex chars");
+}
+
+#[test]
+fn sha512_256_parses_from_str() {
+    assert!("sha512-256".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn sha512_256_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Sha512_256, b"abc");
+    assert_eq!(h.len(), 64, "sha512-256 output should be 64 hex chars");
+}
+
+#[test]
+fn sha512_224_parses_from_str() {
+    assert!("sha512-224".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn sha512_224_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Sha512_224, b"abc");
+    assert_eq!(h.len(), 56, "sha512-224 output should be 56 hex chars");
+}
+
+#[test]
+fn k12_parses_from_str() {
+    assert!("k12".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn k12_parses_alias() {
+    assert!("kangaroo12".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn k12_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::K12, b"abc");
+    assert_eq!(h.len(), 64, "k12 output should be 64 hex chars");
+}
+
+#[test]
+fn adler32_parses_from_str() {
+    assert!("adler32".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn adler32_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Adler32, b"abc");
+    assert_eq!(h.len(), 8, "adler32 output should be 8 hex chars");
+}
+
+#[test]
+fn adler32_is_non_cryptographic() {
+    assert!(Algorithm::Adler32.is_non_cryptographic());
+}
+
+#[test]
+fn crc64_parses_from_str() {
+    assert!("crc64".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn crc64_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Crc64, b"abc");
+    assert_eq!(h.len(), 16, "crc64 output should be 16 hex chars");
+}
+
+#[test]
+fn crc64_is_non_cryptographic() {
+    assert!(Algorithm::Crc64.is_non_cryptographic());
+}
+
+#[test]
+fn nilsimsa_parses_from_str() {
+    assert!("nilsimsa".parse::<Algorithm>().is_ok());
+}
+
+#[test]
+fn nilsimsa_hash_bytes_length() {
+    let h = hash_bytes(Algorithm::Nilsimsa, b"abc");
+    assert_eq!(h.len(), 64, "nilsimsa output should be 64 hex chars");
+}
+
+#[test]
+fn nilsimsa_is_fuzzy() {
+    assert!(Algorithm::Nilsimsa.is_fuzzy());
+}
