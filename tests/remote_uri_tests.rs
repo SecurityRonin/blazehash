@@ -332,6 +332,20 @@ fn scheme_detect_vercel_blob() {
     assert_eq!(UriScheme::detect("vercel-blob://key"), Some(UriScheme::VercelBlob));
 }
 
+// ── RocksDB (optional feature: rocksdb-storage) ───────────────────────────────
+
+#[cfg(feature = "rocksdb-storage")]
+#[test]
+fn rocksdb_uri_is_detected() {
+    assert!(is_remote_uri("rocksdb:///var/lib/rocksdb/evidence"));
+}
+
+#[cfg(feature = "rocksdb-storage")]
+#[test]
+fn scheme_detect_rocksdb() {
+    assert_eq!(UriScheme::detect("rocksdb:///path/to/db"), Some(UriScheme::RocksDb));
+}
+
 // ── Monoio filesystem (monoiofs, Linux only) ──────────────────────────────────
 
 #[cfg(target_os = "linux")]
@@ -556,6 +570,22 @@ mod operator_tests {
         let (_, path) = operator_for_uri("ftp://public.example.com/pub/forensics/file.zip")
             .expect("ftp:// without credentials should be supported");
         assert_eq!(path, "pub/forensics/file.zip");
+    }
+
+    // ── rocksdb:// (optional feature: rocksdb-storage) ────────────────────────
+
+    #[cfg(feature = "rocksdb-storage")]
+    #[test]
+    fn operator_rocksdb_not_unsupported() {
+        assert_not_unsupported("rocksdb:///var/lib/evidence/manifest");
+    }
+
+    #[cfg(feature = "rocksdb-storage")]
+    #[test]
+    fn rocksdb_path_extracted_correctly() {
+        let (_, key) = operator_for_uri("rocksdb:///var/lib/evidence/case-001")
+            .expect("rocksdb:// should be supported with rocksdb-storage feature");
+        assert_eq!(key, "case-001");
     }
 
     // ── monoiofs:// (monoio filesystem, Linux only) ───────────────────────────
