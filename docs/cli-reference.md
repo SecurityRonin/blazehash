@@ -28,7 +28,35 @@ Hash algorithms, comma-separated. Default: `blake3`.
 blazehash -r /mnt/evidence -c blake3,sha256,md5
 ```
 
-Available algorithms: `blake3`, `sha256`, `sha512`, `sha3-256`, `sha1`, `md5`, `tiger`, `whirlpool`, `shake128`, `shake256`, `crc32c`, `xxh3`, `ssdeep`, `tlsh`.
+Available algorithms:
+
+| Algorithm | Type | Notes |
+|-----------|------|-------|
+| `blake3` | Cryptographic | Default |
+| `blake2b` | Cryptographic | 512-bit output |
+| `blake2s` | Cryptographic | 256-bit output |
+| `sha256` | Cryptographic | |
+| `sha512` | Cryptographic | |
+| `sha512-256` | Cryptographic | SHA-512 truncated to 256 bits |
+| `sha512-224` | Cryptographic | SHA-512 truncated to 224 bits |
+| `sha3-256` | Cryptographic | |
+| `sha1` | Cryptographic | |
+| `md5` | Cryptographic | |
+| `tiger` | Cryptographic | |
+| `whirlpool` | Cryptographic | |
+| `sm3` | Cryptographic | Chinese national standard (GB/T 32905) |
+| `streebog-256` | Cryptographic | GOST R 34.11-2012, 256-bit |
+| `streebog-512` | Cryptographic | GOST R 34.11-2012, 512-bit |
+| `ripemd160` | Cryptographic | |
+| `k12` | Cryptographic | KangarooTwelve (parallel SHA-3 variant) |
+| `shake128` | Cryptographic | Extendable output |
+| `shake256` | Cryptographic | Extendable output |
+| `crc32c` | Non-cryptographic | |
+| `crc64` | Non-cryptographic | |
+| `adler32` | Non-cryptographic | |
+| `xxh3` | Non-cryptographic | |
+| `ssdeep` | Fuzzy | |
+| `tlsh` | Fuzzy | |
 
 ### `-r`, `--recursive`
 
@@ -216,6 +244,16 @@ Skip automatic signature verification during audit, even when a `.sig` file exis
 ```bash
 blazehash -r /mnt/evidence -a -k manifest.hash --ignore-sig
 ```
+
+### `--fail-on-unknown`
+
+Exit non-zero if any file on disk has no corresponding entry in the manifest (unknown files). Unknown files are logged with a `[?]` prefix; if any are found the process exits with code `1`.
+
+```bash
+blazehash -r /mnt/evidence -a -k manifest.hash --fail-on-unknown
+```
+
+Useful in sealed-environment audits where every file must be accounted for in the known manifest.
 
 ---
 
@@ -491,6 +529,24 @@ Check whether a valid cached token exists.
 ```bash
 blazehash gdrive auth status
 ```
+
+### `completions`
+
+Generate shell completion scripts or a man page. Output goes to stdout.
+
+```bash
+# Shell completions
+blazehash completions bash   > /etc/bash_completion.d/blazehash
+blazehash completions zsh    > ~/.zsh/completions/_blazehash
+blazehash completions fish   > ~/.config/fish/completions/blazehash.fish
+blazehash completions powershell >> $PROFILE
+
+# Man page (troff format)
+blazehash completions man > blazehash.1
+man ./blazehash.1
+```
+
+The `man` subcommand generates a troff-format man page that can be installed system-wide or browsed locally.
 
 ---
 

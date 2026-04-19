@@ -114,6 +114,23 @@ Exit code `0` = valid. Exit code `1` = tampered or wrong key.
 
 ---
 
+## Configuration file
+
+blazehash reads `./blazehash.toml` in the current directory, then `~/.config/blazehash/blazehash.toml`, and merges them with CLI flags taking priority.
+
+```toml
+[defaults]
+algorithms    = ["blake3", "sha256"]   # default -c value
+output_format = "hashdeep"             # default --format value
+sign_key_path = "~/.keys/evidence.key" # pre-loaded signing key
+case_id       = "CASE-2026-001"        # embedded in every manifest header
+examiner      = "Jane Smith"           # embedded in every manifest header
+```
+
+Any field omitted falls back to the built-in default.
+
+---
+
 ## Where to go next
 
 You've got the basics: hash, save, audit, sign, verify. Here's where to go depending on what you need:
