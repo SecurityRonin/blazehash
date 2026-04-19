@@ -19,6 +19,7 @@ pub fn run(
     fuzzy_top: usize,
     ignore_sig: bool,
     expected_pubkey: Option<String>,
+    fail_on_unknown: bool,
 ) -> Result<()> {
     let mut writer = make_writer(output.map(|p| p.as_path()), false)?;
 
@@ -107,7 +108,7 @@ pub fn run(
                     writeln!(writer, "[!] {} CHANGED", p.display())?;
                 }
                 blazehash::audit::AuditStatus::New(p) => {
-                    writeln!(writer, "[!] {} NEW", p.display())?;
+                    writeln!(writer, "[?] {} UNKNOWN", p.display())?;
                 }
                 blazehash::audit::AuditStatus::Moved { path, original } => {
                     writeln!(
@@ -134,6 +135,12 @@ pub fn run(
                     )?;
                 }
             }
+        }
+
+        // --fail-on-unknown: exit non-zero if any file was not found in the manifest
+        if fail_on_unknown && result.new_files > 0 {
+            writer.flush()?;
+            std::process::exit(1);
         }
     }
 

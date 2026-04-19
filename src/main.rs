@@ -1218,6 +1218,7 @@ fn main() -> Result<()> {
                 cli.fuzzy_top,
                 cli.ignore_sig,
                 cli.expected_pubkey.clone(),
+                cli.fail_on_unknown,
             )?;
         }
         Mode::VerifyImage => {

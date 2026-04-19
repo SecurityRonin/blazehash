@@ -152,6 +152,10 @@ pub struct Cli {
     #[arg(long = "ignore-sig")]
     pub ignore_sig: bool,
 
+    /// Exit non-zero if any file encountered during audit has no entry in the known manifest
+    #[arg(long = "fail-on-unknown")]
+    pub fail_on_unknown: bool,
+
     /// Minimum number of valid cosignatures required by `verify-msig`
     #[arg(long = "threshold", default_value = "1")]
     pub threshold: usize,
