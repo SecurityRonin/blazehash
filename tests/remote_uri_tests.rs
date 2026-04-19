@@ -332,6 +332,20 @@ fn scheme_detect_vercel_blob() {
     assert_eq!(UriScheme::detect("vercel-blob://key"), Some(UriScheme::VercelBlob));
 }
 
+// ── Monoio filesystem (monoiofs, Linux only) ──────────────────────────────────
+
+#[cfg(target_os = "linux")]
+#[test]
+fn monoiofs_uri_is_detected() {
+    assert!(is_remote_uri("monoiofs:///tmp/evidence/file.bin"));
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn scheme_detect_monoiofs() {
+    assert_eq!(UriScheme::detect("monoiofs:///path/to/file"), Some(UriScheme::Monoiofs));
+}
+
 // ── Compio filesystem (compfs) ────────────────────────────────────────────────
 
 #[test]
@@ -542,6 +556,22 @@ mod operator_tests {
         let (_, path) = operator_for_uri("ftp://public.example.com/pub/forensics/file.zip")
             .expect("ftp:// without credentials should be supported");
         assert_eq!(path, "pub/forensics/file.zip");
+    }
+
+    // ── monoiofs:// (monoio filesystem, Linux only) ───────────────────────────
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn operator_monoiofs_not_unsupported() {
+        assert_not_unsupported("monoiofs:///tmp/evidence");
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn monoiofs_path_extracted_correctly() {
+        let (_, path) = operator_for_uri("monoiofs:///evidence/disk.dd")
+            .expect("monoiofs:// should be supported");
+        assert_eq!(path, "disk.dd");
     }
 
     // ── compfs:// (compio filesystem) ─────────────────────────────────────────
