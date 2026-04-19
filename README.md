@@ -327,10 +327,3 @@ cargo install blazehash --features yara,report,docker,parquet-output,ots
 
 The [BLAKE3 team](https://github.com/BLAKE3-team/BLAKE3) — Jack O'Connor, Samuel Neves, Jean-Philippe Aumasson, and Zooko Wilcox-O'Hearn.
 
-## Author
-
-**Albert Hui** ([@h4x0r](https://github.com/h4x0r)) · [@SecurityRonin](https://github.com/SecurityRonin)
-
-## License
-
-[MIT License](LICENSE)
