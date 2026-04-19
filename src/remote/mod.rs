@@ -24,7 +24,7 @@ pub fn is_remote_uri(s: &str) -> bool {
             | "github" | "huggingface"
             | "vercel-blob" | "vercel-artifacts"
             // Distributed / big data
-            | "alluxio" | "webhdfs" | "hdfs" | "lakefs" | "dbfs" | "ghac"
+            | "alluxio" | "webhdfs" | "lakefs" | "dbfs" | "ghac"
             // Decentralized
             | "ipfs" | "ipmfs"
             // Network KV / databases
@@ -106,8 +106,6 @@ pub enum UriScheme {
     Monoiofs,
     Mem,
     File,
-    // Hdfs (for future reference)
-    Hdfs,
 }
 
 impl UriScheme {
@@ -169,7 +167,6 @@ impl UriScheme {
             "monoiofs"          => Some(Self::Monoiofs),
             "mem"               => Some(Self::Mem),
             "file"              => Some(Self::File),
-            "hdfs"              => Some(Self::Hdfs),
             _                   => None,
         }
     }

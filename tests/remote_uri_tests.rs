@@ -212,6 +212,26 @@ fn scheme_detect_webhdfs() {
     assert_eq!(UriScheme::detect("webhdfs://host/path"), Some(UriScheme::WebHdfs));
 }
 
+// ── HDFS native (pure-Rust, no JVM) ──────────────────────────────────────────
+
+#[test]
+fn hdfs_uri_is_detected() {
+    assert!(is_remote_uri("hdfs://namenode:9000/user/evidence/disk.dd"));
+    assert!(is_remote_uri("hdfs://cluster.hadoop.corp:8020/data/case-001/image.raw"));
+}
+
+#[test]
+fn hdfs_not_remote_without_host() {
+    // bare path must not be mistaken for an hdfs URI
+    assert!(!is_remote_uri("hdfs_local/path"));
+}
+
+#[test]
+fn scheme_detect_hdfs() {
+    assert_eq!(UriScheme::detect("hdfs://namenode:9000/path"), Some(UriScheme::Hdfs));
+    assert_eq!(UriScheme::detect("hdfs://nn.corp:8020/data/file"), Some(UriScheme::Hdfs));
+}
+
 // ── Alluxio ───────────────────────────────────────────────────────────────────
 
 #[test]
@@ -630,5 +650,26 @@ mod operator_tests {
         let (_, key) = operator_for_uri("rediss://localhost:6380/cache:evidence:hash")
             .expect("rediss:// should be supported");
         assert_eq!(key, "cache:evidence:hash");
+    }
+
+    // ── HDFS native path extraction (TDD) ─────────────────────────────────────
+
+    #[test]
+    fn operator_hdfs_not_unsupported() {
+        assert_not_unsupported("hdfs://namenode:9000/data/evidence.zip");
+    }
+
+    #[test]
+    fn hdfs_path_extracted_correctly() {
+        let (_, path) = operator_for_uri("hdfs://namenode:9000/data/evidence.zip")
+            .expect("hdfs:// should be supported");
+        assert_eq!(path, "data/evidence.zip");
+    }
+
+    #[test]
+    fn hdfs_nested_path_extracted_correctly() {
+        let (_, path) = operator_for_uri("hdfs://cluster.corp:8020/user/analyst/cases/2026/image.raw")
+            .expect("hdfs:// nested path should be supported");
+        assert_eq!(path, "user/analyst/cases/2026/image.raw");
     }
 }
