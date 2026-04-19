@@ -107,8 +107,10 @@ Filter known-good (NSRL), flag known-bad (HashDB), scan with YARA, check VirusTo
 blazehash -r /mnt/suspect -c sha256 \
   --nsrl NSRL.db --nsrl-exclude \
   --hashdb-bad malware.txt \
-  --yara rules.yar --entropy
+  --yara rules.yar --yara-max-size 512 --entropy
 ```
+
+`--yara-max-size <MB>` sets the per-file size limit for YARA scanning (default: 256 MB). Files above the threshold are stream-hashed normally but YARA is skipped with a warning, preventing runaway memory use on large disk images.
 
 [Threat hunting guide](https://securityronin.github.io/blazehash/hunt/) | [SIEM integration guide](https://securityronin.github.io/blazehash/siem/)
 
@@ -145,6 +147,9 @@ blazehash -r /mnt/suspect -c sha256 \
 | Piecewise hashing | Y | Y | -- | -- |
 | hashdeep / DFXML / CSV / JSON | Y | partial | -- | -- |
 | Remote storage (S3/GCS/Azure/WebDAV) | Y | -- | -- | -- |
+| Google Drive hash-without-download | Y | -- | -- | -- |
+| YARA mmap threshold (`--yara-max-size`) | Y | -- | -- | -- |
+| ATT&CK lookup via YARA rule tags | Y | -- | -- | -- |
 
 ---
 
@@ -202,22 +207,61 @@ Auth is picked up from standard environment variables (`AWS_ACCESS_KEY_ID`, `GOO
 
 ---
 
+## Google Drive
+
+`gdrive-collect` downloads a Google Drive file by URL or ID, hashes it in memory without writing it to disk, and outputs a standard manifest line.
+
+```bash
+# Any of these URL formats work:
+blazehash gdrive-collect https://drive.google.com/file/d/1ABC.../view
+blazehash gdrive-collect https://drive.google.com/open?id=1ABC...
+blazehash gdrive-collect gdrive://1ABC...
+blazehash gdrive-collect 1ABC...
+
+# Hash with SHA-256 instead of the default BLAKE3
+blazehash gdrive-collect 1ABC... -c sha256
+
+# Write manifest line to a file
+blazehash gdrive-collect 1ABC... -o collected.hash
+```
+
+Output format:
+
+```
+<hash>  gdrive://<file-id>
+```
+
+**Auth resolution** (highest priority first):
+
+1. Stored user OAuth token (`blazehash gdrive auth login`) — authenticated Drive API v3 with Bearer token
+2. Public unauthenticated download — works for any publicly shared file
+
+```bash
+# Authenticate once via browser OAuth flow
+blazehash gdrive auth login
+```
+
+The token is cached at `~/.config/blazehash/gdrive_token.json` (Unix) or `%APPDATA%\blazehash\gdrive_token.json` (Windows). Embedded OAuth app credentials are used by default — no client ID setup required.
+
+---
+
 ## Optional Feature Flags
 
 ```bash
 cargo install blazehash --features yara,report,docker,parquet-output,ots
 ```
 
-| Flag | Enables |
-|------|---------|
-| `nsrl` | SQLite NSRL database + `--format sqlite` |
-| `yara` | `--yara <rules.yar>` scanning |
-| `report` | `blazehash report` HTML generation |
-| `docker` | `blazehash image` OCI/Docker hashing |
-| `parquet-output` | `--format parquet` output |
-| `ots` | `blazehash ots stamp/verify` Bitcoin timestamps |
-| `tui` | `blazehash tui` interactive dashboard |
-| `hashdb` | `--hashdb-bad` known-bad flagging |
+| Flag | Default | Enables |
+|------|:-------:|---------|
+| `remote` | on | Remote storage (S3/GCS/Azure/WebDAV/HTTP) + `gdrive-collect` |
+| `nsrl` | on | SQLite NSRL database + `--format sqlite` |
+| `yara` | off | `--yara <rules.yar>` scanning with ATT&CK tag lookup |
+| `report` | off | `blazehash report` HTML generation |
+| `docker` | off | `blazehash image` OCI/Docker hashing |
+| `parquet-output` | on | `--format parquet` output |
+| `ots` | off | `blazehash ots stamp/verify` Bitcoin timestamps |
+| `tui` | off | `blazehash tui` interactive dashboard |
+| `hashdb` | off | `--hashdb-bad` known-bad flagging |
 
 ---
 
@@ -260,6 +304,8 @@ cargo install blazehash --features yara,report,docker,parquet-output,ots
 | `mcp` | Start the MCP server for AI-assisted workflows |
 | `bench` | Benchmarks and GPU calibration |
 | `tui` | Interactive terminal dashboard |
+| `gdrive-collect` | Download a Google Drive file by URL/ID and hash it without writing to disk |
+| `gdrive auth login` | Authenticate to Google Drive via browser OAuth flow |
 | `nsrl build-bloom` | Build a bloom filter from an NSRL SQLite database |
 | `completions` | Generate shell completions (bash/zsh/fish) |
 
