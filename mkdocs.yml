@@ -53,6 +53,8 @@ nav:
   - CLI Reference: cli-reference.md
   - Concepts: concepts.md
   - MCP Server: mcp.md
+  - Privacy Policy: privacy.md
+  - Terms of Service: terms.md
 
 plugins:
   - search
