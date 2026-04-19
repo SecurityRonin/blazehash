@@ -49,6 +49,7 @@ nav:
   - Hunt Threats: hunt.md
   - SIEM & Analytics: siem.md
   - Cookbook: cookbook.md
+  - Remote Storage: remote.md
   - CLI Reference: cli-reference.md
   - Concepts: concepts.md
   - MCP Server: mcp.md

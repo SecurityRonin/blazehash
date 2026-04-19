@@ -496,38 +496,34 @@ blazehash gdrive auth status
 
 ## Remote storage
 
-blazehash accepts remote URIs for both input paths and `-o` output. Supported schemes:
+blazehash accepts remote URIs for both input paths and `-o` output — 50+ protocols supported.
 
-| Scheme | Backend |
-|--------|---------|
-| `s3://bucket/key` | AWS S3 and S3-compatible (MinIO, R2, Wasabi, B2) |
-| `gcs://bucket/key` | Google Cloud Storage |
-| `azblob://container/key` | Azure Blob Storage |
-| `webdav://host/path` | WebDAV (Nextcloud, Box, SharePoint) |
-| `sftp://user@host/path` | SFTP |
-| `http://` / `https://` | HTTP/S (read-only) |
-| `file:///abs/path` | Explicit local filesystem |
+**Full protocol reference:** [Remote Storage →](remote.md)
 
-Auth is read from standard environment variables:
-
-| Backend | Environment variables |
-|---------|-----------------------|
-| S3 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_ENDPOINT_URL` |
-| GCS | `GOOGLE_APPLICATION_CREDENTIALS` |
-| Azure | `AZURE_STORAGE_ACCOUNT`, `AZURE_STORAGE_ACCESS_KEY` or `AZURE_STORAGE_SAS_TOKEN` |
-| SFTP | `SFTP_PASSWORD` or `SFTP_KEY_PATH` |
-| WebDAV | `WEBDAV_USERNAME`, `WEBDAV_PASSWORD` |
+Common examples:
 
 ```bash
 # Hash an S3 prefix
-blazehash hash s3://dfir-bucket/case-001/
+blazehash s3://dfir-bucket/case-001/
 
-# Write manifest output to S3
-blazehash hash /mnt/evidence -o s3://dfir-bucket/case-001.hash
+# Write manifest to S3
+blazehash -r /mnt/evidence -o s3://dfir-bucket/case-001.hash
 
-# Audit against a manifest on S3
+# Audit against a remote manifest
 blazehash -r /mnt/evidence -a -k s3://dfir-bucket/case-001.hash
+
+# Hash a Google Drive file
+blazehash gdrive://1ABCdef...
+
+# Hash over SFTP
+blazehash sftp://admin@192.168.1.10/evidence/disk.dd
 ```
+
+Supported schemes include: `s3`, `gcs`, `azblob`, `azdls`, `azfile`, `b2`, `cos`, `obs`, `oss`,
+`swift`, `upyun`, `gdrive`, `onedrive`, `dropbox`, `aliyun-drive`, `yandex-disk`, `pcloud`,
+`koofr`, `seafile`, `github`, `huggingface`, `vercel-blob`, `alluxio`, `webhdfs`, `lakefs`,
+`ipfs`, `ipmfs`, `redis`, `memcached`, `etcd`, `tikv`, `mongodb`, `mysql`, `postgresql`,
+`sqlite`, `cloudflare-kv`, `d1`, `sftp`, `ftp`, `ftps`, `webdav`, `http`, `https`, `file`, `mem`.
 
 ---
 
