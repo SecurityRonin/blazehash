@@ -473,43 +473,58 @@ fn env_var_overrides_default_client_id() {
 
 // ── Consent screen smoke test ────────────────────────────────────────────────
 //
-// Hits the real Google authorization endpoint to verify that the embedded
-// OAuth app has drive.readonly registered on its consent screen.
+// Validates that the embedded OAuth app has drive.readonly registered on its
+// GCP consent screen by calling Google's tokeninfo endpoint with a real token.
+//
+// Requires either:
+//   - A cached token at ~/.config/blazehash/gdrive_token.json  (from `blazehash gdrive auth login`)
+//   - Or env var BLAZEHASH_TEST_GDRIVE_ACCESS_TOKEN
 //
 // Run with:
-//   cargo test --all-features -- --ignored oauth_consent_screen_has_drive_readonly_scope
+//   cargo test --all-features --test gdrive_auth_tests -- --ignored oauth_consent_screen_has_drive_readonly_scope
 
 #[test]
-#[ignore = "requires network — validates drive.readonly scope is registered in GCP consent screen"]
+#[ignore = "requires a real OAuth token — run `blazehash gdrive auth login` first, then re-run"]
 fn oauth_consent_screen_has_drive_readonly_scope() {
-    let url = build_oauth_auth_url(
-        DEFAULT_CLIENT_ID,
-        "http://localhost:9999/callback",
-        "smoke-test-state",
-    );
+    // Resolve token: env var takes priority, then cached token file.
+    let access_token = if let Ok(t) = std::env::var("BLAZEHASH_TEST_GDRIVE_ACCESS_TOKEN") {
+        t
+    } else {
+        let cached = load_token_from(&token_cache_path());
+        match cached {
+            Some(t) => t.access_token,
+            None => panic!(
+                "No token available. Either:\n\
+                 1. Run `blazehash gdrive auth login` to cache a token, or\n\
+                 2. Set BLAZEHASH_TEST_GDRIVE_ACCESS_TOKEN env var"
+            ),
+        }
+    };
 
+    // Call Google's tokeninfo endpoint — returns JSON with the granted scopes.
+    let url = format!(
+        "https://oauth2.googleapis.com/tokeninfo?access_token={access_token}"
+    );
     let response = ureq::get(&url)
         .call()
-        .expect("should reach accounts.google.com");
+        .expect("should reach oauth2.googleapis.com");
 
-    // Google returns 200 HTML in all cases; errors appear as text in the body.
-    // "invalid_scope"  → scope not registered on the consent screen
-    // "invalid_client" → client ID does not exist or has been deleted
-    // "Error 400"      → generic bad-request indicator
+    let status = response.status();
     let body = response.into_string().expect("response body");
 
+    // 400 means the token is expired or invalid — not a scope issue.
     assert!(
-        !body.contains("invalid_scope"),
-        "drive.readonly scope is not registered on the GCP OAuth consent screen.\n\
-         Fix: console.cloud.google.com → APIs & Services → OAuth consent screen → \
-         Add or remove scopes → drive.readonly"
+        status == 200,
+        "tokeninfo returned HTTP {status} — token may be expired.\n\
+         Re-run `blazehash gdrive auth login` to refresh it.\nBody: {body}"
     );
+
+    // tokeninfo JSON includes a "scope" field with space-separated scopes.
+    // Example: {"scope":"https://www.googleapis.com/auth/drive.readonly", ...}
     assert!(
-        !body.contains("invalid_client"),
-        "OAuth client ID is not recognised by Google — check DEFAULT_CLIENT_ID in auth.rs"
-    );
-    assert!(
-        !body.contains("Error 400"),
-        "Google returned Error 400 for the auth URL: {url}"
+        body.contains("drive.readonly"),
+        "drive.readonly not in granted scopes — it is not registered on the GCP OAuth \
+         consent screen.\nFix: console.cloud.google.com → APIs & Services → OAuth consent \
+         screen → Add or remove scopes → drive.readonly\ntokeninfo response: {body}"
     );
 }
