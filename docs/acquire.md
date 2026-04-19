@@ -156,6 +156,54 @@ ADS entries appear as `filename:stream_name` in the output. The `--ads` flag is 
 
 ---
 
+## Hash a Google Drive file without downloading
+
+`gdrive-collect` hashes a Google Drive file entirely in memory — no temporary copy lands on disk.
+
+```bash
+blazehash gdrive-collect https://drive.google.com/file/d/FILE_ID/view
+```
+
+All of the following URL and ID formats are accepted:
+
+| Input | Example |
+|-------|---------|
+| Share link (`/file/d/<id>/view`) | `https://drive.google.com/file/d/1a2B.../view` |
+| Open link (`open?id=<id>`) | `https://drive.google.com/open?id=1a2B...` |
+| `gdrive://` URI | `gdrive://1a2B...` |
+| Bare file ID | `1a2BcDeFgHiJkLmNoPqRsTuVwXyZ` |
+
+Output follows the standard blazehash format:
+
+```
+<hash>  gdrive://<file-id>
+```
+
+### Authentication
+
+blazehash tries the following auth methods in order:
+
+1. **Cached OAuth token** — if you have previously run `blazehash gdrive auth login`, the stored token at `~/.config/blazehash/gdrive_token.json` is used automatically.
+2. **Public download** — if no token is cached, blazehash falls back to an unauthenticated download (works only for files shared publicly).
+
+### `blazehash gdrive auth login`
+
+Opens a browser-based OAuth consent flow and caches the resulting token:
+
+```bash
+blazehash gdrive auth login
+```
+
+After the browser redirects back and you see a success message, the token is saved to `~/.config/blazehash/gdrive_token.json`. Subsequent `gdrive-collect` calls pick it up automatically, giving access to any file your Google account can reach.
+
+To verify the stored token is valid:
+
+```bash
+blazehash gdrive auth status
+```
+
+---
+
 ## What to do next
 
 After acquisition, build the full chain-of-custody package: [Building Court-Ready Evidence](custody.md).

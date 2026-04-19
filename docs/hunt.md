@@ -101,6 +101,28 @@ blazehash -r /mnt/suspect -c sha256 \
 !!! note
     Requires `--features yara` at compile time.
 
+### YARA size threshold: `--yara-max-size`
+
+Very large files are expensive to map into memory. Use `--yara-max-size` (in MiB, default `256`) to control the cut-off:
+
+```bash
+blazehash -r /mnt/suspect --yara rules.yar --yara-max-size 512
+```
+
+blazehash applies a three-branch strategy based on file size and type:
+
+| Condition | Behaviour |
+|-----------|-----------|
+| File size > threshold | Stream-hashed only. YARA scan is skipped. A warning is printed to stderr. |
+| File size <= threshold, regular file | `mmap`-ed, hashed, and YARA-scanned in one pass. |
+| File size <= threshold, non-regular file (pipe, device, etc.) | Read into a `Vec<u8>` buffer, hashed, and YARA-scanned. |
+
+The default of 256 MiB covers the vast majority of executables and documents while protecting against accidental OOM on large forensic images.
+
+### YARA ATT&CK tag lookup
+
+blazehash maps YARA rule hits to MITRE ATT&CK techniques via `lookup_attack_for_match()`. It now checks rule **tags** first (e.g. `T1059`, `T1486`) before falling back to name-prefix matching, so community rule sets from **Neo23x0**, **Elastic**, and **YARA-Forge** work without any modification — no renaming of rules required.
+
 ---
 
 ## VirusTotal: Batch lookup

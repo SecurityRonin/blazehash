@@ -118,7 +118,7 @@ Exit code `0` = valid. Exit code `1` = tampered or wrong key.
 
 You've got the basics: hash, save, audit, sign, verify. Here's where to go depending on what you need:
 
-- **[Acquire Evidence](acquire.md)** -- full acquisition pipeline with direct I/O, resume, block devices, EWF images
+- **[Acquire Evidence](acquire.md)** -- full acquisition pipeline with direct I/O, resume, block devices, EWF images, and Google Drive (`gdrive-collect`)
 - **[Build Court-Ready Evidence](custody.md)** -- signing, cosigning, Bitcoin timestamps, HTML reports
 - **[Hunt Threats](hunt.md)** -- NSRL filtering, HashDB flagging, YARA scanning, VirusTotal, entropy
 - **[SIEM & Analytics](siem.md)** -- export to Elastic, Splunk, STIX, Parquet, SQLite, DuckDB

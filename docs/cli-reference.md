@@ -40,10 +40,26 @@ blazehash -r /mnt/evidence
 
 ### `-o`, `--output`
 
-Write output to a file instead of stdout.
+Write output to a file instead of stdout. Accepts local paths and remote storage URIs (requires `--features remote`, on by default).
 
 ```bash
+# Local file
 blazehash -r /mnt/evidence -o manifest.hash
+
+# AWS S3
+blazehash -r /mnt/evidence -o s3://dfir-bucket/case-001.hash
+
+# Google Cloud Storage
+blazehash -r /mnt/evidence -o gcs://dfir-bucket/case-001.hash
+
+# Azure Blob Storage
+blazehash -r /mnt/evidence -o azblob://dfir-container/case-001.hash
+
+# WebDAV (Nextcloud, Box, SharePoint)
+blazehash -r /mnt/evidence -o webdav://files.example.com/dfir/case-001.hash
+
+# HTTP/S PUT endpoint
+blazehash -r /mnt/evidence -o https://ingest.example.com/upload/case-001.hash
 ```
 
 ### `-b`, `--bare`
@@ -440,6 +456,42 @@ Merge two manifests in alternating A B A B order. Remaining entries from the lon
 blazehash interleave part-a.hash part-b.hash -o interleaved.hash
 ```
 
+### `gdrive-collect`
+
+Hash a Google Drive file without downloading it to disk. Accepts share links, open links, `gdrive://` URIs, and bare file IDs.
+
+```bash
+blazehash gdrive-collect https://drive.google.com/file/d/FILE_ID/view
+blazehash gdrive-collect gdrive://FILE_ID
+blazehash gdrive-collect FILE_ID
+```
+
+Output:
+
+```
+<hash>  gdrive://<file-id>
+```
+
+Auth: uses a cached OAuth token from `~/.config/blazehash/gdrive_token.json` if present, otherwise falls back to a public (unauthenticated) download.
+
+### `gdrive auth login`
+
+Open a browser OAuth consent flow and cache the resulting Google token.
+
+```bash
+blazehash gdrive auth login
+```
+
+The token is saved to `~/.config/blazehash/gdrive_token.json` and used automatically by subsequent `gdrive-collect` invocations.
+
+#### `gdrive auth status`
+
+Check whether a valid cached token exists.
+
+```bash
+blazehash gdrive auth status
+```
+
 ---
 
 ## Remote storage
@@ -526,6 +578,14 @@ Run YARA rule matching during the directory walk. Requires `--features yara`.
 
 ```bash
 blazehash -r /mnt/evidence --yara rules.yar
+```
+
+### `--yara-max-size`
+
+Maximum file size (in MiB) for YARA scanning. Default: `256`. Files larger than this threshold are still hashed but the YARA scan is skipped and a warning is written to stderr.
+
+```bash
+blazehash -r /mnt/evidence --yara rules.yar --yara-max-size 512
 ```
 
 ### `--no-cache`
