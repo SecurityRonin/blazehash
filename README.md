@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/blazehash-icon-256.png" alt="blazehash" width="120" />
+  <img src="assets/blazehash-icon-256.png" alt="blazehash" width="80" style="vertical-align:middle;" />
+  &nbsp;&nbsp;
+  <span style="font-size:2.5em; font-weight:bold; vertical-align:middle;">Blazehash</span>
 </p>
-
-# blazehash
 
 [![Crates.io](https://img.shields.io/crates/v/blazehash.svg)](https://crates.io/crates/blazehash)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
