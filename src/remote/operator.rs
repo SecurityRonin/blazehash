@@ -416,6 +416,14 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
         }
 
         // ── Network KV / databases ────────────────────────────────────────────
+        "rediss" => {
+            // rediss://host:port/key — Redis with TLS
+            let (hostport, key) = rest.split_once('/').unwrap_or((rest, ""));
+            let redis_url = format!("rediss://{hostport}");
+            let builder = services::Redis::default().endpoint(&redis_url);
+            let op = Operator::new(builder)?.finish();
+            Ok((op, key.to_string()))
+        }
         "redis" => {
             // redis://[user:pass@]host:port/key — path after the host:port is the key
             let (conn, path) = rest.split_once('/').unwrap_or((rest, ""));

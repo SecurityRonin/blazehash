@@ -126,6 +126,7 @@ opendal = { version = "0.55.0", optional = true, features = [
     "services-cacache",     # Content-addressable disk cache
     # Network key-value / databases
     "services-redis",       # Redis
+    "services-redis-native-tls", # Redis with TLS (rediss://)
     "services-memcached",   # Memcached
     "services-etcd",        # etcd (gRPC, pure Rust)
     "services-tikv",        # TiKV distributed KV

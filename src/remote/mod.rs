@@ -28,7 +28,7 @@ pub fn is_remote_uri(s: &str) -> bool {
             // Decentralized
             | "ipfs" | "ipmfs"
             // Network KV / databases
-            | "redis" | "memcached" | "etcd" | "tikv"
+            | "redis" | "rediss" | "memcached" | "etcd" | "tikv"
             | "mongodb" | "mysql" | "postgresql" | "sqlite"
             | "surrealdb"
             // Misc
@@ -79,6 +79,7 @@ pub enum UriScheme {
     Ipmfs,
     // Network KV / databases
     Redis,
+    RedisTls,
     Memcached,
     Etcd,
     TiKv,
@@ -139,6 +140,7 @@ impl UriScheme {
             "ipfs"              => Some(Self::Ipfs),
             "ipmfs"             => Some(Self::Ipmfs),
             "redis"             => Some(Self::Redis),
+            "rediss"            => Some(Self::RedisTls),
             "memcached"         => Some(Self::Memcached),
             "etcd"              => Some(Self::Etcd),
             "tikv"              => Some(Self::TiKv),
