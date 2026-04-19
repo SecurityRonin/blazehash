@@ -332,6 +332,18 @@ fn scheme_detect_vercel_blob() {
     assert_eq!(UriScheme::detect("vercel-blob://key"), Some(UriScheme::VercelBlob));
 }
 
+// ── Redis TLS (rediss) ────────────────────────────────────────────────────────
+
+#[test]
+fn rediss_uri_is_detected() {
+    assert!(is_remote_uri("rediss://host:6380/key"));
+}
+
+#[test]
+fn scheme_detect_rediss() {
+    assert_eq!(UriScheme::detect("rediss://host:6380/key"), Some(UriScheme::RedisTls));
+}
+
 // ── operator_for_uri compile-only checks (behind remote feature) ──────────────
 
 #[cfg(feature = "remote")]
@@ -518,5 +530,19 @@ mod operator_tests {
         let (_, path) = operator_for_uri("ftp://public.example.com/pub/forensics/file.zip")
             .expect("ftp:// without credentials should be supported");
         assert_eq!(path, "pub/forensics/file.zip");
+    }
+
+    // ── rediss:// (Redis with TLS) ─────────────────────────────────────────────
+
+    #[test]
+    fn operator_rediss_not_unsupported() {
+        assert_not_unsupported("rediss://host:6380/mykey");
+    }
+
+    #[test]
+    fn rediss_path_extracted_correctly() {
+        let (_, key) = operator_for_uri("rediss://localhost:6380/cache:evidence:hash")
+            .expect("rediss:// should be supported");
+        assert_eq!(key, "cache:evidence:hash");
     }
 }
