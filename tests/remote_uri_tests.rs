@@ -673,3 +673,153 @@ mod operator_tests {
         assert_eq!(path, "user/analyst/cases/2026/image.raw");
     }
 }
+
+// ── FTP / FTPS URI parsing (suppaftp, not opendal) ───────────────────────────
+
+#[cfg(feature = "remote")]
+mod ftp_uri_tests {
+    use blazehash::remote::ftp::{parse_ftp_uri, FtpUri};
+
+    #[test]
+    fn ftp_parse_minimal() {
+        let u = parse_ftp_uri("ftp://files.example.com/pub/doc.txt").expect("parse");
+        assert_eq!(u.host, "files.example.com");
+        assert_eq!(u.port, 21);
+        assert_eq!(u.path, "/pub/doc.txt");
+        assert_eq!(u.username, None);
+        assert_eq!(u.password, None);
+        assert!(!u.is_tls);
+    }
+
+    #[test]
+    fn ftp_parse_custom_port() {
+        let u = parse_ftp_uri("ftp://host.local:2121/data/file.bin").expect("parse");
+        assert_eq!(u.host, "host.local");
+        assert_eq!(u.port, 2121);
+        assert_eq!(u.path, "/data/file.bin");
+        assert!(!u.is_tls);
+    }
+
+    #[test]
+    fn ftps_sets_tls_flag() {
+        let u = parse_ftp_uri("ftps://secure.server.com/secret.zip").expect("parse");
+        assert!(u.is_tls);
+        assert_eq!(u.host, "secure.server.com");
+        assert_eq!(u.port, 21);
+    }
+
+    #[test]
+    fn ftp_with_credentials() {
+        let u = parse_ftp_uri("ftp://admin:s3cr3t@ftp.corp.example:21/reports/q1.csv")
+            .expect("parse");
+        assert_eq!(u.username, Some("admin".to_string()));
+        assert_eq!(u.password, Some("s3cr3t".to_string()));
+        assert_eq!(u.host, "ftp.corp.example");
+        assert_eq!(u.port, 21);
+        assert_eq!(u.path, "/reports/q1.csv");
+    }
+
+    #[test]
+    fn ftp_user_without_password() {
+        let u = parse_ftp_uri("ftp://alice@ftp.host.com/file.txt").expect("parse");
+        assert_eq!(u.username, Some("alice".to_string()));
+        assert_eq!(u.password, None);
+    }
+
+    #[test]
+    fn ftp_no_explicit_path_defaults_to_root() {
+        let u = parse_ftp_uri("ftp://host.com").expect("parse");
+        assert_eq!(u.path, "/");
+    }
+
+    #[test]
+    fn ftp_rejects_wrong_scheme() {
+        assert!(parse_ftp_uri("sftp://host.com/file.txt").is_err());
+        assert!(parse_ftp_uri("http://host.com/file.txt").is_err());
+    }
+
+    #[test]
+    fn ftp_rejects_empty_host() {
+        assert!(parse_ftp_uri("ftp:///path/to/file").is_err());
+    }
+
+    #[test]
+    fn ftp_rejects_invalid_port() {
+        assert!(parse_ftp_uri("ftp://host.com:notaport/file").is_err());
+    }
+
+    #[test]
+    fn ftp_scheme_detected_as_remote() {
+        assert!(blazehash::remote::is_remote_uri("ftp://host.com/file"));
+        assert!(blazehash::remote::is_remote_uri("ftps://host.com/file"));
+    }
+}
+
+// ── TFTP URI parsing (hand-rolled UDP, not opendal) ──────────────────────────
+
+#[cfg(feature = "remote")]
+mod tftp_uri_tests {
+    use blazehash::remote::tftp::{parse_tftp_uri, TftpUri, DEFAULT_TFTP_PORT};
+
+    #[test]
+    fn tftp_parse_minimal() {
+        let u = parse_tftp_uri("tftp://192.168.1.1/firmware.bin").expect("parse");
+        assert_eq!(u.host, "192.168.1.1");
+        assert_eq!(u.port, DEFAULT_TFTP_PORT);
+        assert_eq!(u.path, "firmware.bin");
+    }
+
+    #[test]
+    fn tftp_parse_custom_port() {
+        let u = parse_tftp_uri("tftp://boot-server.local:6969/pxelinux.0").expect("parse");
+        assert_eq!(u.host, "boot-server.local");
+        assert_eq!(u.port, 6969);
+        assert_eq!(u.path, "pxelinux.0");
+    }
+
+    #[test]
+    fn tftp_parse_nested_path() {
+        let u = parse_tftp_uri("tftp://10.0.0.1/images/router/v2/config.bin").expect("parse");
+        assert_eq!(u.path, "images/router/v2/config.bin");
+    }
+
+    #[test]
+    fn tftp_rejects_wrong_scheme() {
+        assert!(parse_tftp_uri("ftp://host/file").is_err());
+        assert!(parse_tftp_uri("http://host/file").is_err());
+    }
+
+    #[test]
+    fn tftp_rejects_empty_string() {
+        assert!(parse_tftp_uri("").is_err());
+    }
+
+    #[test]
+    fn tftp_rejects_uri_with_no_path() {
+        assert!(parse_tftp_uri("tftp://192.168.1.1").is_err());
+        assert!(parse_tftp_uri("tftp://192.168.1.1/").is_err());
+    }
+
+    #[test]
+    fn tftp_rejects_empty_host() {
+        assert!(parse_tftp_uri("tftp:///file.bin").is_err());
+    }
+
+    #[test]
+    fn tftp_rejects_invalid_port() {
+        assert!(parse_tftp_uri("tftp://host:notaport/file").is_err());
+    }
+
+    #[test]
+    fn tftp_scheme_detected_as_remote() {
+        assert!(blazehash::remote::is_remote_uri("tftp://192.168.1.1/firmware.bin"));
+    }
+
+    #[test]
+    fn tftp_uri_scheme_variant_detected() {
+        assert_eq!(
+            blazehash::remote::UriScheme::detect("tftp://192.168.1.1/firmware.bin"),
+            Some(blazehash::remote::UriScheme::Tftp)
+        );
+    }
+}
