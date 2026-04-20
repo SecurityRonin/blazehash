@@ -6,6 +6,10 @@ pub mod reader;
 pub mod operator;
 #[cfg(feature = "remote")]
 pub mod walk;
+#[cfg(feature = "remote")]
+pub mod ftp;
+#[cfg(feature = "remote")]
+pub mod tftp;
 pub mod gdrive;
 
 /// Returns true if the string has a known remote URI scheme.
@@ -34,7 +38,7 @@ pub fn is_remote_uri(s: &str) -> bool {
             // Misc
             | "cloudflare-kv" | "d1"
             // Filesystem / network protocols
-            | "http" | "https" | "webdav" | "sftp" | "ftp" | "ftps"
+            | "http" | "https" | "webdav" | "sftp" | "ftp" | "ftps" | "tftp"
             | "compfs" | "monoiofs"
             | "mem" | "file"
         )
@@ -102,6 +106,7 @@ pub enum UriScheme {
     Sftp,
     Ftp,
     Ftps,
+    Tftp,
     Compfs,
     Monoiofs,
     Mem,
@@ -166,6 +171,7 @@ impl UriScheme {
             "sftp"              => Some(Self::Sftp),
             "ftp"               => Some(Self::Ftp),
             "ftps"              => Some(Self::Ftps),
+            "tftp"              => Some(Self::Tftp),
             "compfs"            => Some(Self::Compfs),
             "monoiofs"          => Some(Self::Monoiofs),
             "mem"               => Some(Self::Mem),

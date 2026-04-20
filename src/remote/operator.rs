@@ -599,16 +599,12 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             Ok((op, path.to_string()))
         }
         "ftp" | "ftps" => {
-            // ftp://user:password@host/path
-            let (userinfo, hostpath) = rest.split_once('@').unwrap_or(("", rest));
-            let (host, path) = hostpath.split_once('/').unwrap_or((hostpath, ""));
-            let (user, password) = userinfo.split_once(':').unwrap_or((userinfo, ""));
-            let builder = services::Ftp::default()
-                .endpoint(&format!("{scheme}://{host}"))
-                .user(user)
-                .password(password);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
+            // ftp/ftps are handled by crate::remote::ftp::fetch_ftp_bytes — not opendal.
+            // (opendal services-ftp has an async-tls/tokio-rustls version conflict.)
+            anyhow::bail!(
+                "ftp:// and ftps:// URIs must be fetched with \
+                 crate::remote::ftp::fetch_ftp_bytes(), not operator_for_uri()"
+            )
         }
         "monoiofs" => {
             // monoiofs:///abs/path — monoio-based async fs (Linux io_uring only)

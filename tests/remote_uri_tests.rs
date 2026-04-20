@@ -678,7 +678,7 @@ mod operator_tests {
 
 #[cfg(feature = "remote")]
 mod ftp_uri_tests {
-    use blazehash::remote::ftp::{parse_ftp_uri, FtpUri};
+    use blazehash::remote::ftp::parse_ftp_uri;
 
     #[test]
     fn ftp_parse_minimal() {
@@ -759,7 +759,7 @@ mod ftp_uri_tests {
 
 #[cfg(feature = "remote")]
 mod tftp_uri_tests {
-    use blazehash::remote::tftp::{parse_tftp_uri, TftpUri, DEFAULT_TFTP_PORT};
+    use blazehash::remote::tftp::{parse_tftp_uri, DEFAULT_TFTP_PORT};
 
     #[test]
     fn tftp_parse_minimal() {
