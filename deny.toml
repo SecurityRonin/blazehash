@@ -38,6 +38,11 @@ ignore = [
     # indicatif number_prefix — transitive dep.
     "RUSTSEC-2024-0363",
 
+    # rustls-webpki CRL parsing panic — transitive via opendal/tikv-client/tonic.
+    # No CRL parsing performed in blazehash; only hash computation paths are used.
+    # Will resolve when opendal/tikv-client upgrades rustls-webpki.
+    "RUSTSEC-2026-0104",
+
     # Wasmtime vulnerabilities — all transitive via yara-x → wasmtime.
     # We do not run untrusted Wasm; only YARA rules execute in the Cranelift sandbox.
     # Will resolve when yara-x upgrades its wasmtime dependency.
