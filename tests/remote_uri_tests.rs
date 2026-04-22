@@ -425,16 +425,18 @@ mod operator_tests {
     }
 
     #[test]
-    fn operator_sftp_not_unsupported() {
-        // On Unix: services-sftp is compiled in, sftp:// must not return "unsupported URI scheme".
-        // On Windows: we return a clear platform message instead of a silent "unsupported" error.
-        let result = operator_for_uri("sftp://user@host/path");
-        if let Err(e) = result {
-            assert!(
-                !e.to_string().contains("unsupported URI scheme"),
-                "sftp:// should give a specific message, got: {e}"
-            );
-        }
+    fn operator_sftp_redirects_to_fetch_sftp_bytes() {
+        // sftp:// is served by fetch_sftp_bytes (ssh2/libssh2, cross-platform).
+        // operator_for_uri bails with a helpful message — not a generic "unsupported URI scheme".
+        let err = operator_for_uri("sftp://user@host/path").unwrap_err().to_string();
+        assert!(
+            !err.contains("unsupported URI scheme"),
+            "sftp:// should give a redirect message, got: {err}"
+        );
+        assert!(
+            err.contains("fetch_sftp_bytes") || err.contains("sftp://"),
+            "sftp:// message should mention fetch_sftp_bytes, got: {err}"
+        );
     }
 
     #[test]
@@ -552,42 +554,34 @@ mod operator_tests {
         assert_not_unsupported("vercel-blob://key");
     }
 
-    // ── sftp path extraction (Unix only — openssh Rust crate is Unix-only) ──
+    // ── sftp path extraction (via parse_sftp_uri — cross-platform ssh2/libssh2) ──
+    // operator_for_uri bails directing callers to fetch_sftp_bytes(); parse_sftp_uri
+    // is the path-extraction API for SFTP, same pattern as parse_ftp_uri for FTP.
 
-    #[cfg(unix)]
     #[test]
     fn sftp_path_extracted_correctly() {
-        let (_, path) = operator_for_uri("sftp://user@192.168.1.10/evidence/disk.dd")
-            .expect("sftp:// should be supported on Unix");
-        assert_eq!(path, "evidence/disk.dd");
+        use blazehash::remote::sftp::parse_sftp_uri;
+        let u = parse_sftp_uri("sftp://user@192.168.1.10/evidence/disk.dd")
+            .expect("sftp:// URI should parse correctly");
+        assert_eq!(u.path, "/evidence/disk.dd");
     }
 
-    #[cfg(unix)]
     #[test]
     fn sftp_nested_path_extracted_correctly() {
-        let (_, path) = operator_for_uri("sftp://analyst@server.corp/cases/2026/image.dd")
-            .expect("sftp:// should be supported on Unix");
-        assert_eq!(path, "cases/2026/image.dd");
+        use blazehash::remote::sftp::parse_sftp_uri;
+        let u = parse_sftp_uri("sftp://analyst@server.corp/cases/2026/image.dd")
+            .expect("sftp:// URI should parse correctly");
+        assert_eq!(u.path, "/cases/2026/image.dd");
     }
 
-    #[cfg(unix)]
     #[test]
     fn sftp_userpass_path_extracted_correctly() {
-        let (_, path) = operator_for_uri("sftp://admin:secret@10.0.0.1/data/forensics/dump.dd")
-            .expect("sftp:// with password should be supported on Unix");
-        assert_eq!(path, "data/forensics/dump.dd");
-    }
-
-    #[cfg(not(unix))]
-    #[test]
-    fn sftp_returns_platform_error_on_windows() {
-        let err = operator_for_uri("sftp://user@192.168.1.10/evidence/disk.dd")
-            .unwrap_err()
-            .to_string();
-        assert!(
-            !err.contains("unsupported URI scheme"),
-            "sftp:// should give a platform-specific message on Windows, got: {err}"
-        );
+        use blazehash::remote::sftp::parse_sftp_uri;
+        let u = parse_sftp_uri("sftp://admin:secret@10.0.0.1/data/forensics/dump.dd")
+            .expect("sftp:// with password should parse correctly");
+        assert_eq!(u.path, "/data/forensics/dump.dd");
+        assert_eq!(u.username, Some("admin".into()));
+        assert_eq!(u.password, Some("secret".into()));
     }
 
     // ── ftp/ftps: handled by fetch_ftp_bytes, not operator_for_uri ──────────

@@ -580,31 +580,15 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             let op = Operator::new(builder)?.finish();
             Ok((op, path.to_string()))
         }
-        #[cfg(unix)]
         "sftp" => {
-            // sftp://user@host/path  (authenticates via SSH agent or key file)
-            // Optional env override: BLAZEHASH_SFTP_KEY_PATH, BLAZEHASH_SFTP_KNOWN_HOSTS
-            // Note: services-sftp uses the openssh Rust crate which is Unix-only.
-            let (userinfo, hostpath) = rest.split_once('@').unwrap_or(("", rest));
-            let (host, path) = hostpath.split_once('/').unwrap_or((hostpath, ""));
-            let user = userinfo.split_once(':').map(|(u, _)| u).unwrap_or(userinfo);
-            let mut builder = services::Sftp::default()
-                .endpoint(&format!("ssh://{host}"))
-                .user(user);
-            if let Ok(key) = std::env::var("BLAZEHASH_SFTP_KEY_PATH") {
-                builder = builder.key(&key);
-            }
-            let known_hosts = std::env::var("BLAZEHASH_SFTP_KNOWN_HOSTS_STRATEGY")
-                .unwrap_or_else(|_| "add".into());
-            builder = builder.known_hosts_strategy(&known_hosts);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
-        #[cfg(not(unix))]
-        "sftp" => {
+            // sftp:// is handled by crate::remote::sftp::fetch_sftp_bytes — not opendal.
+            // (opendal services-sftp uses the openssh Rust crate which is Unix-only;
+            //  our ssh2/libssh2-based implementation works on Linux, macOS, and Windows.)
             anyhow::bail!(
-                "sftp:// is not available on this platform (the openssh Rust crate is Unix-only). \
-                 Transfer files via WinSCP or Windows scp.exe then hash locally."
+                "sftp:// URIs must be fetched with \
+                 `crate::remote::sftp::fetch_sftp_bytes(uri)` \
+                 (ssh2/libssh2, cross-platform). \
+                 operator_for_uri() does not support sftp://."
             )
         }
         "ftp" | "ftps" => {

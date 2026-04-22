@@ -153,7 +153,8 @@ opendal = { version = "0.55.0", optional = true, features = [
     "services-fs",
     "services-http",
     "services-webdav",
-    # services-sftp: in [target.'cfg(unix)'.dependencies] below — openssh-rs is Unix-only.
+        # services-sftp intentionally omitted: openssh Rust crate is Unix-only.
+    # SFTP is handled via ssh2 (libssh2 vendored, cross-platform) in src/remote/sftp.rs.
     # services-ftp intentionally omitted: async-tls/tokio-rustls conflict.
     # FTP/FTPS is handled via suppaftp (blocking + rustls) instead.
     "services-hdfs-native", # HDFS pure-Rust native client (no Java/libhdfs required)
@@ -164,6 +165,8 @@ opendal = { version = "0.55.0", optional = true, features = [
 
 # FTP/FTPS: blocking suppaftp with rustls (avoids opendal services-ftp async-tls conflict)
 suppaftp = { version = "6", default-features = false, features = ["rustls"], optional = true }
+# SFTP: cross-platform ssh2 (libssh2 vendored — no openssh Rust crate, no Unix-only deps)
+ssh2 = { version = "0.9", features = ["vendored-openssl"], optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 libc = "0.2"
@@ -199,13 +202,8 @@ tui = ["dep:ratatui", "dep:crossterm"]
 ots = []
 pq  = []
 qr  = ["dep:qrcode", "dep:image"]
-remote = ["dep:opendal", "dep:tokio", "dep:suppaftp"]
+remote = ["dep:opendal", "dep:tokio", "dep:suppaftp", "dep:ssh2"]
 rocksdb-storage = ["remote", "opendal/services-rocksdb"]
-
-# services-sftp uses the `openssh` Rust crate which is Unix-only (std::os::unix).
-# Cargo merges features from target-specific entries with the base dep entry.
-[target.'cfg(unix)'.dependencies]
-opendal = { version = "0.55.0", optional = true, features = ["services-sftp"] }
 
 [package.metadata.deb]
 maintainer = "SecurityRonin <security-ronin@users.noreply.github.com>"

@@ -9,6 +9,8 @@ pub mod walk;
 #[cfg(feature = "remote")]
 pub mod ftp;
 #[cfg(feature = "remote")]
+pub mod sftp;
+#[cfg(feature = "remote")]
 pub mod tftp;
 pub mod gdrive;
 
