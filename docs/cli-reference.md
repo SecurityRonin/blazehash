@@ -426,11 +426,11 @@ blazehash qr manifest.hash -o manifest-qr.png
 
 ---
 
-### Cryptographic Proofs & Selective Disclosure
+### Tamper Evidence & Selective Disclosure
 
 #### `merkle`
 
-Compute a Merkle tree root hash from a manifest.
+Seal a manifest with a single tamper-evident root hash. Any change to any entry changes the root — you can publish just the root hash to prove the full set was sealed at a specific point in time.
 
 ```bash
 blazehash merkle manifest.hash
@@ -438,7 +438,7 @@ blazehash merkle manifest.hash
 
 #### `merkle-proof`
 
-Generate a Merkle inclusion proof for a specific file path.
+Prove that a specific file was part of a sealed manifest without revealing any other entries. Share only the proof and root hash — the other files stay private.
 
 ```bash
 blazehash merkle-proof manifest.hash --path /evidence/file.dd
@@ -446,7 +446,7 @@ blazehash merkle-proof manifest.hash --path /evidence/file.dd
 
 #### `merkle-verify`
 
-Verify a Merkle inclusion proof.
+Confirm that a file was present when the manifest was sealed. Verifies offline against the root hash — no access to the original manifest required.
 
 ```bash
 blazehash merkle-verify --root <hex> --path /evidence/file.dd --proof <hex>
@@ -454,7 +454,7 @@ blazehash merkle-verify --root <hex> --path /evidence/file.dd --proof <hex>
 
 #### `disclose`
 
-Generate a redacted manifest that proves a specific file exists without revealing all entries.
+Produce a redacted copy that reveals only the files you choose while proving they belong to the original sealed manifest. Useful when you need to share partial evidence without exposing the full case file.
 
 ```bash
 blazehash disclose manifest.hash --paths /evidence/critical.dd -o disclosed.hash
@@ -462,7 +462,7 @@ blazehash disclose manifest.hash --paths /evidence/critical.dd -o disclosed.hash
 
 #### `prove-membership`
 
-Prove that a specific path+hash is in a manifest without revealing the full manifest.
+Assert that a specific file exists in a manifest — exits `0` if present, `1` if not. Useful in automated pipelines that need to verify a file was captured.
 
 ```bash
 blazehash prove-membership manifest.hash --path /evidence/file.dd
@@ -511,7 +511,7 @@ blazehash diff before.hash after.hash
 
 #### `sym-diff`
 
-Symmetric difference: entries whose path appears in A or B but not both.
+Find files that changed between two evidence snapshots — entries that appear in one manifest but not the other. Useful for pinpointing what was added or removed between two collection points.
 
 ```bash
 blazehash sym-diff before.hash after.hash -o changes.hash
@@ -716,7 +716,7 @@ blazehash split manifest.hash --parts 4
 
 #### `balance`
 
-Split a manifest into N roughly equal parts by size.
+Split a manifest into N parts of roughly equal total file size — useful when distributing hashing work across multiple machines or verifiers.
 
 ```bash
 blazehash balance manifest.hash --parts 4
@@ -724,7 +724,7 @@ blazehash balance manifest.hash --parts 4
 
 #### `interleave`
 
-Merge two manifests in alternating A B A B order.
+Combine two manifests by alternating their entries (A, B, A, B, …). Useful for interlacing two partial collections into a single ordered pass before hashing or processing.
 
 ```bash
 blazehash interleave part-a.hash part-b.hash -o interleaved.hash
@@ -789,7 +789,7 @@ blazehash annotate manifest.hash --note "Reviewed by Jane Smith"
 
 #### `pivot`
 
-Re-key manifest entries by a different algorithm column (for cross-referencing with legacy manifests).
+Produce a copy of a manifest keyed by a different algorithm — useful when you need to cross-reference a BLAKE3 manifest against a legacy SHA-256 database or hand it to a tool that only understands one algorithm.
 
 ```bash
 blazehash pivot manifest.hash --pivot-algo sha256 -o sha256-keyed.hash
