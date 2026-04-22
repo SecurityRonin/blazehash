@@ -428,6 +428,8 @@ blazehash qr manifest.hash -o manifest-qr.png
 
 ### Tamper Evidence & Selective Disclosure
 
+> **How it works** — see [Tamper Evidence mechanics](concepts.md#how-tamper-evidence-works-seal--file-proof--verify-proof) in Concepts for a full explanation of Merkle tree construction, inclusion proofs, and the security properties of each subcommand.
+
 #### `seal`
 
 Seal a manifest with a single tamper-evident root hash. Any change to any entry changes the root — you can publish just the root hash to prove the full set was sealed at a specific point in time.

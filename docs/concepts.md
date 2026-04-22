@@ -128,6 +128,61 @@ blazehash automatically detects and verifies sidecar hash files when you run `--
 
 ---
 
+## How tamper evidence works (`seal` / `file-proof` / `verify-proof`)
+
+### The problem: a manifest is just a text file
+
+A SHA-256 manifest proves each file's integrity, but it doesn't prove the manifest itself is intact. Anyone who can edit the manifest can remove entries, change hashes, or swap paths — and unless you kept the original, you can't tell.
+
+Signing the manifest (Ed25519) is the standard fix. But signatures are binary — you can't verify a single entry without the full manifest and the public key.
+
+### What `seal` does
+
+`blazehash seal` builds a [Merkle tree](https://en.wikipedia.org/wiki/Merkle_tree) over every entry in the manifest:
+
+1. **Leaf hashing** — each entry `(path, hash_value)` is serialised and SHA-256 hashed to produce a leaf node.
+2. **Tree construction** — leaf nodes are pairwise-hashed bottom-up: `parent = SHA-256(left_child || right_child)`. If a level has an odd number of nodes, the last node is duplicated.
+3. **Root commitment** — the single root hash at the top of the tree commits to every entry simultaneously. Change any leaf (path, hash, or order) and the root changes completely.
+
+The root hash is a short, publishable value — 64 hex characters. You can put it in an email, a court filing, a blockchain transaction, or a notebook. Anyone who later sees the same manifest can recompute the root and verify it matches.
+
+### What `file-proof` does
+
+`blazehash file-proof` generates an **inclusion proof** for one file:
+
+1. Find the file's leaf node in the Merkle tree.
+2. Walk up the tree, recording the **sibling hash** at each level.
+3. Output the root hash and the ordered list of sibling hashes (the "proof path").
+
+The proof is a compact JSON array — O(log n) hashes for a manifest of n files. For 10,000 files, that's ~13 hashes, ~416 bytes. The proof reveals nothing about any other file in the manifest.
+
+### What `verify-proof` does
+
+`blazehash verify-proof` recomputes the path from leaf to root using only:
+
+- The file being verified (to recompute its leaf hash)
+- The proof path (sibling hashes)
+- The expected root hash
+
+It hashes the file's entry to get the leaf, then applies each sibling hash in sequence to climb the tree. If the recomputed root matches the provided root, the file was present in the manifest when it was sealed — provably, without access to the original manifest or the other files.
+
+### What `disclose` does
+
+`blazehash disclose` produces a redacted copy of the manifest that contains only the files you choose, but includes their Merkle proof paths. A recipient can verify each disclosed file against the same root hash. Undisclosed files remain completely private — their hashes are never transmitted.
+
+### Security properties
+
+| Property | Guarantee |
+|----------|-----------|
+| Tamper detection | Any change to any entry changes the root hash |
+| Selective disclosure | Proof reveals nothing about undisclosed entries |
+| Offline verification | `verify-proof` needs no access to the original manifest |
+| Compact proofs | O(log n) hashes; ~400 bytes for 10,000-file manifests |
+
+The underlying algorithm is the same one used by [Certificate Transparency](https://certificate.transparency.dev/) logs and [Git's object graph](https://git-scm.com/book/en/v2/Git-Internals-Git-Objects) — a well-understood construction with no known attacks when SHA-256 is used as the node hash function.
+
+---
+
 ## Further reading
 
 - [NIST SP 800-86: Guide to Integrating Forensic Techniques](https://csrc.nist.gov/pubs/sp/800/86/final) — NIST guide to digital forensics
