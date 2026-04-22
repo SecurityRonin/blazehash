@@ -742,7 +742,9 @@ impl Cli {
             Mode::Balance
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("interleave")) {
             Mode::Interleave
-        } else if self.paths.first().map(|p| {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("gdrive-collect"))
+            || self.paths.first().map(|p| {
                 let s = p.to_string_lossy();
                 s.starts_with("gdrive://")
                     || s.starts_with("https://drive.google.com/")
