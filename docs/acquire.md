@@ -158,20 +158,20 @@ ADS entries appear as `filename:stream_name` in the output. The `--ads` flag is 
 
 ## Hash a Google Drive file without downloading
 
-`gdrive-collect` hashes a Google Drive file entirely in memory — no temporary copy lands on disk.
+blazehash hashes a Google Drive file entirely in memory — no temporary copy lands on disk. Pass the URL or `gdrive://` URI directly as the path argument:
 
 ```bash
-blazehash gdrive-collect https://drive.google.com/file/d/FILE_ID/view
+blazehash https://drive.google.com/file/d/FILE_ID/view
+blazehash gdrive://FILE_ID
 ```
 
 All of the following URL and ID formats are accepted:
 
 | Input | Example |
 |-------|---------|
-| Share link (`/file/d/<id>/view`) | `https://drive.google.com/file/d/1a2B.../view` |
-| Open link (`open?id=<id>`) | `https://drive.google.com/open?id=1a2B...` |
-| `gdrive://` URI | `gdrive://1a2B...` |
-| Bare file ID | `1a2BcDeFgHiJkLmNoPqRsTuVwXyZ` |
+| Share link (`/file/d/<id>/view`) | `blazehash https://drive.google.com/file/d/1a2B.../view` |
+| Open link (`open?id=<id>`) | `blazehash https://drive.google.com/open?id=1a2B...` |
+| `gdrive://` URI | `blazehash gdrive://1a2B...` |
 
 Output follows the standard blazehash format:
 
@@ -194,7 +194,7 @@ Opens a browser-based OAuth consent flow and caches the resulting token:
 blazehash gdrive auth login
 ```
 
-After the browser redirects back and you see a success message, the token is saved to `~/.config/blazehash/gdrive_token.json`. Subsequent `gdrive-collect` calls pick it up automatically, giving access to any file your Google account can reach.
+After the browser redirects back and you see a success message, the token is saved to `~/.config/blazehash/gdrive_token.json`. Subsequent Google Drive hashing picks it up automatically, giving access to any file your Google account can reach.
 
 To verify the stored token is valid:
 

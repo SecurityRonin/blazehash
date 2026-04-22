@@ -10,7 +10,7 @@
 
 blazehash is a local command-line tool. It does not operate a server, does not have a backend, and does not transmit data to Security Ronin or any third party.
 
-The only external service blazehash contacts is **Google's OAuth 2.0 endpoint** — and only when you explicitly run `blazehash gdrive auth login` or `blazehash gdrive-collect` with a Google Drive URL.
+The only external service blazehash contacts is **Google's OAuth 2.0 endpoint** — and only when you explicitly run `blazehash gdrive auth login` or hash a `gdrive://` URI.
 
 ---
 
