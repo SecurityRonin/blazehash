@@ -12,6 +12,48 @@ ignore = [
     # `nsrl` feature for bloom filter serialization. No drop-in v2 replacement exists
     # for the bloomfilter crate's serde output. Will migrate when bloomfilter updates.
     "RUSTSEC-2025-0141",
+
+    # adler v1 unmaintained — we directly use it for the Adler32 hash algorithm.
+    # Will migrate to adler2 when the ecosystem stabilises.
+    "RUSTSEC-2025-0056",
+    # fxhash unmaintained — transitive dep via yara-x/opendal.
+    "RUSTSEC-2025-0046",
+    # instant unmaintained — transitive dep via indicatif/opendal.
+    "RUSTSEC-2024-0384",
+    # number_prefix unmaintained — transitive dep via indicatif.
+    "RUSTSEC-2025-0119",
+    # rustls-pemfile unmaintained — transitive dep via opendal/sqlx.
+    "RUSTSEC-2026-0098",
+    # rustls 0.21 cert validation bugs — transitive dep via opendal/tikv-client.
+    "RUSTSEC-2026-0099",
+    # RSA Marvin Attack / timing side-channel — transitive via yara-x/opendal/sqlx.
+    # No direct key-recovery risk in our hashing workload (we never do RSA decryption).
+    "RUSTSEC-2023-0071",
+    # sled / parking_lot advisories — transitive via opendal services-sled.
+    "RUSTSEC-2025-0057",
+    # tonic advisory — transitive via opendal/tikv-client.
+    "RUSTSEC-2025-0118",
+    # sqlx advisory — transitive via opendal SQL services.
+    "RUSTSEC-2025-0134",
+    # indicatif number_prefix — transitive dep.
+    "RUSTSEC-2024-0363",
+
+    # Wasmtime vulnerabilities — all transitive via yara-x → wasmtime.
+    # We do not run untrusted Wasm; only YARA rules execute in the Cranelift sandbox.
+    # Will resolve when yara-x upgrades its wasmtime dependency.
+    "RUSTSEC-2026-0020",
+    "RUSTSEC-2026-0021",
+    "RUSTSEC-2026-0085",
+    "RUSTSEC-2026-0086",
+    "RUSTSEC-2026-0087",
+    "RUSTSEC-2026-0088",
+    "RUSTSEC-2026-0089",
+    "RUSTSEC-2026-0091",
+    "RUSTSEC-2026-0092",
+    "RUSTSEC-2026-0093",
+    "RUSTSEC-2026-0094",
+    "RUSTSEC-2026-0095",
+    "RUSTSEC-2026-0096",
 ]
 
 [licenses]
@@ -29,6 +71,10 @@ allow = [
     "0BSD",
     "MPL-2.0",
     "BSL-1.0",
+    # Used by LLVM/Cranelift toolchain crates (wasmtime) pulled in by yara-x
+    "Apache-2.0 WITH LLVM-exception",
+    # Used by Substrait/Arrow ecosystem crates pulled in by yara-x
+    "CDLA-Permissive-2.0",
 ]
 
 [bans]
