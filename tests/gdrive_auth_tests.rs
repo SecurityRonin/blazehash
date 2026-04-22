@@ -307,8 +307,22 @@ fn exchange_code_parses_access_token_from_valid_response() {
 
     std::thread::spawn(move || {
         let (mut stream, _) = listener.accept().unwrap();
-        let mut buf = [0u8; 4096];
-        let _ = stream.read(&mut buf);
+        // Drain the full HTTP request so macOS sees no unread data in the
+        // receive buffer when we close — otherwise the kernel sends TCP RST
+        // instead of FIN, which ureq reads as EINVAL on macOS.
+        let mut buf = vec![0u8; 8192];
+        let mut total = 0;
+        loop {
+            match stream.read(&mut buf[total..]) {
+                Ok(0) | Err(_) => break,
+                Ok(n) => {
+                    total += n;
+                    if buf[..total].windows(4).any(|w| w == b"\r\n\r\n") {
+                        break;
+                    }
+                }
+            }
+        }
         let body = r#"{"access_token":"ya29.mock","token_type":"Bearer","expires_in":3600,"refresh_token":"1//mock_refresh"}"#;
         let response = format!(
             "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
@@ -316,6 +330,8 @@ fn exchange_code_parses_access_token_from_valid_response() {
             body
         );
         stream.write_all(response.as_bytes()).unwrap();
+        // Send FIN (not RST) so ureq gets a clean EOF when reading the body.
+        let _ = stream.shutdown(std::net::Shutdown::Write);
     });
 
     let token = exchange_code_for_token(
@@ -343,8 +359,19 @@ fn exchange_code_returns_error_on_non_200_response() {
 
     std::thread::spawn(move || {
         let (mut stream, _) = listener.accept().unwrap();
-        let mut buf = [0u8; 4096];
-        let _ = stream.read(&mut buf);
+        let mut buf = vec![0u8; 8192];
+        let mut total = 0;
+        loop {
+            match stream.read(&mut buf[total..]) {
+                Ok(0) | Err(_) => break,
+                Ok(n) => {
+                    total += n;
+                    if buf[..total].windows(4).any(|w| w == b"\r\n\r\n") {
+                        break;
+                    }
+                }
+            }
+        }
         let body = r#"{"error":"invalid_grant"}"#;
         let response = format!(
             "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
@@ -352,6 +379,7 @@ fn exchange_code_returns_error_on_non_200_response() {
             body
         );
         stream.write_all(response.as_bytes()).unwrap();
+        let _ = stream.shutdown(std::net::Shutdown::Write);
     });
 
     let result = exchange_code_for_token(

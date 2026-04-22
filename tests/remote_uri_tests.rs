@@ -637,7 +637,8 @@ mod operator_tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn monoiofs_path_extracted_correctly() {
-        let (_, path) = operator_for_uri("monoiofs:///evidence/disk.dd")
+        // Use /tmp so the operator can create its root dir without needing root
+        let (_, path) = operator_for_uri("monoiofs:///tmp/blazehash-test-monoiofs/disk.dd")
             .expect("monoiofs:// should be supported");
         assert_eq!(path, "disk.dd");
     }
