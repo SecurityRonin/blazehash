@@ -117,7 +117,7 @@ fn piecewise_hashes_match_full_file_hash() {
     f.flush().unwrap();
 
     let piecewise = hash_file_piecewise(f.path(), &[Algorithm::Blake3], 4096).unwrap();
-    let full = hash_file(f.path(), &[Algorithm::Blake3], false, false, false).unwrap();
+    let full = hash_file(f.path(), &[Algorithm::Blake3], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
 
     assert_eq!(piecewise.len(), 1);
     assert_eq!(
