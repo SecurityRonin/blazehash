@@ -2,7 +2,7 @@
 name = "blazehash"
 version = "0.2.4"
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.88"
 authors = ["Albert Hui <albert@securityronin.com>"]
 description = "Forensic file hasher — hashdeep for the modern era, BLAKE3 by default"
 license = "MIT"
@@ -153,7 +153,7 @@ opendal = { version = "0.55.0", optional = true, features = [
     "services-fs",
     "services-http",
     "services-webdav",
-    "services-sftp",
+    # services-sftp: in [target.'cfg(unix)'.dependencies] below — openssh-rs is Unix-only.
     # services-ftp intentionally omitted: async-tls/tokio-rustls conflict.
     # FTP/FTPS is handled via suppaftp (blocking + rustls) instead.
     "services-hdfs-native", # HDFS pure-Rust native client (no Java/libhdfs required)
@@ -201,6 +201,11 @@ pq  = []
 qr  = ["dep:qrcode", "dep:image"]
 remote = ["dep:opendal", "dep:tokio", "dep:suppaftp"]
 rocksdb-storage = ["remote", "opendal/services-rocksdb"]
+
+# services-sftp uses the `openssh` Rust crate which is Unix-only (std::os::unix).
+# Cargo merges features from target-specific entries with the base dep entry.
+[target.'cfg(unix)'.dependencies]
+opendal = { version = "0.55.0", optional = true, features = ["services-sftp"] }
 
 [package.metadata.deb]
 maintainer = "SecurityRonin <security-ronin@users.noreply.github.com>"

@@ -580,9 +580,11 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             let op = Operator::new(builder)?.finish();
             Ok((op, path.to_string()))
         }
+        #[cfg(unix)]
         "sftp" => {
             // sftp://user@host/path  (authenticates via SSH agent or key file)
             // Optional env override: BLAZEHASH_SFTP_KEY_PATH, BLAZEHASH_SFTP_KNOWN_HOSTS
+            // Note: services-sftp uses the openssh Rust crate which is Unix-only.
             let (userinfo, hostpath) = rest.split_once('@').unwrap_or(("", rest));
             let (host, path) = hostpath.split_once('/').unwrap_or((hostpath, ""));
             let user = userinfo.split_once(':').map(|(u, _)| u).unwrap_or(userinfo);
@@ -597,6 +599,13 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             builder = builder.known_hosts_strategy(&known_hosts);
             let op = Operator::new(builder)?.finish();
             Ok((op, path.to_string()))
+        }
+        #[cfg(not(unix))]
+        "sftp" => {
+            anyhow::bail!(
+                "sftp:// is not available on this platform (the openssh Rust crate is Unix-only). \
+                 Transfer files via WinSCP or Windows scp.exe then hash locally."
+            )
         }
         "ftp" | "ftps" => {
             // ftp/ftps are handled by crate::remote::ftp::fetch_ftp_bytes — not opendal.

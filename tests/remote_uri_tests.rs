@@ -426,7 +426,15 @@ mod operator_tests {
 
     #[test]
     fn operator_sftp_not_unsupported() {
-        assert_not_unsupported("sftp://user@host/path");
+        // On Unix: services-sftp is compiled in, sftp:// must not return "unsupported URI scheme".
+        // On Windows: we return a clear platform message instead of a silent "unsupported" error.
+        let result = operator_for_uri("sftp://user@host/path");
+        if let Err(e) = result {
+            assert!(
+                !e.to_string().contains("unsupported URI scheme"),
+                "sftp:// should give a specific message, got: {e}"
+            );
+        }
     }
 
     #[test]
@@ -544,52 +552,68 @@ mod operator_tests {
         assert_not_unsupported("vercel-blob://key");
     }
 
-    // ── sftp path extraction (TDD redo) ───────────────────────────────────────
+    // ── sftp path extraction (Unix only — openssh Rust crate is Unix-only) ──
 
+    #[cfg(unix)]
     #[test]
     fn sftp_path_extracted_correctly() {
         let (_, path) = operator_for_uri("sftp://user@192.168.1.10/evidence/disk.dd")
-            .expect("sftp:// should be supported");
+            .expect("sftp:// should be supported on Unix");
         assert_eq!(path, "evidence/disk.dd");
     }
 
+    #[cfg(unix)]
     #[test]
     fn sftp_nested_path_extracted_correctly() {
         let (_, path) = operator_for_uri("sftp://analyst@server.corp/cases/2026/image.dd")
-            .expect("sftp:// should be supported");
+            .expect("sftp:// should be supported on Unix");
         assert_eq!(path, "cases/2026/image.dd");
     }
 
+    #[cfg(unix)]
     #[test]
     fn sftp_userpass_path_extracted_correctly() {
-        // sftp://user:pass@host/path — password stripped, path still correct
         let (_, path) = operator_for_uri("sftp://admin:secret@10.0.0.1/data/forensics/dump.dd")
-            .expect("sftp:// with password should be supported");
+            .expect("sftp:// with password should be supported on Unix");
         assert_eq!(path, "data/forensics/dump.dd");
     }
 
-    // ── ftp path extraction (TDD redo) ────────────────────────────────────────
+    #[cfg(not(unix))]
+    #[test]
+    fn sftp_returns_platform_error_on_windows() {
+        let err = operator_for_uri("sftp://user@192.168.1.10/evidence/disk.dd")
+            .unwrap_err()
+            .to_string();
+        assert!(
+            !err.contains("unsupported URI scheme"),
+            "sftp:// should give a platform-specific message on Windows, got: {err}"
+        );
+    }
+
+    // ── ftp/ftps: handled by fetch_ftp_bytes, not operator_for_uri ──────────
+    // operator_for_uri bails with a redirect message; these tests verify that
+    // message is present and is NOT a generic "unsupported URI scheme" error.
 
     #[test]
-    fn ftp_path_extracted_correctly() {
-        let (_, path) = operator_for_uri("ftp://user:pass@ftpserver.example.com/data/malware.zip")
-            .expect("ftp:// should be supported");
-        assert_eq!(path, "data/malware.zip");
+    fn ftp_operator_returns_redirect_to_fetch_ftp_bytes() {
+        let err = operator_for_uri("ftp://user:pass@ftpserver.example.com/data/malware.zip")
+            .unwrap_err()
+            .to_string();
+        assert!(
+            err.contains("fetch_ftp_bytes") || err.contains("ftp://"),
+            "ftp:// should give a redirect message, got: {err}"
+        );
     }
 
     #[test]
-    fn ftps_path_extracted_correctly() {
-        let (_, path) = operator_for_uri("ftps://user:pass@secure.example.com/evidence/image.dd")
-            .expect("ftps:// should be supported");
-        assert_eq!(path, "evidence/image.dd");
-    }
-
-    #[test]
-    fn ftp_no_credentials_path_extracted() {
-        // ftp://host/path — no credentials in URI
-        let (_, path) = operator_for_uri("ftp://public.example.com/pub/forensics/file.zip")
-            .expect("ftp:// without credentials should be supported");
-        assert_eq!(path, "pub/forensics/file.zip");
+    fn ftps_operator_returns_redirect_to_fetch_ftp_bytes() {
+        let err = operator_for_uri("ftps://user:pass@secure.example.com/evidence/image.dd")
+            .unwrap_err()
+            .to_string();
+        assert!(
+            err.contains("fetch_ftp_bytes") || err.contains("ftps://"),
+            "ftps:// should give a redirect message, got: {err}"
+        );
     }
 
     // ── rocksdb:// (optional feature: rocksdb-storage) ────────────────────────
