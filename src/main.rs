@@ -1168,18 +1168,9 @@ fn main() -> Result<()> {
         Mode::Interleave => unreachable!(),
         #[cfg(feature = "remote")]
         Mode::GDriveCollect => {
-            // Supports two invocation forms:
-            //   blazehash gdrive-collect <url-or-id>  → subcommand form; URL is paths[1]
-            //   blazehash gdrive://<id>               → URI form; URI is paths[0]
-            //   blazehash https://drive.google.com/…  → URL form; URL is paths[0]
-            let input = {
-                let first = cli.paths.first().map(|p| p.to_string_lossy());
-                if first.as_deref() == Some("gdrive-collect") {
-                    cli.paths.get(1).map(|p| p.to_string_lossy().to_string()).unwrap_or_default()
-                } else {
-                    first.map(|s| s.to_string()).unwrap_or_default()
-                }
-            };
+            let input = cli.paths.first()
+                .map(|p| p.to_string_lossy().to_string())
+                .unwrap_or_default();
             let file_id = blazehash::remote::gdrive::parse_file_id(&input)
                 .ok_or_else(|| {
                     anyhow::anyhow!(

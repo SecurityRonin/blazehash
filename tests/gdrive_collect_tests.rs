@@ -1,4 +1,8 @@
-// Tests for the `blazehash gdrive-collect <url>` CLI subcommand.
+// Tests for blazehash Google Drive file hashing (URI-based interface).
+//
+// Usage:
+//   blazehash gdrive://<file-id>
+//   blazehash https://drive.google.com/file/d/<id>/view
 //
 // Unit tests run offline (no network). Network integration test is #[ignore]
 // and must be run explicitly:
@@ -29,34 +33,35 @@ fn test_gdrive_collect_parses_gdrive_uri() {
     assert_eq!(id, "1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0");
 }
 
-// ── CLI subcommand dispatch tests ─────────────────────────────────────────────
+// ── CLI URI dispatch tests ────────────────────────────────────────────────────
 
-/// Verifies that `blazehash gdrive-collect` (no URL arg) is recognised as a
-/// subcommand and fails with a meaningful error — not with
-/// "No such file or directory" (which would happen if it fell through to Hash).
+/// Verifies that `blazehash gdrive://` (no file ID) is recognised as a
+/// gdrive URI and fails with a meaningful error — not silently with
+/// "No such file or directory" (hash-mode fallthrough).
 #[test]
-fn test_gdrive_collect_subcommand_exists() {
+fn test_gdrive_scheme_is_recognised() {
     let output = assert_cmd::Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["gdrive-collect"])
+        .args(["gdrive://"])
         .output()
         .unwrap();
+    assert!(
+        !output.status.success(),
+        "gdrive:// with empty ID should fail"
+    );
     let stderr = String::from_utf8_lossy(&output.stderr);
-    // Should NOT say "No such file or directory" (that's the Hash fallthrough)
     assert!(
         !stderr.contains("No such file"),
-        "gdrive-collect not recognised as subcommand — stderr: {stderr}"
+        "gdrive:// fell through to hash mode — stderr: {stderr}"
     );
 }
 
-/// Passing an unrecognisable string (no scheme, not a valid bare ID format
-/// for Drive, e.g. contains characters Drive IDs don't have) should exit
-/// non-zero.
+/// An empty gdrive:// URI (no file ID) must exit non-zero.
 #[test]
-fn test_gdrive_collect_bad_url_exits_nonzero() {
+fn test_gdrive_empty_id_exits_nonzero() {
     assert_cmd::Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["gdrive-collect", "https://example.com/not-a-drive-url"])
+        .args(["gdrive://"])
         .assert()
         .failure();
 }
@@ -69,14 +74,13 @@ fn test_gdrive_collect_live() {
     let url = "https://drive.google.com/file/d/1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0/view";
     let out = assert_cmd::Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["gdrive-collect", url])
+        .args([url])
         .assert()
         .success()
         .get_output()
         .stdout
         .clone();
     let stdout = String::from_utf8(out).unwrap();
-    // manifest line format: "<hash>  gdrive://<id>"
     assert!(
         stdout.contains("gdrive://1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0"),
         "expected manifest line in stdout, got: {stdout}"
