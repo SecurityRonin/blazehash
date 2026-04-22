@@ -13,7 +13,7 @@ blazehash -r /mnt/evidence -c blake3,sha256 \
   -o evidence.hash --progress
 
 # Hash evidence on S3, write manifest back to S3
-blazehash hash s3://dfir-bucket/case-001/ -o s3://dfir-bucket/case-001.hash
+blazehash s3://dfir-bucket/case-001/ -o s3://dfir-bucket/case-001.hash
 
 # Sign (prompts for password)
 blazehash sign evidence.hash
@@ -119,7 +119,7 @@ No other open-source tool delivers all four in one binary.
 | Live monitoring (watch) | Y | -- | -- | -- |
 | BLAKE3 (1,640 MB/s) | Y | -- | Y | -- |
 | GPU-accelerated SHA-256/MD5 | Y | -- | -- | -- |
-| 14 algorithms simultaneous | Y | -- | -- | -- |
+| 25 algorithms simultaneous | Y | -- | -- | -- |
 | Direct I/O (no page cache) | Y | -- | -- | -- |
 | STIX 2.1 / ECS NDJSON output | Y | -- | -- | -- |
 | SQLite / Parquet / DuckDB | Y | -- | -- | -- |

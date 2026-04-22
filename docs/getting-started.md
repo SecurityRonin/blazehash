@@ -13,7 +13,7 @@ blazehash report.pdf
 ```
 %%%% BLAZEHASH-1.0
 %%%% size,blake3,filename
-## blazehash v0.3.0
+## blazehash v0.2.4
 1048576,af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262,/home/user/report.pdf
 ```
 
@@ -135,7 +135,7 @@ Any field omitted falls back to the built-in default.
 
 You've got the basics: hash, save, audit, sign, verify. Here's where to go depending on what you need:
 
-- **[Acquire Evidence](acquire.md)** -- full acquisition pipeline with direct I/O, resume, block devices, EWF images, and Google Drive (`gdrive-collect`)
+- **[Acquire Evidence](acquire.md)** -- full acquisition pipeline with direct I/O, resume, block devices, EWF images, and Google Drive (`gdrive://` URI)
 - **[Build Court-Ready Evidence](custody.md)** -- signing, cosigning, Bitcoin timestamps, HTML reports
 - **[Hunt Threats](hunt.md)** -- NSRL filtering, HashDB flagging, YARA scanning, VirusTotal, entropy
 - **[SIEM & Analytics](siem.md)** -- export to Elastic, Splunk, STIX, Parquet, SQLite, DuckDB

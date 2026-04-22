@@ -169,15 +169,21 @@ cargo install blazehash --all-features
 
 | Flag | Default | Enables |
 |------|:-------:|---------|
-| `remote` | on | Remote storage + Google Drive |
-| `nsrl` | on | SQLite NSRL database |
+| `remote` | on | Remote storage (S3/GCS/Azure/SFTP/GDrive/60+ protocols) |
+| `sqlite` | on | `--format sqlite` output + NSRL SQLite database |
 | `parquet-output` | on | `--format parquet` output |
-| `yara` | off | YARA rule scanning with ATT&CK tag lookup |
-| `report` | off | `blazehash report` HTML generation |
-| `docker` | off | `blazehash image` OCI/Docker hashing |
-| `ots` | off | `blazehash ots` Bitcoin timestamps |
+| `duckdb-output` | on | `--format duckdb` output |
+| `archive` | on | ZIP/TAR archive hashing |
+| `qr` | on | `blazehash qr` QR code generation |
+| `pq` | on | `blazehash pq-sign` / `pq-verify-sig` post-quantum signing |
+| `forensic-image` | on | `--verify-image` EWF/E01 forensic image verification |
+| `gpu` | on | GPU-accelerated SHA-256/MD5 |
+| `yara` | off | `--yara` YARA rule scanning with ATT&CK tag lookup |
+| `report` | off | `blazehash report` HTML chain-of-custody generation |
+| `docker` | off | `blazehash image` OCI/Docker layer hashing |
+| `ots` | off | `blazehash ots stamp` / `ots verify` Bitcoin timestamps |
 | `tui` | off | `blazehash tui` interactive dashboard |
-| `hashdb` | off | `--hashdb-bad` known-bad flagging |
+| `hashdb` | off | `--hashdb-bad` known-bad file flagging (requires `sqlite`) |
 
 ---
 
