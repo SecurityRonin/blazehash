@@ -221,11 +221,11 @@ pub struct Cli {
     #[arg(long = "progress")]
     pub progress: bool,
 
-    /// File path for merkle-proof / merkle-verify subcommands
+    /// File path for file-proof / verify-proof subcommands
     #[arg(long = "path", value_name = "PATH")]
     pub merkle_path: Option<String>,
 
-    /// SHA-256 hex value for merkle-verify / prove-membership subcommands
+    /// SHA-256 hex value for verify-proof / check-file subcommands
     #[arg(long = "sha256", value_name = "HEX")]
     pub merkle_sha256: Option<String>,
 
@@ -233,11 +233,11 @@ pub struct Cli {
     #[arg(long = "paths", value_name = "PATHS")]
     pub disclose_paths: Option<String>,
 
-    /// JSON proof array for merkle-verify subcommand
+    /// JSON proof array for verify-proof subcommand
     #[arg(long = "proof", value_name = "JSON")]
     pub merkle_proof: Option<String>,
 
-    /// Merkle root hex for merkle-verify subcommand
+    /// Root hex for verify-proof subcommand
     #[arg(long = "root", value_name = "HEX")]
     pub merkle_root: Option<String>,
 
@@ -586,15 +586,15 @@ impl Cli {
             #[cfg(not(feature = "tui"))]
             return Mode::Hash;
         } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("merkle-proof"))
+            == Some(std::ffi::OsStr::new("file-proof"))
         {
             Mode::MerkleProof
         } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("merkle-verify"))
+            == Some(std::ffi::OsStr::new("verify-proof"))
         {
             Mode::MerkleVerify
         } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("merkle"))
+            == Some(std::ffi::OsStr::new("seal"))
         {
             Mode::Merkle
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("qr")) {
@@ -607,7 +607,7 @@ impl Cli {
         {
             Mode::Disclose
         } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("prove-membership"))
+            == Some(std::ffi::OsStr::new("check-file"))
         {
             Mode::ProveMembership
         } else if self.paths.first().map(|p| p.as_os_str())

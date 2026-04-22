@@ -336,7 +336,7 @@ fn main() -> Result<()> {
             .paths
             .get(1)
             .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash merkle <manifest>"))?;
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash seal <manifest>"))?;
         let records = blazehash::manifest_loader::load_manifest(&manifest)?;
         let entries: Vec<(String, String, String)> = records
             .iter()
@@ -359,11 +359,11 @@ fn main() -> Result<()> {
             .paths
             .get(1)
             .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash merkle-proof <manifest> --path <p>"))?;
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash file-proof <manifest> --path <p>"))?;
         let file_path = cli
             .merkle_path
             .as_deref()
-            .ok_or_else(|| anyhow::anyhow!("merkle-proof requires --path <file_path>"))?;
+            .ok_or_else(|| anyhow::anyhow!("file-proof requires --path <file_path>"))?;
         let records = blazehash::manifest_loader::load_manifest(&manifest)?;
         let entries: Vec<(String, String, String)> = records
             .iter()
@@ -385,19 +385,19 @@ fn main() -> Result<()> {
         let root = cli
             .merkle_root
             .as_deref()
-            .ok_or_else(|| anyhow::anyhow!("merkle-verify requires --root <hex>"))?;
+            .ok_or_else(|| anyhow::anyhow!("verify-proof requires --root <hex>"))?;
         let file_path = cli
             .merkle_path
             .as_deref()
-            .ok_or_else(|| anyhow::anyhow!("merkle-verify requires --path <path>"))?;
+            .ok_or_else(|| anyhow::anyhow!("verify-proof requires --path <path>"))?;
         let sha256_hex = cli
             .merkle_sha256
             .as_deref()
-            .ok_or_else(|| anyhow::anyhow!("merkle-verify requires --sha256 <hex>"))?;
+            .ok_or_else(|| anyhow::anyhow!("verify-proof requires --sha256 <hex>"))?;
         let proof_json = cli
             .merkle_proof
             .as_deref()
-            .ok_or_else(|| anyhow::anyhow!("merkle-verify requires --proof <json>"))?;
+            .ok_or_else(|| anyhow::anyhow!("verify-proof requires --proof <json>"))?;
         let proof: Vec<String> = serde_json::from_str(proof_json)
             .map_err(|e| anyhow::anyhow!("invalid proof JSON: {e}"))?;
         let ok = blazehash::merkle::verify_proof(root, file_path, sha256_hex, &proof)?;
@@ -435,11 +435,11 @@ fn main() -> Result<()> {
             .paths
             .get(1)
             .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash prove-membership <manifest> --sha256 <hex> [-o proof.json]"))?;
+            .ok_or_else(|| anyhow::anyhow!("usage: blazehash check-file <manifest> --sha256 <hex> [-o proof.json]"))?;
         let sha256_hex = cli
             .merkle_sha256
             .as_deref()
-            .ok_or_else(|| anyhow::anyhow!("prove-membership requires --sha256 <hex>"))?;
+            .ok_or_else(|| anyhow::anyhow!("check-file requires --sha256 <hex>"))?;
         let entries = parse_manifest_entries(&manifest)?;
         let proof = blazehash::disclosure::prove_hash_membership(&entries, sha256_hex)?;
         let json = serde_json::to_string_pretty(&proof)?;

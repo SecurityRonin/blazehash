@@ -428,28 +428,28 @@ blazehash qr manifest.hash -o manifest-qr.png
 
 ### Tamper Evidence & Selective Disclosure
 
-#### `merkle`
+#### `seal`
 
 Seal a manifest with a single tamper-evident root hash. Any change to any entry changes the root — you can publish just the root hash to prove the full set was sealed at a specific point in time.
 
 ```bash
-blazehash merkle manifest.hash
+blazehash seal manifest.hash
 ```
 
-#### `merkle-proof`
+#### `file-proof`
 
 Prove that a specific file was part of a sealed manifest without revealing any other entries. Share only the proof and root hash — the other files stay private.
 
 ```bash
-blazehash merkle-proof manifest.hash --path /evidence/file.dd
+blazehash file-proof manifest.hash --path /evidence/file.dd
 ```
 
-#### `merkle-verify`
+#### `verify-proof`
 
 Confirm that a file was present when the manifest was sealed. Verifies offline against the root hash — no access to the original manifest required.
 
 ```bash
-blazehash merkle-verify --root <hex> --path /evidence/file.dd --proof <hex>
+blazehash verify-proof --root <hex> --path /evidence/file.dd --proof <hex>
 ```
 
 #### `disclose`
@@ -460,12 +460,12 @@ Produce a redacted copy that reveals only the files you choose while proving the
 blazehash disclose manifest.hash --paths /evidence/critical.dd -o disclosed.hash
 ```
 
-#### `prove-membership`
+#### `check-file`
 
 Assert that a specific file exists in a manifest — exits `0` if present, `1` if not. Useful in automated pipelines that need to verify a file was captured.
 
 ```bash
-blazehash prove-membership manifest.hash --path /evidence/file.dd
+blazehash check-file manifest.hash --path /evidence/file.dd
 ```
 
 ---
