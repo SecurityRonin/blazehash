@@ -307,30 +307,49 @@ fn exchange_code_parses_access_token_from_valid_response() {
 
     std::thread::spawn(move || {
         let (mut stream, _) = listener.accept().unwrap();
-        // Drain the full HTTP request so macOS sees no unread data in the
-        // receive buffer when we close — otherwise the kernel sends TCP RST
-        // instead of FIN, which ureq reads as EINVAL on macOS.
+        // macOS sends TCP RST when a socket is dropped with unread kernel-buffer
+        // data, causing ureq to get EINVAL reading the response body. Fix:
+        // fully drain the HTTP request (headers + Content-Length body) before
+        // responding, then shutdown(Write) to send FIN instead of RST.
+        let _ = stream.set_nodelay(true);
         let mut buf = vec![0u8; 8192];
         let mut total = 0;
-        loop {
+        // Phase 1: read until end of headers.
+        let header_end = loop {
             match stream.read(&mut buf[total..]) {
-                Ok(0) | Err(_) => break,
+                Ok(0) | Err(_) => break total,
                 Ok(n) => {
                     total += n;
-                    if buf[..total].windows(4).any(|w| w == b"\r\n\r\n") {
-                        break;
+                    if let Some(pos) = buf[..total].windows(4).position(|w| w == b"\r\n\r\n") {
+                        break pos + 4;
                     }
                 }
             }
+        };
+        // Phase 2: find Content-Length and drain the request body.
+        let headers = std::str::from_utf8(&buf[..header_end]).unwrap_or("");
+        let body_len: usize = headers
+            .lines()
+            .find_map(|l| {
+                let l = l.trim();
+                l.to_ascii_lowercase()
+                    .strip_prefix("content-length:")
+                    .and_then(|v| v.trim().parse().ok())
+            })
+            .unwrap_or(0);
+        let already_read = total.saturating_sub(header_end);
+        let remaining = body_len.saturating_sub(already_read);
+        if remaining > 0 {
+            let mut drain = vec![0u8; remaining];
+            let _ = stream.read_exact(&mut drain);
         }
-        let body = r#"{"access_token":"ya29.mock","token_type":"Bearer","expires_in":3600,"refresh_token":"1//mock_refresh"}"#;
+        let resp_body = r#"{"access_token":"ya29.mock","token_type":"Bearer","expires_in":3600,"refresh_token":"1//mock_refresh"}"#;
         let response = format!(
             "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-            body.len(),
-            body
+            resp_body.len(),
+            resp_body
         );
         stream.write_all(response.as_bytes()).unwrap();
-        // Send FIN (not RST) so ureq gets a clean EOF when reading the body.
         let _ = stream.shutdown(std::net::Shutdown::Write);
     });
 
@@ -359,24 +378,41 @@ fn exchange_code_returns_error_on_non_200_response() {
 
     std::thread::spawn(move || {
         let (mut stream, _) = listener.accept().unwrap();
+        let _ = stream.set_nodelay(true);
         let mut buf = vec![0u8; 8192];
         let mut total = 0;
-        loop {
+        let header_end = loop {
             match stream.read(&mut buf[total..]) {
-                Ok(0) | Err(_) => break,
+                Ok(0) | Err(_) => break total,
                 Ok(n) => {
                     total += n;
-                    if buf[..total].windows(4).any(|w| w == b"\r\n\r\n") {
-                        break;
+                    if let Some(pos) = buf[..total].windows(4).position(|w| w == b"\r\n\r\n") {
+                        break pos + 4;
                     }
                 }
             }
+        };
+        let headers = std::str::from_utf8(&buf[..header_end]).unwrap_or("");
+        let body_len: usize = headers
+            .lines()
+            .find_map(|l| {
+                let l = l.trim();
+                l.to_ascii_lowercase()
+                    .strip_prefix("content-length:")
+                    .and_then(|v| v.trim().parse().ok())
+            })
+            .unwrap_or(0);
+        let already_read = total.saturating_sub(header_end);
+        let remaining = body_len.saturating_sub(already_read);
+        if remaining > 0 {
+            let mut drain = vec![0u8; remaining];
+            let _ = stream.read_exact(&mut drain);
         }
-        let body = r#"{"error":"invalid_grant"}"#;
+        let resp_body = r#"{"error":"invalid_grant"}"#;
         let response = format!(
             "HTTP/1.1 400 Bad Request\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-            body.len(),
-            body
+            resp_body.len(),
+            resp_body
         );
         stream.write_all(response.as_bytes()).unwrap();
         let _ = stream.shutdown(std::net::Shutdown::Write);
