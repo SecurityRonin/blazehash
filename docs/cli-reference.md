@@ -262,124 +262,9 @@ Useful in sealed-environment audits where every file must be accounted for in th
 
 ## Subcommands
 
-### `sign`
+### Acquisition
 
-Sign a manifest file with a password-derived Ed25519 key.
-
-```bash
-blazehash sign manifest.hash
-```
-
-Set `BLAZEHASH_SIGN_PASSWORD` to skip the interactive prompt:
-
-```bash
-BLAZEHASH_SIGN_PASSWORD=secret blazehash sign manifest.hash
-```
-
-The password is fed through Argon2id with a fixed application salt to produce a deterministic Ed25519 key. Same password = same key on any machine.
-
-### `verify-sig`
-
-Verify a manifest signature against an expected public key.
-
-```bash
-blazehash verify-sig manifest.hash --expected-pubkey a3f8e2c1d4b7...
-```
-
-Exit code `0` = valid. Exit code `1` = tampered or wrong key.
-
-### `dedup`
-
-Find duplicate files in a directory or manifest.
-
-```bash
-blazehash dedup /mnt/evidence
-blazehash dedup manifest.hash
-```
-
-Exit code `0` = no duplicates. Exit code `1` = duplicates found.
-
-#### `--dedup-unique`
-
-Print one representative per duplicate group (what to keep).
-
-```bash
-blazehash dedup /mnt/evidence --dedup-unique
-```
-
-#### `--dedup-dupes`
-
-Print only the redundant copies (safe to delete).
-
-```bash
-blazehash dedup /mnt/evidence --dedup-dupes
-```
-
-### `diff`
-
-Compare two manifests and report changes.
-
-```bash
-blazehash diff before.hash after.hash
-```
-
-When no arguments are given, auto-detects `*.hash` files in the current directory.
-
-Output uses the same `[+]`, `[-]`, `[!]`, `[*]` prefixes as audit mode. Exit code `0` = identical. Exit code `1` = differences.
-
-### `bench`
-
-Run benchmarks and GPU calibration.
-
-#### `--gpu`
-
-Run GPU calibration benchmark. Measures the crossover point where GPU hashing outperforms CPU and writes the result to a config file.
-
-```bash
-blazehash bench --gpu
-```
-
-#### `--no-calibrate`
-
-Use conservative GPU defaults without running a benchmark or writing config.
-
-```bash
-blazehash bench --gpu --no-calibrate
-```
-
-### `mcp`
-
-Start the MCP (Model Context Protocol) server for AI-assisted forensic hashing. See [MCP Server](mcp.md) for details.
-
-```bash
-blazehash mcp
-```
-
-### `nsrl build-bloom`
-
-Build a bloom filter from an NSRL SQLite database for faster lookups.
-
-```bash
-blazehash nsrl build-bloom NSRL.db --output nsrl.bloom
-```
-
-### `merge`
-
-Combine two or more manifests into one. Last-write-wins on duplicate paths.
-
-```bash
-blazehash merge a.hash b.hash -o merged.hash
-```
-
-### `update`
-
-Incrementally rehash only changed or new files against an existing manifest.
-
-```bash
-blazehash update manifest.hash /path/to/folder
-```
-
-### `watch`
+#### `watch`
 
 Live monitoring: continuously hash a path and alert on changes against a baseline manifest.
 
@@ -387,24 +272,16 @@ Live monitoring: continuously hash a path and alert on changes against a baselin
 blazehash watch /path/to/folder -k manifest.hash
 ```
 
-### `vt`
+#### `archive`
 
-Batch VirusTotal lookup for all hashes in a manifest. Requires a VT API key via `--api-key` or the `VT_API_KEY` environment variable.
-
-```bash
-blazehash vt manifest.hash --api-key YOUR_KEY
-VT_API_KEY=YOUR_KEY blazehash vt manifest.hash
-```
-
-### `report`
-
-Generate an HTML chain-of-custody report from a manifest. Requires `--features report`.
+Hash all files inside a ZIP or TAR archive without extracting. Requires `--features archive` (default-on).
 
 ```bash
-blazehash report manifest.hash --examiner "Jane Smith" --case "CASE-2026-001" -o report.html
+blazehash archive collection.zip -c blake3,sha256
+blazehash archive evidence.tar.gz -c sha256
 ```
 
-### `image`
+#### `image`
 
 Hash the layers of an OCI/Docker container image. Requires `--features docker`.
 
@@ -412,92 +289,7 @@ Hash the layers of an OCI/Docker container image. Requires `--features docker`.
 blazehash image nginx:latest
 ```
 
-### `duplicates`
-
-Emit all manifest entries whose hash value appears more than once (content-identical files).
-
-```bash
-blazehash duplicates manifest.hash
-blazehash duplicates manifest.hash -o dupes.hash
-```
-
-### `unique-hash`
-
-Keep only the first entry per unique hash value — complement to `duplicates`.
-
-```bash
-blazehash unique-hash manifest.hash -o deduped.hash
-```
-
-### `repair`
-
-Normalize manifest formatting: strip blank lines, normalize separators to exactly two spaces, drop malformed data lines.
-
-```bash
-blazehash repair manifest.hash -o clean.hash
-```
-
-### `sym-diff`
-
-Symmetric difference of two manifests by path — entries whose path appears in A or B but not both.
-
-```bash
-blazehash sym-diff before.hash after.hash
-blazehash sym-diff before.hash after.hash -o changes.hash
-```
-
-### `first`
-
-Keep the first occurrence of each path; drop subsequent duplicate path entries. Complement to `uniq` (which keeps the last).
-
-```bash
-blazehash first manifest.hash -o first.hash
-```
-
-### `annotate`
-
-Add or replace a `## note:` header in a manifest. Requires `--note`.
-
-```bash
-blazehash annotate manifest.hash --note "Reviewed by Jane Smith"
-blazehash annotate manifest.hash --note "Reviewed by Jane Smith" -o annotated.hash
-```
-
-### `shuffle`
-
-Randomly reorder manifest entries. Use `--seed` for reproducible output.
-
-```bash
-blazehash shuffle manifest.hash
-blazehash shuffle manifest.hash --seed 42 -o shuffled.hash
-```
-
-### `reverse`
-
-Reverse the entry order of a manifest.
-
-```bash
-blazehash reverse manifest.hash -o reversed.hash
-```
-
-### `balance`
-
-Split a manifest into N roughly equal parts. Requires `--parts`.
-
-```bash
-blazehash balance manifest.hash --parts 4
-# → manifest_part001.hash ... manifest_part004.hash
-```
-
-### `interleave`
-
-Merge two manifests in alternating A B A B order. Remaining entries from the longer manifest are appended.
-
-```bash
-blazehash interleave part-a.hash part-b.hash -o interleaved.hash
-```
-
-### Google Drive hashing
+#### Google Drive hashing
 
 Hash a Google Drive file without downloading it to disk. Pass a `gdrive://` URI or a full Drive share URL directly as the path argument.
 
@@ -514,7 +306,7 @@ Output:
 
 Auth: uses a cached OAuth token from `~/.config/blazehash/gdrive_token.json` if present, otherwise falls back to a public (unauthenticated) download. Run `blazehash gdrive auth login` once to authenticate.
 
-### `gdrive auth login`
+#### `gdrive auth login`
 
 Open a browser OAuth consent flow and cache the resulting Google token.
 
@@ -522,9 +314,7 @@ Open a browser OAuth consent flow and cache the resulting Google token.
 blazehash gdrive auth login
 ```
 
-The token is saved to `~/.config/blazehash/gdrive_token.json` and used automatically by subsequent Google Drive hashing.
-
-### `gdrive auth status`
+#### `gdrive auth status`
 
 Check whether a valid cached token exists.
 
@@ -532,65 +322,45 @@ Check whether a valid cached token exists.
 blazehash gdrive auth status
 ```
 
-### `completions`
+---
 
-Generate shell completion scripts or a man page. Output goes to stdout.
+### Chain of Custody & Signing
 
-```bash
-# Shell completions
-blazehash completions bash   > /etc/bash_completion.d/blazehash
-blazehash completions zsh    > ~/.zsh/completions/_blazehash
-blazehash completions fish   > ~/.config/fish/completions/blazehash.fish
-blazehash completions powershell >> $PROFILE
+#### `sign`
 
-# Man page (troff format)
-blazehash completions man > blazehash.1
-man ./blazehash.1
-```
-
-The `man` subcommand generates a troff-format man page that can be installed system-wide or browsed locally.
-
-### `ots stamp`
-
-Anchor a manifest to the Bitcoin blockchain via OpenTimestamps. Creates `manifest.hash.ots`. Requires `--features ots`.
+Sign a manifest file with a password-derived Ed25519 key.
 
 ```bash
-blazehash ots stamp manifest.hash
+blazehash sign manifest.hash
 ```
 
-### `ots verify`
-
-Verify a previously created OpenTimestamps proof. Requires `--features ots`.
+Set `BLAZEHASH_SIGN_PASSWORD` to skip the interactive prompt:
 
 ```bash
-blazehash ots verify manifest.hash
+BLAZEHASH_SIGN_PASSWORD=secret blazehash sign manifest.hash
 ```
 
-### `pq-sign`
+The password is fed through Argon2id with a fixed application salt to produce a deterministic Ed25519 key. Same password = same key on any machine.
 
-Sign a manifest with a CRYSTALS-Dilithium (ML-DSA) post-quantum key. Requires `--features pq` (default-on).
+#### `verify-sig`
+
+Verify a manifest signature against an expected public key.
 
 ```bash
-blazehash pq-sign manifest.hash
+blazehash verify-sig manifest.hash --expected-pubkey a3f8e2c1d4b7...
 ```
 
-### `pq-verify-sig`
+Exit code `0` = valid. Exit code `1` = tampered or wrong key.
 
-Verify a post-quantum ML-DSA signature. Requires `--features pq` (default-on).
+#### `cosign`
 
-```bash
-blazehash pq-verify-sig manifest.hash
-```
-
-### `cosign`
-
-Add an N-of-M co-signature to a manifest. Each signer runs this with their own password/key; M co-signatures are required before `verify-msig` passes.
+Add a co-signature to a manifest. Each examiner runs this with their own password; N-of-M signatures are required before `verify-msig` passes.
 
 ```bash
 blazehash cosign manifest.hash
 ```
 
-### `verify-msig`
+#### `verify-msig`
 
 Verify that a manifest has reached the required N-of-M cosignature threshold.
 
@@ -598,63 +368,55 @@ Verify that a manifest has reached the required N-of-M cosignature threshold.
 blazehash verify-msig manifest.hash --threshold 2
 ```
 
-### `merkle`
+#### `pq-sign`
 
-Compute a Merkle tree root hash from a manifest.
-
-```bash
-blazehash merkle manifest.hash
-```
-
-### `merkle-proof`
-
-Generate a Merkle inclusion proof for a specific file path.
+Sign a manifest with a CRYSTALS-Dilithium (ML-DSA) post-quantum key. Requires `--features pq` (default-on).
 
 ```bash
-blazehash merkle-proof manifest.hash --path /evidence/file.dd
+blazehash pq-sign manifest.hash
 ```
 
-### `merkle-verify`
+#### `pq-verify-sig`
 
-Verify a Merkle inclusion proof.
+Verify a post-quantum ML-DSA signature. Requires `--features pq` (default-on).
 
 ```bash
-blazehash merkle-verify --root <hex> --path /evidence/file.dd --proof <hex>
+blazehash pq-verify-sig manifest.hash
 ```
 
-### `disclose`
+#### `ots stamp`
 
-Selective disclosure: generate a redacted manifest that proves a file exists without revealing all entries.
+Anchor a manifest to the Bitcoin blockchain via OpenTimestamps. Creates `manifest.hash.ots`. Requires `--features ots`.
 
 ```bash
-blazehash disclose manifest.hash --paths /evidence/critical.dd -o disclosed.hash
+blazehash ots stamp manifest.hash
 ```
 
-### `prove-membership`
+#### `ots verify`
 
-Prove that a specific path+hash is in a manifest without revealing the full manifest.
+Verify a previously created OpenTimestamps proof. Requires `--features ots`.
 
 ```bash
-blazehash prove-membership manifest.hash --path /evidence/file.dd
+blazehash ots verify manifest.hash
 ```
 
-### `timeline`
+#### `stamp`
 
-Generate a chronological timeline of file activity from a manifest.
+Add or update the `## timestamp:` header in a manifest to the current UTC time.
 
 ```bash
-blazehash timeline manifest.hash
+blazehash stamp manifest.hash
 ```
 
-### `tui`
+#### `report`
 
-Launch the interactive terminal dashboard. Requires `--features tui`.
+Generate an HTML chain-of-custody report from a manifest. Requires `--features report`.
 
 ```bash
-blazehash tui manifest.hash
+blazehash report manifest.hash --examiner "Jane Smith" --case "CASE-2026-001" -o report.html
 ```
 
-### `qr`
+#### `qr`
 
 Generate a QR code image from a manifest's root hash. Requires `--features qr`.
 
@@ -662,190 +424,72 @@ Generate a QR code image from a manifest's root hash. Requires `--features qr`.
 blazehash qr manifest.hash -o manifest-qr.png
 ```
 
-### `convert`
+---
 
-Import a foreign manifest format (md5sum, sha256sum, hashdeep, SFV) and convert to blazehash format.
+### Cryptographic Proofs & Selective Disclosure
 
-```bash
-blazehash convert md5sums.txt -o manifest.hash
-blazehash convert hashes.sfv -o manifest.hash
-```
+#### `merkle`
 
-### `lint`
-
-Validate a manifest for formatting errors, duplicate paths, or missing fields.
+Compute a Merkle tree root hash from a manifest.
 
 ```bash
-blazehash lint manifest.hash
+blazehash merkle manifest.hash
 ```
 
-### `redact`
+#### `merkle-proof`
 
-Remove selected entries from a manifest (selective disclosure / privacy redaction).
+Generate a Merkle inclusion proof for a specific file path.
 
 ```bash
-blazehash redact manifest.hash --exclude-pattern "*.pii" -o redacted.hash
+blazehash merkle-proof manifest.hash --path /evidence/file.dd
 ```
 
-### `export`
+#### `merkle-verify`
 
-Export a manifest to CSV, JSONL, or TSV.
+Verify a Merkle inclusion proof.
 
 ```bash
-blazehash export manifest.hash --export-format csv -o hashes.csv
-blazehash export manifest.hash --export-format jsonl -o hashes.jsonl
+blazehash merkle-verify --root <hex> --path /evidence/file.dd --proof <hex>
 ```
 
-### `search`
+#### `disclose`
 
-Search manifest entries by path substring or exact hash value.
+Generate a redacted manifest that proves a specific file exists without revealing all entries.
 
 ```bash
-blazehash search manifest.hash --search-path "suspicious"
-blazehash search manifest.hash --search-hash "a3f8e2c1..."
+blazehash disclose manifest.hash --paths /evidence/critical.dd -o disclosed.hash
 ```
 
-### `sort`
+#### `prove-membership`
 
-Sort manifest entries by path, size, or hash.
+Prove that a specific path+hash is in a manifest without revealing the full manifest.
 
 ```bash
-blazehash sort manifest.hash --sort-by path -o sorted.hash
-blazehash sort manifest.hash --sort-by size -o sorted.hash
+blazehash prove-membership manifest.hash --path /evidence/file.dd
 ```
 
-### `head` / `tail`
+---
 
-Print the first or last N entries of a manifest.
+### Integrity & Threat Intel
 
-```bash
-blazehash head manifest.hash --count 10
-blazehash tail manifest.hash --count 10
-```
+#### `verify`
 
-### `count`
-
-Print the number of entries in a manifest.
-
-```bash
-blazehash count manifest.hash
-```
-
-### `stats`
-
-Print per-algorithm statistics: entry count, total size, unique hash count.
-
-```bash
-blazehash stats manifest.hash
-```
-
-### `filter`
-
-Keep only entries that were computed with a specific algorithm.
-
-```bash
-blazehash filter manifest.hash --filter-algo sha256 -o sha256-only.hash
-```
-
-### `sample`
-
-Select N random entries from a manifest.
-
-```bash
-blazehash sample manifest.hash --count 100 -o sample.hash
-```
-
-### `intersect`
-
-Keep only entries whose path appears in both manifests (set intersection).
-
-```bash
-blazehash intersect a.hash b.hash -o common.hash
-```
-
-### `subtract`
-
-Remove entries from manifest A whose path appears in manifest B (set difference).
-
-```bash
-blazehash subtract a.hash b.hash -o diff.hash
-```
-
-### `apply-patch`
-
-Apply a unified diff patch to a manifest.
-
-```bash
-blazehash apply-patch base.hash patch.diff -o updated.hash
-```
-
-### `verify`
-
-Re-hash every file listed in a manifest and report any mismatches (alias for audit mode without requiring `-a`).
+Re-hash every file listed in a manifest and report mismatches (alias for audit mode without requiring `-a`).
 
 ```bash
 blazehash verify manifest.hash
 ```
 
-### `info`
+#### `vt`
 
-Print manifest header metadata: version, algorithm list, case ID, examiner, timestamp.
-
-```bash
-blazehash info manifest.hash
-```
-
-### `missing`
-
-List files in the manifest that do not exist on disk.
+Batch VirusTotal lookup for all hashes in a manifest. Requires a VT API key via `--api-key` or `VT_API_KEY`.
 
 ```bash
-blazehash missing manifest.hash
+blazehash vt manifest.hash --api-key YOUR_KEY
+VT_API_KEY=YOUR_KEY blazehash vt manifest.hash
 ```
 
-### `tag`
-
-Add or update header metadata fields in a manifest.
-
-```bash
-blazehash tag manifest.hash --set case_id="CASE-2026-002"
-blazehash tag manifest.hash --unset examiner
-```
-
-### `cat`
-
-Concatenate two or more manifests. Similar to `merge` but preserves duplicate path entries.
-
-```bash
-blazehash cat a.hash b.hash c.hash -o combined.hash
-```
-
-### `split`
-
-Split a manifest into N parts by entry count.
-
-```bash
-blazehash split manifest.hash --parts 4
-# → manifest_part001.hash ... manifest_part004.hash
-```
-
-### `uniq`
-
-Deduplicate entries by path — keep the last occurrence of each path.
-
-```bash
-blazehash uniq manifest.hash -o deduped.hash
-```
-
-### `normalize`
-
-Normalize a manifest: remove blank lines, fix spacing, sort entries, deduplicate.
-
-```bash
-blazehash normalize manifest.hash -o clean.hash
-```
-
-### `selfcheck`
+#### `selfcheck`
 
 Verify the integrity of the blazehash binary itself.
 
@@ -853,56 +497,59 @@ Verify the integrity of the blazehash binary itself.
 blazehash selfcheck
 ```
 
-### `archive`
+---
 
-Hash all files inside a ZIP or TAR archive without extracting. Requires `--features archive` (default-on).
+### Manifest Analysis
 
-```bash
-blazehash archive collection.zip -c blake3,sha256
-blazehash archive evidence.tar.gz -c sha256
-```
+#### `diff`
 
-### `pivot`
-
-Re-key manifest entries by a different algorithm column (for cross-referencing with legacy manifests).
+Compare two manifests and report changes. Output uses `[+]`, `[-]`, `[!]`, `[*]` prefixes. Exit code `0` = identical, `1` = differences.
 
 ```bash
-blazehash pivot manifest.hash --pivot-algo sha256 -o sha256-keyed.hash
+blazehash diff before.hash after.hash
 ```
 
-### `rename`
+#### `sym-diff`
 
-Rewrite path prefixes across all manifest entries.
+Symmetric difference: entries whose path appears in A or B but not both.
 
 ```bash
-blazehash rename manifest.hash --rename-from /mnt/evidence --rename-to /evidence
+blazehash sym-diff before.hash after.hash -o changes.hash
 ```
 
-### `slice`
+#### `info`
 
-Extract a range of entries by offset and count.
+Print manifest header metadata: version, algorithm list, case ID, examiner, timestamp.
 
 ```bash
-blazehash slice manifest.hash --offset 100 --count 50 -o page2.hash
+blazehash info manifest.hash
 ```
 
-### `stamp`
+#### `stats`
 
-Add or update the `## timestamp:` header to the current UTC time.
+Print per-algorithm statistics: entry count, total size, unique hash count.
 
 ```bash
-blazehash stamp manifest.hash
+blazehash stats manifest.hash
 ```
 
-### `grep`
+#### `count`
 
-Filter manifest entries whose path matches a regular expression.
+Print the number of entries in a manifest.
 
 ```bash
-blazehash grep manifest.hash --pattern "\.exe$" -o executables.hash
+blazehash count manifest.hash
 ```
 
-### `tally`
+#### `timeline`
+
+Generate a chronological timeline of file activity from a manifest.
+
+```bash
+blazehash timeline manifest.hash
+```
+
+#### `tally`
 
 Count entries grouped by extension, directory, or algorithm.
 
@@ -911,7 +558,69 @@ blazehash tally manifest.hash --tally-by ext
 blazehash tally manifest.hash --tally-by dir
 ```
 
-### `contains`
+#### `missing`
+
+List files in the manifest that do not exist on disk.
+
+```bash
+blazehash missing manifest.hash
+```
+
+---
+
+### Manifest Filtering & Selection
+
+#### `search`
+
+Search entries by path substring or exact hash value.
+
+```bash
+blazehash search manifest.hash --search-path "suspicious"
+blazehash search manifest.hash --search-hash "a3f8e2c1..."
+```
+
+#### `grep`
+
+Filter entries whose path matches a regular expression.
+
+```bash
+blazehash grep manifest.hash --pattern "\.exe$" -o executables.hash
+```
+
+#### `filter`
+
+Keep only entries computed with a specific algorithm.
+
+```bash
+blazehash filter manifest.hash --filter-algo sha256 -o sha256-only.hash
+```
+
+#### `head` / `tail`
+
+Print the first or last N entries.
+
+```bash
+blazehash head manifest.hash --count 10
+blazehash tail manifest.hash --count 10
+```
+
+#### `slice`
+
+Extract a range of entries by offset and count.
+
+```bash
+blazehash slice manifest.hash --offset 100 --count 50 -o page2.hash
+```
+
+#### `sample`
+
+Select N random entries.
+
+```bash
+blazehash sample manifest.hash --count 100 -o sample.hash
+```
+
+#### `contains`
 
 Exit 0 if a path or hash exists in the manifest, exit 1 otherwise. Useful in shell scripts.
 
@@ -919,36 +628,321 @@ Exit 0 if a path or hash exists in the manifest, exit 1 otherwise. Useful in she
 blazehash contains manifest.hash --search-hash "a3f8e2c1..."
 ```
 
-### `path-only`
+#### `intersect`
 
-Print only the file paths from a manifest (strips hashes and metadata).
-
-```bash
-blazehash path-only manifest.hash
-```
-
-### `hash-only`
-
-Print only the hash values from a manifest (strips paths and metadata).
+Keep only entries whose path appears in both manifests (set intersection).
 
 ```bash
-blazehash hash-only manifest.hash --hash-only-algo blake3
+blazehash intersect a.hash b.hash -o common.hash
 ```
 
-### `exclude`
+#### `subtract`
 
-Remove entries matching a path pattern from a manifest.
+Remove entries from manifest A whose path appears in manifest B (set difference).
+
+```bash
+blazehash subtract a.hash b.hash -o diff.hash
+```
+
+#### `exclude`
+
+Remove entries matching a path pattern.
 
 ```bash
 blazehash exclude manifest.hash --exclude-pattern "*.log" -o filtered.hash
 ```
 
-### `checksum`
+#### `path-only`
+
+Print only the file paths (strips hashes and metadata).
+
+```bash
+blazehash path-only manifest.hash
+```
+
+#### `hash-only`
+
+Print only the hash values (strips paths and metadata).
+
+```bash
+blazehash hash-only manifest.hash --hash-only-algo blake3
+```
+
+---
+
+### Manifest Transformation
+
+#### `merge`
+
+Combine two or more manifests into one. Last-write-wins on duplicate paths.
+
+```bash
+blazehash merge a.hash b.hash -o merged.hash
+```
+
+#### `update`
+
+Incrementally rehash only changed or new files against an existing manifest.
+
+```bash
+blazehash update manifest.hash /path/to/folder
+```
+
+#### `cat`
+
+Concatenate two or more manifests. Like `merge` but preserves duplicate path entries.
+
+```bash
+blazehash cat a.hash b.hash c.hash -o combined.hash
+```
+
+#### `sort`
+
+Sort entries by path, size, or hash.
+
+```bash
+blazehash sort manifest.hash --sort-by path -o sorted.hash
+blazehash sort manifest.hash --sort-by size -o sorted.hash
+```
+
+#### `split`
+
+Split a manifest into N parts by entry count.
+
+```bash
+blazehash split manifest.hash --parts 4
+# → manifest_part001.hash ... manifest_part004.hash
+```
+
+#### `balance`
+
+Split a manifest into N roughly equal parts by size.
+
+```bash
+blazehash balance manifest.hash --parts 4
+```
+
+#### `interleave`
+
+Merge two manifests in alternating A B A B order.
+
+```bash
+blazehash interleave part-a.hash part-b.hash -o interleaved.hash
+```
+
+#### `reverse`
+
+Reverse the entry order of a manifest.
+
+```bash
+blazehash reverse manifest.hash -o reversed.hash
+```
+
+#### `shuffle`
+
+Randomly reorder entries. Use `--seed` for reproducible output.
+
+```bash
+blazehash shuffle manifest.hash --seed 42 -o shuffled.hash
+```
+
+#### `normalize`
+
+Normalize a manifest: remove blank lines, fix spacing, sort entries, deduplicate.
+
+```bash
+blazehash normalize manifest.hash -o clean.hash
+```
+
+#### `repair`
+
+Minimal formatting fix: strip blank lines, normalize separators, drop malformed lines. Less aggressive than `normalize`.
+
+```bash
+blazehash repair manifest.hash -o clean.hash
+```
+
+#### `rename`
+
+Rewrite path prefixes across all manifest entries.
+
+```bash
+blazehash rename manifest.hash --rename-from /mnt/evidence --rename-to /evidence
+```
+
+#### `tag`
+
+Add or update header metadata fields in a manifest.
+
+```bash
+blazehash tag manifest.hash --set case_id="CASE-2026-002"
+blazehash tag manifest.hash --unset examiner
+```
+
+#### `annotate`
+
+Add or replace a `## note:` header in a manifest.
+
+```bash
+blazehash annotate manifest.hash --note "Reviewed by Jane Smith"
+```
+
+#### `pivot`
+
+Re-key manifest entries by a different algorithm column (for cross-referencing with legacy manifests).
+
+```bash
+blazehash pivot manifest.hash --pivot-algo sha256 -o sha256-keyed.hash
+```
+
+#### `apply-patch`
+
+Apply a unified diff patch to a manifest.
+
+```bash
+blazehash apply-patch base.hash patch.diff -o updated.hash
+```
+
+---
+
+### Deduplication
+
+#### `dedup`
+
+Find duplicate files in a directory or manifest. Exit code `0` = no duplicates, `1` = duplicates found.
+
+```bash
+blazehash dedup /mnt/evidence
+blazehash dedup manifest.hash
+blazehash dedup /mnt/evidence --dedup-unique   # one representative per group
+blazehash dedup /mnt/evidence --dedup-dupes    # only the redundant copies
+```
+
+#### `duplicates`
+
+Emit all manifest entries whose hash appears more than once.
+
+```bash
+blazehash duplicates manifest.hash -o dupes.hash
+```
+
+#### `unique-hash`
+
+Keep only the first entry per unique hash — complement to `duplicates`.
+
+```bash
+blazehash unique-hash manifest.hash -o deduped.hash
+```
+
+#### `uniq`
+
+Deduplicate entries by path — keep the last occurrence of each path.
+
+```bash
+blazehash uniq manifest.hash -o deduped.hash
+```
+
+#### `first`
+
+Keep the first occurrence of each path — complement to `uniq`.
+
+```bash
+blazehash first manifest.hash -o first.hash
+```
+
+---
+
+### Format Conversion & Import/Export
+
+#### `convert`
+
+Import a foreign manifest format (md5sum, sha256sum, hashdeep, SFV) and convert to blazehash format.
+
+```bash
+blazehash convert md5sums.txt -o manifest.hash
+blazehash convert hashes.sfv -o manifest.hash
+```
+
+#### `export`
+
+Export a manifest to CSV, JSONL, or TSV.
+
+```bash
+blazehash export manifest.hash --export-format csv -o hashes.csv
+blazehash export manifest.hash --export-format jsonl -o hashes.jsonl
+```
+
+#### `checksum`
 
 Convert a DFXML manifest to a sha256sum-compatible flat file.
 
 ```bash
 blazehash checksum manifest.dfxml -o hashes.sha256
+```
+
+#### `lint`
+
+Validate a manifest for formatting errors, duplicate paths, or missing fields.
+
+```bash
+blazehash lint manifest.hash
+```
+
+#### `redact`
+
+Remove selected entries from a manifest (privacy redaction / selective disclosure).
+
+```bash
+blazehash redact manifest.hash --exclude-pattern "*.pii" -o redacted.hash
+```
+
+---
+
+### Utilities
+
+#### `nsrl build-bloom`
+
+Build a bloom filter from an NSRL SQLite database for faster lookups.
+
+```bash
+blazehash nsrl build-bloom NSRL.db --output nsrl.bloom
+```
+
+#### `bench`
+
+Run benchmarks and GPU calibration.
+
+```bash
+blazehash bench --gpu              # measure GPU vs CPU crossover, write config
+blazehash bench --gpu --no-calibrate  # use conservative defaults, no config write
+```
+
+#### `tui`
+
+Launch the interactive terminal dashboard. Requires `--features tui`.
+
+```bash
+blazehash tui manifest.hash
+```
+
+#### `mcp`
+
+Start the MCP (Model Context Protocol) server for AI-assisted forensic hashing. See [MCP Server](mcp.md) for details.
+
+```bash
+blazehash mcp
+```
+
+#### `completions`
+
+Generate shell completion scripts or a man page. Output goes to stdout.
+
+```bash
+blazehash completions bash   > /etc/bash_completion.d/blazehash
+blazehash completions zsh    > ~/.zsh/completions/_blazehash
+blazehash completions fish   > ~/.config/fish/completions/blazehash.fish
+blazehash completions powershell >> $PROFILE
+blazehash completions man    > blazehash.1 && man ./blazehash.1
 ```
 
 ---
