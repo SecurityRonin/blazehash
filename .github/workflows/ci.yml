@@ -46,6 +46,7 @@ jobs:
       - run: cargo test --features parquet-output
       - run: cargo test --features ots
       - run: cargo test --features tui
+      - run: cargo test --features nomicon
       - run: cargo clippy -- -D warnings
       - run: cargo fmt --check
 
