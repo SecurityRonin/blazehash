@@ -33,6 +33,12 @@ pub fn run(
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
+        #[cfg(feature = "nomicon")]
+        nomicon_match: None,
+        #[cfg(feature = "nomicon")]
+        is_lolbin: false,
+        #[cfg(all(feature = "nomicon", feature = "yara"))]
+        yara_enrichments: Vec::new(),
     };
 
     match format {

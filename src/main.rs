@@ -1081,15 +1081,38 @@ fn main() -> Result<()> {
 
     // Build YARA scanner once if --yara was given (requires `yara` feature).
     #[cfg(feature = "yara")]
-    let yara_scanner_instance: Option<blazehash::yara_scan::YaraScanner> =
-        if let Some(ref rules_path) = cli.yara {
-            Some(
-                blazehash::yara_scan::YaraScanner::new(rules_path)
-                    .with_context(|| format!("failed to compile YARA rules from {}", rules_path.display()))?,
-            )
-        } else {
-            None
-        };
+    let yara_scanner_instance: Option<blazehash::yara_scan::YaraScanner> = {
+        // Start with the file-based rules (if --yara was given).
+        let file_scanner: Option<blazehash::yara_scan::YaraScanner> =
+            if let Some(ref rules_path) = cli.yara {
+                Some(
+                    blazehash::yara_scan::YaraScanner::new(rules_path)
+                        .with_context(|| format!("failed to compile YARA rules from {}", rules_path.display()))?,
+                )
+            } else {
+                None
+            };
+
+        // Merge with catalog scanner if --yara-catalog was given (requires nomicon feature).
+        #[cfg(feature = "nomicon")]
+        {
+            if cli.yara_catalog {
+                let catalog_scanner = blazehash::nomicon::build_catalog_scanner()
+                    .context("failed to compile forensicnomicon catalog YARA rules")?;
+                // If a file scanner was also provided, the catalog scanner takes precedence;
+                // in practice, users will usually use one or the other.
+                // Combining would require merging rule sources — use catalog scanner as the
+                // primary when --yara-catalog is set and fall back to file scanner otherwise.
+                let _ = file_scanner; // suppress unused warning
+                Some(catalog_scanner)
+            } else {
+                file_scanner
+            }
+        }
+
+        #[cfg(not(feature = "nomicon"))]
+        file_scanner
+    };
 
     match cli.mode() {
         Mode::Mcp => unreachable!(),

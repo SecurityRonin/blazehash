@@ -15,9 +15,14 @@ pub struct YaraScanner {
 impl YaraScanner {
     pub fn new(rules_file: &Path) -> Result<Self> {
         let source = std::fs::read_to_string(rules_file)?;
+        Self::from_source(&source)
+    }
+
+    /// Build a `YaraScanner` from a YARA rules source string.
+    pub fn from_source(source: &str) -> Result<Self> {
         let mut compiler = yara_x::Compiler::new();
         compiler
-            .add_source(source.as_str())
+            .add_source(source)
             .map_err(|e| anyhow::anyhow!("YARA compile error: {e}"))?;
         let rules = compiler.build();
         Ok(Self { rules })
