@@ -126,7 +126,8 @@ fn resolve_auth_mode_is_service_account_when_env_set() {
     let key_file = dir.path().join("service_account.json");
     std::fs::write(&key_file, b"{}").unwrap();
 
-    // Scope the env var to this test
+    // Scope the env var to this test (hold env_lock for the full test duration)
+    let _env = env_lock();
     let _guard = EnvGuard::set("GOOGLE_APPLICATION_CREDENTIALS", key_file.to_str().unwrap());
 
     let mode = resolve_auth_mode();
@@ -138,6 +139,7 @@ fn resolve_auth_mode_is_service_account_when_env_set() {
 
 #[test]
 fn resolve_auth_mode_is_public_when_no_credentials() {
+    let _env = env_lock();
     let _guard = EnvGuard::remove("GOOGLE_APPLICATION_CREDENTIALS");
 
     // Ensure no cached token exists for this test by pointing cache elsewhere
@@ -158,6 +160,7 @@ fn resolve_auth_mode_prefers_service_account_over_stored_token() {
     let key_file = dir.path().join("sa.json");
     std::fs::write(&key_file, b"{}").unwrap();
 
+    let _env = env_lock();
     let _guard = EnvGuard::set("GOOGLE_APPLICATION_CREDENTIALS", key_file.to_str().unwrap());
 
     // Even if a user token is cached, service account takes priority
@@ -187,6 +190,22 @@ fn oauth_token_serializes_and_deserializes() {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 /// RAII guard that sets/removes an env var for the duration of a test,
+/// Serialises all tests that mutate process environment variables.
+///
+/// `std::env::set_var` / `remove_var` are not thread-safe across concurrent
+/// Rust tests. Acquire this at the top of every test that uses `EnvGuard`
+/// and hold it for the full test duration:
+///
+/// ```ignore
+/// let _env = env_lock();
+/// let _cid = EnvGuard::remove("BLAZEHASH_GDRIVE_CLIENT_ID");
+/// ```
+static ENV_MUTEX: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+fn env_lock() -> std::sync::MutexGuard<'static, ()> {
+    ENV_MUTEX.lock().unwrap_or_else(|e| e.into_inner())
+}
+
 /// then restores the original value on drop.
 struct EnvGuard {
     key: String,
@@ -437,6 +456,7 @@ fn initiate_browser_auth_uses_embedded_defaults_when_env_absent() {
     // and DEFAULT_CLIENT_SECRET — it must NOT fail with "not set" error.
     // It will fail later (no browser / no callback), but the credential
     // resolution step must succeed.
+    let _env = env_lock();
     let _cid = EnvGuard::remove("BLAZEHASH_GDRIVE_CLIENT_ID");
     let _csecret = EnvGuard::remove("BLAZEHASH_GDRIVE_CLIENT_SECRET");
 
@@ -503,6 +523,7 @@ fn initiate_browser_auth_works_without_env_vars() {
     // We test this by removing the env vars and checking the error is NOT
     // about missing credentials (it will fail trying to open a browser/bind,
     // which is fine in a test environment).
+    let _env = env_lock();
     let _cid = EnvGuard::remove("BLAZEHASH_GDRIVE_CLIENT_ID");
     let _csecret = EnvGuard::remove("BLAZEHASH_GDRIVE_CLIENT_SECRET");
 
@@ -518,6 +539,7 @@ fn initiate_browser_auth_works_without_env_vars() {
 
 #[test]
 fn env_var_overrides_default_client_id() {
+    let _env = env_lock();
     let _cid = EnvGuard::set("BLAZEHASH_GDRIVE_CLIENT_ID", "override-client-id");
     let effective = std::env::var("BLAZEHASH_GDRIVE_CLIENT_ID")
         .unwrap_or_else(|_| DEFAULT_CLIENT_ID.to_string());
