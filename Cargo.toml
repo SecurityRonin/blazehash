@@ -65,6 +65,7 @@ dirs = { version = "5", optional = true }
 rusqlite = { version = "0.31", optional = true, features = ["bundled"] }
 bloomfilter = { version = "1", optional = true, features = ["serde"] }
 yara-x = { version = "0.9", optional = true }
+forensicnomicon = { path = "../forensicnomicon", optional = true }
 minijinja = { version = "2", optional = true }
 parquet = { version = "54", optional = true }
 arrow = { version = "54", optional = true }
@@ -196,6 +197,7 @@ gpu = ["dep:wgpu", "dep:pollster", "dep:toml", "dep:dirs"]
 sqlite = ["dep:rusqlite"]
 hashdb = ["dep:bloomfilter", "sqlite"]
 yara    = ["dep:yara-x"]
+nomicon = ["dep:forensicnomicon"]
 report  = ["dep:minijinja"]
 parquet-output = ["dep:parquet", "dep:arrow"]
 docker  = ["dep:oci-distribution", "dep:flate2", "dep:tar", "dep:tokio"]
