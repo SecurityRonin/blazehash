@@ -73,7 +73,6 @@ pub fn write_record<W: Write>(
     writeln!(w, ",{}", result.path.display())?;
 
     // nomicon: path annotation comment line.
-    #[cfg(feature = "nomicon")]
     if let Some(ref m) = result.nomicon_match {
         writeln!(
             w,
@@ -83,13 +82,12 @@ pub fn write_record<W: Write>(
     }
 
     // nomicon: LOLBin flagging comment line.
-    #[cfg(feature = "nomicon")]
     if result.is_lolbin {
         writeln!(w, "## lolbin: true")?;
     }
 
-    // nomicon + yara: YARA enrichment comment lines.
-    #[cfg(all(feature = "nomicon", feature = "yara"))]
+    // yara: YARA enrichment comment lines.
+    #[cfg(feature = "yara")]
     for enrichment in &result.yara_enrichments {
         let sigma = enrichment.sigma_rule_id.unwrap_or("");
         let vr = enrichment.velociraptor_artifacts.first().copied().unwrap_or("");

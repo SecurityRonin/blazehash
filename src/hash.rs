@@ -17,13 +17,11 @@ pub struct FileHashResult {
     #[cfg(feature = "yara")]
     pub yara_matches: Option<Vec<crate::yara_scan::YaraMatch>>,
     /// forensicnomicon catalog match for this file's path (populated when --nomicon is used).
-    #[cfg(feature = "nomicon")]
     pub nomicon_match: Option<crate::nomicon::NomiconMatch>,
     /// Whether this file's name is a known Windows or Linux LOLBin.
-    #[cfg(feature = "nomicon")]
     pub is_lolbin: bool,
     /// YARA match enrichments from the forensicnomicon catalog.
-    #[cfg(all(feature = "nomicon", feature = "yara"))]
+    #[cfg(feature = "yara")]
     pub yara_enrichments: Vec<crate::nomicon::YaraEnrichment>,
 }
 
@@ -443,13 +441,11 @@ pub fn hash_file(
     };
 
     // nomicon: path annotation and LOLBin detection.
-    #[cfg(feature = "nomicon")]
     let nomicon_match = crate::nomicon::match_path(path);
-    #[cfg(feature = "nomicon")]
     let is_lolbin = crate::nomicon::is_lolbin(path);
 
-    // nomicon + yara: enrich YARA matches from the catalog.
-    #[cfg(all(feature = "nomicon", feature = "yara"))]
+    // yara: enrich YARA matches from the forensicnomicon catalog.
+    #[cfg(feature = "yara")]
     let yara_enrichments: Vec<crate::nomicon::YaraEnrichment> = {
         if let Some(ref matches) = yara_matches {
             matches
@@ -468,11 +464,9 @@ pub fn hash_file(
         entropy,
         #[cfg(feature = "yara")]
         yara_matches,
-        #[cfg(feature = "nomicon")]
         nomicon_match,
-        #[cfg(feature = "nomicon")]
         is_lolbin,
-        #[cfg(all(feature = "nomicon", feature = "yara"))]
+        #[cfg(feature = "yara")]
         yara_enrichments,
     })
 }

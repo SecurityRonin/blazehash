@@ -1093,25 +1093,17 @@ fn main() -> Result<()> {
                 None
             };
 
-        // Merge with catalog scanner if --yara-catalog was given (requires nomicon feature).
-        #[cfg(feature = "nomicon")]
-        {
-            if cli.yara_catalog {
-                let catalog_scanner = blazehash::nomicon::build_catalog_scanner()
-                    .context("failed to compile forensicnomicon catalog YARA rules")?;
-                // If a file scanner was also provided, the catalog scanner takes precedence;
-                // in practice, users will usually use one or the other.
-                // Combining would require merging rule sources — use catalog scanner as the
-                // primary when --yara-catalog is set and fall back to file scanner otherwise.
-                let _ = file_scanner; // suppress unused warning
-                Some(catalog_scanner)
-            } else {
-                file_scanner
-            }
+        // Merge with catalog scanner if --yara-catalog was given.
+        if cli.yara_catalog {
+            let catalog_scanner = blazehash::nomicon::build_catalog_scanner()
+                .context("failed to compile forensicnomicon catalog YARA rules")?;
+            // If a file scanner was also provided, the catalog scanner takes precedence;
+            // in practice, users will usually use one or the other.
+            let _ = file_scanner; // suppress unused warning
+            Some(catalog_scanner)
+        } else {
+            file_scanner
         }
-
-        #[cfg(not(feature = "nomicon"))]
-        file_scanner
     };
 
     match cli.mode() {

@@ -789,6 +789,10 @@ fn test_manifest_roundtrip_with_ssdeep() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
+        nomicon_match: None,
+        is_lolbin: false,
+        #[cfg(feature = "yara")]
+        yara_enrichments: Vec::new(),
     };
 
     let mut buf = Vec::new();
@@ -834,6 +838,10 @@ fn test_manifest_roundtrip_with_tlsh() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
+        nomicon_match: None,
+        is_lolbin: false,
+        #[cfg(feature = "yara")]
+        yara_enrichments: Vec::new(),
     };
 
     let mut buf = Vec::new();

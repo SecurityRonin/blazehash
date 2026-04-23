@@ -1,8 +1,4 @@
-/// Tests for forensicnomicon integration (nomicon feature).
-///
-/// All tests in this file require `--features nomicon` (or `nomicon,yara`).
-/// They are intentionally written BEFORE implementation (TDD RED phase).
-#[cfg(feature = "nomicon")]
+/// Tests for forensicnomicon integration.
 mod nomicon_tests {
     use blazehash::nomicon::{match_path, is_lolbin, NomiconMatch};
     use std::path::Path;
@@ -121,8 +117,8 @@ mod nomicon_tests {
     }
 }
 
-// ── Feature 3 & 4: YARA catalog scanner + enrichment (requires both features) ──
-#[cfg(all(feature = "nomicon", feature = "yara"))]
+// ── Feature 3 & 4: YARA catalog scanner + enrichment (requires yara feature) ──
+#[cfg(feature = "yara")]
 mod nomicon_yara_tests {
     use blazehash::nomicon::{build_catalog_scanner, enrich_yara_match, YaraEnrichment};
 
@@ -194,7 +190,6 @@ mod nomicon_yara_tests {
 }
 
 // ── CLI integration test: --nomicon flag is accepted ─────────────────────────
-#[cfg(feature = "nomicon")]
 mod cli_integration {
     use assert_cmd::Command;
 

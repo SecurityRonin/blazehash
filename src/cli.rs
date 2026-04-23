@@ -206,7 +206,6 @@ pub struct Cli {
     pub yara_max_size: u64,
 
     /// Annotate each file against the forensicnomicon CATALOG (triage priority, MITRE, artifact type)
-    #[cfg(feature = "nomicon")]
     #[arg(
         long = "nomicon",
         help = "Annotate hashed files with forensicnomicon catalog metadata (triage, MITRE, artifact type)"
@@ -214,10 +213,10 @@ pub struct Cli {
     pub nomicon: bool,
 
     /// Compile and use all forensicnomicon catalog YARA rules in addition to any --yara rules file
-    #[cfg(all(feature = "nomicon", feature = "yara"))]
+    #[cfg(feature = "yara")]
     #[arg(
         long = "yara-catalog",
-        help = "Compile forensicnomicon catalog YARA rules and scan files (requires both nomicon and yara features)"
+        help = "Compile forensicnomicon catalog YARA rules and scan files"
     )]
     pub yara_catalog: bool,
 

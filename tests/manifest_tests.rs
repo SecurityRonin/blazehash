@@ -35,6 +35,10 @@ fn write_record_single_algorithm() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
+        nomicon_match: None,
+        is_lolbin: false,
+        #[cfg(feature = "yara")]
+        yara_enrichments: Vec::new(),
     };
 
     let mut buf = Vec::new();
@@ -64,6 +68,10 @@ fn write_record_multiple_algorithms() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
+        nomicon_match: None,
+        is_lolbin: false,
+        #[cfg(feature = "yara")]
+        yara_enrichments: Vec::new(),
     };
 
     let mut buf = Vec::new();
@@ -100,6 +108,10 @@ fn filename_with_comma_preserved() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
+        nomicon_match: None,
+        is_lolbin: false,
+        #[cfg(feature = "yara")]
+        yara_enrichments: Vec::new(),
     };
 
     let mut buf = Vec::new();
@@ -120,6 +132,10 @@ fn write_record_missing_algorithm_returns_error() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
+        nomicon_match: None,
+        is_lolbin: false,
+        #[cfg(feature = "yara")]
+        yara_enrichments: Vec::new(),
     };
 
     let mut buf = Vec::new();
@@ -195,6 +211,10 @@ fn write_record_zero_size_file() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
+        nomicon_match: None,
+        is_lolbin: false,
+        #[cfg(feature = "yara")]
+        yara_enrichments: Vec::new(),
     };
 
     let mut buf = Vec::new();

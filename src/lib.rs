@@ -44,7 +44,6 @@ pub mod timeline;
 pub mod watch;
 #[cfg(feature = "yara")]
 pub mod yara_scan;
-#[cfg(feature = "nomicon")]
 pub mod nomicon;
 #[cfg(feature = "qr")]
 pub mod qr_label;
