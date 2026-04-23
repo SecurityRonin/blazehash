@@ -105,7 +105,7 @@ fn test_cli_merkle_root() {
     .unwrap();
 
     let mut cmd = Command::cargo_bin("blazehash").unwrap();
-    cmd.arg("merkle").arg(&manifest);
+    cmd.arg("seal").arg(&manifest);
     let output = cmd.assert().success();
     let stdout = String::from_utf8(output.get_output().stdout.clone()).unwrap();
     assert!(
@@ -128,7 +128,7 @@ fn test_cli_merkle_proof_and_verify() {
     // Get root
     let root_out = Command::cargo_bin("blazehash")
         .unwrap()
-        .arg("merkle")
+        .arg("seal")
         .arg(&manifest)
         .assert()
         .success();
@@ -140,7 +140,7 @@ fn test_cli_merkle_proof_and_verify() {
     // Get proof
     let proof_out = Command::cargo_bin("blazehash")
         .unwrap()
-        .arg("merkle-proof")
+        .arg("file-proof")
         .arg(&manifest)
         .arg("--path")
         .arg("/a")
@@ -153,7 +153,7 @@ fn test_cli_merkle_proof_and_verify() {
     // Verify
     Command::cargo_bin("blazehash")
         .unwrap()
-        .arg("merkle-verify")
+        .arg("verify-proof")
         .arg("--root")
         .arg(&root)
         .arg("--path")

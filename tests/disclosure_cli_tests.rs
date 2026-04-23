@@ -47,7 +47,7 @@ fn test_cli_prove_membership_produces_json() {
     let manifest = write_manifest(&dir);
     let out = dir.path().join("membership.json");
     Command::cargo_bin("blazehash").unwrap()
-        .args(["prove-membership", manifest.to_str().unwrap(),
+        .args(["check-file", manifest.to_str().unwrap(),
                "--sha256", &"a".repeat(64),
                "-o", out.to_str().unwrap()])
         .assert().success();
@@ -86,7 +86,7 @@ fn test_cli_prove_membership_stdout_when_no_output_flag() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
     let output = Command::cargo_bin("blazehash").unwrap()
-        .args(["prove-membership", manifest.to_str().unwrap(),
+        .args(["check-file", manifest.to_str().unwrap(),
                "--sha256", &"a".repeat(64)])
         .output().unwrap();
     assert!(output.status.success());
