@@ -1,6 +1,6 @@
-//! MITRE ATT&CK technique lookup — thin delegation to forensicnomicon::attack.
+//! MITRE ATT&CK technique lookup — thin delegation to forensicnomicon::mitre.
 
-pub use forensicnomicon::attack::AttackTechnique;
+pub use forensicnomicon::mitre::AttackTechnique;
 
 /// Look up an ATT&CK technique for a YARA match.
 ///
@@ -18,7 +18,7 @@ pub fn lookup_attack_for_match(m: &crate::yara_scan::YaraMatch) -> Option<Attack
         }
     }
     // 2. Fall back to forensicnomicon's prefix table.
-    forensicnomicon::attack::lookup_attack_for_rule_name(&m.rule_name)
+    forensicnomicon::mitre::lookup_attack_for_rule_name(&m.rule_name)
 }
 
 fn is_technique_id(s: &str) -> bool {
@@ -33,7 +33,7 @@ fn is_technique_id(s: &str) -> bool {
 
 /// Look up an ATT&CK technique by rule name prefix.
 ///
-/// Delegates to `forensicnomicon::attack::lookup_attack_for_rule_name`.
+/// Delegates to `forensicnomicon::mitre::lookup_attack_for_rule_name`.
 pub fn lookup_attack(rule_name: &str) -> Option<AttackTechnique> {
-    forensicnomicon::attack::lookup_attack_for_rule_name(rule_name)
+    forensicnomicon::mitre::lookup_attack_for_rule_name(rule_name)
 }
