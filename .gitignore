@@ -1,2 +1,6 @@
 /target/
 .cargo/
+site/
+.DS_Store
+.playwright-mcp/
+.serena/

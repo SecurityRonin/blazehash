@@ -16,13 +16,6 @@ pub struct FileHashResult {
     /// YARA rule matches for this file (populated only when --yara is used).
     #[cfg(feature = "yara")]
     pub yara_matches: Option<Vec<crate::yara_scan::YaraMatch>>,
-    /// forensicnomicon catalog match for this file's path (populated when --nomicon is used).
-    pub nomicon_match: Option<crate::nomicon::NomiconMatch>,
-    /// Whether this file's name is a known Windows or Linux LOLBin.
-    pub is_lolbin: bool,
-    /// YARA match enrichments from the forensicnomicon catalog.
-    #[cfg(feature = "yara")]
-    pub yara_enrichments: Vec<crate::nomicon::YaraEnrichment>,
 }
 
 /// Compute Shannon entropy for a byte slice.
@@ -440,23 +433,6 @@ pub fn hash_file(
         }
     };
 
-    // nomicon: path annotation and LOLBin detection.
-    let nomicon_match = crate::nomicon::match_path(path);
-    let is_lolbin = crate::nomicon::is_lolbin(path);
-
-    // yara: enrich YARA matches from the forensicnomicon catalog.
-    #[cfg(feature = "yara")]
-    let yara_enrichments: Vec<crate::nomicon::YaraEnrichment> = {
-        if let Some(ref matches) = yara_matches {
-            matches
-                .iter()
-                .filter_map(|m| crate::nomicon::enrich_yara_match(&m.rule_name))
-                .collect()
-        } else {
-            Vec::new()
-        }
-    };
-
     Ok(FileHashResult {
         path: path.to_path_buf(),
         size,
@@ -464,10 +440,6 @@ pub fn hash_file(
         entropy,
         #[cfg(feature = "yara")]
         yara_matches,
-        nomicon_match,
-        is_lolbin,
-        #[cfg(feature = "yara")]
-        yara_enrichments,
     })
 }
 

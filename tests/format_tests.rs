@@ -21,8 +21,6 @@ fn sample_result() -> FileHashResult {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     }
@@ -88,8 +86,6 @@ fn csv_missing_algorithm_returns_error() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -123,8 +119,6 @@ fn csv_multiple_results() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -219,8 +213,6 @@ fn sumfile_output_hash_two_spaces_path() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -265,8 +257,6 @@ fn sqlite_output_queryable() {
         entropy: Some(6.5),
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -309,8 +299,6 @@ fn parquet_output_creates_file() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -336,8 +324,6 @@ fn json_missing_algorithm_silently_skipped() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -370,8 +356,6 @@ fn csv_entropy_column_present_when_set() {
         entropy: Some(7.9),
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -403,8 +387,6 @@ fn json_entropy_field_present_when_set() {
         entropy: Some(3.5),
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -441,8 +423,6 @@ fn duckdb_output_creates_file() {
         entropy: Some(3.5),
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     }];
@@ -492,8 +472,6 @@ fn test_stix_output_is_valid_bundle() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -538,8 +516,6 @@ fn test_stix_output_multiple_algorithms() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -574,8 +550,6 @@ fn test_ecs_output_has_correct_fields() {
         entropy: Some(7.5),
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };
@@ -612,8 +586,6 @@ fn test_ecs_output_is_ndjson() {
                 entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
             }
@@ -655,8 +627,6 @@ fn sqlite_feature_is_independent_of_hashdb() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };

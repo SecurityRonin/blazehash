@@ -33,8 +33,6 @@ pub fn run(
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        nomicon_match: None,
-        is_lolbin: false,
         #[cfg(feature = "yara")]
         yara_enrichments: Vec::new(),
     };

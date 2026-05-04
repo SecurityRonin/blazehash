@@ -52,8 +52,6 @@ async fn oci_results_async(uri: &str, algorithms: &[Algorithm]) -> Result<Vec<Fi
             entropy: None,
             #[cfg(feature = "yara")]
             yara_matches: None,
-            nomicon_match: None,
-            is_lolbin: false,
             #[cfg(feature = "yara")]
             yara_enrichments: Vec::new(),
         });

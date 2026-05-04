@@ -205,21 +205,6 @@ pub struct Cli {
     )]
     pub yara_max_size: u64,
 
-    /// Annotate each file against the forensicnomicon CATALOG (triage priority, MITRE, artifact type)
-    #[arg(
-        long = "nomicon",
-        help = "Annotate hashed files with forensicnomicon catalog metadata (triage, MITRE, artifact type)"
-    )]
-    pub nomicon: bool,
-
-    /// Compile and use all forensicnomicon catalog YARA rules in addition to any --yara rules file
-    #[cfg(feature = "yara")]
-    #[arg(
-        long = "yara-catalog",
-        help = "Compile forensicnomicon catalog YARA rules and scan files"
-    )]
-    pub yara_catalog: bool,
-
     /// VirusTotal API key (for `blazehash vt`; falls back to VT_API_KEY env var)
     #[arg(long = "api-key", value_name = "KEY")]
     pub api_key: Option<String>,

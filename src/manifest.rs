@@ -52,11 +52,6 @@ pub fn write_header_with_metadata<W: Write>(
 }
 
 /// Write a single hashdeep-format record.
-///
-/// When the `nomicon` feature is enabled, appends `## nomicon:` and/or
-/// `## lolbin:` comment lines immediately after the hash record line.
-/// When both `nomicon` and `yara` features are enabled, also appends
-/// `## yara-enrich:` comment lines for any YARA matches with enrichment.
 pub fn write_record<W: Write>(
     w: &mut W,
     result: &FileHashResult,
@@ -71,20 +66,6 @@ pub fn write_record<W: Write>(
         write!(w, ",{hash}")?;
     }
     writeln!(w, ",{}", result.path.display())?;
-
-    // nomicon: path annotation comment line.
-    if let Some(ref m) = result.nomicon_match {
-        writeln!(
-            w,
-            "## nomicon: artifact_id={} triage={} mitre={} type={}",
-            m.artifact_id, m.triage_priority, m.mitre_technique, m.artifact_type
-        )?;
-    }
-
-    // nomicon: LOLBin flagging comment line.
-    if result.is_lolbin {
-        writeln!(w, "## lolbin: true")?;
-    }
 
     // yara: YARA enrichment comment lines.
     #[cfg(feature = "yara")]

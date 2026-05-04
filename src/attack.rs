@@ -1,13 +1,21 @@
-//! MITRE ATT&CK technique lookup — thin delegation to forensicnomicon::mitre.
+//! MITRE ATT&CK technique lookup.
 
-pub use forensicnomicon::mitre::AttackTechnique;
+/// A resolved MITRE ATT&CK technique entry.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AttackTechnique {
+    /// ATT&CK technique ID, e.g. `"T1486"` or `"T1059.001"`.
+    pub technique_id: &'static str,
+    /// ATT&CK tactic (lowercase kebab-case), e.g. `"impact"`.
+    pub tactic: &'static str,
+    /// Human-readable technique name, e.g. `"Data Encrypted for Impact"`.
+    pub name: &'static str,
+}
 
 /// Look up an ATT&CK technique for a YARA match.
 ///
-/// Priority: technique tag (T####) embedded in the match tags > rule name prefix table.
+/// Uses technique tags (T####) embedded in the match tags.
 #[cfg(feature = "yara")]
 pub fn lookup_attack_for_match(m: &crate::yara_scan::YaraMatch) -> Option<AttackTechnique> {
-    // 1. Check tags for a T#### or T####.### pattern (e.g. T1486, T1059.001).
     for tag in &m.tags {
         if is_technique_id(tag) {
             return Some(AttackTechnique {
@@ -17,8 +25,7 @@ pub fn lookup_attack_for_match(m: &crate::yara_scan::YaraMatch) -> Option<Attack
             });
         }
     }
-    // 2. Fall back to forensicnomicon's prefix table.
-    forensicnomicon::mitre::lookup_attack_for_rule_name(&m.rule_name)
+    None
 }
 
 fn is_technique_id(s: &str) -> bool {
@@ -31,9 +38,10 @@ fn is_technique_id(s: &str) -> bool {
     base.len() == 4 && base.chars().all(|c| c.is_ascii_digit())
 }
 
-/// Look up an ATT&CK technique by rule name prefix.
+/// Look up an ATT&CK technique by rule name.
 ///
-/// Delegates to `forensicnomicon::mitre::lookup_attack_for_rule_name`.
-pub fn lookup_attack(rule_name: &str) -> Option<AttackTechnique> {
-    forensicnomicon::mitre::lookup_attack_for_rule_name(rule_name)
+/// Returns `None` — rule-name prefix table removed with forensicnomicon dependency.
+#[allow(dead_code)]
+pub fn lookup_attack(_rule_name: &str) -> Option<AttackTechnique> {
+    None
 }
