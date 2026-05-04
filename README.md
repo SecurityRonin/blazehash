@@ -8,9 +8,9 @@
 [![Release](https://github.com/SecurityRonin/blazehash/actions/workflows/release.yml/badge.svg)](https://github.com/SecurityRonin/blazehash/releases)
 [![Sponsor](https://img.shields.io/badge/sponsor-h4x0r-ea4aaa?logo=github-sponsors)](https://github.com/sponsors/h4x0r)
 
-**Hash. Sign. Timestamp. Prove.**
+**Hash. Sign. Timestamp. Prove. Seal.**
 
-You're already using hashdeep. blazehash is what it looks like with everything you've been asking for: BLAKE3 at **1,640 MB/s**, Ed25519 signing, Bitcoin-anchored timestamps, YARA scanning, and native cloud storage — while every hashdeep flag and output format works exactly as before.
+You're already using hashdeep. blazehash is what it looks like with everything you've been asking for: BLAKE3 at **1,640 MB/s**, 25 hash algorithms, Ed25519 + post-quantum signing, Bitcoin-anchored timestamps, YARA scanning, and native cloud storage — while every hashdeep flag and output format works exactly as before.
 
 ```bash
 brew tap SecurityRonin/tap && brew install blazehash
@@ -53,12 +53,13 @@ cargo install blazehash
 blazehash -r /mnt/evidence -c blake3,sha256 \
   --case "CASE-2026-001" --examiner "Jane Smith" \
   -o evidence.hash --progress
-blazehash sign evidence.hash
-blazehash ots stamp evidence.hash
+blazehash sign evidence.hash        # Ed25519 signature
+blazehash seal evidence.hash        # Merkle tamper-evidence seal
+blazehash ots stamp evidence.hash   # Bitcoin blockchain timestamp (requires --features ots)
 blazehash report evidence.hash -o report.html
 ```
 
-One manifest proves *what* (cryptographic hashes), *who* (Ed25519 signature), *when* (Bitcoin blockchain anchor), and *context* (case/examiner metadata).
+One manifest proves *what* (cryptographic hashes), *who* (Ed25519 signature), *when* (Bitcoin blockchain anchor), *structure* (Merkle root commits every file), and *context* (case/examiner metadata).
 
 [Acquisition guide →](https://securityronin.github.io/blazehash/acquire/)
 
@@ -66,8 +67,9 @@ One manifest proves *what* (cryptographic hashes), *who* (Ed25519 signature), *w
 
 ```bash
 blazehash -r /mnt/evidence -a -k evidence.hash
-blazehash verify-sig evidence.hash
-blazehash ots verify evidence.hash
+blazehash verify-sig evidence.hash       # Ed25519 signature check
+blazehash verify-proof evidence.hash     # Merkle inclusion proof check
+blazehash ots verify evidence.hash       # Bitcoin timestamp check
 ```
 
 ### Hunt threats
@@ -92,20 +94,23 @@ Every hashdeep flag works. Your existing scripts keep working. These are the add
 | | blazehash | hashdeep |
 |--|:-:|:-:|
 | BLAKE3 (1,640 MB/s) | Y | — |
+| 25 hash algorithms (Blake3/SHA/MD5/fuzzy/checksums) | Y | 7 |
 | Ed25519 manifest signing | Y | — |
+| Post-quantum signing (CRYSTALS-Dilithium) | Y | — |
 | N-of-M cosigning | Y | — |
-| Bitcoin timestamps (OTS) | Y | — |
+| Bitcoin timestamps (OpenTimestamps) | Y | — |
+| Merkle tamper-evidence seals + inclusion proofs | Y | — |
 | Case/examiner metadata | Y | — |
 | HTML chain-of-custody report | Y | — |
 | NSRL known-good filtering | Y | — |
 | YARA rule scanning + ATT&CK tag lookup | Y | — |
 | VirusTotal batch lookup | Y | — |
 | Shannon entropy | Y | — |
-| Fuzzy / similarity hashing | Y | — |
+| Fuzzy / similarity hashing (ssdeep + TLSH) | Y | — |
 | Duplicate detection | Y | — |
 | Manifest diff / merge / update | Y | — |
 | Live monitoring (watch) | Y | — |
-| Remote storage (S3/GCS/Azure/WebDAV) | Y | — |
+| Remote storage (S3/GCS/Azure/WebDAV/60+ protocols) | Y | — |
 | Google Drive hash-without-download | Y | — |
 | GPU-accelerated SHA-256/MD5 | Y | — |
 | MCP server (AI-assisted workflows) | Y | — |
