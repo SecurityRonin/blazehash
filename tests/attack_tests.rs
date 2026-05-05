@@ -272,6 +272,58 @@ fn case_insensitive_lookup() {
     assert!(lookup_attack("COBALTSTRIKE_Beacon").is_some());
 }
 
+// ── Pruning RED tests ───────────────────────────────────────────────────────
+// Assert entries that should be removed/renamed. All fail until table updated.
+
+#[test]
+fn golang_prefix_replaces_go() {
+    assert!(
+        lookup_attack("golang_implant").is_some(),
+        "golang_implant should match golang_ prefix"
+    );
+    assert!(
+        lookup_attack("go_rat").is_none(),
+        "go_rat should not match after go_ is removed"
+    );
+}
+
+#[test]
+fn pruned_language_prefixes_return_none() {
+    for rule in &["perl_backdoor", "ruby_rat", "java_trojan", "nodejs_stealer"] {
+        assert!(
+            lookup_attack(rule).is_none(),
+            "'{rule}' should return None after language pruning"
+        );
+    }
+}
+
+#[test]
+fn pruned_generic_recon_prefixes_return_none() {
+    for rule in &[
+        "scan_tool",
+        "recon_kit",
+        "enum_users",
+        "discovery_module",
+        "harvest_creds",
+        "osint_framework",
+    ] {
+        assert!(
+            lookup_attack(rule).is_none(),
+            "'{rule}' should return None after recon pruning"
+        );
+    }
+}
+
+#[test]
+fn pruned_windows_registry_prefixes_return_none() {
+    for rule in &["reg_editor", "event_log_cleaner", "prefetch_wipe"] {
+        assert!(
+            lookup_attack(rule).is_none(),
+            "'{rule}' should return None after registry pruning"
+        );
+    }
+}
+
 #[cfg(feature = "yara")]
 #[test]
 fn test_stix_output_includes_attack_extension_when_yara_tag_is_technique_id() {
