@@ -2,7 +2,10 @@ pub mod ads;
 pub mod remote;
 pub mod attack;
 pub mod disclosure;
-pub mod algorithm;
+// The hash algorithms live in the lean `blazehash-core` engine. Re-export them
+// here so existing `blazehash::algorithm::…` / `blazehash::fuzzy::…` paths (and
+// the crate's own `crate::algorithm::…` references) keep resolving unchanged.
+pub use blazehash_core::{algorithm, fuzzy};
 pub mod digest_wrappers;
 pub mod audit;
 pub mod config;
@@ -11,7 +14,6 @@ pub mod device;
 pub mod folder_diff;
 pub mod forensic_image;
 pub mod format;
-pub mod fuzzy;
 #[cfg(feature = "gpu")]
 pub mod gpu;
 pub mod hash;

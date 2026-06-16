@@ -1,0 +1,43 @@
+[package]
+name = "blazehash-core"
+version = "0.2.4"
+edition = "2021"
+rust-version = "1.88"
+authors = ["Albert Hui <albert@securityronin.com>"]
+description = "Lean hash-algorithm engine behind blazehash — 27 hash/checksum/fuzzy algorithms, no heavy deps"
+license = "Apache-2.0"
+repository = "https://github.com/SecurityRonin/blazehash"
+homepage = "https://github.com/SecurityRonin/blazehash"
+documentation = "https://docs.rs/blazehash-core"
+readme = "README.md"
+keywords = ["hash", "blake3", "checksum", "ssdeep", "tlsh"]
+categories = ["cryptography"]
+
+[lib]
+name = "blazehash_core"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+digest = { workspace = true }
+hex = { workspace = true }
+blake3 = { workspace = true }
+sha1 = { workspace = true }
+sha2 = { workspace = true }
+sha3 = { workspace = true }
+md-5 = { workspace = true }
+tiger = { workspace = true }
+whirlpool = { workspace = true }
+blake2 = { workspace = true }
+sm3 = { workspace = true }
+streebog = { workspace = true }
+ripemd = { workspace = true }
+tiny-keccak = { workspace = true }
+crc = { workspace = true }
+crc32c = { workspace = true }
+adler = { workspace = true }
+xxhash-rust = { workspace = true }
+tlsh2 = { workspace = true }
+
+[lints]
+workspace = true

@@ -2,8 +2,8 @@ const ROLLING_WINDOW: usize = 7;
 const MIN_BLOCK_SIZE: u32 = 3;
 const SPAMSUM_LENGTH: usize = 64;
 const B64: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-const FNV_PRIME: u32 = 16777619;
-const FNV_INIT: u32 = 0x28021967;
+const FNV_PRIME: u32 = 16_777_619;
+const FNV_INIT: u32 = 0x2802_1967;
 
 struct RollingState {
     window: [u8; ROLLING_WINDOW],
@@ -28,14 +28,14 @@ impl RollingState {
         self.h2 = self
             .h2
             .wrapping_sub(self.h1)
-            .wrapping_add((ROLLING_WINDOW as u32).wrapping_mul(c as u32));
+            .wrapping_add((ROLLING_WINDOW as u32).wrapping_mul(u32::from(c)));
         self.h1 = self
             .h1
-            .wrapping_add(c as u32)
-            .wrapping_sub(self.window[self.n % ROLLING_WINDOW] as u32);
+            .wrapping_add(u32::from(c))
+            .wrapping_sub(u32::from(self.window[self.n % ROLLING_WINDOW]));
         self.window[self.n % ROLLING_WINDOW] = c;
         self.n += 1;
-        self.h3 = self.h3.rotate_left(5) ^ (c as u32);
+        self.h3 = self.h3.rotate_left(5) ^ u32::from(c);
     }
 
     fn sum(&self) -> u32 {
@@ -66,8 +66,8 @@ fn compute_with_bs(data: &[u8], bs: u32) -> (String, String) {
     let mut hash2 = Vec::with_capacity(SPAMSUM_LENGTH / 2);
 
     for &c in data {
-        fnv1 = fnv1.wrapping_mul(FNV_PRIME) ^ (c as u32);
-        fnv2 = fnv2.wrapping_mul(FNV_PRIME) ^ (c as u32);
+        fnv1 = fnv1.wrapping_mul(FNV_PRIME) ^ u32::from(c);
+        fnv2 = fnv2.wrapping_mul(FNV_PRIME) ^ u32::from(c);
         roll.update(c);
         let r = roll.sum();
         if r % bs == bs - 1 {
@@ -88,9 +88,12 @@ fn compute_with_bs(data: &[u8], bs: u32) -> (String, String) {
     hash1.push(B64[(fnv1 % 64) as usize]);
     hash2.push(B64[(fnv2 % 64) as usize]);
 
+    // Every byte pushed onto hash1/hash2 comes from the ASCII `B64` table, so the
+    // vectors are valid UTF-8 by construction; `from_utf8_lossy` is exact here and
+    // keeps the path panic-free if that invariant is ever broken.
     (
-        String::from_utf8(hash1).unwrap(),
-        String::from_utf8(hash2).unwrap(),
+        String::from_utf8_lossy(&hash1).into_owned(),
+        String::from_utf8_lossy(&hash2).into_owned(),
     )
 }
 
@@ -126,7 +129,9 @@ fn edit_distance(a: &[u8], b: &[u8], cap: usize) -> usize {
             };
         }
         std::mem::swap(&mut prev, &mut curr);
-        if *prev.iter().min().unwrap() >= cap {
+        // `prev` always has m+1 >= 1 entries here (m == 0 returns early above), so
+        // `min()` is `Some`; `unwrap_or(0)` keeps the early-out panic-free.
+        if prev.iter().min().copied().unwrap_or(0) >= cap {
             return cap;
         }
     }

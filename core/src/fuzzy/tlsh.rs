@@ -24,13 +24,11 @@ pub fn distance_to_similarity(dist: i32) -> u32 {
 /// Compute similarity (0–100) between two tlsh digest strings.
 /// Returns 0 if either hash is invalid or cannot be parsed.
 pub fn similarity(h1: &str, h2: &str) -> u32 {
-    let t1 = match TlshDefault::from_str(h1) {
-        Ok(t) => t,
-        Err(_) => return 0,
+    let Ok(t1) = TlshDefault::from_str(h1) else {
+        return 0;
     };
-    let t2 = match TlshDefault::from_str(h2) {
-        Ok(t) => t,
-        Err(_) => return 0,
+    let Ok(t2) = TlshDefault::from_str(h2) else {
+        return 0;
     };
     let dist = t1.diff(&t2, true);
     distance_to_similarity(dist)

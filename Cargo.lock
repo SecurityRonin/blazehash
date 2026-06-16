@@ -1016,6 +1016,7 @@ dependencies = [
  "bincode",
  "blake2",
  "blake3",
+ "blazehash-core",
  "bloomfilter",
  "chrono",
  "clap",
@@ -1079,6 +1080,32 @@ dependencies = [
  "xxhash-rust",
  "yara-x",
  "zip 2.4.2",
+]
+
+[[package]]
+name = "blazehash-core"
+version = "0.2.4"
+dependencies = [
+ "adler",
+ "anyhow",
+ "blake2",
+ "blake3",
+ "crc",
+ "crc32c",
+ "digest 0.10.7",
+ "hex",
+ "md-5",
+ "ripemd",
+ "sha1",
+ "sha2",
+ "sha3 0.10.8",
+ "sm3",
+ "streebog",
+ "tiger",
+ "tiny-keccak",
+ "tlsh2",
+ "whirlpool",
+ "xxhash-rust",
 ]
 
 [[package]]

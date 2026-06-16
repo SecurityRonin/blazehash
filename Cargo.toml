@@ -1,3 +1,54 @@
+[workspace]
+members = ["core"]
+resolver = "2"
+
+# Single source of truth for the hash-crate versions shared between the lean
+# `blazehash-core` engine and the full `blazehash` app (DRY): declare each once
+# here, members write `<dep>.workspace = true`.
+[workspace.dependencies]
+anyhow = "1"
+digest = "0.10"
+hex = "0.4"
+blake3 = "1"
+sha1 = { version = "0.10", features = ["oid"] }
+sha2 = { version = "0.10", features = ["oid"] }
+sha3 = "0.10"
+md-5 = "0.10"
+tiger = "0.2"
+whirlpool = "0.10"
+blake2 = "0.10"
+sm3 = "0.4"
+streebog = "0.10"
+ripemd = "0.1"
+tiny-keccak = { version = "2", features = ["k12"] }
+crc = "3"
+crc32c = "0.6"
+adler = "1"
+xxhash-rust = { version = "0.8", features = ["xxh3"] }
+tlsh2 = { version = "0.4", features = ["diff"] }
+
+# Paranoid Gatekeeper lints (fleet standard) — every member inherits via
+# `[lints] workspace = true`. These crates parse untrusted input: never panic,
+# never read out of bounds, never trust a length field.
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+module_name_repetitions = { level = "allow", priority = 1 }
+must_use_candidate = { level = "allow", priority = 1 }
+missing_errors_doc = { level = "allow", priority = 1 }
+missing_panics_doc = { level = "allow", priority = 1 }
+cast_possible_truncation = { level = "allow", priority = 1 }
+cast_possible_wrap = { level = "allow", priority = 1 }
+cast_sign_loss = { level = "allow", priority = 1 }
+cast_precision_loss = { level = "allow", priority = 1 }
+
 [package]
 name = "blazehash"
 version = "0.2.4"
@@ -23,33 +74,34 @@ name = "blazehash"
 path = "src/lib.rs"
 
 [dependencies]
-anyhow = "1"
+blazehash-core = { version = "0.2.4", path = "core" }
+anyhow = { workspace = true }
 base64 = "0.22"
-blake3 = "1"
+blake3 = { workspace = true }
 clap = { version = "4", features = ["derive"] }
-digest = "0.10"
-hex = "0.4"
-md-5 = "0.10"
+digest = { workspace = true }
+hex = { workspace = true }
+md-5 = { workspace = true }
 memmap2 = "0.9"
 rayon = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-sha1 = { version = "0.10", features = ["oid"] }
-sha2 = { version = "0.10", features = ["oid"] }
-sha3 = "0.10"
-tiger = "0.2"
-tlsh2 = { version = "0.4", features = ["diff"] }
+sha1 = { workspace = true }
+sha2 = { workspace = true }
+sha3 = { workspace = true }
+tiger = { workspace = true }
+tlsh2 = { workspace = true }
 walkdir = "2"
-whirlpool = "0.10"
-xxhash-rust = { version = "0.8", features = ["xxh3"] }
-crc32c = "0.6"
-crc = "3"
-blake2 = "0.10"
-sm3 = "0.4"
-streebog = "0.10"
-ripemd = "0.1"
-tiny-keccak = { version = "2", features = ["k12"] }
-adler = "1"
+whirlpool = { workspace = true }
+xxhash-rust = { workspace = true }
+crc32c = { workspace = true }
+crc = { workspace = true }
+blake2 = { workspace = true }
+sm3 = { workspace = true }
+streebog = { workspace = true }
+ripemd = { workspace = true }
+tiny-keccak = { workspace = true }
+adler = { workspace = true }
 # nilsimsa = "0.2"  # requires nightly: uses #![feature()] — skipped
 globset = "0.4"
 chrono = { version = "0.4", default-features = false, features = ["std"] }
