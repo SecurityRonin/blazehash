@@ -98,7 +98,7 @@ jobs:
         with:
           token: ${{ secrets.TAP_GITHUB_TOKEN }}
           repository: SecurityRonin/homebrew-tap
-          event-type: update-formula
+          event-type: update-blazehash
           client-payload: '{"version": "${{ github.ref_name }}"}'
 
   crate:
