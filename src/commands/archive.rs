@@ -35,7 +35,7 @@ pub fn hash_archive<W: Write>(archive_path: &Path, out: &mut W) -> Result<()> {
 fn hash_zip<W: Write>(path: &Path, out: &mut W) -> Result<()> {
     use std::io::Read;
     let file = std::fs::File::open(path)?;
-    let mut archive = zip::ZipArchive::new(file)?;
+    let mut archive = zip_core::ZipArchive::new(file)?;
     for i in 0..archive.len() {
         let mut entry = archive.by_index(i)?;
         if entry.is_dir() {

@@ -122,7 +122,9 @@ parquet = { version = "54", optional = true }
 arrow = { version = "54", optional = true }
 oci-distribution = { version = "0.11", optional = true }
 flate2 = { version = "1", optional = true }
-zip = { version = "2", optional = true }
+# Pure-Rust, no-C-FFI ZIP reader (read-only). Test fixtures still write via the
+# third-party `zip` dev-dependency below (zip-forensic-core has no writer).
+zip-forensic-core = { version = "0.1", optional = true }
 tar = { version = "0.4", optional = true }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"], optional = true }
 notify = "6"
@@ -251,7 +253,7 @@ yara    = ["dep:yara-x"]
 report  = ["dep:minijinja"]
 parquet-output = ["dep:parquet", "dep:arrow"]
 docker  = ["dep:oci-distribution", "dep:flate2", "dep:tar", "dep:tokio"]
-archive = ["dep:zip", "dep:flate2", "dep:tar"]
+archive = ["dep:zip-forensic-core", "dep:flate2", "dep:tar"]
 duckdb-output = ["dep:duckdb"]
 tui = ["dep:ratatui", "dep:crossterm"]
 ots = []
@@ -280,5 +282,7 @@ tempfile = "3"
 assert_cmd = "2"
 predicates = "3"
 regex = "1"
-zip = "2"
+# Third-party zip kept ONLY to write test-fixture archives (zip-forensic-core is
+# read-only). default-features=false + deflate keeps this dev-dep C-FFI-free.
+zip = { version = "2", default-features = false, features = ["deflate"] }
 
