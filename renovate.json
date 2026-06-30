@@ -4,17 +4,48 @@
     "config:recommended",
     "helpers:pinGitHubActionDigests"
   ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["before 6am on monday"]
+  },
   "packageRules": [
     {
+      "description": "GitHub Actions: keep digests pinned and current; auto-merge digest/patch/minor.",
       "matchManagers": ["github-actions"],
       "automerge": true,
       "automergeType": "pr",
       "matchUpdateTypes": ["digest", "patch", "minor"]
     },
     {
+      "description": "Base: all cargo deps update weekly, never auto-merge. Fleet rules below OVERRIDE this for SecurityRonin/h4x0r crates (Renovate applies packageRules in order; later wins). Keep this FIRST among the cargo rules.",
       "matchManagers": ["cargo"],
-      "automerge": true,
-      "matchUpdateTypes": ["patch", "minor"]
+      "automerge": false,
+      "schedule": ["before 6am on monday"]
+    },
+    {
+      "description": "Fleet crates (SecurityRonin/h4x0r) — patch/minor: WIDEN the requirement (rangeStrategy=bump un-sticks a caret pin like zip-forensic-core \"0.1\" that cannot reach a published 0.2.x), GROUP into one PR per wave. blazehash is a PUBLISHED LIBRARY (`[lib]` + rust-version MSRV promise), so automerge=false — auto-bumping a dep can silently raise blazehash's MSRV; a human reviews. Owner-based matcher keys on the dep's `repository` URL (won't over-match third-party `-core`/`-forensic` crates); requires fleet crates to set `repository = https://github.com/SecurityRonin/<repo>`.",
+      "matchManagers": ["cargo"],
+      "matchSourceUrls": [
+        "https://github.com/SecurityRonin/**",
+        "https://github.com/h4x0r/**"
+      ],
+      "matchUpdateTypes": ["patch", "minor"],
+      "rangeStrategy": "bump",
+      "groupName": "securityronin fleet",
+      "automerge": false
+    },
+    {
+      "description": "Fleet crates — MAJOR: still widen + group, but require human review (API breaks).",
+      "matchManagers": ["cargo"],
+      "matchSourceUrls": [
+        "https://github.com/SecurityRonin/**",
+        "https://github.com/h4x0r/**"
+      ],
+      "matchUpdateTypes": ["major"],
+      "rangeStrategy": "bump",
+      "groupName": "securityronin fleet (major)",
+      "automerge": false
     }
   ]
 }
