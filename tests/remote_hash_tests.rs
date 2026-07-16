@@ -2,17 +2,6 @@
 mod remote_hash_tests {
     use opendal::{blocking, services, Operator};
 
-    fn mem_blocking_op() -> blocking::Operator {
-        // opendal blocking operators require an active Tokio runtime handle
-        let rt = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .unwrap();
-        let _guard = rt.enter();
-        let async_op = Operator::new(services::Memory::default()).unwrap().finish();
-        blocking::Operator::new(async_op).unwrap()
-    }
-
     #[test]
     fn test_hash_remote_walk_module_exists() {
         // Verify the remote::walk module compiles by calling it with a sink

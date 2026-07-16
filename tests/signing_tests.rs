@@ -1,6 +1,5 @@
 use assert_cmd::Command;
 use blazehash::signing;
-use predicates;
 use std::fs;
 use tempfile::tempdir;
 

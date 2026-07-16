@@ -196,7 +196,5 @@ pub fn hash_device(
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        #[cfg(feature = "yara")]
-        yara_enrichments: Vec::new(),
     })
 }

@@ -635,13 +635,11 @@ mod tests {
         // Currently fails RED: bails with "unsupported URI scheme: hdfs://"
         assert!(
             result.is_ok()
-                || result
+                || !result
                     .as_ref()
                     .unwrap_err()
                     .to_string()
-                    .contains("unsupported URI scheme: hdfs://")
-                    .then(|| false)
-                    .unwrap_or(true),
+                    .contains("unsupported URI scheme: hdfs://"),
             "hdfs:// should not return unsupported-scheme error"
         );
     }

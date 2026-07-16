@@ -799,7 +799,7 @@ fn test_bench_gpu_no_calibrate_exits_successfully() {
     let tmp = TempDir::new().unwrap();
     // Run bench --gpu --no-calibrate — should exit 0 (or print info and exit 0)
     // Since gpu feature may not be compiled, accept both success and "unknown subcommand"
-    let out = Command::cargo_bin("blazehash")
+    let _out = Command::cargo_bin("blazehash")
         .unwrap()
         .args(["bench", "--gpu", "--no-calibrate"])
         .env("BLAZEHASH_CONFIG_DIR", tmp.path().to_str().unwrap())
@@ -940,8 +940,6 @@ fn test_manifest_roundtrip_with_ssdeep() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        #[cfg(feature = "yara")]
-        yara_enrichments: Vec::new(),
     };
 
     let mut buf = Vec::new();
@@ -987,8 +985,6 @@ fn test_manifest_roundtrip_with_tlsh() {
         entropy: None,
         #[cfg(feature = "yara")]
         yara_matches: None,
-        #[cfg(feature = "yara")]
-        yara_enrichments: Vec::new(),
     };
 
     let mut buf = Vec::new();

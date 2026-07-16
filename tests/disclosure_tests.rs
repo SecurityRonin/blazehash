@@ -1,4 +1,4 @@
-use blazehash::disclosure::{generate_selective_proof, verify_selective_proof, SelectiveProof};
+use blazehash::disclosure::{generate_selective_proof, verify_selective_proof};
 use blazehash::merkle::merkle_root;
 
 fn sample_entries() -> Vec<(String, String, String)> {

@@ -110,7 +110,7 @@ fn test_render_timeline_html_contains_table() {
 
 #[test]
 fn test_timeline_none_timestamp_sorts_last() {
-    let mut events = vec![
+    let mut events = [
         TimelineEvent {
             kind: TimelineEventKind::Timestamped,
             timestamp: None,

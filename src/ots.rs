@@ -83,34 +83,6 @@ pub fn stamp(manifest_path: &Path) -> Result<()> {
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::path::PathBuf;
-
-    #[test]
-    fn test_ots_stamp_unit_hash() {
-        let dir = tempfile::tempdir().unwrap();
-        let manifest = dir.path().join("test.hash");
-        std::fs::write(&manifest, "test content for OTS").unwrap();
-
-        let digest = compute_manifest_digest(&manifest).unwrap();
-        assert_eq!(digest.len(), 32, "SHA-256 digest must be 32 bytes");
-
-        let expected = Sha256::digest(b"test content for OTS");
-        assert_eq!(digest, expected.as_slice());
-    }
-
-    #[test]
-    fn test_ots_sidecar_path() {
-        let p = PathBuf::from("/evidence/manifest.hash");
-        assert_eq!(
-            ots_path_for(&p),
-            PathBuf::from("/evidence/manifest.hash.ots")
-        );
-    }
-}
-
 /// Verify an existing `.ots` proof file exists and is non-empty.
 pub fn verify(manifest_path: &Path) -> Result<bool> {
     let ots_path = ots_path_for(manifest_path);
@@ -139,4 +111,32 @@ pub fn verify(manifest_path: &Path) -> Result<bool> {
         ots_path.display()
     );
     Ok(true)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_ots_stamp_unit_hash() {
+        let dir = tempfile::tempdir().unwrap();
+        let manifest = dir.path().join("test.hash");
+        std::fs::write(&manifest, "test content for OTS").unwrap();
+
+        let digest = compute_manifest_digest(&manifest).unwrap();
+        assert_eq!(digest.len(), 32, "SHA-256 digest must be 32 bytes");
+
+        let expected = Sha256::digest(b"test content for OTS");
+        assert_eq!(digest, expected.as_slice());
+    }
+
+    #[test]
+    fn test_ots_sidecar_path() {
+        let p = PathBuf::from("/evidence/manifest.hash");
+        assert_eq!(
+            ots_path_for(&p),
+            PathBuf::from("/evidence/manifest.hash.ots")
+        );
+    }
 }

@@ -67,24 +67,6 @@ pub fn write_record<W: Write>(
     }
     writeln!(w, ",{}", result.path.display())?;
 
-    // yara: YARA enrichment comment lines.
-    #[cfg(feature = "yara")]
-    for enrichment in &result.yara_enrichments {
-        let sigma = enrichment.sigma_rule_id.unwrap_or("");
-        let vr = enrichment
-            .velociraptor_artifacts
-            .first()
-            .copied()
-            .unwrap_or("");
-        let kape = enrichment.kape_targets.first().copied().unwrap_or("");
-        let playbook = enrichment.playbook_id.unwrap_or("");
-        writeln!(
-            w,
-            "## yara-enrich: artifact={} sigma={} velociraptor={} kape={} playbook={}",
-            enrichment.artifact_id, sigma, vr, kape, playbook
-        )?;
-    }
-
     Ok(())
 }
 

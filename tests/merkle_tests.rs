@@ -1,4 +1,4 @@
-use blazehash::merkle::{build_tree, generate_proof, merkle_root, verify_proof};
+use blazehash::merkle::{generate_proof, merkle_root, verify_proof};
 
 #[test]
 fn test_merkle_root_single_entry() {

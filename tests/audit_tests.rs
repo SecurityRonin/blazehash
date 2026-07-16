@@ -232,7 +232,7 @@ fn audit_details_contains_correct_statuses() {
     fs::write(&file, b"hello world").unwrap();
     let known = make_known_file(&dir);
 
-    let result = audit(&[file.clone()], &known, 50, 5).unwrap();
+    let result = audit(std::slice::from_ref(&file), &known, 50, 5).unwrap();
     assert_eq!(result.details.len(), 1);
     match &result.details[0] {
         AuditStatus::Matched(p) => assert_eq!(p, &file),
@@ -281,7 +281,7 @@ fn audit_details_new_file_variant() {
     let new_file = dir.path().join("brand_new.txt");
     fs::write(&new_file, b"new").unwrap();
 
-    let result = audit(&[new_file.clone()], known, 50, 5).unwrap();
+    let result = audit(std::slice::from_ref(&new_file), known, 50, 5).unwrap();
     assert!(result
         .details
         .iter()

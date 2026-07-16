@@ -26,7 +26,7 @@ mod remote_writer_tests {
         let (_rt, op) = mem_op();
         let op2 = op.clone();
         let mut w = RemoteWriter::new(op, "test/out.hash".to_string());
-        write!(w, "blake3  abc123  /path/to/file.bin\n").unwrap();
+        writeln!(w, "blake3  abc123  /path/to/file.bin").unwrap();
         w.finish().unwrap();
         let bytes = op2.read("test/out.hash").unwrap();
         let text = String::from_utf8(bytes.to_bytes().to_vec()).unwrap();
@@ -47,7 +47,7 @@ mod remote_writer_tests {
         let op2 = op.clone();
         {
             let mut w = RemoteWriter::new(op, "test/drop.hash".to_string());
-            write!(w, "sha256  deadbeef  /evidence/file.bin\n").unwrap();
+            writeln!(w, "sha256  deadbeef  /evidence/file.bin").unwrap();
             // Drop here triggers upload
         }
         // Verify it was uploaded
