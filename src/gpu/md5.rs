@@ -17,7 +17,7 @@ fn pad_message_md5(data: &[u8]) -> Vec<u32> {
     }
     // Append 64-bit little-endian bit length
     padded.extend_from_slice(&bit_len.to_le_bytes());
-    assert!(padded.len() % 64 == 0);
+    assert!(padded.len().is_multiple_of(64));
 
     // Convert to little-endian u32 words
     padded

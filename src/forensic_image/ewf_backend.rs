@@ -9,7 +9,7 @@ fn hex(bytes: &[u8]) -> String {
 }
 
 pub fn verify_ewf(path: &Path) -> Result<ImageVerification> {
-    let mut reader = EwfReader::open(path)?;
+    let reader = EwfReader::open(path)?;
 
     let media_size = reader.total_size();
     let stored = reader.stored_hashes();

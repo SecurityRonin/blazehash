@@ -80,7 +80,7 @@ fn merkle_proof_path(levels: &[Vec<String>], leaf_idx: usize) -> Vec<String> {
     let mut path = Vec::new();
     let mut idx = leaf_idx;
     for level in &levels[..levels.len() - 1] {
-        let sibling_idx = if idx % 2 == 0 { idx + 1 } else { idx - 1 };
+        let sibling_idx = if idx.is_multiple_of(2) { idx + 1 } else { idx - 1 };
         let sibling = if sibling_idx < level.len() {
             level[sibling_idx].clone()
         } else {

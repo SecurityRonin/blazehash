@@ -35,7 +35,7 @@ pub fn balance_manifest(
         .to_string();
     let dir = out_dir.unwrap_or_else(|| manifest_path.parent().unwrap_or(Path::new(".")));
     let total = entries.len();
-    let base_size = if parts > 0 { total / parts } else { 0 };
+    let base_size = total.checked_div(parts).unwrap_or(0);
     let extras = total % parts;
     let mut offset = 0;
     let mut out_paths = Vec::new();

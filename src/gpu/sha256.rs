@@ -21,7 +21,7 @@ fn pad_message_with_length(data: &[u8], total_bit_len: u64) -> Vec<u32> {
         padded.push(0);
     }
     padded.extend_from_slice(&total_bit_len.to_be_bytes());
-    assert!(padded.len() % 64 == 0);
+    assert!(padded.len().is_multiple_of(64));
 
     padded
         .chunks_exact(4)

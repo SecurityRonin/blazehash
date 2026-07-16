@@ -121,7 +121,7 @@ pub fn audit(
                                 }
                             })
                             .collect();
-                        matches.sort_by(|a, b| b.0.cmp(&a.0));
+                        matches.sort_by_key(|b| std::cmp::Reverse(b.0));
                         matches.truncate(fuzzy_top);
                         if let Some((sim, orig)) = matches.into_iter().next() {
                             if best_fuzzy.as_ref().is_none_or(|(s, _)| sim > *s) {
@@ -149,7 +149,7 @@ pub fn audit(
                                     }
                                 })
                                 .collect();
-                            matches.sort_by(|a, b| b.0.cmp(&a.0));
+                            matches.sort_by_key(|b| std::cmp::Reverse(b.0));
                             matches.truncate(fuzzy_top);
                             if let Some((sim, orig)) = matches.into_iter().next() {
                                 if best_fuzzy.as_ref().is_none_or(|(s, _)| sim > *s) {
