@@ -16,9 +16,8 @@
 
 use blazehash::remote::gdrive::auth::{
     build_oauth_auth_url, exchange_code_for_token, find_available_port, load_token_from,
-    parse_auth_code_from_redirect,
-    resolve_auth_mode, save_token, token_cache_path, GDriveAuthMode, OAuthToken,
-    DEFAULT_CLIENT_ID, DEFAULT_CLIENT_SECRET,
+    parse_auth_code_from_redirect, resolve_auth_mode, save_token, token_cache_path, GDriveAuthMode,
+    OAuthToken, DEFAULT_CLIENT_ID, DEFAULT_CLIENT_SECRET,
 };
 
 // ── build_oauth_auth_url ─────────────────────────────────────────────────────
@@ -149,7 +148,10 @@ fn resolve_auth_mode_is_public_when_no_credentials() {
     let mode = resolve_auth_mode();
     // Either Public or UserOAuth (if token is cached on this machine) — both valid
     assert!(
-        matches!(mode, GDriveAuthMode::Public | GDriveAuthMode::UserOAuth { .. }),
+        matches!(
+            mode,
+            GDriveAuthMode::Public | GDriveAuthMode::UserOAuth { .. }
+        ),
         "expected Public or UserOAuth without credentials env var, got: {mode:?}"
     );
 }
@@ -216,13 +218,19 @@ impl EnvGuard {
     fn set(key: &str, value: &str) -> Self {
         let original = std::env::var(key).ok();
         std::env::set_var(key, value);
-        Self { key: key.to_string(), original }
+        Self {
+            key: key.to_string(),
+            original,
+        }
     }
 
     fn remove(key: &str) -> Self {
         let original = std::env::var(key).ok();
         std::env::remove_var(key);
-        Self { key: key.to_string(), original }
+        Self {
+            key: key.to_string(),
+            original,
+        }
     }
 }
 
@@ -254,7 +262,11 @@ fn save_token_persists_access_token_to_disk() {
 #[test]
 fn save_token_creates_parent_directories() {
     let dir = tempfile::tempdir().unwrap();
-    let path = dir.path().join("nested").join("deep").join("gdrive_token.json");
+    let path = dir
+        .path()
+        .join("nested")
+        .join("deep")
+        .join("gdrive_token.json");
     let token = OAuthToken {
         access_token: "ya29.nested".to_string(),
         refresh_token: None,
@@ -306,7 +318,10 @@ fn find_available_port_returns_nonzero_port() {
 fn find_available_port_returns_valid_range() {
     let port = find_available_port().expect("should find an available port");
     // Ephemeral ports are typically in 1024-65535
-    assert!(port >= 1024, "port should be in ephemeral range, got {port}");
+    assert!(
+        port >= 1024,
+        "port should be in ephemeral range, got {port}"
+    );
 }
 
 // ── exchange_code_for_token ──────────────────────────────────────────────────
@@ -490,12 +505,18 @@ fn auth_url_with_localhost_port_has_correct_redirect_uri() {
 
 #[test]
 fn default_client_id_is_nonempty() {
-    assert!(!DEFAULT_CLIENT_ID.is_empty(), "DEFAULT_CLIENT_ID must be set");
+    assert!(
+        !DEFAULT_CLIENT_ID.is_empty(),
+        "DEFAULT_CLIENT_ID must be set"
+    );
 }
 
 #[test]
 fn default_client_secret_is_nonempty() {
-    assert!(!DEFAULT_CLIENT_SECRET.is_empty(), "DEFAULT_CLIENT_SECRET must be set");
+    assert!(
+        !DEFAULT_CLIENT_SECRET.is_empty(),
+        "DEFAULT_CLIENT_SECRET must be set"
+    );
 }
 
 #[test]
@@ -577,9 +598,7 @@ fn oauth_consent_screen_has_drive_readonly_scope() {
     };
 
     // Call Google's tokeninfo endpoint — returns JSON with the granted scopes.
-    let url = format!(
-        "https://oauth2.googleapis.com/tokeninfo?access_token={access_token}"
-    );
+    let url = format!("https://oauth2.googleapis.com/tokeninfo?access_token={access_token}");
     let response = ureq::get(&url)
         .call()
         .expect("should reach oauth2.googleapis.com");

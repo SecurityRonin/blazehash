@@ -51,7 +51,14 @@ pub fn walk_and_hash_with_progress(
         .par_iter()
         .filter_map(|path| {
             let file_size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
-            match hash_file(path, algorithms, false, false, compute_entropy, YaraOpts::no_yara()) {
+            match hash_file(
+                path,
+                algorithms,
+                false,
+                false,
+                compute_entropy,
+                YaraOpts::no_yara(),
+            ) {
                 Ok(result) => {
                     pb.inc(file_size);
                     Some(result)

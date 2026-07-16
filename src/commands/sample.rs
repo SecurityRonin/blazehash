@@ -49,7 +49,9 @@ fn lcg_sample<'a>(entries: &[&'a str], take: usize, seed: u64) -> Vec<&'a str> {
     let mut indices: Vec<usize> = (0..entries.len()).collect();
 
     for i in 0..take {
-        rng = rng.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        rng = rng
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         let j = i + (rng >> 33) as usize % (entries.len() - i);
         indices.swap(i, j);
     }

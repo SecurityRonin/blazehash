@@ -30,14 +30,22 @@ fn test_pq_sign_creates_pqsig_file() {
     let manifest_path = manifest.path();
     pq_sign_with_password(manifest_path, "testpass").unwrap();
     let sig_path = {
-        let name = format!("{}.pqsig",
-            manifest_path.file_name().unwrap().to_str().unwrap());
+        let name = format!(
+            "{}.pqsig",
+            manifest_path.file_name().unwrap().to_str().unwrap()
+        );
         manifest_path.with_file_name(name)
     };
     assert!(sig_path.exists(), ".pqsig file must be created");
     let content = std::fs::read_to_string(&sig_path).unwrap();
-    assert!(content.starts_with("blazehash-pqsig-v1\n"), "must have version header");
-    assert!(content.contains("algorithm: ml-dsa-65"), "must declare algorithm");
+    assert!(
+        content.starts_with("blazehash-pqsig-v1\n"),
+        "must have version header"
+    );
+    assert!(
+        content.contains("algorithm: ml-dsa-65"),
+        "must declare algorithm"
+    );
     assert!(content.contains("pubkey: "), "must embed pubkey");
     assert!(content.contains("sig: "), "must embed signature");
 }
@@ -84,8 +92,8 @@ fn test_cli_pq_sign_creates_pqsig() {
 
     let mut cmd = Command::cargo_bin("blazehash").unwrap();
     cmd.env("BLAZEHASH_SIGN_PASSWORD", "testpass")
-       .arg("pq-sign")
-       .arg(&manifest);
+        .arg("pq-sign")
+        .arg(&manifest);
     cmd.assert().success();
 
     let pqsig = dir.path().join("evidence.hash.pqsig");
@@ -101,8 +109,8 @@ fn test_cli_pq_verify_sig_valid() {
     // First sign
     let mut cmd = Command::cargo_bin("blazehash").unwrap();
     cmd.env("BLAZEHASH_SIGN_PASSWORD", "testpass")
-       .arg("pq-sign")
-       .arg(&manifest);
+        .arg("pq-sign")
+        .arg(&manifest);
     cmd.assert().success();
 
     // Then verify

@@ -51,7 +51,11 @@ pub fn parse_file_id(input: &str) -> Option<String> {
     // gdrive://<id>
     if let Some(id) = input.strip_prefix("gdrive://") {
         let id = id.trim_end_matches('/');
-        return if id.is_empty() { None } else { Some(id.to_string()) };
+        return if id.is_empty() {
+            None
+        } else {
+            Some(id.to_string())
+        };
     }
 
     // https://drive.google.com/file/d/<id>/view  (or /edit, or bare)
@@ -60,7 +64,11 @@ pub fn parse_file_id(input: &str) -> Option<String> {
         .or_else(|| input.strip_prefix("http://drive.google.com/file/d/"))
     {
         let id = rest.split('/').next().unwrap_or("").trim();
-        return if id.is_empty() { None } else { Some(id.to_string()) };
+        return if id.is_empty() {
+            None
+        } else {
+            Some(id.to_string())
+        };
     }
 
     // https://drive.google.com/open?id=<id>
@@ -69,7 +77,11 @@ pub fn parse_file_id(input: &str) -> Option<String> {
     {
         if let Some(id) = input.split("id=").nth(1) {
             let id = id.split('&').next().unwrap_or("").trim();
-            return if id.is_empty() { None } else { Some(id.to_string()) };
+            return if id.is_empty() {
+                None
+            } else {
+                Some(id.to_string())
+            };
         }
         return None;
     }
@@ -172,12 +184,10 @@ fn hash_gdrive_file_with_auth_inner(
                 .call()?
         }
         GDriveAuthMode::ServiceAccount { .. } => {
-            return Err(
-                "service account auth is not yet implemented — \
+            return Err("service account auth is not yet implemented — \
                  run `blazehash gdrive auth login` to authenticate as a user, \
                  or set GOOGLE_APPLICATION_CREDENTIALS and use `gcloud auth print-access-token`"
-                    .into(),
-            );
+                .into());
         }
     };
 
@@ -231,7 +241,10 @@ fn hash_gdrive_file_with_auth_inner(
     let sha256 = sha256_hasher.map(|h| format!("{:x}", sha2::Digest::finalize(h)));
     let blake3 = blake3_hasher.map(|h| h.finalize().to_hex().to_string());
 
-    let hash_str = sha256.as_deref().or(blake3.as_deref()).unwrap_or("(no hash)");
+    let hash_str = sha256
+        .as_deref()
+        .or(blake3.as_deref())
+        .unwrap_or("(no hash)");
     writeln!(sink, "{hash_str}  gdrive://{file_id}")?;
 
     Ok(GDriveHashResult {

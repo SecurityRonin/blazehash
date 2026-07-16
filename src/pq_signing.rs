@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use argon2::{Algorithm as Argon2Algorithm, Argon2, Params, Version};
-use ml_dsa::{EncodedSignature, EncodedVerifyingKey, KeyGen, MlDsa65, Signature, VerifyingKey};
 use ml_dsa::signature::{Keypair, Signer, Verifier};
+use ml_dsa::{EncodedSignature, EncodedVerifyingKey, KeyGen, MlDsa65, Signature, VerifyingKey};
 use std::path::Path;
 
 const APP_SALT: &[u8] = b"blazehash-pq-signing-v1";
@@ -116,15 +116,23 @@ pub fn pq_verify_sig(manifest_path: &Path, expected_pubkey_hex: &str) -> Result<
 
     // Decode public key
     let pub_bytes = hex::decode(pub_hex.trim()).context("invalid pubkey hex")?;
-    let enc_vk = EncodedVerifyingKey::<MlDsa65>::try_from(pub_bytes.as_slice())
-        .map_err(|_| anyhow::anyhow!("pubkey wrong length: expected 1952 bytes, got {}", pub_bytes.len()))?;
+    let enc_vk = EncodedVerifyingKey::<MlDsa65>::try_from(pub_bytes.as_slice()).map_err(|_| {
+        anyhow::anyhow!(
+            "pubkey wrong length: expected 1952 bytes, got {}",
+            pub_bytes.len()
+        )
+    })?;
     let vk = VerifyingKey::<MlDsa65>::decode(&enc_vk);
 
     // Decode signature
     let sig_hex = sig_hex.ok_or_else(|| anyhow::anyhow!("no sig: line in pqsig file"))?;
     let sig_bytes = hex::decode(sig_hex.trim()).context("invalid sig hex")?;
-    let enc_sig = EncodedSignature::<MlDsa65>::try_from(sig_bytes.as_slice())
-        .map_err(|_| anyhow::anyhow!("sig wrong length: expected 3309 bytes, got {}", sig_bytes.len()))?;
+    let enc_sig = EncodedSignature::<MlDsa65>::try_from(sig_bytes.as_slice()).map_err(|_| {
+        anyhow::anyhow!(
+            "sig wrong length: expected 3309 bytes, got {}",
+            sig_bytes.len()
+        )
+    })?;
     let signature = Signature::<MlDsa65>::decode(&enc_sig)
         .ok_or_else(|| anyhow::anyhow!("invalid ML-DSA-65 signature encoding"))?;
 

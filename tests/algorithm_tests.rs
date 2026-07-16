@@ -441,8 +441,7 @@ fn crc64_is_non_cryptographic() {
 // same bytes as the existing hash_bytes() dispatch arms.
 
 use blazehash::digest_wrappers::{
-    Adler32Digest, Crc32cDigest, Crc64Digest, K12Fixed,
-    Shake128Fixed, Shake256Fixed, Xxh3Digest,
+    Adler32Digest, Crc32cDigest, Crc64Digest, K12Fixed, Shake128Fixed, Shake256Fixed, Xxh3Digest,
 };
 use digest::Digest;
 
@@ -513,7 +512,10 @@ fn shake128_wrapper_incremental_matches_oneshot() {
     Digest::update(&mut h, part1);
     Digest::update(&mut h, part2);
     let incremental = hex::encode(h.finalize());
-    assert_eq!(incremental, oneshot, "incremental must equal one-shot for Shake128");
+    assert_eq!(
+        incremental, oneshot,
+        "incremental must equal one-shot for Shake128"
+    );
 }
 
 #[test]
@@ -527,7 +529,10 @@ fn crc32c_wrapper_incremental_matches_oneshot() {
     Digest::update(&mut h, part1);
     Digest::update(&mut h, part2);
     let incremental = hex::encode(h.finalize());
-    assert_eq!(incremental, oneshot, "incremental must equal one-shot for Crc32c");
+    assert_eq!(
+        incremental, oneshot,
+        "incremental must equal one-shot for Crc32c"
+    );
 }
 
 // nilsimsa is skipped: the `nilsimsa` crate (0.2.1) requires #![feature()] and does not

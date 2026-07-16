@@ -28,13 +28,36 @@ fn test_shuffle_contains_all_entries() {
         .arg("42")
         .output()
         .unwrap();
-    assert!(out.status.success(), "shuffle should succeed: {:?}", String::from_utf8_lossy(&out.stderr));
+    assert!(
+        out.status.success(),
+        "shuffle should succeed: {:?}",
+        String::from_utf8_lossy(&out.stderr)
+    );
     let stdout = String::from_utf8_lossy(&out.stdout);
-    for path in &["/tmp/file1.txt", "/tmp/file2.txt", "/tmp/file3.txt", "/tmp/file4.txt", "/tmp/file5.txt"] {
-        assert!(stdout.contains(path), "output should contain {path}, got: {stdout}");
+    for path in &[
+        "/tmp/file1.txt",
+        "/tmp/file2.txt",
+        "/tmp/file3.txt",
+        "/tmp/file4.txt",
+        "/tmp/file5.txt",
+    ] {
+        assert!(
+            stdout.contains(path),
+            "output should contain {path}, got: {stdout}"
+        );
     }
-    let data_lines: Vec<&str> = stdout.lines().filter(|l| !l.trim().starts_with('#') && !l.trim().starts_with('%') && !l.trim().is_empty()).collect();
-    assert_eq!(data_lines.len(), 5, "output should have exactly 5 data entries, got: {}", data_lines.len());
+    let data_lines: Vec<&str> = stdout
+        .lines()
+        .filter(|l| {
+            !l.trim().starts_with('#') && !l.trim().starts_with('%') && !l.trim().is_empty()
+        })
+        .collect();
+    assert_eq!(
+        data_lines.len(),
+        5,
+        "output should have exactly 5 data entries, got: {}",
+        data_lines.len()
+    );
 }
 
 #[test]
@@ -116,7 +139,16 @@ fn test_shuffle_output_to_file() {
         .assert()
         .success();
     let content = fs::read_to_string(&out_path).unwrap();
-    for path in &["/tmp/file1.txt", "/tmp/file2.txt", "/tmp/file3.txt", "/tmp/file4.txt", "/tmp/file5.txt"] {
-        assert!(content.contains(path), "output file should contain {path}, got: {content}");
+    for path in &[
+        "/tmp/file1.txt",
+        "/tmp/file2.txt",
+        "/tmp/file3.txt",
+        "/tmp/file4.txt",
+        "/tmp/file5.txt",
+    ] {
+        assert!(
+            content.contains(path),
+            "output file should contain {path}, got: {content}"
+        );
     }
 }

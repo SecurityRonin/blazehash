@@ -16,10 +16,16 @@ fn make_manifest(dir: &TempDir, name: &str, header: &str, entries: &[&str]) -> s
 #[test]
 fn test_interleave_alternates_entries() {
     let dir = TempDir::new().unwrap();
-    let a = make_manifest(&dir, "a.txt", "## case: A", &["file_a1.txt", "file_a2.txt", "file_a3.txt"]);
+    let a = make_manifest(
+        &dir,
+        "a.txt",
+        "## case: A",
+        &["file_a1.txt", "file_a2.txt", "file_a3.txt"],
+    );
     let b = make_manifest(&dir, "b.txt", "## case: B", &["file_b1.txt", "file_b2.txt"]);
 
-    let output = Command::cargo_bin("blazehash").unwrap()
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
         .args(["interleave", a.to_str().unwrap(), b.to_str().unwrap()])
         .assert()
         .success()
@@ -49,7 +55,8 @@ fn test_interleave_preserves_headers_from_a() {
     let a = make_manifest(&dir, "a.txt", "## case: A", &["file_a1.txt"]);
     let b = make_manifest(&dir, "b.txt", "## case: B", &["file_b1.txt"]);
 
-    Command::cargo_bin("blazehash").unwrap()
+    Command::cargo_bin("blazehash")
+        .unwrap()
         .args(["interleave", a.to_str().unwrap(), b.to_str().unwrap()])
         .assert()
         .success()
@@ -62,7 +69,8 @@ fn test_interleave_skips_headers_from_b() {
     let a = make_manifest(&dir, "a.txt", "## case: A", &["file_a1.txt"]);
     let b = make_manifest(&dir, "b.txt", "## case: B", &["file_b1.txt"]);
 
-    Command::cargo_bin("blazehash").unwrap()
+    Command::cargo_bin("blazehash")
+        .unwrap()
         .args(["interleave", a.to_str().unwrap(), b.to_str().unwrap()])
         .assert()
         .success()
@@ -75,7 +83,8 @@ fn test_interleave_missing_manifest_fails() {
     let a = dir.path().join("nonexistent_a.txt");
     let b = dir.path().join("nonexistent_b.txt");
 
-    Command::cargo_bin("blazehash").unwrap()
+    Command::cargo_bin("blazehash")
+        .unwrap()
         .args(["interleave", a.to_str().unwrap(), b.to_str().unwrap()])
         .assert()
         .failure();
@@ -84,19 +93,46 @@ fn test_interleave_missing_manifest_fails() {
 #[test]
 fn test_interleave_output_to_file() {
     let dir = TempDir::new().unwrap();
-    let a = make_manifest(&dir, "a.txt", "## case: A", &["file_a1.txt", "file_a2.txt", "file_a3.txt"]);
+    let a = make_manifest(
+        &dir,
+        "a.txt",
+        "## case: A",
+        &["file_a1.txt", "file_a2.txt", "file_a3.txt"],
+    );
     let b = make_manifest(&dir, "b.txt", "## case: B", &["file_b1.txt", "file_b2.txt"]);
     let out = dir.path().join("out.txt");
 
-    Command::cargo_bin("blazehash").unwrap()
-        .args(["interleave", a.to_str().unwrap(), b.to_str().unwrap(), "-o", out.to_str().unwrap()])
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([
+            "interleave",
+            a.to_str().unwrap(),
+            b.to_str().unwrap(),
+            "-o",
+            out.to_str().unwrap(),
+        ])
         .assert()
         .success();
 
     let content = std::fs::read_to_string(&out).unwrap();
-    assert!(content.contains("file_a1.txt"), "output missing file_a1.txt");
-    assert!(content.contains("file_a2.txt"), "output missing file_a2.txt");
-    assert!(content.contains("file_a3.txt"), "output missing file_a3.txt");
-    assert!(content.contains("file_b1.txt"), "output missing file_b1.txt");
-    assert!(content.contains("file_b2.txt"), "output missing file_b2.txt");
+    assert!(
+        content.contains("file_a1.txt"),
+        "output missing file_a1.txt"
+    );
+    assert!(
+        content.contains("file_a2.txt"),
+        "output missing file_a2.txt"
+    );
+    assert!(
+        content.contains("file_a3.txt"),
+        "output missing file_a3.txt"
+    );
+    assert!(
+        content.contains("file_b1.txt"),
+        "output missing file_b1.txt"
+    );
+    assert!(
+        content.contains("file_b2.txt"),
+        "output missing file_b2.txt"
+    );
 }

@@ -193,18 +193,27 @@ pub fn initiate_browser_auth(
     let listener = TcpListener::bind("127.0.0.1:0")?;
     let port = listener.local_addr()?.port();
     let redirect_uri = format!("http://localhost:{port}/callback");
-    let state = format!("blazehash-{}", std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_secs());
+    let state = format!(
+        "blazehash-{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs()
+    );
 
     let auth_url = build_oauth_auth_url(&client_id, &redirect_uri, &state);
 
     // Try to open the browser; fall back to printing the URL
     eprintln!("\nOpen this URL to authorise blazehash to access Google Drive:");
     eprintln!("\n  {auth_url}\n");
-    let _ = std::process::Command::new("open").arg(&auth_url).status()
-        .or_else(|_| std::process::Command::new("xdg-open").arg(&auth_url).status())
+    let _ = std::process::Command::new("open")
+        .arg(&auth_url)
+        .status()
+        .or_else(|_| {
+            std::process::Command::new("xdg-open")
+                .arg(&auth_url)
+                .status()
+        })
         .or_else(|_| std::process::Command::new("start").arg(&auth_url).status());
     eprintln!("Waiting for browser redirect...");
 
@@ -213,13 +222,17 @@ pub fn initiate_browser_auth(
     let code = read_code_from_callback(stream)?;
 
     let endpoint = token_endpoint.unwrap_or("https://oauth2.googleapis.com/token");
-    let token = exchange_code_for_token(&client_id, &client_secret, &code, &redirect_uri, endpoint)?;
+    let token =
+        exchange_code_for_token(&client_id, &client_secret, &code, &redirect_uri, endpoint)?;
 
     // Persist token and return access token
     let cache = token_cache_path();
     save_token(&token, &cache)?;
     let access_token = token.access_token.clone();
-    eprintln!("Authentication successful. Token cached at {}", cache.display());
+    eprintln!(
+        "Authentication successful. Token cached at {}",
+        cache.display()
+    );
     Ok(access_token)
 }
 
@@ -236,11 +249,12 @@ fn read_code_from_callback(stream: TcpStream) -> Result<String, Box<dyn std::err
         .ok_or("malformed HTTP request")?;
 
     let full_url = format!("http://localhost{path}");
-    let code = parse_auth_code_from_redirect(&full_url)
-        .ok_or("no authorization code in callback URL")?;
+    let code =
+        parse_auth_code_from_redirect(&full_url).ok_or("no authorization code in callback URL")?;
 
     // Send a minimal success response so the browser tab closes cleanly
-    let html = b"<html><body><h1>blazehash: authorised.</h1><p>You may close this tab.</p></body></html>";
+    let html =
+        b"<html><body><h1>blazehash: authorised.</h1><p>You may close this tab.</p></body></html>";
     let response = format!(
         "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
         html.len()

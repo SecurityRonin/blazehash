@@ -1,6 +1,6 @@
-use blazehash::manifest_loader::load_manifest;
-use blazehash::manifest::ManifestRecord;
 use anyhow::{bail, Result};
+use blazehash::manifest::ManifestRecord;
+use blazehash::manifest_loader::load_manifest;
 use std::collections::HashMap;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -12,7 +12,10 @@ pub struct MergeArgs {
 
 pub fn run_merge(args: MergeArgs) -> Result<()> {
     if args.inputs.len() < 2 {
-        bail!("merge requires at least 2 input manifests; got {}", args.inputs.len());
+        bail!(
+            "merge requires at least 2 input manifests; got {}",
+            args.inputs.len()
+        );
     }
 
     let mut by_path: HashMap<PathBuf, ManifestRecord> = HashMap::new();

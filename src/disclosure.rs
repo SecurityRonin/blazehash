@@ -80,7 +80,11 @@ fn merkle_proof_path(levels: &[Vec<String>], leaf_idx: usize) -> Vec<String> {
     let mut path = Vec::new();
     let mut idx = leaf_idx;
     for level in &levels[..levels.len() - 1] {
-        let sibling_idx = if idx.is_multiple_of(2) { idx + 1 } else { idx - 1 };
+        let sibling_idx = if idx.is_multiple_of(2) {
+            idx + 1
+        } else {
+            idx - 1
+        };
         let sibling = if sibling_idx < level.len() {
             level[sibling_idx].clone()
         } else {
@@ -129,7 +133,10 @@ fn sorted_sha256_entries(entries: &[(String, String, String)]) -> Vec<(String, S
         .collect();
     // Sort by leaf hash (matches merkle.rs build_levels sort_by_key)
     pairs.sort_by(|a, b| a.0.cmp(&b.0));
-    pairs.into_iter().map(|(_, path, hash)| (path, hash)).collect()
+    pairs
+        .into_iter()
+        .map(|(_, path, hash)| (path, hash))
+        .collect()
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────

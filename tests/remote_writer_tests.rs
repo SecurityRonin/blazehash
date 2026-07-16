@@ -15,9 +15,7 @@ mod remote_writer_tests {
         let rt = make_rt();
         let op = {
             let _guard = rt.enter();
-            let async_op = Operator::new(services::Memory::default())
-                .unwrap()
-                .finish();
+            let async_op = Operator::new(services::Memory::default()).unwrap().finish();
             blocking::Operator::new(async_op).unwrap()
         };
         (rt, op)

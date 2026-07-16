@@ -358,11 +358,10 @@ fn main() -> Result<()> {
     }
 
     if let Mode::MerkleProof = cli.mode() {
-        let manifest = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash file-proof <manifest> --path <p>"))?;
+        let manifest =
+            cli.paths.get(1).cloned().ok_or_else(|| {
+                anyhow::anyhow!("usage: blazehash file-proof <manifest> --path <p>")
+            })?;
         let file_path = cli
             .merkle_path
             .as_deref()
@@ -413,11 +412,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Disclose = cli.mode() {
-        let manifest = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash disclose <manifest> --paths <p1,p2> [-o proof.json]"))?;
+        let manifest = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash disclose <manifest> --paths <p1,p2> [-o proof.json]")
+        })?;
         let paths_str = cli
             .disclose_paths
             .as_deref()
@@ -434,11 +431,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::ProveMembership = cli.mode() {
-        let manifest = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash check-file <manifest> --sha256 <hex> [-o proof.json]"))?;
+        let manifest = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash check-file <manifest> --sha256 <hex> [-o proof.json]")
+        })?;
         let sha256_hex = cli
             .merkle_sha256
             .as_deref()
@@ -464,8 +459,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::HashOnly = cli.mode() {
-        let manifest = cli.paths.get(1)
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash hash-only <manifest> [--hash-only-algo ALGO]"))?;
+        let manifest = cli.paths.get(1).ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash hash-only <manifest> [--hash-only-algo ALGO]")
+        })?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::hash_only::hash_only_manifest(
             manifest.as_ref(),
@@ -476,29 +472,31 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Redact = cli.mode() {
-        let manifest = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash redact <manifest> -o <redacted.hash>"))?;
-        let out = output
-            .ok_or_else(|| anyhow::anyhow!("redact requires -o <output>"))?;
+        let manifest = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash redact <manifest> -o <redacted.hash>")
+        })?;
+        let out = output.ok_or_else(|| anyhow::anyhow!("redact requires -o <output>"))?;
         commands::redact::redact_manifest(&manifest, &out)?;
         return Ok(());
     }
 
     if let Mode::Annotate = cli.mode() {
-        let note = cli.annotate_note.as_deref()
+        let note = cli
+            .annotate_note
+            .as_deref()
             .ok_or_else(|| anyhow::anyhow!("--note is required for blazehash annotate"))?;
-        let manifest = cli.paths.get(1)
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash annotate <manifest> --note <message>"))?;
+        let manifest = cli.paths.get(1).ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash annotate <manifest> --note <message>")
+        })?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::annotate::annotate_manifest(manifest.as_ref(), note, &mut out)?;
         return Ok(());
     }
 
     if let Mode::Shuffle = cli.mode() {
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash shuffle <manifest>"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::shuffle::shuffle_manifest(manifest.as_ref(), cli.shuffle_seed, &mut out)?;
@@ -506,7 +504,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Reverse = cli.mode() {
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash reverse <manifest>"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::reverse::reverse_manifest(manifest.as_ref(), &mut out)?;
@@ -514,7 +514,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::UniqueHash = cli.mode() {
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash unique-hash <manifest>"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::unique_hash::unique_hash_manifest(manifest.as_ref(), &mut out)?;
@@ -522,9 +524,12 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Balance = cli.mode() {
-        let parts = cli.balance_parts
+        let parts = cli
+            .balance_parts
             .ok_or_else(|| anyhow::anyhow!("--parts is required for blazehash balance"))?;
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash balance <manifest> --parts <N>"))?;
         let out_dir = cli.output.as_deref();
         let paths = crate::commands::balance::balance_manifest(manifest.as_ref(), parts, out_dir)?;
@@ -535,10 +540,12 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Interleave = cli.mode() {
-        let a = cli.paths.get(1)
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash interleave <manifest-a> <manifest-b>"))?;
-        let b = cli.paths.get(2)
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash interleave <manifest-a> <manifest-b>"))?;
+        let a = cli.paths.get(1).ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash interleave <manifest-a> <manifest-b>")
+        })?;
+        let b = cli.paths.get(2).ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash interleave <manifest-a> <manifest-b>")
+        })?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::interleave::interleave_manifests(a.as_ref(), b.as_ref(), &mut out)?;
         return Ok(());
@@ -562,11 +569,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Timeline = cli.mode() {
-        let manifest_path = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash timeline <manifest> [-o report.html]"))?;
+        let manifest_path = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash timeline <manifest> [-o report.html]")
+        })?;
         if !manifest_path.exists() {
             anyhow::bail!("manifest not found: {}", manifest_path.display());
         }
@@ -596,16 +601,20 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Filter = cli.mode() {
-        let manifest_path = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash filter <manifest> [--include GLOB]... [--algo ALGO] [-o output]"))?;
+        let manifest_path = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!(
+                "usage: blazehash filter <manifest> [--include GLOB]... [--algo ALGO] [-o output]"
+            )
+        })?;
         if !manifest_path.exists() {
             anyhow::bail!("manifest not found: {}", manifest_path.display());
         }
         let opts = commands::filter::FilterOpts {
-            include: if cli.include.is_empty() { None } else { Some(&cli.include) },
+            include: if cli.include.is_empty() {
+                None
+            } else {
+                Some(&cli.include)
+            },
             algo: cli.filter_algo.as_deref(),
         };
         if let Some(out_path) = &output {
@@ -620,10 +629,12 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Exclude = cli.mode() {
-        let pattern = cli.exclude_pattern.as_deref()
-            .ok_or_else(|| anyhow::anyhow!("--exclude-pattern is required for blazehash exclude"))?;
-        let manifest = cli.paths.get(1)
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash exclude <manifest> --exclude-pattern <GLOB>"))?;
+        let pattern = cli.exclude_pattern.as_deref().ok_or_else(|| {
+            anyhow::anyhow!("--exclude-pattern is required for blazehash exclude")
+        })?;
+        let manifest = cli.paths.get(1).ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash exclude <manifest> --exclude-pattern <GLOB>")
+        })?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::exclude::exclude_manifest(manifest.as_ref(), pattern, &mut out)?;
         return Ok(());
@@ -654,9 +665,8 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Archive = cli.mode() {
-        let archive_path = std::path::Path::new(
-            cli.paths.get(1).map(|s| s.as_os_str()).unwrap_or_default(),
-        );
+        let archive_path =
+            std::path::Path::new(cli.paths.get(1).map(|s| s.as_os_str()).unwrap_or_default());
         if let Some(out_path) = &output {
             let mut f = std::fs::File::create(out_path)?;
             commands::archive::hash_archive(archive_path, &mut f)?;
@@ -668,15 +678,14 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Convert = cli.mode() {
-        let input = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash convert <file> --from <format> [-o output]"))?;
-        let format = cli
-            .from_format
-            .as_deref()
-            .ok_or_else(|| anyhow::anyhow!("--from <format> is required (sha256sum, md5sum, sha1sum, hashdeep, sfv)"))?;
+        let input = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash convert <file> --from <format> [-o output]")
+        })?;
+        let format = cli.from_format.as_deref().ok_or_else(|| {
+            anyhow::anyhow!(
+                "--from <format> is required (sha256sum, md5sum, sha1sum, hashdeep, sfv)"
+            )
+        })?;
         if let Some(out_path) = &output {
             let mut f = std::fs::File::create(out_path)?;
             commands::convert::convert_manifest(&input, format, &mut f)?;
@@ -706,7 +715,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Tail = cli.mode() {
-        let manifest_path = cli.paths.get(1)
+        let manifest_path = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("tail: missing manifest path"))?;
         if let Some(out_path) = &output {
             let mut f = std::fs::File::create(out_path)?;
@@ -720,11 +731,11 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Search = cli.mode() {
-        let manifest = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash search <manifest> [--search-path QUERY] [--hash PREFIX]"))?;
+        let manifest = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!(
+                "usage: blazehash search <manifest> [--search-path QUERY] [--hash PREFIX]"
+            )
+        })?;
         let opts = commands::search::SearchOpts {
             path_query: cli.search_path.as_deref(),
             hash_query: cli.search_hash.as_deref(),
@@ -745,15 +756,10 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Export = cli.mode() {
-        let manifest = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash export <manifest> --format <csv|tsv|jsonl>"))?;
-        let fmt = cli
-            .export_format
-            .as_deref()
-            .unwrap_or("csv");
+        let manifest = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash export <manifest> --format <csv|tsv|jsonl>")
+        })?;
+        let fmt = cli.export_format.as_deref().unwrap_or("csv");
         if let Some(out_path) = &output {
             let mut f = std::fs::File::create(out_path)?;
             commands::export::export_manifest(&manifest, fmt, &mut f)?;
@@ -766,10 +772,12 @@ fn main() -> Result<()> {
     }
 
     if let Mode::ApplyPatch = cli.mode() {
-        let manifest = cli.paths.get(1).cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash apply-patch <manifest> <patch-file>"))?;
-        let patch_file = cli.paths.get(2).cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash apply-patch <manifest> <patch-file>"))?;
+        let manifest = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash apply-patch <manifest> <patch-file>")
+        })?;
+        let patch_file = cli.paths.get(2).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash apply-patch <manifest> <patch-file>")
+        })?;
         if let Some(out_path) = &output {
             let mut f = std::fs::File::create(out_path)?;
             commands::apply_patch::apply_patch(&manifest, &patch_file, &mut f)?;
@@ -782,10 +790,12 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Subtract = cli.mode() {
-        let left = cli.paths.get(1).cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash subtract <manifest_a> <manifest_b>"))?;
-        let right = cli.paths.get(2).cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash subtract <manifest_a> <manifest_b>"))?;
+        let left = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash subtract <manifest_a> <manifest_b>")
+        })?;
+        let right = cli.paths.get(2).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash subtract <manifest_a> <manifest_b>")
+        })?;
         let kept = if let Some(out_path) = &output {
             let mut f = std::fs::File::create(out_path)?;
             commands::subtract::subtract_manifests(&left, &right, &mut f)?
@@ -794,25 +804,31 @@ fn main() -> Result<()> {
             let mut handle = stdout.lock();
             commands::subtract::subtract_manifests(&left, &right, &mut handle)?
         };
-        if kept == 0 { std::process::exit(1); }
+        if kept == 0 {
+            std::process::exit(1);
+        }
         return Ok(());
     }
 
     if let Mode::SymDiff = cli.mode() {
-        let a = cli.paths.get(1)
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash sym-diff <manifest-a> <manifest-b>"))?;
-        let b = cli.paths.get(2)
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash sym-diff <manifest-a> <manifest-b>"))?;
+        let a = cli.paths.get(1).ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash sym-diff <manifest-a> <manifest-b>")
+        })?;
+        let b = cli.paths.get(2).ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash sym-diff <manifest-a> <manifest-b>")
+        })?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::sym_diff::sym_diff_manifests(a.as_ref(), b.as_ref(), &mut out)?;
         return Ok(());
     }
 
     if let Mode::Intersect = cli.mode() {
-        let left = cli.paths.get(1).cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash intersect <manifest_a> <manifest_b>"))?;
-        let right = cli.paths.get(2).cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash intersect <manifest_a> <manifest_b>"))?;
+        let left = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash intersect <manifest_a> <manifest_b>")
+        })?;
+        let right = cli.paths.get(2).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash intersect <manifest_a> <manifest_b>")
+        })?;
         let matched = if let Some(out_path) = &output {
             let mut f = std::fs::File::create(out_path)?;
             commands::intersect::intersect_manifests(&left, &right, &mut f)?
@@ -821,16 +837,16 @@ fn main() -> Result<()> {
             let mut handle = stdout.lock();
             commands::intersect::intersect_manifests(&left, &right, &mut handle)?
         };
-        if matched == 0 { std::process::exit(1); }
+        if matched == 0 {
+            std::process::exit(1);
+        }
         return Ok(());
     }
 
     if let Mode::Sort = cli.mode() {
-        let manifest = cli
-            .paths
-            .get(1)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash sort <manifest> [--sort-by path|hash|algo|ext]"))?;
+        let manifest = cli.paths.get(1).cloned().ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash sort <manifest> [--sort-by path|hash|algo|ext]")
+        })?;
         commands::sort::validate_sort_by(&cli.sort_by)?;
         if let Some(out_path) = &output {
             let mut f = std::fs::File::create(out_path)?;
@@ -862,7 +878,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Info = cli.mode() {
-        let manifest_path = cli.paths.get(1)
+        let manifest_path = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("info: missing manifest path"))?;
         let stdout = std::io::stdout();
         let mut out: Box<dyn std::io::Write> = match &cli.output {
@@ -874,7 +892,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Missing = cli.mode() {
-        let manifest_path = cli.paths.get(1)
+        let manifest_path = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("missing: missing manifest path"))?;
         let root = cli.merkle_root.as_deref().map(std::path::Path::new);
         let stdout = std::io::stdout();
@@ -890,7 +910,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Tag = cli.mode() {
-        let manifest_path = cli.paths.get(1)
+        let manifest_path = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("tag: missing manifest path"))?;
         let stdout = std::io::stdout();
         let mut out: Box<dyn std::io::Write> = match &cli.output {
@@ -902,15 +924,14 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Verify = cli.mode() {
-        let manifest_path = cli.paths.get(1)
+        let manifest_path = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("verify: missing manifest path"))?;
         let stdout = std::io::stdout();
         let mut out = stdout.lock();
-        let result = commands::verify::verify_manifest(
-            manifest_path,
-            cli.verify_algo.as_deref(),
-            &mut out,
-        )?;
+        let result =
+            commands::verify::verify_manifest(manifest_path, cli.verify_algo.as_deref(), &mut out)?;
         if result.failed > 0 {
             std::process::exit(1);
         }
@@ -918,7 +939,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Count = cli.mode() {
-        let manifest_path = cli.paths.get(1)
+        let manifest_path = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("count: missing manifest path"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         commands::count::count_entries(manifest_path, &mut out)?;
@@ -926,25 +949,30 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Cat = cli.mode() {
-        let input_paths: Vec<&std::path::Path> = cli.paths[1..].iter()
-            .map(|p| p.as_path())
-            .collect();
+        let input_paths: Vec<&std::path::Path> =
+            cli.paths[1..].iter().map(|p| p.as_path()).collect();
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         commands::cat::cat_manifests(&input_paths, &mut out)?;
         return Ok(());
     }
 
     if let Mode::Split = cli.mode() {
-        let manifest_path = cli.paths.get(1)
+        let manifest_path = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("split: missing manifest path"))?;
-        let out_base = cli.output.as_deref()
+        let out_base = cli
+            .output
+            .as_deref()
             .ok_or_else(|| anyhow::anyhow!("split: -o <base> is required"))?;
         commands::split::split_manifest(manifest_path, cli.split_chunk, out_base)?;
         return Ok(());
     }
 
     if let Mode::Uniq = cli.mode() {
-        let manifest_path = cli.paths.get(1)
+        let manifest_path = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("uniq: missing manifest path"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         commands::uniq::uniq_manifest(manifest_path, &mut out)?;
@@ -952,7 +980,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Checksum = cli.mode() {
-        let manifest_path = cli.paths.get(1)
+        let manifest_path = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("checksum: missing manifest path"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         commands::checksum::checksum_manifest(manifest_path, cli.json, &mut out)?;
@@ -960,9 +990,13 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Rename = cli.mode() {
-        let from = cli.rename_from.as_deref()
+        let from = cli
+            .rename_from
+            .as_deref()
             .ok_or_else(|| anyhow::anyhow!("--rename-from is required for blazehash rename"))?;
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("blazehash rename requires a manifest path"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::rename_cmd::rename_manifest(
@@ -975,7 +1009,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Slice = cli.mode() {
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("blazehash slice requires a manifest path"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::slice_cmd::slice_manifest(
@@ -988,9 +1024,13 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Pivot = cli.mode() {
-        let algo = cli.pivot_algo.as_deref()
+        let algo = cli
+            .pivot_algo
+            .as_deref()
             .ok_or_else(|| anyhow::anyhow!("--pivot-algo is required for blazehash pivot"))?;
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("blazehash pivot requires a manifest path"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::pivot::pivot_manifest(manifest.as_ref(), algo, &mut out)?;
@@ -998,7 +1038,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Stamp = cli.mode() {
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("blazehash stamp requires a manifest path"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::stamp::stamp_manifest(manifest.as_ref(), &mut out)?;
@@ -1006,9 +1048,13 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Grep = cli.mode() {
-        let pattern = cli.grep_pattern.as_deref()
+        let pattern = cli
+            .grep_pattern
+            .as_deref()
             .ok_or_else(|| anyhow::anyhow!("--pattern is required for blazehash grep"))?;
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("blazehash grep requires a manifest path"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::grep_cmd::grep_manifest(
@@ -1021,17 +1067,23 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Tally = cli.mode() {
-        let manifest = cli.paths.get(1)
-            .ok_or_else(|| anyhow::anyhow!("usage: blazehash tally <manifest> [--tally-by ext|dir|algo]"))?;
+        let manifest = cli.paths.get(1).ok_or_else(|| {
+            anyhow::anyhow!("usage: blazehash tally <manifest> [--tally-by ext|dir|algo]")
+        })?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::tally::tally_manifest(manifest.as_ref(), &cli.tally_by, &mut out)?;
         return Ok(());
     }
 
     if let Mode::Contains = cli.mode() {
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash contains <manifest> <term>"))?;
-        let term = cli.paths.get(2).and_then(|p| p.to_str())
+        let term = cli
+            .paths
+            .get(2)
+            .and_then(|p| p.to_str())
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash contains <manifest> <term>"))?;
         let found = crate::commands::contains_cmd::contains_manifest(manifest.as_ref(), term)?;
         if !found {
@@ -1042,7 +1094,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Duplicates = cli.mode() {
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash duplicates <manifest>"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::duplicates::duplicates_manifest(manifest.as_ref(), &mut out)?;
@@ -1050,7 +1104,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::Repair = cli.mode() {
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash repair <manifest>"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::repair::repair_manifest(manifest.as_ref(), &mut out)?;
@@ -1058,7 +1114,9 @@ fn main() -> Result<()> {
     }
 
     if let Mode::First = cli.mode() {
-        let manifest = cli.paths.get(1)
+        let manifest = cli
+            .paths
+            .get(1)
             .ok_or_else(|| anyhow::anyhow!("usage: blazehash first <manifest>"))?;
         let mut out = crate::commands::output_writer(cli.output.as_deref())?;
         crate::commands::first_cmd::first_manifest(manifest.as_ref(), &mut out)?;
@@ -1089,8 +1147,9 @@ fn main() -> Result<()> {
         let file_scanner: Option<blazehash::yara_scan::YaraScanner> =
             if let Some(ref rules_path) = cli.yara {
                 Some(
-                    blazehash::yara_scan::YaraScanner::new(rules_path)
-                        .with_context(|| format!("failed to compile YARA rules from {}", rules_path.display()))?,
+                    blazehash::yara_scan::YaraScanner::new(rules_path).with_context(|| {
+                        format!("failed to compile YARA rules from {}", rules_path.display())
+                    })?,
                 )
             } else {
                 None
@@ -1176,15 +1235,14 @@ fn main() -> Result<()> {
         Mode::Interleave => unreachable!(),
         #[cfg(feature = "remote")]
         Mode::GDriveCollect => {
-            let input = cli.paths.first()
+            let input = cli
+                .paths
+                .first()
                 .map(|p| p.to_string_lossy().to_string())
                 .unwrap_or_default();
-            let file_id = blazehash::remote::gdrive::parse_file_id(&input)
-                .ok_or_else(|| {
-                    anyhow::anyhow!(
-                        "Could not parse a Google Drive file ID from: {input}"
-                    )
-                })?;
+            let file_id = blazehash::remote::gdrive::parse_file_id(&input).ok_or_else(|| {
+                anyhow::anyhow!("Could not parse a Google Drive file ID from: {input}")
+            })?;
             let mut out = crate::commands::output_writer(cli.output.as_deref())?;
             blazehash::remote::gdrive::hash_gdrive_file(&file_id, &algorithms, &mut *out)
                 .map_err(|e| anyhow::anyhow!("{e}"))?;

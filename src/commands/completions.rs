@@ -15,9 +15,7 @@ pub fn run(shell_name: &str) -> Result<()> {
         "zsh" => Shell::Zsh,
         "fish" => Shell::Fish,
         "powershell" | "pwsh" => Shell::PowerShell,
-        other => bail!(
-            "unsupported shell: {other}. Supported: bash, zsh, fish, powershell, man"
-        ),
+        other => bail!("unsupported shell: {other}. Supported: bash, zsh, fish, powershell, man"),
     };
     let mut cmd = crate::cli::Cli::command();
     generate(shell, &mut cmd, "blazehash", &mut io::stdout());

@@ -182,18 +182,15 @@ mod hash_auth_tests {
 
         let auth = GDriveAuthMode::ServiceAccount { path: sa_path };
         let mut out = Vec::new();
-        let result = hash_gdrive_file_with_auth(
-            "fileid",
-            &auth,
-            &[Algorithm::Blake3],
-            &mut out,
-            None,
-        );
+        let result =
+            hash_gdrive_file_with_auth("fileid", &auth, &[Algorithm::Blake3], &mut out, None);
 
         assert!(result.is_err(), "service account mode should return error");
         let msg = result.err().unwrap().to_string().to_lowercase();
         assert!(
-            msg.contains("service account") || msg.contains("not yet") || msg.contains("gdrive auth"),
+            msg.contains("service account")
+                || msg.contains("not yet")
+                || msg.contains("gdrive auth"),
             "error should explain service account is not yet supported, got: {msg}"
         );
     }

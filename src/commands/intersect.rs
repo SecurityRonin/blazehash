@@ -11,7 +11,7 @@ pub fn intersect_manifests(
     right_path: &Path,
     out: &mut impl Write,
 ) -> Result<usize> {
-    let left  = std::fs::read_to_string(left_path)?;
+    let left = std::fs::read_to_string(left_path)?;
     let right = std::fs::read_to_string(right_path)?;
 
     let right_paths: HashSet<String> = right
@@ -22,7 +22,11 @@ pub fn intersect_manifests(
                 return None;
             }
             let parts: Vec<&str> = t.splitn(3, "  ").collect();
-            if parts.len() == 3 { Some(parts[2].trim().to_string()) } else { None }
+            if parts.len() == 3 {
+                Some(parts[2].trim().to_string())
+            } else {
+                None
+            }
         })
         .collect();
 

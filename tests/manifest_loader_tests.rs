@@ -157,17 +157,23 @@ fn test_load_csv_manifest() {
 
 #[test]
 fn test_is_remote_url_http() {
-    assert!(blazehash::manifest_loader::is_remote_url("http://example.com/manifest.hash"));
+    assert!(blazehash::manifest_loader::is_remote_url(
+        "http://example.com/manifest.hash"
+    ));
 }
 
 #[test]
 fn test_is_remote_url_https() {
-    assert!(blazehash::manifest_loader::is_remote_url("https://example.com/manifest.hash"));
+    assert!(blazehash::manifest_loader::is_remote_url(
+        "https://example.com/manifest.hash"
+    ));
 }
 
 #[test]
 fn test_is_remote_url_local_path() {
-    assert!(!blazehash::manifest_loader::is_remote_url("/tmp/manifest.hash"));
+    assert!(!blazehash::manifest_loader::is_remote_url(
+        "/tmp/manifest.hash"
+    ));
     assert!(!blazehash::manifest_loader::is_remote_url("manifest.hash"));
 }
 
@@ -202,9 +208,9 @@ fn test_fetch_remote_manifest_from_local_server() {
         }
     });
 
-    let tmp = blazehash::manifest_loader::fetch_remote_manifest(
-        &format!("http://127.0.0.1:{port}/manifest.hash"),
-    )
+    let tmp = blazehash::manifest_loader::fetch_remote_manifest(&format!(
+        "http://127.0.0.1:{port}/manifest.hash"
+    ))
     .unwrap();
     let content = std::fs::read_to_string(tmp.path()).unwrap();
     assert!(content.contains("BLAZEHASH-1.0"));

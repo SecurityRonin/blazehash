@@ -20,13 +20,20 @@ fn test_update_appends_new_file() {
 
     Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["update", manifest.to_str().unwrap(), dir.path().to_str().unwrap()])
+        .args([
+            "update",
+            manifest.to_str().unwrap(),
+            dir.path().to_str().unwrap(),
+        ])
         .assert()
         .success();
 
     let contents = fs::read_to_string(&manifest).unwrap();
     assert!(contents.contains("new.bin"), "update should append new.bin");
-    assert!(contents.contains("existing.bin"), "update should keep existing.bin");
+    assert!(
+        contents.contains("existing.bin"),
+        "update should keep existing.bin"
+    );
 }
 
 #[test]
@@ -41,7 +48,12 @@ fn test_update_removes_deleted_file() {
 
     Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["-r", "-o", manifest.to_str().unwrap(), dir.path().to_str().unwrap()])
+        .args([
+            "-r",
+            "-o",
+            manifest.to_str().unwrap(),
+            dir.path().to_str().unwrap(),
+        ])
         .assert()
         .success();
 
@@ -49,12 +61,19 @@ fn test_update_removes_deleted_file() {
 
     Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["update", manifest.to_str().unwrap(), dir.path().to_str().unwrap()])
+        .args([
+            "update",
+            manifest.to_str().unwrap(),
+            dir.path().to_str().unwrap(),
+        ])
         .assert()
         .success();
 
     let contents = fs::read_to_string(&manifest).unwrap();
-    assert!(!contents.contains("f2.bin"), "deleted file should be removed from manifest");
+    assert!(
+        !contents.contains("f2.bin"),
+        "deleted file should be removed from manifest"
+    );
 }
 
 #[test]
@@ -77,11 +96,21 @@ fn test_update_rehashes_changed_file() {
 
     Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["update", manifest.to_str().unwrap(), dir.path().to_str().unwrap()])
+        .args([
+            "update",
+            manifest.to_str().unwrap(),
+            dir.path().to_str().unwrap(),
+        ])
         .assert()
         .success();
 
     let after = fs::read_to_string(&manifest).unwrap();
-    assert_ne!(before, after, "manifest should change after file content change");
-    assert!(after.contains("20,") || after.contains(",20,") || after.contains(" 20 "), "updated manifest should reflect new size");
+    assert_ne!(
+        before, after,
+        "manifest should change after file content change"
+    );
+    assert!(
+        after.contains("20,") || after.contains(",20,") || after.contains(" 20 "),
+        "updated manifest should reflect new size"
+    );
 }

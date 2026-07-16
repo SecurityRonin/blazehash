@@ -59,7 +59,10 @@ pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
         timestamp: file_mtime_iso(manifest_path),
         description: format!(
             "Manifest acquired: {}",
-            manifest_path.file_name().unwrap_or_default().to_string_lossy()
+            manifest_path
+                .file_name()
+                .unwrap_or_default()
+                .to_string_lossy()
         ),
     });
 
@@ -69,7 +72,9 @@ pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
         let signed_at = read_sidecar_meta(&sig_path, "signed_at");
         let pubkey = read_sidecar_meta(&sig_path, "pubkey").unwrap_or_default();
         events.push(TimelineEvent {
-            kind: TimelineEventKind::Signed { pubkey: pubkey.clone() },
+            kind: TimelineEventKind::Signed {
+                pubkey: pubkey.clone(),
+            },
             timestamp: signed_at,
             description: format!("Ed25519 signature by pubkey {pubkey}"),
         });
@@ -92,7 +97,9 @@ pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
                             .and_then(|v| v.as_str())
                             .map(|s| s.to_string());
                         events.push(TimelineEvent {
-                            kind: TimelineEventKind::Cosigned { pubkey: pubkey.clone() },
+                            kind: TimelineEventKind::Cosigned {
+                                pubkey: pubkey.clone(),
+                            },
                             timestamp: signed_at,
                             description: format!("Co-signed by pubkey {pubkey}"),
                         });
@@ -119,7 +126,9 @@ pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
         let pubkey = read_sidecar_meta(&pqsig_path, "pubkey").unwrap_or_default();
         let pubkey_prefix = pubkey.chars().take(16).collect::<String>();
         events.push(TimelineEvent {
-            kind: TimelineEventKind::PqSigned { pubkey_prefix: pubkey_prefix.clone() },
+            kind: TimelineEventKind::PqSigned {
+                pubkey_prefix: pubkey_prefix.clone(),
+            },
             timestamp: signed_at,
             description: format!("ML-DSA post-quantum signature by pubkey prefix {pubkey_prefix}"),
         });
@@ -138,10 +147,10 @@ pub fn build_timeline(manifest_path: &Path) -> Result<Vec<TimelineEvent>> {
 
 fn html_escape(s: &str) -> String {
     s.replace('&', "&amp;")
-     .replace('<', "&lt;")
-     .replace('>', "&gt;")
-     .replace('"', "&quot;")
-     .replace('\'', "&#39;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+        .replace('\'', "&#39;")
 }
 
 pub fn render_timeline_html(events: &[TimelineEvent], manifest_path: &Path) -> Result<String> {
@@ -164,7 +173,9 @@ pub fn render_timeline_html(events: &[TimelineEvent], manifest_path: &Path) -> R
         };
         rows.push_str(&format!(
             "<tr><td>{}</td><td>{}</td><td>{}</td></tr>\n",
-            html_escape(ts), html_escape(&kind), html_escape(&event.description)
+            html_escape(ts),
+            html_escape(&kind),
+            html_escape(&event.description)
         ));
     }
 

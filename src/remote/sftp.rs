@@ -51,7 +51,9 @@ pub fn parse_sftp_uri(uri: &str) -> Result<SftpUri> {
     };
 
     let (host, port) = if let Some((h, p)) = hostport.split_once(':') {
-        let port: u16 = p.parse().map_err(|_| anyhow!("invalid port in sftp URI: {uri}"))?;
+        let port: u16 = p
+            .parse()
+            .map_err(|_| anyhow!("invalid port in sftp URI: {uri}"))?;
         (h.to_string(), port)
     } else {
         (hostport.to_string(), 22u16)
@@ -72,7 +74,13 @@ pub fn parse_sftp_uri(uri: &str) -> Result<SftpUri> {
         None => (None, None),
     };
 
-    Ok(SftpUri { host, port, path, username, password })
+    Ok(SftpUri {
+        host,
+        port,
+        path,
+        username,
+        password,
+    })
 }
 
 /// Fetch raw bytes from an `sftp://` URI using libssh2.
@@ -89,17 +97,25 @@ pub fn fetch_sftp_bytes(uri: &str) -> Result<Vec<u8>> {
     let sftp_uri = parse_sftp_uri(uri)?;
     let addr = format!("{}:{}", sftp_uri.host, sftp_uri.port);
 
-    let tcp = TcpStream::connect(&addr)
-        .map_err(|e| anyhow!("SFTP TCP connect to {addr} failed: {e}"))?;
+    let tcp =
+        TcpStream::connect(&addr).map_err(|e| anyhow!("SFTP TCP connect to {addr} failed: {e}"))?;
 
     let mut sess = Session::new().map_err(|e| anyhow!("SSH session init failed: {e}"))?;
     sess.set_tcp_stream(tcp);
-    sess.handshake().map_err(|e| anyhow!("SSH handshake with {addr} failed: {e}"))?;
+    sess.handshake()
+        .map_err(|e| anyhow!("SSH handshake with {addr} failed: {e}"))?;
 
     let user = sftp_uri
         .username
         .as_deref()
-        .or_else(|| std::env::var("USER").ok().as_deref().map(|_| "").ok_or(()).ok())
+        .or_else(|| {
+            std::env::var("USER")
+                .ok()
+                .as_deref()
+                .map(|_| "")
+                .ok_or(())
+                .ok()
+        })
         .unwrap_or("anonymous");
 
     // Try password auth first
@@ -118,10 +134,18 @@ pub fn fetch_sftp_bytes(uri: &str) -> Result<Vec<u8>> {
         .map_err(|e| anyhow!("SFTP key auth failed ({key_path}): {e}"))?;
     } else {
         // SSH agent
-        let mut agent = sess.agent().map_err(|e| anyhow!("SSH agent init failed: {e}"))?;
-        agent.connect().map_err(|e| anyhow!("SSH agent connect failed: {e}"))?;
-        agent.list_identities().map_err(|e| anyhow!("SSH agent list failed: {e}"))?;
-        let identities = agent.identities().map_err(|e| anyhow!("SSH agent identities: {e}"))?;
+        let mut agent = sess
+            .agent()
+            .map_err(|e| anyhow!("SSH agent init failed: {e}"))?;
+        agent
+            .connect()
+            .map_err(|e| anyhow!("SSH agent connect failed: {e}"))?;
+        agent
+            .list_identities()
+            .map_err(|e| anyhow!("SSH agent list failed: {e}"))?;
+        let identities = agent
+            .identities()
+            .map_err(|e| anyhow!("SSH agent identities: {e}"))?;
         let mut authed = false;
         for identity in identities {
             if agent.userauth(user, &identity).is_ok() {
@@ -140,7 +164,9 @@ pub fn fetch_sftp_bytes(uri: &str) -> Result<Vec<u8>> {
         return Err(anyhow!("SFTP authentication failed for {addr}"));
     }
 
-    let sftp = sess.sftp().map_err(|e| anyhow!("SFTP subsystem init failed: {e}"))?;
+    let sftp = sess
+        .sftp()
+        .map_err(|e| anyhow!("SFTP subsystem init failed: {e}"))?;
     let mut file = sftp
         .open(std::path::Path::new(&sftp_uri.path))
         .map_err(|e| anyhow!("SFTP open '{}' failed: {e}", sftp_uri.path))?;

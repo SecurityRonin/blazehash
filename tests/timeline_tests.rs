@@ -1,7 +1,7 @@
 // tests/timeline_tests.rs
 use blazehash::timeline::{build_timeline, TimelineEvent, TimelineEventKind};
-use tempfile::TempDir;
 use std::fs;
+use tempfile::TempDir;
 
 fn write_manifest(dir: &TempDir) -> std::path::PathBuf {
     let p = dir.path().join("case.hash");
@@ -19,17 +19,24 @@ fn test_timeline_has_acquired_event() {
     let manifest = write_manifest(&dir);
     let events = build_timeline(&manifest).unwrap();
     assert!(!events.is_empty());
-    assert!(events.iter().any(|e| matches!(e.kind, TimelineEventKind::Acquired)));
+    assert!(events
+        .iter()
+        .any(|e| matches!(e.kind, TimelineEventKind::Acquired)));
 }
 
 #[test]
 fn test_timeline_includes_sig_event() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
-    write_sidecar(&dir, "case.hash.sig",
-        "# signed_at: 2026-04-13T00:00:00Z\n# pubkey: abcd1234\naabbccdd");
+    write_sidecar(
+        &dir,
+        "case.hash.sig",
+        "# signed_at: 2026-04-13T00:00:00Z\n# pubkey: abcd1234\naabbccdd",
+    );
     let events = build_timeline(&manifest).unwrap();
-    assert!(events.iter().any(|e| matches!(e.kind, TimelineEventKind::Signed { .. })));
+    assert!(events
+        .iter()
+        .any(|e| matches!(e.kind, TimelineEventKind::Signed { .. })));
 }
 
 #[test]
@@ -42,7 +49,10 @@ fn test_timeline_includes_msig_events() {
     ]}"#;
     write_sidecar(&dir, "case.hash.msig", msig);
     let events = build_timeline(&manifest).unwrap();
-    let count = events.iter().filter(|e| matches!(e.kind, TimelineEventKind::Cosigned { .. })).count();
+    let count = events
+        .iter()
+        .filter(|e| matches!(e.kind, TimelineEventKind::Cosigned { .. }))
+        .count();
     assert_eq!(count, 2);
 }
 
@@ -52,17 +62,23 @@ fn test_timeline_includes_ots_event() {
     let manifest = write_manifest(&dir);
     write_sidecar(&dir, "case.hash.ots", "dummy ots");
     let events = build_timeline(&manifest).unwrap();
-    assert!(events.iter().any(|e| matches!(e.kind, TimelineEventKind::Timestamped)));
+    assert!(events
+        .iter()
+        .any(|e| matches!(e.kind, TimelineEventKind::Timestamped)));
 }
 
 #[test]
 fn test_timeline_events_sorted_by_time() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
-    write_sidecar(&dir, "case.hash.sig",
-        "# signed_at: 2026-04-14T00:00:00Z\naabbccdd");
+    write_sidecar(
+        &dir,
+        "case.hash.sig",
+        "# signed_at: 2026-04-14T00:00:00Z\naabbccdd",
+    );
     let events = build_timeline(&manifest).unwrap();
-    let timestamps: Vec<_> = events.iter()
+    let timestamps: Vec<_> = events
+        .iter()
         .filter_map(|e| e.timestamp.as_deref())
         .collect();
     let mut sorted = timestamps.clone();
@@ -95,8 +111,16 @@ fn test_render_timeline_html_contains_table() {
 #[test]
 fn test_timeline_none_timestamp_sorts_last() {
     let mut events = vec![
-        TimelineEvent { kind: TimelineEventKind::Timestamped, timestamp: None, description: "no ts".into() },
-        TimelineEvent { kind: TimelineEventKind::Acquired, timestamp: Some("2026-04-13T00:00:00Z".into()), description: "has ts".into() },
+        TimelineEvent {
+            kind: TimelineEventKind::Timestamped,
+            timestamp: None,
+            description: "no ts".into(),
+        },
+        TimelineEvent {
+            kind: TimelineEventKind::Acquired,
+            timestamp: Some("2026-04-13T00:00:00Z".into()),
+            description: "has ts".into(),
+        },
     ];
     events.sort_by(|a, b| match (&a.timestamp, &b.timestamp) {
         (None, None) => std::cmp::Ordering::Equal,
@@ -104,5 +128,8 @@ fn test_timeline_none_timestamp_sorts_last() {
         (Some(_), None) => std::cmp::Ordering::Less,
         (Some(x), Some(y)) => x.cmp(y),
     });
-    assert!(events.last().unwrap().timestamp.is_none(), "None timestamp must sort last");
+    assert!(
+        events.last().unwrap().timestamp.is_none(),
+        "None timestamp must sort last"
+    );
 }

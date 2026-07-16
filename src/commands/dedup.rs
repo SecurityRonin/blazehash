@@ -121,7 +121,14 @@ fn load_results(
                     }
                 }
                 Err(_) => {
-                    let r = blazehash::hash::hash_file(target, algorithms, false, false, false, blazehash::hash::YaraOpts::no_yara())?;
+                    let r = blazehash::hash::hash_file(
+                        target,
+                        algorithms,
+                        false,
+                        false,
+                        false,
+                        blazehash::hash::YaraOpts::no_yara(),
+                    )?;
                     all.push(r);
                 }
             }

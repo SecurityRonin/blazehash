@@ -43,7 +43,7 @@ fn sort_key<'a>(line: &'a str, by: &str) -> &'a str {
     match by {
         "hash" => parts[1].trim(),
         "algo" => parts[0].trim(),
-        "ext"  => {
+        "ext" => {
             let path = parts[2].trim();
             match path.rfind('.') {
                 Some(i) => &path[i..],

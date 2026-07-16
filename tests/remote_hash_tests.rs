@@ -9,9 +9,7 @@ mod remote_hash_tests {
             .build()
             .unwrap();
         let _guard = rt.enter();
-        let async_op = Operator::new(services::Memory::default())
-            .unwrap()
-            .finish();
+        let async_op = Operator::new(services::Memory::default()).unwrap().finish();
         blocking::Operator::new(async_op).unwrap()
     }
 
@@ -26,9 +24,7 @@ mod remote_hash_tests {
             .build()
             .unwrap();
         let _guard = rt.enter();
-        let async_op = Operator::new(services::Memory::default())
-            .unwrap()
-            .finish();
+        let async_op = Operator::new(services::Memory::default()).unwrap().finish();
         let op = opendal::blocking::Operator::new(async_op).unwrap();
         let mut sink = Vec::<u8>::new();
         let _ = hash_remote_prefix(&op, "empty/", &[Algorithm::Blake3], &mut sink);
@@ -44,19 +40,19 @@ mod remote_hash_tests {
             .build()
             .unwrap();
         let _guard = rt.enter();
-        let async_op = Operator::new(services::Memory::default())
-            .unwrap()
-            .finish();
+        let async_op = Operator::new(services::Memory::default()).unwrap().finish();
         let op = blocking::Operator::new(async_op).unwrap();
 
         // Seed 3 objects
-        op.write("evidence/file1.bin", b"content1".to_vec()).unwrap();
-        op.write("evidence/file2.bin", b"content2".to_vec()).unwrap();
-        op.write("evidence/file3.bin", b"content3".to_vec()).unwrap();
+        op.write("evidence/file1.bin", b"content1".to_vec())
+            .unwrap();
+        op.write("evidence/file2.bin", b"content2".to_vec())
+            .unwrap();
+        op.write("evidence/file3.bin", b"content3".to_vec())
+            .unwrap();
 
         let mut out = Vec::new();
-        let count =
-            hash_remote_prefix(&op, "evidence/", &[Algorithm::Blake3], &mut out).unwrap();
+        let count = hash_remote_prefix(&op, "evidence/", &[Algorithm::Blake3], &mut out).unwrap();
         let text = String::from_utf8(out).unwrap();
 
         assert_eq!(count, 3, "should hash 3 objects");
@@ -75,9 +71,7 @@ mod remote_hash_tests {
             .build()
             .unwrap();
         let _guard = rt.enter();
-        let async_op = Operator::new(services::Memory::default())
-            .unwrap()
-            .finish();
+        let async_op = Operator::new(services::Memory::default()).unwrap().finish();
         let op = blocking::Operator::new(async_op).unwrap();
 
         let content = b"known content for hashing";
@@ -105,16 +99,13 @@ mod remote_hash_tests {
             .build()
             .unwrap();
         let _guard = rt.enter();
-        let async_op = Operator::new(services::Memory::default())
-            .unwrap()
-            .finish();
+        let async_op = Operator::new(services::Memory::default()).unwrap().finish();
         let op = blocking::Operator::new(async_op).unwrap();
 
         op.write("single/file.bin", b"data".to_vec()).unwrap();
 
         let mut out = Vec::new();
-        let count =
-            hash_remote_prefix(&op, "single/", &[Algorithm::Sha256], &mut out).unwrap();
+        let count = hash_remote_prefix(&op, "single/", &[Algorithm::Sha256], &mut out).unwrap();
         assert_eq!(count, 1);
     }
 }

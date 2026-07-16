@@ -3,9 +3,13 @@ use blazehash::merkle::merkle_root;
 
 fn sample_entries() -> Vec<(String, String, String)> {
     vec![
-        ("sha256".into(), "abc/secret.txt".into(),  "aaaa".repeat(16)),
-        ("sha256".into(), "abc/evidence.bin".into(), "bbbb".repeat(16)),
-        ("sha256".into(), "abc/notes.txt".into(),   "cccc".repeat(16)),
+        ("sha256".into(), "abc/secret.txt".into(), "aaaa".repeat(16)),
+        (
+            "sha256".into(),
+            "abc/evidence.bin".into(),
+            "bbbb".repeat(16),
+        ),
+        ("sha256".into(), "abc/notes.txt".into(), "cccc".repeat(16)),
     ]
 }
 
@@ -57,7 +61,10 @@ fn test_membership_proof_proves_hash_exists_without_revealing_path() {
     let proof = prove_hash_membership(&entries, &target_hash).unwrap();
     // Proof MUST NOT contain the file path
     let json = serde_json::to_string(&proof).unwrap();
-    assert!(!json.contains("evidence.bin"), "path must not appear in proof JSON");
+    assert!(
+        !json.contains("evidence.bin"),
+        "path must not appear in proof JSON"
+    );
     // But verification must pass
     assert!(verify_membership_proof(&proof, &target_hash).unwrap());
 }

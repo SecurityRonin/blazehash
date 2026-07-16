@@ -30,7 +30,11 @@ fn test_unique_hash_keeps_first_of_each_hash() {
         .unwrap();
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     assert!(stdout.contains("file1.exe"), "expected file1.exe in output");
     assert!(stdout.contains("file2.bin"), "expected file2.bin in output");
 }
@@ -48,7 +52,10 @@ fn test_unique_hash_keeps_unique_entries() {
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(output.status.success());
-    assert!(stdout.contains("file5.jpg"), "expected file5.jpg (unique hash) in output");
+    assert!(
+        stdout.contains("file5.jpg"),
+        "expected file5.jpg (unique hash) in output"
+    );
 }
 
 #[test]
@@ -64,8 +71,14 @@ fn test_unique_hash_drops_duplicate_hash_entries() {
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(output.status.success());
-    assert!(!stdout.contains("file3.dll"), "file3.dll should be dropped (duplicate of H1)");
-    assert!(!stdout.contains("file4.txt"), "file4.txt should be dropped (duplicate of H2)");
+    assert!(
+        !stdout.contains("file3.dll"),
+        "file3.dll should be dropped (duplicate of H1)"
+    );
+    assert!(
+        !stdout.contains("file4.txt"),
+        "file4.txt should be dropped (duplicate of H2)"
+    );
 }
 
 #[test]
@@ -100,5 +113,9 @@ fn test_unique_hash_output_to_file() {
         .lines()
         .filter(|l| !l.starts_with('#') && !l.starts_with('%') && !l.is_empty())
         .collect();
-    assert_eq!(hash_lines.len(), 3, "expected 3 unique-hash entries, got: {hash_lines:?}");
+    assert_eq!(
+        hash_lines.len(),
+        3,
+        "expected 3 unique-hash entries, got: {hash_lines:?}"
+    );
 }

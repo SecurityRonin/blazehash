@@ -7,23 +7,23 @@ use std::collections::HashSet;
 use std::io::Write;
 use std::path::Path;
 
-pub fn apply_patch(
-    manifest_path: &Path,
-    patch_path: &Path,
-    out: &mut impl Write,
-) -> Result<()> {
+pub fn apply_patch(manifest_path: &Path, patch_path: &Path, out: &mut impl Write) -> Result<()> {
     let manifest = std::fs::read_to_string(manifest_path)?;
-    let patch    = std::fs::read_to_string(patch_path)?;
+    let patch = std::fs::read_to_string(patch_path)?;
 
     let mut removals: HashSet<String> = HashSet::new();
     let mut additions: Vec<String> = Vec::new();
 
     for line in patch.lines() {
         if let Some(rest) = line.strip_prefix('-') {
-            if rest.starts_with("--") { continue; } // skip `--- filename` header
+            if rest.starts_with("--") {
+                continue;
+            } // skip `--- filename` header
             removals.insert(rest.to_string());
         } else if let Some(rest) = line.strip_prefix('+') {
-            if rest.starts_with("++") { continue; } // skip `+++ filename` header
+            if rest.starts_with("++") {
+                continue;
+            } // skip `+++ filename` header
             additions.push(rest.to_string());
         }
     }

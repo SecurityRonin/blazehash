@@ -584,10 +584,10 @@ fn test_ecs_output_is_ndjson() {
                 size: i * 100,
                 hashes,
                 entropy: None,
-        #[cfg(feature = "yara")]
-        yara_matches: None,
-        #[cfg(feature = "yara")]
-        yara_enrichments: Vec::new(),
+                #[cfg(feature = "yara")]
+                yara_matches: None,
+                #[cfg(feature = "yara")]
+                yara_enrichments: Vec::new(),
             }
         })
         .collect();

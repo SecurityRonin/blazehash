@@ -6,8 +6,8 @@
 //! implements those lower-level traits; `Digest::digest()`, `chain_update()`,
 //! etc. come for free.
 
+use digest::typenum::{U16, U32, U4, U64, U8};
 use digest::{FixedOutput, HashMarker, Output, OutputSizeUser, Update};
-use digest::typenum::{U4, U8, U16, U32, U64};
 
 // ── SHAKE128 → 32 bytes ──────────────────────────────────────────────────────
 

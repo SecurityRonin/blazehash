@@ -9,7 +9,15 @@ fn hash_file_blake3() {
     f.write_all(b"hello world").unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Blake3],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     assert_eq!(result.size, 11);
     assert_eq!(
         result.hashes[&Algorithm::Blake3],
@@ -24,7 +32,15 @@ fn hash_file_multiple_algorithms() {
     f.flush().unwrap();
 
     let algos = vec![Algorithm::Blake3, Algorithm::Sha256, Algorithm::Md5];
-    let result = hash_file(f.path(), &algos, false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &algos,
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     assert_eq!(result.size, 11);
     assert_eq!(result.hashes.len(), 3);
     assert_eq!(
@@ -40,7 +56,15 @@ fn hash_file_multiple_algorithms() {
 #[test]
 fn hash_file_empty() {
     let f = NamedTempFile::new().unwrap();
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Blake3],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     assert_eq!(result.size, 0);
     assert!(!result.hashes[&Algorithm::Blake3].is_empty());
 }
@@ -59,7 +83,7 @@ fn hash_file_large_uses_mmap() {
         false,
         false,
         false,
-            blazehash::hash::YaraOpts::no_yara(),
+        blazehash::hash::YaraOpts::no_yara(),
     )
     .unwrap();
     assert_eq!(result.size, 2 * 1024 * 1024);
@@ -75,7 +99,15 @@ fn hash_file_returns_path() {
     f.write_all(b"test").unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Blake3],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     assert_eq!(result.path, f.path());
 }
 
@@ -87,7 +119,7 @@ fn hash_file_nonexistent_returns_error() {
         false,
         false,
         false,
-            blazehash::hash::YaraOpts::no_yara(),
+        blazehash::hash::YaraOpts::no_yara(),
     );
     assert!(result.is_err());
 }
@@ -106,7 +138,7 @@ fn hash_file_at_mmap_threshold() {
         false,
         false,
         false,
-            blazehash::hash::YaraOpts::no_yara(),
+        blazehash::hash::YaraOpts::no_yara(),
     )
     .unwrap();
     assert_eq!(result.size, 1024 * 1024);
@@ -124,7 +156,15 @@ fn hash_file_just_below_mmap_threshold() {
     f.write_all(&data).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Blake3],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     assert_eq!(result.size, 1024 * 1024 - 1);
 
     let expected = blazehash::algorithm::hash_bytes(Algorithm::Blake3, &data);
@@ -138,7 +178,15 @@ fn hash_file_all_algorithms() {
     f.flush().unwrap();
 
     let algos: Vec<Algorithm> = Algorithm::all().to_vec();
-    let result = hash_file(f.path(), &algos, false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &algos,
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     assert_eq!(result.hashes.len(), 8);
     for algo in &algos {
         assert!(
@@ -203,8 +251,24 @@ fn test_no_cache_macos_opens_file() {
     f.write_all(b"test content for F_NOCACHE").unwrap();
     f.flush().unwrap();
 
-    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
-    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let normal = hash_file(
+        f.path(),
+        &[Algorithm::Sha256],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
+    let nocache = hash_file(
+        f.path(),
+        &[Algorithm::Sha256],
+        true,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
 
     assert_eq!(
         normal.hashes[&Algorithm::Sha256],
@@ -225,8 +289,24 @@ fn test_no_cache_linux_aligned_read() {
     f.write_all(&vec![0xABu8; 4096]).unwrap();
     f.flush().unwrap();
 
-    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
-    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let normal = hash_file(
+        f.path(),
+        &[Algorithm::Sha256],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
+    let nocache = hash_file(
+        f.path(),
+        &[Algorithm::Sha256],
+        true,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
 
     assert_eq!(
         normal.hashes[&Algorithm::Sha256],
@@ -248,8 +328,24 @@ fn test_no_cache_linux_unaligned_size_file() {
     f.write_all(&vec![0x42u8; 777]).unwrap(); // deliberately odd size
     f.flush().unwrap();
 
-    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
-    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let normal = hash_file(
+        f.path(),
+        &[Algorithm::Sha256],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
+    let nocache = hash_file(
+        f.path(),
+        &[Algorithm::Sha256],
+        true,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
 
     assert_eq!(
         normal.hashes[&Algorithm::Sha256],
@@ -269,8 +365,24 @@ fn test_no_cache_windows_no_buffering() {
     f.write_all(&vec![0xCDu8; 8192]).unwrap(); // 2 × 4096
     f.flush().unwrap();
 
-    let normal = hash_file(f.path(), &[Algorithm::Sha256], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
-    let nocache = hash_file(f.path(), &[Algorithm::Sha256], true, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let normal = hash_file(
+        f.path(),
+        &[Algorithm::Sha256],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
+    let nocache = hash_file(
+        f.path(),
+        &[Algorithm::Sha256],
+        true,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
 
     assert_eq!(
         normal.hashes[&Algorithm::Sha256],
@@ -291,7 +403,15 @@ fn test_large_pages_linux_correct_hash() {
     f.write_all(&vec![0x55u8; 3 * 1024 * 1024]).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Blake3],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     let h = &result.hashes[&Algorithm::Blake3];
     assert_eq!(h.len(), 64, "BLAKE3 hash must be 64 hex chars");
     assert!(h.chars().all(|c| c.is_ascii_hexdigit()));
@@ -311,7 +431,14 @@ fn test_large_pages_windows_fallback_on_no_privilege() {
     f.write_all(&vec![0xAAu8; 4 * 1024 * 1024]).unwrap(); // 4 MiB
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Sha256], false, false, false, blazehash::hash::YaraOpts::no_yara());
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Sha256],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    );
     assert!(
         result.is_ok(),
         "hash_file must not error when large page privilege absent"
@@ -332,7 +459,15 @@ fn test_large_pages_windows_correct_hash() {
     f.write_all(&vec![0xBBu8; 3 * 1024 * 1024]).unwrap();
     f.flush().unwrap();
 
-    let with_lp = hash_file(f.path(), &[Algorithm::Blake3], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let with_lp = hash_file(
+        f.path(),
+        &[Algorithm::Blake3],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     assert_eq!(with_lp.hashes[&Algorithm::Blake3].len(), 64);
 }
 
@@ -722,7 +857,7 @@ fn test_hash_file_with_ssdeep() {
         false,
         false,
         false,
-            blazehash::hash::YaraOpts::no_yara(),
+        blazehash::hash::YaraOpts::no_yara(),
     )
     .unwrap();
     assert!(result.hashes.contains_key(&Algorithm::Blake3));
@@ -745,7 +880,15 @@ fn test_hash_file_with_tlsh() {
     f.write_all(&data).unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Tlsh], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Tlsh],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     assert!(result.hashes.contains_key(&Algorithm::Tlsh));
     let tlsh_hash = &result.hashes[&Algorithm::Tlsh];
     assert!(tlsh_hash.starts_with("T1"), "tlsh hash must start with T1");
@@ -761,7 +904,15 @@ fn test_hash_file_tlsh_short_file_empty_string() {
     f.write_all(b"tiny").unwrap();
     f.flush().unwrap();
 
-    let result = hash_file(f.path(), &[Algorithm::Tlsh], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Tlsh],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     let tlsh_hash = &result.hashes[&Algorithm::Tlsh];
     assert!(
         tlsh_hash.is_empty() || tlsh_hash.starts_with("T1"),
@@ -866,8 +1017,15 @@ fn hash_file_streaming_matches_mmap() {
     let mut small = NamedTempFile::new().unwrap();
     small.write_all(content).unwrap();
     small.flush().unwrap();
-    let streaming_result =
-        hash_file(small.path(), &[Algorithm::Sha256], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let streaming_result = hash_file(
+        small.path(),
+        &[Algorithm::Sha256],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
 
     // Verify against known hash_bytes
     let expected = blazehash::algorithm::hash_bytes(Algorithm::Sha256, content);
@@ -973,7 +1131,15 @@ fn test_hash_file_entropy_flag_computes_entropy() {
     f.flush().unwrap();
 
     // compute_entropy=true → entropy must be Some(_)
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, true, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Blake3],
+        false,
+        false,
+        true,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     assert!(
         result.entropy.is_some(),
         "entropy should be Some when compute_entropy=true"
@@ -996,7 +1162,15 @@ fn test_hash_file_no_entropy_flag_has_none() {
     f.flush().unwrap();
 
     // compute_entropy=false → entropy must be None
-    let result = hash_file(f.path(), &[Algorithm::Blake3], false, false, false, blazehash::hash::YaraOpts::no_yara()).unwrap();
+    let result = hash_file(
+        f.path(),
+        &[Algorithm::Blake3],
+        false,
+        false,
+        false,
+        blazehash::hash::YaraOpts::no_yara(),
+    )
+    .unwrap();
     assert!(
         result.entropy.is_none(),
         "entropy should be None when compute_entropy=false"

@@ -30,7 +30,10 @@ pub fn write_parquet(path: &Path, results: &[FileHashResult], algos: &[Algorithm
         vec![Arc::new(paths), Arc::new(sizes), Arc::new(entropies)];
 
     for algo in algos {
-        let col: StringArray = results.iter().map(|r| r.hashes.get(algo).cloned()).collect();
+        let col: StringArray = results
+            .iter()
+            .map(|r| r.hashes.get(algo).cloned())
+            .collect();
         columns.push(Arc::new(col));
     }
 

@@ -29,10 +29,14 @@ mod remote_reader_tests {
 // Always-compiled tests (no feature gate needed)
 #[test]
 fn test_is_remote_uri_sftp() {
-    assert!(blazehash::remote::is_remote_uri("sftp://user@host/path/file.hash"));
+    assert!(blazehash::remote::is_remote_uri(
+        "sftp://user@host/path/file.hash"
+    ));
 }
 
 #[test]
 fn test_is_remote_uri_webdav() {
-    assert!(blazehash::remote::is_remote_uri("webdav://files.example.com/evidence/"));
+    assert!(blazehash::remote::is_remote_uri(
+        "webdav://files.example.com/evidence/"
+    ));
 }

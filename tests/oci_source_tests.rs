@@ -21,6 +21,9 @@ mod oci_source_tests {
     fn test_oci_layer_path() {
         // The synthetic path used in the manifest for a layer
         let path = blazehash::image::layer_path("nginx:latest", 0, "sha256:abc123");
-        assert_eq!(path.to_string_lossy(), "oci://nginx:latest/layer[0]/sha256:abc123");
+        assert_eq!(
+            path.to_string_lossy(),
+            "oci://nginx:latest/layer[0]/sha256:abc123"
+        );
     }
 }

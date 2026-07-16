@@ -148,8 +148,8 @@ pub fn verify_proof(
     let mut current = leaf_hash(path, sha256_hex);
 
     for sibling_hex in proof {
-        let sibling_bytes = hex::decode(sibling_hex)
-            .map_err(|_| anyhow::anyhow!("invalid hex in proof"))?;
+        let sibling_bytes =
+            hex::decode(sibling_hex).map_err(|_| anyhow::anyhow!("invalid hex in proof"))?;
         if sibling_bytes.len() != 32 {
             bail!("proof step must be 32 bytes");
         }

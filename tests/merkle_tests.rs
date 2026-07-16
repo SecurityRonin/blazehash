@@ -36,7 +36,10 @@ fn test_merkle_root_order_independent() {
     ];
     let r_ab = merkle_root(&entries_ab).unwrap();
     let r_ba = merkle_root(&entries_ba).unwrap();
-    assert_eq!(r_ab, r_ba, "canonical ordering: insertion order must not matter");
+    assert_eq!(
+        r_ab, r_ba,
+        "canonical ordering: insertion order must not matter"
+    );
 }
 
 #[test]

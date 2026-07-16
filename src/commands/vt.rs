@@ -1,7 +1,7 @@
+use anyhow::Result;
 use blazehash::algorithm::Algorithm;
 use blazehash::manifest_loader::load_manifest;
 use blazehash::vt::{classify_vt_response, VtResult};
-use anyhow::Result;
 use std::path::PathBuf;
 use std::time::Duration;
 

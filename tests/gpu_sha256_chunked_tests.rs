@@ -22,7 +22,10 @@ mod gpu_chunked_tests {
         let data: Vec<u8> = (0..1024 * 1024).map(|i| (i % 251) as u8).collect();
         let gpu_result = gpu.hash_chunked(&data).unwrap();
         let cpu_result = sha256_cpu(&data);
-        assert_eq!(gpu_result, cpu_result, "1 MiB chunked GPU must match CPU SHA-256");
+        assert_eq!(
+            gpu_result, cpu_result,
+            "1 MiB chunked GPU must match CPU SHA-256"
+        );
     }
 
     #[test]
@@ -36,7 +39,10 @@ mod gpu_chunked_tests {
         let data: Vec<u8> = (0..100).map(|i| i as u8).collect();
         let single = gpu.hash(&data);
         let chunked = gpu.hash_chunked(&data).unwrap();
-        assert_eq!(single, chunked, "small data: chunked must match single-shot");
+        assert_eq!(
+            single, chunked,
+            "small data: chunked must match single-shot"
+        );
     }
 
     #[test]
@@ -51,7 +57,10 @@ mod gpu_chunked_tests {
         let data: Vec<u8> = vec![0xABu8; 64 * 1024];
         let gpu_result = gpu.hash_chunked(&data).unwrap();
         let cpu_result = sha256_cpu(&data);
-        assert_eq!(gpu_result, cpu_result, "exact batch boundary must match CPU");
+        assert_eq!(
+            gpu_result, cpu_result,
+            "exact batch boundary must match CPU"
+        );
     }
 
     #[test]

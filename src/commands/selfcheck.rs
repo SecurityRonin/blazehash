@@ -28,7 +28,12 @@ pub fn selfcheck() -> Result<SelfCheckResult> {
         hex::encode(h.finalize())
     };
 
-    Ok(SelfCheckResult { path: exe, size, blake3, sha256 })
+    Ok(SelfCheckResult {
+        path: exe,
+        size,
+        blake3,
+        sha256,
+    })
 }
 
 pub fn print_selfcheck(r: &SelfCheckResult) {

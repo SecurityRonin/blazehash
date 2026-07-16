@@ -45,7 +45,8 @@ pub fn search_manifest(
             None => true,
             Some(q) => {
                 if opts.ignore_case {
-                    hash.to_ascii_lowercase().starts_with(&q.to_ascii_lowercase())
+                    hash.to_ascii_lowercase()
+                        .starts_with(&q.to_ascii_lowercase())
                 } else {
                     hash.starts_with(q)
                 }

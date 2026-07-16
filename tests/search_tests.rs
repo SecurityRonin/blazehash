@@ -1,6 +1,6 @@
 use assert_cmd::Command;
-use tempfile::TempDir;
 use std::fs;
+use tempfile::TempDir;
 
 fn write_manifest(dir: &TempDir) -> std::path::PathBuf {
     let p = dir.path().join("case.hash");
@@ -18,12 +18,22 @@ fn write_manifest(dir: &TempDir) -> std::path::PathBuf {
 fn test_search_by_path_substring() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
-    let out = Command::cargo_bin("blazehash").unwrap()
-        .args(["search", manifest.to_str().unwrap(), "--search-path", "docs/"])
-        .output().unwrap();
+    let out = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([
+            "search",
+            manifest.to_str().unwrap(),
+            "--search-path",
+            "docs/",
+        ])
+        .output()
+        .unwrap();
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
-    assert!(stdout.contains("contract.pdf"), "docs/contract.pdf must match");
+    assert!(
+        stdout.contains("contract.pdf"),
+        "docs/contract.pdf must match"
+    );
     assert!(stdout.contains("notes.txt"), "docs/notes.txt must match");
     assert!(!stdout.contains("photo.jpg"), "images/ must not match");
 }
@@ -32,50 +42,89 @@ fn test_search_by_path_substring() {
 fn test_search_by_hash_prefix() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
-    let out = Command::cargo_bin("blazehash").unwrap()
+    let out = Command::cargo_bin("blazehash")
+        .unwrap()
         .args(["search", manifest.to_str().unwrap(), "--hash", "aaa"])
-        .output().unwrap();
+        .output()
+        .unwrap();
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
-    assert!(stdout.contains("contract.pdf"), "hash prefix 'aaa' must match contract.pdf");
-    assert!(!stdout.contains("photo.jpg"), "hash 'bbb...' must not match");
+    assert!(
+        stdout.contains("contract.pdf"),
+        "hash prefix 'aaa' must match contract.pdf"
+    );
+    assert!(
+        !stdout.contains("photo.jpg"),
+        "hash 'bbb...' must not match"
+    );
 }
 
 #[test]
 fn test_search_no_match_exits_nonzero_or_empty() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
-    let out = Command::cargo_bin("blazehash").unwrap()
-        .args(["search", manifest.to_str().unwrap(), "--search-path", "nonexistent"])
-        .output().unwrap();
+    let out = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([
+            "search",
+            manifest.to_str().unwrap(),
+            "--search-path",
+            "nonexistent",
+        ])
+        .output()
+        .unwrap();
     let stdout = String::from_utf8_lossy(&out.stdout);
-    let data_lines: Vec<_> = stdout.lines()
+    let data_lines: Vec<_> = stdout
+        .lines()
         .filter(|l| !l.trim().is_empty() && !l.trim().starts_with('#'))
         .collect();
-    assert!(data_lines.is_empty() || !out.status.success(),
-        "no-match should produce empty output or nonzero exit");
+    assert!(
+        data_lines.is_empty() || !out.status.success(),
+        "no-match should produce empty output or nonzero exit"
+    );
 }
 
 #[test]
 fn test_search_preserves_headers() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
-    let out = Command::cargo_bin("blazehash").unwrap()
-        .args(["search", manifest.to_str().unwrap(), "--search-path", "docs/"])
-        .output().unwrap();
+    let out = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([
+            "search",
+            manifest.to_str().unwrap(),
+            "--search-path",
+            "docs/",
+        ])
+        .output()
+        .unwrap();
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
-    assert!(stdout.contains("## case: CASE-001"), "headers must be preserved");
+    assert!(
+        stdout.contains("## case: CASE-001"),
+        "headers must be preserved"
+    );
 }
 
 #[test]
 fn test_search_case_insensitive_flag() {
     let dir = TempDir::new().unwrap();
     let manifest = write_manifest(&dir);
-    let out = Command::cargo_bin("blazehash").unwrap()
-        .args(["search", manifest.to_str().unwrap(), "--search-path", "readme", "--ignore-case"])
-        .output().unwrap();
+    let out = Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([
+            "search",
+            manifest.to_str().unwrap(),
+            "--search-path",
+            "readme",
+            "--ignore-case",
+        ])
+        .output()
+        .unwrap();
     assert!(out.status.success());
     let stdout = String::from_utf8_lossy(&out.stdout);
-    assert!(stdout.contains("README.md"), "case-insensitive match must find README.md");
+    assert!(
+        stdout.contains("README.md"),
+        "case-insensitive match must find README.md"
+    );
 }

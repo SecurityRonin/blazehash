@@ -1,8 +1,8 @@
+use anyhow::Result;
 use blazehash::algorithm::Algorithm;
 use blazehash::hash::hash_file;
 use blazehash::manifest::ManifestRecord;
 use blazehash::manifest_loader::load_manifest;
-use anyhow::Result;
 use std::collections::HashMap;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -42,7 +42,14 @@ pub fn run_update(args: UpdateArgs) -> Result<()> {
         }
 
         // File is new or size changed — re-hash it.
-        let result = hash_file(&fpath, &args.algos, false, false, false, blazehash::hash::YaraOpts::no_yara())?;
+        let result = hash_file(
+            &fpath,
+            &args.algos,
+            false,
+            false,
+            false,
+            blazehash::hash::YaraOpts::no_yara(),
+        )?;
         updated.insert(
             fpath.clone(),
             ManifestRecord {

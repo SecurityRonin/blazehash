@@ -547,8 +547,7 @@ impl Cli {
             == Some(std::ffi::OsStr::new("verify-sig"))
         {
             Mode::VerifySig
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("pq-sign"))
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("pq-sign"))
         {
             Mode::PqSign
         } else if self.paths.first().map(|p| p.as_os_str())
@@ -594,9 +593,7 @@ impl Cli {
             == Some(std::ffi::OsStr::new("verify-proof"))
         {
             Mode::MerkleVerify
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("seal"))
-        {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("seal")) {
             Mode::Merkle
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("qr")) {
             #[cfg(feature = "qr")]
@@ -617,20 +614,15 @@ impl Cli {
             Mode::Timeline
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("lint")) {
             Mode::Lint
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("redact"))
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("redact"))
         {
             Mode::Redact
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("sample"))
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("sample"))
         {
             Mode::Sample
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("stats"))
-        {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("stats")) {
             Mode::Stats
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("filter"))
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("filter"))
         {
             Mode::Filter
         } else if self.paths.first().map(|p| p.as_os_str())
@@ -641,35 +633,38 @@ impl Cli {
             == Some(std::ffi::OsStr::new("selfcheck"))
         {
             Mode::Selfcheck
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("archive"))
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("archive"))
         {
             Mode::Archive
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("convert"))
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("convert"))
         {
             Mode::Convert
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("head")) {
             Mode::Head
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("tail")) {
             Mode::Tail
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("search"))
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("search"))
         {
             Mode::Search
-        } else if self.paths.first().map(|p| p.as_os_str())
-            == Some(std::ffi::OsStr::new("export"))
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("export"))
         {
             Mode::Export
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("sort")) {
             Mode::Sort
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("intersect")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("intersect"))
+        {
             Mode::Intersect
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("subtract")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("subtract"))
+        {
             Mode::Subtract
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("apply-patch")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("apply-patch"))
+        {
             Mode::ApplyPatch
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("verify")) {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("verify"))
+        {
             Mode::Verify
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("ots")) {
             match self.paths.get(1).and_then(|p| p.to_str()) {
@@ -689,7 +684,8 @@ impl Cli {
             }
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("info")) {
             Mode::Info
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("missing")) {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("missing"))
+        {
             Mode::Missing
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("tag")) {
             Mode::Tag
@@ -701,11 +697,14 @@ impl Cli {
             Mode::Split
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("uniq")) {
             Mode::Uniq
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("checksum")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("checksum"))
+        {
             Mode::Checksum
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("pivot")) {
             Mode::Pivot
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("rename")) {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("rename"))
+        {
             Mode::Rename
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("slice")) {
             Mode::Slice
@@ -715,40 +714,61 @@ impl Cli {
             Mode::Grep
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("tally")) {
             Mode::Tally
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("exclude")) {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("exclude"))
+        {
             Mode::Exclude
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("contains")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("contains"))
+        {
             Mode::Contains
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("path-only")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("path-only"))
+        {
             Mode::PathOnly
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("hash-only")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("hash-only"))
+        {
             Mode::HashOnly
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("duplicates")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("duplicates"))
+        {
             Mode::Duplicates
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("repair")) {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("repair"))
+        {
             Mode::Repair
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("sym-diff")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("sym-diff"))
+        {
             Mode::SymDiff
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("first")) {
             Mode::First
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("annotate")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("annotate"))
+        {
             Mode::Annotate
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("shuffle")) {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("shuffle"))
+        {
             Mode::Shuffle
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("reverse")) {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("reverse"))
+        {
             Mode::Reverse
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("unique-hash")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("unique-hash"))
+        {
             Mode::UniqueHash
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("balance")) {
+        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("balance"))
+        {
             Mode::Balance
-        } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("interleave")) {
+        } else if self.paths.first().map(|p| p.as_os_str())
+            == Some(std::ffi::OsStr::new("interleave"))
+        {
             Mode::Interleave
         } else if self.paths.first().map(|p| {
-                let s = p.to_string_lossy();
-                s.starts_with("gdrive://")
-                    || s.starts_with("https://drive.google.com/")
-                    || s.starts_with("http://drive.google.com/")
-            }) == Some(true)
+            let s = p.to_string_lossy();
+            s.starts_with("gdrive://")
+                || s.starts_with("https://drive.google.com/")
+                || s.starts_with("http://drive.google.com/")
+        }) == Some(true)
         {
             #[cfg(feature = "remote")]
             return Mode::GDriveCollect;

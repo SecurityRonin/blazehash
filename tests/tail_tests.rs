@@ -1,5 +1,5 @@
-use assert_cmd::Command;
 use assert_cmd::prelude::*;
+use assert_cmd::Command;
 use std::fs;
 use tempfile::TempDir;
 
@@ -26,11 +26,19 @@ fn test_tail_default_10() {
         .stdout
         .clone();
     let s = String::from_utf8_lossy(&out);
-    let data_lines: Vec<_> = s.lines()
+    let data_lines: Vec<_> = s
+        .lines()
         .filter(|l| !l.starts_with('#') && !l.starts_with('%') && !l.is_empty())
         .collect();
-    assert_eq!(data_lines.len(), 10, "default tail should return 10 entries");
-    assert!(data_lines.last().unwrap().contains("file015.txt"), "last entry should be file015");
+    assert_eq!(
+        data_lines.len(),
+        10,
+        "default tail should return 10 entries"
+    );
+    assert!(
+        data_lines.last().unwrap().contains("file015.txt"),
+        "last entry should be file015"
+    );
 }
 
 #[test]
@@ -46,7 +54,8 @@ fn test_tail_count_3() {
         .stdout
         .clone();
     let s = String::from_utf8_lossy(&out);
-    let data_lines: Vec<_> = s.lines()
+    let data_lines: Vec<_> = s
+        .lines()
         .filter(|l| !l.starts_with('#') && !l.starts_with('%') && !l.is_empty())
         .collect();
     assert_eq!(data_lines.len(), 3);
@@ -66,7 +75,10 @@ fn test_tail_preserves_headers() {
         .stdout
         .clone();
     let s = String::from_utf8_lossy(&out);
-    assert!(s.contains("## algorithm: blake3"), "headers must be preserved");
+    assert!(
+        s.contains("## algorithm: blake3"),
+        "headers must be preserved"
+    );
 }
 
 #[test]
@@ -82,10 +94,15 @@ fn test_tail_count_larger_than_manifest_returns_all() {
         .stdout
         .clone();
     let s = String::from_utf8_lossy(&out);
-    let data_lines: Vec<_> = s.lines()
+    let data_lines: Vec<_> = s
+        .lines()
         .filter(|l| !l.starts_with('#') && !l.starts_with('%') && !l.is_empty())
         .collect();
-    assert_eq!(data_lines.len(), 4, "should return all 4 when count > total");
+    assert_eq!(
+        data_lines.len(),
+        4,
+        "should return all 4 when count > total"
+    );
 }
 
 #[test]
@@ -95,7 +112,12 @@ fn test_tail_output_to_file() {
     let out_file = dir.path().join("out.hash");
     Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["tail", m.to_str().unwrap(), "-o", out_file.to_str().unwrap()])
+        .args([
+            "tail",
+            m.to_str().unwrap(),
+            "-o",
+            out_file.to_str().unwrap(),
+        ])
         .assert()
         .success();
     let content = fs::read_to_string(&out_file).unwrap();

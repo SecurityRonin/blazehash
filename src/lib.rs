@@ -1,16 +1,16 @@
 pub mod ads;
-pub mod remote;
 pub mod attack;
 pub mod disclosure;
+pub mod remote;
 // The hash algorithms live in the lean `blazehash-core` engine. Re-export them
 // here so existing `blazehash::algorithm::…` / `blazehash::fuzzy::…` paths (and
 // the crate's own `crate::algorithm::…` references) keep resolving unchanged.
 pub use blazehash_core::{algorithm, fuzzy};
-pub mod digest_wrappers;
 pub mod audit;
 pub mod config;
 pub mod cosign;
 pub mod device;
+pub mod digest_wrappers;
 pub mod folder_diff;
 pub mod forensic_image;
 pub mod format;
@@ -29,11 +29,14 @@ pub mod ots;
 pub mod output;
 pub mod parallel_config;
 pub mod piecewise;
-pub mod progress;
-pub mod resume;
 #[cfg(feature = "pq")]
 pub mod pq_signing;
+pub mod progress;
+#[cfg(feature = "qr")]
+pub mod qr_label;
+pub mod resume;
 pub mod signing;
+pub mod timeline;
 #[cfg(feature = "tui")]
 pub mod tui;
 pub mod vt;
@@ -43,9 +46,6 @@ pub mod walk_filter;
 pub mod walk_windows;
 #[cfg(target_os = "windows")]
 pub mod walk_windows_mft;
-pub mod timeline;
 pub mod watch;
 #[cfg(feature = "yara")]
 pub mod yara_scan;
-#[cfg(feature = "qr")]
-pub mod qr_label;

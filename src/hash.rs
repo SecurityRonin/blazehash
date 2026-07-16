@@ -273,9 +273,18 @@ impl<'a> YaraOpts<'a> {
     /// Works regardless of whether the `yara` feature is enabled.
     pub fn no_yara() -> Self {
         #[cfg(feature = "yara")]
-        { YaraOpts { scanner: None, max_size_mb: 256 } }
+        {
+            YaraOpts {
+                scanner: None,
+                max_size_mb: 256,
+            }
+        }
         #[cfg(not(feature = "yara"))]
-        { YaraOpts { _phantom: std::marker::PhantomData } }
+        {
+            YaraOpts {
+                _phantom: std::marker::PhantomData,
+            }
+        }
     }
 }
 
@@ -417,15 +426,17 @@ pub fn hash_file(
                     Some(scanner.scan(&[])?)
                 } else {
                     let mmap = unsafe {
-                        memmap2::Mmap::map(&file)
-                            .with_context(|| format!("failed to mmap {} for YARA", path.display()))?
+                        memmap2::Mmap::map(&file).with_context(|| {
+                            format!("failed to mmap {} for YARA", path.display())
+                        })?
                     };
                     Some(scanner.scan(&mmap[..])?)
                 }
             } else {
                 // Non-regular file (pipe, device, etc.): read to Vec and scan.
-                let data = fs::read(path)
-                    .with_context(|| format!("failed to read {} for YARA buffered scan", path.display()))?;
+                let data = fs::read(path).with_context(|| {
+                    format!("failed to read {} for YARA buffered scan", path.display())
+                })?;
                 Some(scanner.scan(&data)?)
             }
         } else {
@@ -660,7 +671,9 @@ fn make_hasher(algo: Algorithm) -> Box<dyn DynHasher> {
             inner: sha2::Sha512_224::new(),
         }),
         Algorithm::K12 | Algorithm::Adler32 | Algorithm::Crc64 => {
-            panic!("algorithms (k12/adler32/crc64) cannot stream; use algorithm::hash_bytes instead")
+            panic!(
+                "algorithms (k12/adler32/crc64) cannot stream; use algorithm::hash_bytes instead"
+            )
         }
     }
 }

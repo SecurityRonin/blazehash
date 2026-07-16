@@ -21,13 +21,22 @@ fn test_hash_only_emits_hashes_for_algo() {
     let manifest = write_manifest(&dir);
     let out = Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["hash-only", manifest.to_str().unwrap(), "--hash-only-algo", "sha256"])
+        .args([
+            "hash-only",
+            manifest.to_str().unwrap(),
+            "--hash-only-algo",
+            "sha256",
+        ])
         .output()
         .unwrap();
     assert!(out.status.success(), "exit code must be 0");
     let stdout = String::from_utf8_lossy(&out.stdout);
     let lines: Vec<&str> = stdout.lines().filter(|l| !l.is_empty()).collect();
-    assert_eq!(lines.len(), 2, "expected exactly 2 lines for sha256, got: {stdout:?}");
+    assert_eq!(
+        lines.len(),
+        2,
+        "expected exactly 2 lines for sha256, got: {stdout:?}"
+    );
     assert!(
         lines.contains(&"aaaa1111111111111111111111111111111111111111111111111111111111111111"),
         "sha256 hash aaaa1111... must be present, got: {stdout:?}"
@@ -44,7 +53,12 @@ fn test_hash_only_skips_other_algos() {
     let manifest = write_manifest(&dir);
     let out = Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["hash-only", manifest.to_str().unwrap(), "--hash-only-algo", "sha256"])
+        .args([
+            "hash-only",
+            manifest.to_str().unwrap(),
+            "--hash-only-algo",
+            "sha256",
+        ])
         .output()
         .unwrap();
     assert!(out.status.success(), "exit code must be 0");
@@ -61,13 +75,22 @@ fn test_hash_only_algo_case_insensitive() {
     let manifest = write_manifest(&dir);
     let out = Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["hash-only", manifest.to_str().unwrap(), "--hash-only-algo", "SHA256"])
+        .args([
+            "hash-only",
+            manifest.to_str().unwrap(),
+            "--hash-only-algo",
+            "SHA256",
+        ])
         .output()
         .unwrap();
     assert!(out.status.success(), "exit code must be 0");
     let stdout = String::from_utf8_lossy(&out.stdout);
     let lines: Vec<&str> = stdout.lines().filter(|l| !l.is_empty()).collect();
-    assert_eq!(lines.len(), 2, "SHA256 (uppercase) must match sha256 entries, got: {stdout:?}");
+    assert_eq!(
+        lines.len(),
+        2,
+        "SHA256 (uppercase) must match sha256 entries, got: {stdout:?}"
+    );
     assert!(
         lines.contains(&"aaaa1111111111111111111111111111111111111111111111111111111111111111"),
         "sha256 hash aaaa1111... must be present, got: {stdout:?}"
@@ -86,7 +109,11 @@ fn test_hash_only_no_algo_filter_emits_all_hashes() {
     assert!(out.status.success(), "exit code must be 0");
     let stdout = String::from_utf8_lossy(&out.stdout);
     let lines: Vec<&str> = stdout.lines().filter(|l| !l.is_empty()).collect();
-    assert_eq!(lines.len(), 3, "no filter must emit all 3 hashes, got: {stdout:?}");
+    assert_eq!(
+        lines.len(),
+        3,
+        "no filter must emit all 3 hashes, got: {stdout:?}"
+    );
     assert!(
         lines.contains(&"aaaa1111111111111111111111111111111111111111111111111111111111111111"),
         "sha256 hash aaaa1111... must be present"
@@ -120,7 +147,11 @@ fn test_hash_only_output_to_file() {
         .success();
     let content = fs::read_to_string(&out_path).unwrap();
     let lines: Vec<&str> = content.lines().filter(|l| !l.is_empty()).collect();
-    assert_eq!(lines.len(), 1, "output file must have exactly 1 line (blake3), got: {content:?}");
+    assert_eq!(
+        lines.len(),
+        1,
+        "output file must have exactly 1 line (blake3), got: {content:?}"
+    );
     assert!(
         lines.contains(&"cccc3333333333333333333333333333333333333333333333333333333333333333"),
         "blake3 hash cccc3333... must be in output file, got: {content:?}"

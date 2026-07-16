@@ -94,7 +94,10 @@ fn test_contains_multiple_matches_all_printed() {
         .args(["contains", p.to_str().unwrap(), "evidence"])
         .output()
         .unwrap();
-    assert!(output.status.success(), "expected exit 0 when matches found");
+    assert!(
+        output.status.success(),
+        "expected exit 0 when matches found"
+    );
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(
         stdout.contains("/evidence/file1.bin"),

@@ -19,17 +19,14 @@ fn test_gdrive_collect_parses_full_url() {
 
 #[test]
 fn test_gdrive_collect_parses_bare_id() {
-    let id =
-        blazehash::remote::gdrive::parse_file_id("1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0").unwrap();
+    let id = blazehash::remote::gdrive::parse_file_id("1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0").unwrap();
     assert_eq!(id, "1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0");
 }
 
 #[test]
 fn test_gdrive_collect_parses_gdrive_uri() {
-    let id = blazehash::remote::gdrive::parse_file_id(
-        "gdrive://1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0",
-    )
-    .unwrap();
+    let id = blazehash::remote::gdrive::parse_file_id("gdrive://1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0")
+        .unwrap();
     assert_eq!(id, "1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0");
 }
 

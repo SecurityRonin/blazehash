@@ -15,11 +15,18 @@ pub fn verify_manifest(
     out: &mut impl Write,
 ) -> Result<VerifyResult> {
     let records = blazehash::manifest_loader::load_manifest(manifest_path)?;
-    let mut result = VerifyResult { total: 0, passed: 0, failed: 0 };
+    let mut result = VerifyResult {
+        total: 0,
+        passed: 0,
+        failed: 0,
+    };
 
     // Determine which algorithms to verify
     let filter_algo: Option<Algorithm> = if let Some(f) = algo_filter {
-        Some(f.parse().map_err(|e| anyhow::anyhow!("unknown algorithm {f:?}: {e}"))?)
+        Some(
+            f.parse()
+                .map_err(|e| anyhow::anyhow!("unknown algorithm {f:?}: {e}"))?,
+        )
     } else {
         None
     };
@@ -31,9 +38,7 @@ pub fn verify_manifest(
         let hashes_to_verify: Vec<(Algorithm, &str)> = record
             .hashes
             .iter()
-            .filter(|(algo, _)| {
-                filter_algo.is_none_or(|fa| **algo == fa)
-            })
+            .filter(|(algo, _)| filter_algo.is_none_or(|fa| **algo == fa))
             .map(|(algo, hash)| (*algo, hash.as_str()))
             .collect();
 

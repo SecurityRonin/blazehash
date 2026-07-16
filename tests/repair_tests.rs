@@ -1,6 +1,6 @@
 use assert_cmd::Command;
-use tempfile::TempDir;
 use std::fs;
+use tempfile::TempDir;
 
 static REPAIR_MANIFEST: &str = concat!(
     "## case: REPAIR-TEST\n",
@@ -22,7 +22,8 @@ fn test_repair_removes_blank_lines() {
     let dir = TempDir::new().unwrap();
     let manifest = write_repair_manifest(&dir);
 
-    let output = Command::cargo_bin("blazehash").unwrap()
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
         .args(["repair", manifest.to_str().unwrap()])
         .output()
         .unwrap();
@@ -30,7 +31,11 @@ fn test_repair_removes_blank_lines() {
     assert!(output.status.success(), "expected success: {:?}", output);
     let content = String::from_utf8(output.stdout).unwrap();
     for line in content.lines() {
-        assert!(!line.trim().is_empty(), "blank line found in output: {:?}", content);
+        assert!(
+            !line.trim().is_empty(),
+            "blank line found in output: {:?}",
+            content
+        );
     }
 }
 
@@ -39,14 +44,18 @@ fn test_repair_preserves_headers() {
     let dir = TempDir::new().unwrap();
     let manifest = write_repair_manifest(&dir);
 
-    let output = Command::cargo_bin("blazehash").unwrap()
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
         .args(["repair", manifest.to_str().unwrap()])
         .output()
         .unwrap();
 
     assert!(output.status.success());
     let content = String::from_utf8(output.stdout).unwrap();
-    assert!(content.contains("## case: REPAIR-TEST"), "header not preserved in:\n{content}");
+    assert!(
+        content.contains("## case: REPAIR-TEST"),
+        "header not preserved in:\n{content}"
+    );
 }
 
 #[test]
@@ -54,7 +63,8 @@ fn test_repair_normalizes_extra_spaces() {
     let dir = TempDir::new().unwrap();
     let manifest = write_repair_manifest(&dir);
 
-    let output = Command::cargo_bin("blazehash").unwrap()
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
         .args(["repair", manifest.to_str().unwrap()])
         .output()
         .unwrap();
@@ -63,7 +73,8 @@ fn test_repair_normalizes_extra_spaces() {
     let content = String::from_utf8(output.stdout).unwrap();
 
     // The first data line used 4 spaces between fields; after repair it must use exactly 2
-    let data_lines: Vec<&str> = content.lines()
+    let data_lines: Vec<&str> = content
+        .lines()
         .filter(|l| l.starts_with("sha256"))
         .collect();
     assert!(!data_lines.is_empty(), "no data lines found");
@@ -79,7 +90,8 @@ fn test_repair_drops_malformed_lines() {
     let dir = TempDir::new().unwrap();
     let manifest = write_repair_manifest(&dir);
 
-    let output = Command::cargo_bin("blazehash").unwrap()
+    let output = Command::cargo_bin("blazehash")
+        .unwrap()
         .args(["repair", manifest.to_str().unwrap()])
         .output()
         .unwrap();
@@ -98,8 +110,14 @@ fn test_repair_output_to_file() {
     let manifest = write_repair_manifest(&dir);
     let out = dir.path().join("clean.hash");
 
-    Command::cargo_bin("blazehash").unwrap()
-        .args(["repair", manifest.to_str().unwrap(), "-o", out.to_str().unwrap()])
+    Command::cargo_bin("blazehash")
+        .unwrap()
+        .args([
+            "repair",
+            manifest.to_str().unwrap(),
+            "-o",
+            out.to_str().unwrap(),
+        ])
         .assert()
         .success();
 
@@ -109,5 +127,8 @@ fn test_repair_output_to_file() {
         assert!(!line.trim().is_empty(), "blank line found in output file");
     }
     // Header preserved
-    assert!(content.contains("## case: REPAIR-TEST"), "header missing from output file");
+    assert!(
+        content.contains("## case: REPAIR-TEST"),
+        "header missing from output file"
+    );
 }

@@ -1,8 +1,8 @@
+use anyhow::Result;
 use blazehash::algorithm::Algorithm;
 use blazehash::manifest::ManifestRecord;
 use blazehash::manifest_loader::load_manifest;
 use blazehash::watch::{check_file_against_baseline, ChangeStatus};
-use anyhow::Result;
 use notify::{EventKind, RecursiveMode, Watcher};
 use std::collections::HashMap;
 use std::path::PathBuf;

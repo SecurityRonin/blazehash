@@ -22,6 +22,7 @@ pub struct AttackTechnique {
 /// after generic archetypes so that `rat_` fires before `ratty_`.
 ///
 /// Keep in sync with `forensicnomicon::mitre::ATTACK_PREFIXES`.
+#[rustfmt::skip]
 static ATTACK_PREFIXES: &[(&str, &str, &str, &str)] = &[
     // ── Generic archetypes (original 20) ───────────────────────────────
     ("rat_",          "T1219",     "command-and-control",  "Remote Access Software"),

@@ -44,7 +44,9 @@ pub fn lint_manifest(manifest_path: &Path) -> Result<LintReport> {
                 "line {lineno}: duplicate path '{path}' (first seen at line {first})"
             ));
         }
-        if let Some((first_line, first_path)) = seen_hashes.insert(hash.clone(), (lineno, path.clone())) {
+        if let Some((first_line, first_path)) =
+            seen_hashes.insert(hash.clone(), (lineno, path.clone()))
+        {
             report.warnings.push(format!(
                 "line {lineno}: duplicate hash '{hash}' for '{path}' (also on line {first_line} for '{first_path}') — possible hardlink"
             ));

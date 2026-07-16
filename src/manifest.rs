@@ -71,7 +71,11 @@ pub fn write_record<W: Write>(
     #[cfg(feature = "yara")]
     for enrichment in &result.yara_enrichments {
         let sigma = enrichment.sigma_rule_id.unwrap_or("");
-        let vr = enrichment.velociraptor_artifacts.first().copied().unwrap_or("");
+        let vr = enrichment
+            .velociraptor_artifacts
+            .first()
+            .copied()
+            .unwrap_or("");
         let kape = enrichment.kape_targets.first().copied().unwrap_or("");
         let playbook = enrichment.playbook_id.unwrap_or("");
         writeln!(

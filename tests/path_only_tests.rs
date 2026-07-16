@@ -28,10 +28,26 @@ fn test_path_only_emits_paths_one_per_line() {
     assert!(out.status.success(), "exit code must be 0");
     let stdout = String::from_utf8_lossy(&out.stdout);
     let lines: Vec<&str> = stdout.lines().filter(|l| !l.is_empty()).collect();
-    assert_eq!(lines.len(), 3, "expected exactly 3 output lines, got: {stdout:?}");
-    assert!(lines[0].starts_with('/'), "each line must be a path, got: {}", lines[0]);
-    assert!(lines[1].starts_with('/'), "each line must be a path, got: {}", lines[1]);
-    assert!(lines[2].starts_with('/'), "each line must be a path, got: {}", lines[2]);
+    assert_eq!(
+        lines.len(),
+        3,
+        "expected exactly 3 output lines, got: {stdout:?}"
+    );
+    assert!(
+        lines[0].starts_with('/'),
+        "each line must be a path, got: {}",
+        lines[0]
+    );
+    assert!(
+        lines[1].starts_with('/'),
+        "each line must be a path, got: {}",
+        lines[1]
+    );
+    assert!(
+        lines[2].starts_with('/'),
+        "each line must be a path, got: {}",
+        lines[2]
+    );
 }
 
 #[test]
@@ -108,5 +124,9 @@ fn test_path_only_output_to_file() {
         .success();
     let content = fs::read_to_string(&out_path).unwrap();
     let lines: Vec<&str> = content.lines().filter(|l| !l.is_empty()).collect();
-    assert_eq!(lines.len(), 3, "output file must have exactly 3 lines, got: {content:?}");
+    assert_eq!(
+        lines.len(),
+        3,
+        "output file must have exactly 3 lines, got: {content:?}"
+    );
 }

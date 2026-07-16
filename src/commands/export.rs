@@ -7,10 +7,10 @@ use std::path::Path;
 pub fn export_manifest(manifest_path: &Path, format: &str, out: &mut impl Write) -> Result<()> {
     let content = std::fs::read_to_string(manifest_path)?;
     match format.to_ascii_lowercase().as_str() {
-        "csv"   => export_delimited(&content, ',', out),
-        "tsv"   => export_delimited(&content, '\t', out),
+        "csv" => export_delimited(&content, ',', out),
+        "tsv" => export_delimited(&content, '\t', out),
         "jsonl" => export_jsonl(&content, out),
-        other   => bail!("unknown export format '{other}'; supported: csv, tsv, jsonl"),
+        other => bail!("unknown export format '{other}'; supported: csv, tsv, jsonl"),
     }
 }
 

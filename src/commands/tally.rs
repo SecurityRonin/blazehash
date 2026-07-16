@@ -22,14 +22,15 @@ pub fn tally_manifest(manifest_path: &Path, key: &str, out: &mut impl Write) -> 
         let path = parts[2].trim();
         let bucket = match key {
             "algo" => algo.to_string(),
-            "dir" => {
-                std::path::Path::new(path)
-                    .parent()
-                    .map(|d| d.to_string_lossy().into_owned())
-                    .unwrap_or_else(|| ".".to_string())
-            }
+            "dir" => std::path::Path::new(path)
+                .parent()
+                .map(|d| d.to_string_lossy().into_owned())
+                .unwrap_or_else(|| ".".to_string()),
             _ => {
-                match std::path::Path::new(path).extension().and_then(|e| e.to_str()) {
+                match std::path::Path::new(path)
+                    .extension()
+                    .and_then(|e| e.to_str())
+                {
                     Some(ext) => format!(".{ext}"),
                     None => "(none)".to_string(),
                 }

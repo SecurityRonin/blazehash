@@ -29,12 +29,16 @@
 
 #[test]
 fn gdrive_scheme_detected_by_is_remote_uri() {
-    assert!(blazehash::remote::is_remote_uri("gdrive://1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0"));
+    assert!(blazehash::remote::is_remote_uri(
+        "gdrive://1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0"
+    ));
 }
 
 #[test]
 fn gdrive_legacy_0b_scheme_detected_by_is_remote_uri() {
-    assert!(blazehash::remote::is_remote_uri("gdrive://0B0KLoHg_gR_XQnV4RVhlNl96MHM"));
+    assert!(blazehash::remote::is_remote_uri(
+        "gdrive://0B0KLoHg_gR_XQnV4RVhlNl96MHM"
+    ));
 }
 
 #[test]
@@ -186,8 +190,7 @@ mod gdrive_integration {
         assert_eq!(id, FIXTURE_B_ID);
 
         let mut out = Vec::new();
-        let result =
-            hash_gdrive_file(&id, &[Algorithm::Sha256], &mut out).expect("download");
+        let result = hash_gdrive_file(&id, &[Algorithm::Sha256], &mut out).expect("download");
         assert_eq!(result.sha256.as_deref(), Some(FIXTURE_B_SHA256));
     }
 

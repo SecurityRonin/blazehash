@@ -290,7 +290,10 @@ fn collect_results(
                 no_gpu,
                 entropy,
                 #[cfg(feature = "yara")]
-                YaraOpts { scanner: yara_scanner, max_size_mb: yara_max_size_mb },
+                YaraOpts {
+                    scanner: yara_scanner,
+                    max_size_mb: yara_max_size_mb,
+                },
                 #[cfg(not(feature = "yara"))]
                 YaraOpts::no_yara(),
             )
@@ -333,7 +336,14 @@ fn hash_ads_streams(
     results: &mut Vec<FileHashResult>,
 ) {
     for stream_path in enumerate_ads(path) {
-        match hash_file(&stream_path, algorithms, no_cache, no_gpu, false, YaraOpts::no_yara()) {
+        match hash_file(
+            &stream_path,
+            algorithms,
+            no_cache,
+            no_gpu,
+            false,
+            YaraOpts::no_yara(),
+        ) {
             Ok(r) => results.push(r),
             Err(e) => eprintln!("[!] Failed to hash ADS {}: {e}", stream_path.display()),
         }

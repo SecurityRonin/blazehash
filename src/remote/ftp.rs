@@ -84,7 +84,14 @@ pub fn parse_ftp_uri(uri: &str) -> Result<FtpUri> {
         (None, None)
     };
 
-    Ok(FtpUri { host, port, path, username, password, is_tls })
+    Ok(FtpUri {
+        host,
+        port,
+        path,
+        username,
+        password,
+        is_tls,
+    })
 }
 
 /// Fetch the raw bytes of an `ftp://` or `ftps://` URI using a blocking FTP connection.
@@ -97,8 +104,8 @@ pub fn fetch_ftp_bytes(uri: &str) -> Result<Vec<u8>> {
     let ftp_uri = parse_ftp_uri(uri)?;
     let addr = format!("{}:{}", ftp_uri.host, ftp_uri.port);
 
-    let mut stream = FtpStream::connect(&addr)
-        .map_err(|e| anyhow!("FTP connect to {addr} failed: {e}"))?;
+    let mut stream =
+        FtpStream::connect(&addr).map_err(|e| anyhow!("FTP connect to {addr} failed: {e}"))?;
 
     let user = ftp_uri.username.as_deref().unwrap_or("anonymous");
     let pass = ftp_uri.password.as_deref().unwrap_or("anonymous@");

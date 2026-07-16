@@ -40,7 +40,10 @@ pub fn parse_image_ref(s: &str) -> Result<ImageRef> {
     };
 
     let (bare_name, tag) = if let Some(colon) = name_part.rfind(':') {
-        (name_part[..colon].to_string(), name_part[colon + 1..].to_string())
+        (
+            name_part[..colon].to_string(),
+            name_part[colon + 1..].to_string(),
+        )
     } else {
         (name_part.clone(), "latest".to_string())
     };
@@ -51,5 +54,10 @@ pub fn parse_image_ref(s: &str) -> Result<ImageRef> {
         bare_name
     };
 
-    Ok(ImageRef { registry, name, tag, digest })
+    Ok(ImageRef {
+        registry,
+        name,
+        tag,
+        digest,
+    })
 }

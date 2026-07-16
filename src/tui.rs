@@ -100,7 +100,14 @@ pub fn run_tui(
             let _ = tx.send(TuiEvent::FileStarted {
                 path: path.display().to_string(),
             });
-            match hash_file(path, &algos, false, false, entropy, crate::hash::YaraOpts::no_yara()) {
+            match hash_file(
+                path,
+                &algos,
+                false,
+                false,
+                entropy,
+                crate::hash::YaraOpts::no_yara(),
+            ) {
                 Ok(result) => {
                     let preview = result
                         .hashes

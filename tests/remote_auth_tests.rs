@@ -15,12 +15,11 @@ mod remote_auth_tests {
             .unwrap();
         let _guard = rt.enter();
 
-        let async_op = Operator::new(services::Memory::default())
-            .unwrap()
-            .finish();
+        let async_op = Operator::new(services::Memory::default()).unwrap().finish();
         let op = blocking::Operator::new(async_op).unwrap();
 
-        op.write("test/data.bin", b"round trip content".to_vec()).unwrap();
+        op.write("test/data.bin", b"round trip content".to_vec())
+            .unwrap();
         let result = op.read("test/data.bin").unwrap();
         assert_eq!(result.to_vec(), b"round trip content");
     }
@@ -28,7 +27,11 @@ mod remote_auth_tests {
     #[test]
     fn test_operator_for_uri_mem_succeeds() {
         let result = operator_for_uri("mem://testbucket/key.hash");
-        assert!(result.is_ok(), "mem:// should build successfully: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "mem:// should build successfully: {:?}",
+            result.err()
+        );
     }
 
     #[test]
@@ -36,7 +39,10 @@ mod remote_auth_tests {
         let result = operator_for_uri("ftp://host/file");
         assert!(result.is_err());
         let msg = result.unwrap_err().to_string();
-        assert!(msg.contains("unsupported") || msg.contains("ftp"), "error: {msg}");
+        assert!(
+            msg.contains("unsupported") || msg.contains("ftp"),
+            "error: {msg}"
+        );
     }
 
     #[test]

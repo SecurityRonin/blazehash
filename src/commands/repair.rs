@@ -9,7 +9,9 @@ pub fn repair_manifest(manifest_path: &Path, out: &mut impl Write) -> Result<()>
     let content = std::fs::read_to_string(manifest_path)?;
     for line in content.lines() {
         let trimmed = line.trim();
-        if trimmed.is_empty() { continue; }
+        if trimmed.is_empty() {
+            continue;
+        }
         if trimmed.starts_with('#') || trimmed.starts_with('%') {
             writeln!(out, "{trimmed}")?;
             continue;

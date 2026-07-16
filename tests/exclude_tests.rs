@@ -22,13 +22,25 @@ fn test_exclude_drops_matching_entries() {
     let manifest = write_manifest();
     let output = Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["exclude", manifest.path().to_str().unwrap(), "--exclude-pattern", "*.tmp"])
+        .args([
+            "exclude",
+            manifest.path().to_str().unwrap(),
+            "--exclude-pattern",
+            "*.tmp",
+        ])
         .output()
         .unwrap();
 
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(!stdout.contains("scratch.tmp"), "scratch.tmp should be excluded");
+    assert!(
+        !stdout.contains("scratch.tmp"),
+        "scratch.tmp should be excluded"
+    );
     assert!(stdout.contains("file1.exe"), "file1.exe should be kept");
     assert!(stdout.contains("readme.txt"), "readme.txt should be kept");
 }
@@ -38,13 +50,25 @@ fn test_exclude_preserves_headers() {
     let manifest = write_manifest();
     let output = Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["exclude", manifest.path().to_str().unwrap(), "--exclude-pattern", "*.tmp"])
+        .args([
+            "exclude",
+            manifest.path().to_str().unwrap(),
+            "--exclude-pattern",
+            "*.tmp",
+        ])
         .output()
         .unwrap();
 
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("## case:"), "header should be preserved in output");
+    assert!(
+        stdout.contains("## case:"),
+        "header should be preserved in output"
+    );
 }
 
 #[test]
@@ -52,14 +76,29 @@ fn test_exclude_glob_with_directory_prefix() {
     let manifest = write_manifest();
     let output = Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["exclude", manifest.path().to_str().unwrap(), "--exclude-pattern", "/evidence/*"])
+        .args([
+            "exclude",
+            manifest.path().to_str().unwrap(),
+            "--exclude-pattern",
+            "/evidence/*",
+        ])
         .output()
         .unwrap();
 
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(!stdout.contains("file1.exe"), "file1.exe should be excluded");
-    assert!(!stdout.contains("report.pdf"), "report.pdf should be excluded");
+    assert!(
+        !stdout.contains("file1.exe"),
+        "file1.exe should be excluded"
+    );
+    assert!(
+        !stdout.contains("report.pdf"),
+        "report.pdf should be excluded"
+    );
     assert!(stdout.contains("readme.txt"), "readme.txt should be kept");
 }
 
@@ -68,11 +107,20 @@ fn test_exclude_no_matches_passes_all_through() {
     let manifest = write_manifest();
     let output = Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["exclude", manifest.path().to_str().unwrap(), "--exclude-pattern", "*.xyz"])
+        .args([
+            "exclude",
+            manifest.path().to_str().unwrap(),
+            "--exclude-pattern",
+            "*.xyz",
+        ])
         .output()
         .unwrap();
 
-    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("file1.exe"), "file1.exe should be kept");
     assert!(stdout.contains("readme.txt"), "readme.txt should be kept");
@@ -98,6 +146,12 @@ fn test_exclude_output_to_file() {
         .assert()
         .success();
     let contents = std::fs::read_to_string(out_file.path()).unwrap();
-    assert!(!contents.contains("scratch.tmp"), "excluded entry should not be in output file");
-    assert!(contents.contains("file1.exe"), "kept entry should be in output file");
+    assert!(
+        !contents.contains("scratch.tmp"),
+        "excluded entry should not be in output file"
+    );
+    assert!(
+        contents.contains("file1.exe"),
+        "kept entry should be in output file"
+    );
 }

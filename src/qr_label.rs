@@ -111,11 +111,8 @@ pub fn generate_qr_png(
 ) -> Result<()> {
     let content = build_qr_content(manifest_path, pubkey_override, None)?;
 
-    let code = qrcode::QrCode::with_error_correction_level(
-        content.as_bytes(),
-        qrcode::EcLevel::M,
-    )
-    .map_err(|e| anyhow::anyhow!("QR encoding error: {e:?}"))?;
+    let code = qrcode::QrCode::with_error_correction_level(content.as_bytes(), qrcode::EcLevel::M)
+        .map_err(|e| anyhow::anyhow!("QR encoding error: {e:?}"))?;
 
     // Render as grayscale image (black on white, 8px per module, with quiet zone)
     let img = code

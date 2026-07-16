@@ -2,7 +2,11 @@ use assert_cmd::Command;
 use std::fs;
 use tempfile::TempDir;
 
-fn write_file_and_manifest(dir: &TempDir, content: &[u8], algo: &str) -> (std::path::PathBuf, std::path::PathBuf) {
+fn write_file_and_manifest(
+    dir: &TempDir,
+    content: &[u8],
+    algo: &str,
+) -> (std::path::PathBuf, std::path::PathBuf) {
     let file_path = dir.path().join("evidence.bin");
     fs::write(&file_path, content).unwrap();
     let hash_out = Command::cargo_bin("blazehash")
@@ -41,7 +45,10 @@ fn test_verify_fails_when_file_modified() {
         .unwrap();
     assert!(!out.status.success(), "verify should exit 1 on mismatch");
     let stdout = String::from_utf8_lossy(&out.stdout);
-    assert!(stdout.contains("FAIL"), "should print FAIL for tampered file");
+    assert!(
+        stdout.contains("FAIL"),
+        "should print FAIL for tampered file"
+    );
 }
 
 #[test]
@@ -54,9 +61,15 @@ fn test_verify_fails_when_file_missing() {
         .args(["verify", manifest.to_str().unwrap()])
         .output()
         .unwrap();
-    assert!(!out.status.success(), "verify should exit 1 when file missing");
+    assert!(
+        !out.status.success(),
+        "verify should exit 1 when file missing"
+    );
     let stdout = String::from_utf8_lossy(&out.stdout);
-    assert!(stdout.contains("MISS") || stdout.contains("FAIL"), "should indicate missing file");
+    assert!(
+        stdout.contains("MISS") || stdout.contains("FAIL"),
+        "should indicate missing file"
+    );
 }
 
 #[test]
@@ -73,7 +86,12 @@ fn test_verify_algo_filter() {
     fs::write(&manifest_path, &hash_out.stdout).unwrap();
     let out = Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["verify", manifest_path.to_str().unwrap(), "--verify-algo", "blake3"])
+        .args([
+            "verify",
+            manifest_path.to_str().unwrap(),
+            "--verify-algo",
+            "blake3",
+        ])
         .output()
         .unwrap();
     assert!(out.status.success());

@@ -4,7 +4,11 @@ use rand::{seq::SliceRandom, SeedableRng};
 use std::io::Write;
 use std::path::Path;
 
-pub fn shuffle_manifest(manifest_path: &Path, seed: Option<u64>, out: &mut impl Write) -> Result<()> {
+pub fn shuffle_manifest(
+    manifest_path: &Path,
+    seed: Option<u64>,
+    out: &mut impl Write,
+) -> Result<()> {
     if !manifest_path.exists() {
         bail!("manifest not found: {}", manifest_path.display());
     }

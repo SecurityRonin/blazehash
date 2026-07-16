@@ -21,7 +21,10 @@ fn test_local_path_not_remote() {
 
 #[test]
 fn test_scheme_detect_azblob() {
-    assert_eq!(UriScheme::detect("azblob://container/blob"), Some(UriScheme::AzBlob));
+    assert_eq!(
+        UriScheme::detect("azblob://container/blob"),
+        Some(UriScheme::AzBlob)
+    );
 }
 
 // Renamed from test_scheme_detect_unknown_returns_none — ftp is now supported;
@@ -55,7 +58,10 @@ fn sftp_uri_is_detected() {
 
 #[test]
 fn scheme_detect_sftp() {
-    assert_eq!(UriScheme::detect("sftp://user@host/path"), Some(UriScheme::Sftp));
+    assert_eq!(
+        UriScheme::detect("sftp://user@host/path"),
+        Some(UriScheme::Sftp)
+    );
 }
 
 // ── Microsoft OneDrive ────────────────────────────────────────────────────────
@@ -67,7 +73,10 @@ fn onedrive_uri_is_detected() {
 
 #[test]
 fn scheme_detect_onedrive() {
-    assert_eq!(UriScheme::detect("onedrive://path/file"), Some(UriScheme::OneDrive));
+    assert_eq!(
+        UriScheme::detect("onedrive://path/file"),
+        Some(UriScheme::OneDrive)
+    );
 }
 
 // ── Dropbox ───────────────────────────────────────────────────────────────────
@@ -79,7 +88,10 @@ fn dropbox_uri_is_detected() {
 
 #[test]
 fn scheme_detect_dropbox() {
-    assert_eq!(UriScheme::detect("dropbox://path/file"), Some(UriScheme::Dropbox));
+    assert_eq!(
+        UriScheme::detect("dropbox://path/file"),
+        Some(UriScheme::Dropbox)
+    );
 }
 
 // ── Backblaze B2 ──────────────────────────────────────────────────────────────
@@ -139,7 +151,10 @@ fn swift_uri_is_detected() {
 
 #[test]
 fn scheme_detect_swift() {
-    assert_eq!(UriScheme::detect("swift://container/path"), Some(UriScheme::Swift));
+    assert_eq!(
+        UriScheme::detect("swift://container/path"),
+        Some(UriScheme::Swift)
+    );
 }
 
 // ── Azure Files ───────────────────────────────────────────────────────────────
@@ -151,7 +166,10 @@ fn azfile_uri_is_detected() {
 
 #[test]
 fn scheme_detect_azfile() {
-    assert_eq!(UriScheme::detect("azfile://share/file"), Some(UriScheme::AzFile));
+    assert_eq!(
+        UriScheme::detect("azfile://share/file"),
+        Some(UriScheme::AzFile)
+    );
 }
 
 // ── Azure Data Lake Storage ───────────────────────────────────────────────────
@@ -163,7 +181,10 @@ fn azdls_uri_is_detected() {
 
 #[test]
 fn scheme_detect_azdls() {
-    assert_eq!(UriScheme::detect("azdls://container/path"), Some(UriScheme::AzDls));
+    assert_eq!(
+        UriScheme::detect("azdls://container/path"),
+        Some(UriScheme::AzDls)
+    );
 }
 
 // ── GitHub ────────────────────────────────────────────────────────────────────
@@ -175,7 +196,10 @@ fn github_uri_is_detected() {
 
 #[test]
 fn scheme_detect_github() {
-    assert_eq!(UriScheme::detect("github://owner/repo/file"), Some(UriScheme::GitHub));
+    assert_eq!(
+        UriScheme::detect("github://owner/repo/file"),
+        Some(UriScheme::GitHub)
+    );
 }
 
 // ── IPFS / IPMFS ─────────────────────────────────────────────────────────────
@@ -209,7 +233,10 @@ fn webhdfs_uri_is_detected() {
 
 #[test]
 fn scheme_detect_webhdfs() {
-    assert_eq!(UriScheme::detect("webhdfs://host/path"), Some(UriScheme::WebHdfs));
+    assert_eq!(
+        UriScheme::detect("webhdfs://host/path"),
+        Some(UriScheme::WebHdfs)
+    );
 }
 
 // ── HDFS native (pure-Rust, no JVM) ──────────────────────────────────────────
@@ -217,7 +244,9 @@ fn scheme_detect_webhdfs() {
 #[test]
 fn hdfs_uri_is_detected() {
     assert!(is_remote_uri("hdfs://namenode:9000/user/evidence/disk.dd"));
-    assert!(is_remote_uri("hdfs://cluster.hadoop.corp:8020/data/case-001/image.raw"));
+    assert!(is_remote_uri(
+        "hdfs://cluster.hadoop.corp:8020/data/case-001/image.raw"
+    ));
 }
 
 #[test]
@@ -228,8 +257,14 @@ fn hdfs_not_remote_without_host() {
 
 #[test]
 fn scheme_detect_hdfs() {
-    assert_eq!(UriScheme::detect("hdfs://namenode:9000/path"), Some(UriScheme::Hdfs));
-    assert_eq!(UriScheme::detect("hdfs://nn.corp:8020/data/file"), Some(UriScheme::Hdfs));
+    assert_eq!(
+        UriScheme::detect("hdfs://namenode:9000/path"),
+        Some(UriScheme::Hdfs)
+    );
+    assert_eq!(
+        UriScheme::detect("hdfs://nn.corp:8020/data/file"),
+        Some(UriScheme::Hdfs)
+    );
 }
 
 // ── Alluxio ───────────────────────────────────────────────────────────────────
@@ -241,7 +276,10 @@ fn alluxio_uri_is_detected() {
 
 #[test]
 fn scheme_detect_alluxio() {
-    assert_eq!(UriScheme::detect("alluxio://host/path"), Some(UriScheme::Alluxio));
+    assert_eq!(
+        UriScheme::detect("alluxio://host/path"),
+        Some(UriScheme::Alluxio)
+    );
 }
 
 // ── LakeFS ────────────────────────────────────────────────────────────────────
@@ -253,7 +291,10 @@ fn lakefs_uri_is_detected() {
 
 #[test]
 fn scheme_detect_lakefs() {
-    assert_eq!(UriScheme::detect("lakefs://repo/main/file"), Some(UriScheme::LakeFs));
+    assert_eq!(
+        UriScheme::detect("lakefs://repo/main/file"),
+        Some(UriScheme::LakeFs)
+    );
 }
 
 // ── Aliyun Drive ─────────────────────────────────────────────────────────────
@@ -265,7 +306,10 @@ fn aliyun_drive_uri_is_detected() {
 
 #[test]
 fn scheme_detect_aliyun_drive() {
-    assert_eq!(UriScheme::detect("aliyun-drive://path"), Some(UriScheme::AliyunDrive));
+    assert_eq!(
+        UriScheme::detect("aliyun-drive://path"),
+        Some(UriScheme::AliyunDrive)
+    );
 }
 
 // ── Seafile ───────────────────────────────────────────────────────────────────
@@ -277,7 +321,10 @@ fn seafile_uri_is_detected() {
 
 #[test]
 fn scheme_detect_seafile() {
-    assert_eq!(UriScheme::detect("seafile://server/repo/file"), Some(UriScheme::Seafile));
+    assert_eq!(
+        UriScheme::detect("seafile://server/repo/file"),
+        Some(UriScheme::Seafile)
+    );
 }
 
 // ── pCloud ────────────────────────────────────────────────────────────────────
@@ -313,7 +360,10 @@ fn yandex_disk_uri_is_detected() {
 
 #[test]
 fn scheme_detect_yandex_disk() {
-    assert_eq!(UriScheme::detect("yandex-disk://path"), Some(UriScheme::YandexDisk));
+    assert_eq!(
+        UriScheme::detect("yandex-disk://path"),
+        Some(UriScheme::YandexDisk)
+    );
 }
 
 // ── HuggingFace ───────────────────────────────────────────────────────────────
@@ -325,7 +375,10 @@ fn huggingface_uri_is_detected() {
 
 #[test]
 fn scheme_detect_huggingface() {
-    assert_eq!(UriScheme::detect("huggingface://owner/repo/file"), Some(UriScheme::HuggingFace));
+    assert_eq!(
+        UriScheme::detect("huggingface://owner/repo/file"),
+        Some(UriScheme::HuggingFace)
+    );
 }
 
 // ── Upyun ─────────────────────────────────────────────────────────────────────
@@ -337,7 +390,10 @@ fn upyun_uri_is_detected() {
 
 #[test]
 fn scheme_detect_upyun() {
-    assert_eq!(UriScheme::detect("upyun://bucket/key"), Some(UriScheme::Upyun));
+    assert_eq!(
+        UriScheme::detect("upyun://bucket/key"),
+        Some(UriScheme::Upyun)
+    );
 }
 
 // ── Vercel Blob ───────────────────────────────────────────────────────────────
@@ -349,7 +405,10 @@ fn vercel_blob_uri_is_detected() {
 
 #[test]
 fn scheme_detect_vercel_blob() {
-    assert_eq!(UriScheme::detect("vercel-blob://key"), Some(UriScheme::VercelBlob));
+    assert_eq!(
+        UriScheme::detect("vercel-blob://key"),
+        Some(UriScheme::VercelBlob)
+    );
 }
 
 // ── RocksDB (optional feature: rocksdb-storage) ───────────────────────────────
@@ -363,7 +422,10 @@ fn rocksdb_uri_is_detected() {
 #[cfg(feature = "rocksdb-storage")]
 #[test]
 fn scheme_detect_rocksdb() {
-    assert_eq!(UriScheme::detect("rocksdb:///path/to/db"), Some(UriScheme::RocksDb));
+    assert_eq!(
+        UriScheme::detect("rocksdb:///path/to/db"),
+        Some(UriScheme::RocksDb)
+    );
 }
 
 // ── Monoio filesystem (monoiofs, Linux only) ──────────────────────────────────
@@ -377,7 +439,10 @@ fn monoiofs_uri_is_detected() {
 #[cfg(target_os = "linux")]
 #[test]
 fn scheme_detect_monoiofs() {
-    assert_eq!(UriScheme::detect("monoiofs:///path/to/file"), Some(UriScheme::Monoiofs));
+    assert_eq!(
+        UriScheme::detect("monoiofs:///path/to/file"),
+        Some(UriScheme::Monoiofs)
+    );
 }
 
 // ── Compio filesystem (compfs) ────────────────────────────────────────────────
@@ -389,7 +454,10 @@ fn compfs_uri_is_detected() {
 
 #[test]
 fn scheme_detect_compfs() {
-    assert_eq!(UriScheme::detect("compfs:///path/to/file"), Some(UriScheme::Compfs));
+    assert_eq!(
+        UriScheme::detect("compfs:///path/to/file"),
+        Some(UriScheme::Compfs)
+    );
 }
 
 // ── Redis TLS (rediss) ────────────────────────────────────────────────────────
@@ -401,7 +469,10 @@ fn rediss_uri_is_detected() {
 
 #[test]
 fn scheme_detect_rediss() {
-    assert_eq!(UriScheme::detect("rediss://host:6380/key"), Some(UriScheme::RedisTls));
+    assert_eq!(
+        UriScheme::detect("rediss://host:6380/key"),
+        Some(UriScheme::RedisTls)
+    );
 }
 
 // ── operator_for_uri compile-only checks (behind remote feature) ──────────────
@@ -428,7 +499,9 @@ mod operator_tests {
     fn operator_sftp_redirects_to_fetch_sftp_bytes() {
         // sftp:// is served by fetch_sftp_bytes (ssh2/libssh2, cross-platform).
         // operator_for_uri bails with a helpful message — not a generic "unsupported URI scheme".
-        let err = operator_for_uri("sftp://user@host/path").unwrap_err().to_string();
+        let err = operator_for_uri("sftp://user@host/path")
+            .unwrap_err()
+            .to_string();
         assert!(
             !err.contains("unsupported URI scheme"),
             "sftp:// should give a redirect message, got: {err}"
@@ -687,8 +760,9 @@ mod operator_tests {
 
     #[test]
     fn hdfs_nested_path_extracted_correctly() {
-        let (_, path) = operator_for_uri("hdfs://cluster.corp:8020/user/analyst/cases/2026/image.raw")
-            .expect("hdfs:// nested path should be supported");
+        let (_, path) =
+            operator_for_uri("hdfs://cluster.corp:8020/user/analyst/cases/2026/image.raw")
+                .expect("hdfs:// nested path should be supported");
         assert_eq!(path, "user/analyst/cases/2026/image.raw");
     }
 }
@@ -729,8 +803,8 @@ mod ftp_uri_tests {
 
     #[test]
     fn ftp_with_credentials() {
-        let u = parse_ftp_uri("ftp://admin:s3cr3t@ftp.corp.example:21/reports/q1.csv")
-            .expect("parse");
+        let u =
+            parse_ftp_uri("ftp://admin:s3cr3t@ftp.corp.example:21/reports/q1.csv").expect("parse");
         assert_eq!(u.username, Some("admin".to_string()));
         assert_eq!(u.password, Some("s3cr3t".to_string()));
         assert_eq!(u.host, "ftp.corp.example");
@@ -831,7 +905,9 @@ mod tftp_uri_tests {
 
     #[test]
     fn tftp_scheme_detected_as_remote() {
-        assert!(blazehash::remote::is_remote_uri("tftp://192.168.1.1/firmware.bin"));
+        assert!(blazehash::remote::is_remote_uri(
+            "tftp://192.168.1.1/firmware.bin"
+        ));
     }
 
     #[test]

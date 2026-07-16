@@ -53,7 +53,14 @@ pub fn handle_hash(
                 }
             }
         } else {
-            match hash_file(path, &algos, false, false, false, blazehash::hash::YaraOpts::no_yara()) {
+            match hash_file(
+                path,
+                &algos,
+                false,
+                false,
+                false,
+                blazehash::hash::YaraOpts::no_yara(),
+            ) {
                 Ok(r) => {
                     let hashes: serde_json::Map<String, Value> = r
                         .hashes

@@ -54,7 +54,11 @@ mod yara_threshold_tests {
             .unwrap();
 
         let stdout = String::from_utf8_lossy(&output.stdout);
-        assert!(output.status.success(), "command failed: {}", String::from_utf8_lossy(&output.stderr));
+        assert!(
+            output.status.success(),
+            "command failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
         // STIX output should contain YARA match data for the matched rule
         assert!(
             stdout.contains("detect_match") || stdout.contains("yara") || stdout.contains("T1059"),
@@ -91,7 +95,9 @@ mod yara_threshold_tests {
         let stderr = String::from_utf8_lossy(&output.stderr);
         assert!(output.status.success(), "command failed: {stderr}");
         assert!(
-            stderr.contains("YARA skipped") || stderr.contains("yara skipped") || stderr.contains("skipped"),
+            stderr.contains("YARA skipped")
+                || stderr.contains("yara skipped")
+                || stderr.contains("skipped"),
             "expected YARA skip warning in stderr, got: {stderr}"
         );
     }
@@ -105,16 +111,15 @@ mod yara_threshold_tests {
 
         let output = Command::cargo_bin("blazehash")
             .unwrap()
-            .args([
-                "hash",
-                "--format",
-                "stix",
-                file.to_str().unwrap(),
-            ])
+            .args(["hash", "--format", "stix", file.to_str().unwrap()])
             .output()
             .unwrap();
 
-        assert!(output.status.success(), "command failed: {}", String::from_utf8_lossy(&output.stderr));
+        assert!(
+            output.status.success(),
+            "command failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
         let stdout = String::from_utf8_lossy(&output.stdout);
         // Without --yara, no yara_matches field should appear
         assert!(

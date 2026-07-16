@@ -20,11 +20,14 @@ fn original_20_archetypes_resolve() {
         ("webshell_", "T1505.003"),
         ("miner_", "T1496"),
         ("wiper_", "T1485"),
-        ("stealer_", "T1041"),  // generic stealer_ → Exfiltration Over C2 Channel
+        ("stealer_", "T1041"), // generic stealer_ → Exfiltration Over C2 Channel
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
         assert_eq!(
             r.unwrap().technique_id,
             expected_id,
@@ -36,24 +39,31 @@ fn original_20_archetypes_resolve() {
 #[test]
 fn named_ransomware_families_resolve() {
     let cases = [
-        ("lockbit_3_0",        "T1486"),
-        ("conti_v3",           "T1486"),
-        ("revil_sample",       "T1486"),
-        ("blackcat_enc",       "T1486"),
-        ("alphv_",             "T1486"),
-        ("cl0p_",              "T1486"),
-        ("akira_",             "T1486"),
-        ("blackbasta_",        "T1486"),
-        ("rhysida_",           "T1486"),
-        ("play_ransom_sample", "T1486"),  // play_ransom_ prefix
-        ("hive_ransom_v3",     "T1486"),  // hive_ransom_ prefix
-        ("darkside_",          "T1486"),
-        ("ryuk_",              "T1486"),
+        ("lockbit_3_0", "T1486"),
+        ("conti_v3", "T1486"),
+        ("revil_sample", "T1486"),
+        ("blackcat_enc", "T1486"),
+        ("alphv_", "T1486"),
+        ("cl0p_", "T1486"),
+        ("akira_", "T1486"),
+        ("blackbasta_", "T1486"),
+        ("rhysida_", "T1486"),
+        ("play_ransom_sample", "T1486"), // play_ransom_ prefix
+        ("hive_ransom_v3", "T1486"),     // hive_ransom_ prefix
+        ("darkside_", "T1486"),
+        ("ryuk_", "T1486"),
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
@@ -66,68 +76,96 @@ fn named_rat_families_resolve() {
         ("plugx_", "T1219"),
         ("gh0st_", "T1219"),
         ("xworm_", "T1219"),
-        ("quasar_rat_v2", "T1219"),   // quasar_ prefix (table uses quasar_ not quasarrat_)
+        ("quasar_rat_v2", "T1219"), // quasar_ prefix (table uses quasar_ not quasarrat_)
         ("nanocore_", "T1219"),
         ("darkcomet_", "T1219"),
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
 #[test]
 fn named_banking_trojan_families_resolve() {
     let cases = [
-        ("emotet_epoch5",    "T1566"),  // emotet_ → Phishing
-        ("trickbot_",        "T1185"),  // trickbot_ → Browser Session Hijacking
-        ("qakbot_",          "T1185"),
-        ("zeus_panda",       "T1185"),  // zeus_ → Browser Session Hijacking
-        ("gozi_",            "T1185"),
-        ("sharkbot_",        "T1185"),
-        ("godfather_banker", "T1185"),  // godfather_ → Browser Session Hijacking
-        ("dridex_",          "T1185"),
+        ("emotet_epoch5", "T1566"), // emotet_ → Phishing
+        ("trickbot_", "T1185"),     // trickbot_ → Browser Session Hijacking
+        ("qakbot_", "T1185"),
+        ("zeus_panda", "T1185"), // zeus_ → Browser Session Hijacking
+        ("gozi_", "T1185"),
+        ("sharkbot_", "T1185"),
+        ("godfather_banker", "T1185"), // godfather_ → Browser Session Hijacking
+        ("dridex_", "T1185"),
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
 #[test]
 fn named_infostealer_families_resolve() {
     let cases = [
-        ("redline_stealer", "T1552"),  // T1552 Unsecured Credentials
-        ("raccoon_v2",      "T1552"),
-        ("vidar_sample",    "T1552"),
-        ("lumma_stealer",   "T1552"),
-        ("stealc_",         "T1552"),
-        ("rhadamanthys_",   "T1552"),
-        ("azorult_",        "T1552"),
+        ("redline_stealer", "T1552"), // T1552 Unsecured Credentials
+        ("raccoon_v2", "T1552"),
+        ("vidar_sample", "T1552"),
+        ("lumma_stealer", "T1552"),
+        ("stealc_", "T1552"),
+        ("rhadamanthys_", "T1552"),
+        ("azorult_", "T1552"),
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
 #[test]
 fn named_loader_families_resolve() {
     let cases = [
-        ("bumblebee_loader", "T1105"),  // T1105 Ingress Tool Transfer
-        ("icedid_",          "T1105"),
-        ("guloader_",        "T1105"),
-        ("pikabot_",         "T1105"),
-        ("darkgate_",        "T1105"),
-        ("smokeloader_",     "T1105"),
+        ("bumblebee_loader", "T1105"), // T1105 Ingress Tool Transfer
+        ("icedid_", "T1105"),
+        ("guloader_", "T1105"),
+        ("pikabot_", "T1105"),
+        ("darkgate_", "T1105"),
+        ("smokeloader_", "T1105"),
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
@@ -142,43 +180,64 @@ fn credential_attack_prefixes_resolve() {
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
 #[test]
 fn cve_specific_prefixes_resolve() {
     let cases = [
-        ("eternalblue_exploit", "T1210"),  // T1210 Exploitation of Remote Services
-        ("log4shell_payload",   "T1190"),  // T1190 Exploit Public-Facing Application
-        ("proxyshell_",         "T1190"),
-        ("printnightmare_",     "T1068"),  // T1068 Exploitation for Privilege Escalation
-        ("zerologon_",          "T1068"),  // zerologon is privilege escalation, not remote services
-        ("bluekeep_",           "T1210"),  // T1210 Exploitation of Remote Services
-        ("follina_",            "T1203"),  // T1203 Exploitation for Client Execution
+        ("eternalblue_exploit", "T1210"), // T1210 Exploitation of Remote Services
+        ("log4shell_payload", "T1190"),   // T1190 Exploit Public-Facing Application
+        ("proxyshell_", "T1190"),
+        ("printnightmare_", "T1068"), // T1068 Exploitation for Privilege Escalation
+        ("zerologon_", "T1068"),      // zerologon is privilege escalation, not remote services
+        ("bluekeep_", "T1210"),       // T1210 Exploitation of Remote Services
+        ("follina_", "T1203"),        // T1203 Exploitation for Client Execution
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
 #[test]
 fn c2_framework_prefixes_resolve() {
     let cases = [
-        ("cobaltstrike_beacon", "T1219"),    // T1219 Remote Access Software
-        ("sliver_implant",      "T1219"),
-        ("havoc_agent",         "T1219"),
-        ("brute_ratel_",        "T1219"),
-        ("empire_stager",       "T1059.001"),
-        ("mimikatz_lsadump",    "T1003"),    // mimikatz_ → T1003 OS Credential Dumping
+        ("cobaltstrike_beacon", "T1219"), // T1219 Remote Access Software
+        ("sliver_implant", "T1219"),
+        ("havoc_agent", "T1219"),
+        ("brute_ratel_", "T1219"),
+        ("empire_stager", "T1059.001"),
+        ("mimikatz_lsadump", "T1003"), // mimikatz_ → T1003 OS Credential Dumping
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
@@ -194,8 +253,15 @@ fn defense_evasion_prefixes_resolve() {
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
@@ -210,8 +276,15 @@ fn process_injection_prefixes_resolve() {
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
@@ -226,40 +299,61 @@ fn persistence_prefixes_resolve() {
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
 #[test]
 fn platform_specific_prefixes_resolve() {
     let cases = [
-        ("linux_rootkit_x",    "T1014"),  // linux_rootkit_ prefix
+        ("linux_rootkit_x", "T1014"),     // linux_rootkit_ prefix
         ("linux_backdoor_ssh", "T1505"),  // linux_backdoor_ → Server Software Component
-        ("macos_persist_plist","T1547"),  // macos_persist_ → Boot or Logon Autostart Execution
-        ("android_banker_x",   "T1185"),  // android_banker_ → Browser Session Hijacking
-        ("ios_spyware_x",      "T1430"),  // ios_spyware_ → Location Tracking
+        ("macos_persist_plist", "T1547"), // macos_persist_ → Boot or Logon Autostart Execution
+        ("android_banker_x", "T1185"),    // android_banker_ → Browser Session Hijacking
+        ("ios_spyware_x", "T1430"),       // ios_spyware_ → Location Tracking
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 
 #[test]
 fn impact_prefixes_resolve() {
     let cases = [
-        ("dos_amplify", "T1499"),   // dos_ → Endpoint Denial of Service
-        ("ddos_amp",   "T1498"),   // ddos_ → Network Denial of Service (not T1499)
+        ("dos_amplify", "T1499"), // dos_ → Endpoint Denial of Service
+        ("ddos_amp", "T1498"),    // ddos_ → Network Denial of Service (not T1499)
         ("vss_delete", "T1490"),
         ("disk_wipe_mbr", "T1561"),
         ("defacement_", "T1491"),
     ];
     for (prefix, expected_id) in cases {
         let r = lookup_attack(prefix);
-        assert!(r.is_some(), "lookup_attack({prefix:?}) returned None — expected Some");
-        assert_eq!(r.unwrap().technique_id, expected_id, "wrong id for {prefix:?}");
+        assert!(
+            r.is_some(),
+            "lookup_attack({prefix:?}) returned None — expected Some"
+        );
+        assert_eq!(
+            r.unwrap().technique_id,
+            expected_id,
+            "wrong id for {prefix:?}"
+        );
     }
 }
 

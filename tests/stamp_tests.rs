@@ -83,7 +83,10 @@ fn test_stamp_timestamp_format() {
             break;
         }
         let c = ts.chars().nth(i).unwrap();
-        assert!(c.is_ascii_digit(), "char at {i} should be a digit, got {c}: {ts}");
+        assert!(
+            c.is_ascii_digit(),
+            "char at {i} should be a digit, got {c}: {ts}"
+        );
     }
 }
 
@@ -106,7 +109,10 @@ fn test_stamp_replaces_existing_stamp() {
     let stdout = String::from_utf8_lossy(&out.stdout);
 
     // Should contain exactly one ## stamped: line
-    let stamped_count = stdout.lines().filter(|l| l.starts_with("## stamped:")).count();
+    let stamped_count = stdout
+        .lines()
+        .filter(|l| l.starts_with("## stamped:"))
+        .count();
     assert_eq!(
         stamped_count, 1,
         "expected exactly 1 '## stamped:' line, got {stamped_count}: {stdout}"

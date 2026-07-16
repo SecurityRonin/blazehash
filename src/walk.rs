@@ -109,8 +109,15 @@ pub fn walk_and_hash_with_options(
         let hash_errors = Mutex::new(Vec::new());
         let results: Vec<FileHashResult> = filtered
             .par_iter()
-            .filter_map(
-                |path| match hash_file(path, algorithms, false, false, compute_entropy, YaraOpts::no_yara()) {
+            .filter_map(|path| {
+                match hash_file(
+                    path,
+                    algorithms,
+                    false,
+                    false,
+                    compute_entropy,
+                    YaraOpts::no_yara(),
+                ) {
                     Ok(result) => Some(result),
                     Err(err) => {
                         hash_errors.lock().unwrap().push(WalkError {
@@ -119,8 +126,8 @@ pub fn walk_and_hash_with_options(
                         });
                         None
                     }
-                },
-            )
+                }
+            })
             .collect();
 
         let mut errors = walk_errors;

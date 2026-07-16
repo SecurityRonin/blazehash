@@ -38,7 +38,10 @@ fn test_tally_by_ext_default() {
     );
     assert!(text.contains(".txt"), "output should contain .txt\n{text}");
     assert!(text.contains(".pdf"), "output should contain .pdf\n{text}");
-    assert!(text.contains("(none)"), "output should contain (none)\n{text}");
+    assert!(
+        text.contains("(none)"),
+        "output should contain (none)\n{text}"
+    );
 }
 
 #[test]
@@ -50,10 +53,17 @@ fn test_tally_by_algo() {
         .args(["tally", manifest.to_str().unwrap(), "--tally-by", "algo"])
         .output()
         .unwrap();
-    assert!(output.status.success(), "tally --tally-by algo should succeed");
+    assert!(
+        output.status.success(),
+        "tally --tally-by algo should succeed"
+    );
     let text = String::from_utf8(output.stdout).unwrap();
     let lines: Vec<&str> = text.lines().collect();
-    assert!(lines.len() >= 2, "expected at least 2 lines, got: {:?}", lines);
+    assert!(
+        lines.len() >= 2,
+        "expected at least 2 lines, got: {:?}",
+        lines
+    );
     assert_eq!(
         lines.first().copied(),
         Some("3\tsha256"),
@@ -77,10 +87,19 @@ fn test_tally_by_dir() {
         .args(["tally", manifest.to_str().unwrap(), "--tally-by", "dir"])
         .output()
         .unwrap();
-    assert!(output.status.success(), "tally --tally-by dir should succeed");
+    assert!(
+        output.status.success(),
+        "tally --tally-by dir should succeed"
+    );
     let text = String::from_utf8(output.stdout).unwrap();
-    assert!(text.contains("/evidence"), "output should contain /evidence\n{text}");
-    assert!(text.contains("/docs"), "output should contain /docs\n{text}");
+    assert!(
+        text.contains("/evidence"),
+        "output should contain /evidence\n{text}"
+    );
+    assert!(
+        text.contains("/docs"),
+        "output should contain /docs\n{text}"
+    );
 }
 
 #[test]
@@ -114,6 +133,12 @@ fn test_tally_output_to_file() {
         .assert()
         .success();
     let text = fs::read_to_string(&out_path).unwrap();
-    assert!(text.contains("sha256"), "output file should contain sha256\n{text}");
-    assert!(text.contains("blake3"), "output file should contain blake3\n{text}");
+    assert!(
+        text.contains("sha256"),
+        "output file should contain sha256\n{text}"
+    );
+    assert!(
+        text.contains("blake3"),
+        "output file should contain blake3\n{text}"
+    );
 }

@@ -16,7 +16,9 @@ fn count_entries(path: &std::path::Path) -> usize {
     fs::read_to_string(path)
         .unwrap()
         .lines()
-        .filter(|l| !l.trim().is_empty() && !l.trim().starts_with('#') && !l.trim().starts_with('%'))
+        .filter(|l| {
+            !l.trim().is_empty() && !l.trim().starts_with('#') && !l.trim().starts_with('%')
+        })
         .count()
 }
 
@@ -26,7 +28,14 @@ fn test_balance_creates_correct_number_of_parts() {
     let m = make_manifest(&dir);
     Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["balance", m.to_str().unwrap(), "--parts", "3", "-o", dir.path().to_str().unwrap()])
+        .args([
+            "balance",
+            m.to_str().unwrap(),
+            "--parts",
+            "3",
+            "-o",
+            dir.path().to_str().unwrap(),
+        ])
         .assert()
         .success();
     assert!(dir.path().join("test_part001.hash").exists());
@@ -41,7 +50,14 @@ fn test_balance_distributes_entries_evenly() {
     let m = make_manifest(&dir);
     Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["balance", m.to_str().unwrap(), "--parts", "3", "-o", dir.path().to_str().unwrap()])
+        .args([
+            "balance",
+            m.to_str().unwrap(),
+            "--parts",
+            "3",
+            "-o",
+            dir.path().to_str().unwrap(),
+        ])
         .assert()
         .success();
     // 10 entries / 3 parts → 4, 3, 3
@@ -56,7 +72,14 @@ fn test_balance_parts_cover_all_entries() {
     let m = make_manifest(&dir);
     Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["balance", m.to_str().unwrap(), "--parts", "3", "-o", dir.path().to_str().unwrap()])
+        .args([
+            "balance",
+            m.to_str().unwrap(),
+            "--parts",
+            "3",
+            "-o",
+            dir.path().to_str().unwrap(),
+        ])
         .assert()
         .success();
     let mut all_paths: Vec<String> = Vec::new();
@@ -74,7 +97,11 @@ fn test_balance_parts_cover_all_entries() {
             }
         }
     }
-    assert_eq!(all_paths.len(), 10, "expected 10 total entries across all parts");
+    assert_eq!(
+        all_paths.len(),
+        10,
+        "expected 10 total entries across all parts"
+    );
     for i in 1..=10 {
         let expected = format!("file{i:02}.txt");
         assert!(all_paths.contains(&expected), "missing entry: {expected}");
@@ -98,15 +125,19 @@ fn test_balance_parts_contain_headers() {
     let m = make_manifest(&dir);
     Command::cargo_bin("blazehash")
         .unwrap()
-        .args(["balance", m.to_str().unwrap(), "--parts", "3", "-o", dir.path().to_str().unwrap()])
+        .args([
+            "balance",
+            m.to_str().unwrap(),
+            "--parts",
+            "3",
+            "-o",
+            dir.path().to_str().unwrap(),
+        ])
         .assert()
         .success();
     for i in 1..=3 {
         let part_path = dir.path().join(format!("test_part{:03}.hash", i));
         let content = fs::read_to_string(&part_path).unwrap();
-        assert!(
-            content.contains("## case: test"),
-            "part {i} missing header"
-        );
+        assert!(content.contains("## case: test"), "part {i} missing header");
     }
 }

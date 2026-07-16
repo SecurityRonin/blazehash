@@ -17,7 +17,10 @@ pub fn classify_vt_response(json: &Value) -> VtResult {
             let harmless = s["harmless"].as_u64().unwrap_or(0);
             let total = malicious + undetected + suspicious + harmless;
             if malicious > 0 {
-                VtResult::Malicious { count: malicious, total }
+                VtResult::Malicious {
+                    count: malicious,
+                    total,
+                }
             } else {
                 VtResult::Clean(total)
             }

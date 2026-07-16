@@ -113,8 +113,7 @@ pub fn fetch_tftp_bytes(uri: &str) -> Result<Vec<u8>> {
 fn fetch_tftp_inner(uri: &TftpUri) -> Result<Vec<u8>> {
     let server_addr = format!("{}:{}", uri.host, uri.port);
 
-    let socket = UdpSocket::bind("0.0.0.0:0")
-        .map_err(|e| anyhow!("UDP bind failed: {e}"))?;
+    let socket = UdpSocket::bind("0.0.0.0:0").map_err(|e| anyhow!("UDP bind failed: {e}"))?;
     socket
         .set_read_timeout(Some(Duration::from_secs(READ_TIMEOUT_SECS)))
         .map_err(|e| anyhow!("set_read_timeout failed: {e}"))?;

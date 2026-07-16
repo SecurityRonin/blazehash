@@ -116,9 +116,7 @@ mod bad_list_tests {
         .unwrap();
         let set = load_bad_list(&bad_file).unwrap();
         assert_eq!(set.len(), 2);
-        assert!(set.contains(
-            "aabbccdd00112233445566778899aabbccddeeff00112233445566778899aabbcc"
-        ));
+        assert!(set.contains("aabbccdd00112233445566778899aabbccddeeff00112233445566778899aabbcc"));
     }
 
     #[test]

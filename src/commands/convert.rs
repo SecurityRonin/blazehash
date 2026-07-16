@@ -5,20 +5,18 @@ use anyhow::{bail, Result};
 use std::io::Write;
 use std::path::Path;
 
-pub fn convert_manifest(
-    input_path: &Path,
-    format: &str,
-    out: &mut impl Write,
-) -> Result<()> {
+pub fn convert_manifest(input_path: &Path, format: &str, out: &mut impl Write) -> Result<()> {
     let content = std::fs::read_to_string(input_path)?;
     writeln!(out, "## converted-from: {format}")?;
     match format.to_ascii_lowercase().as_str() {
         "sha256sum" => convert_sumfile(&content, "sha256", out),
-        "sha1sum"   => convert_sumfile(&content, "sha1", out),
-        "md5sum"    => convert_sumfile(&content, "md5", out),
-        "hashdeep"  => convert_hashdeep(&content, out),
-        "sfv"       => convert_sfv(&content, out),
-        other       => bail!("unknown format '{other}'; supported: sha256sum, sha1sum, md5sum, hashdeep, sfv"),
+        "sha1sum" => convert_sumfile(&content, "sha1", out),
+        "md5sum" => convert_sumfile(&content, "md5", out),
+        "hashdeep" => convert_hashdeep(&content, out),
+        "sfv" => convert_sfv(&content, out),
+        other => {
+            bail!("unknown format '{other}'; supported: sha256sum, sha1sum, md5sum, hashdeep, sfv")
+        }
     }
 }
 
@@ -30,8 +28,9 @@ fn convert_sumfile(content: &str, algo: &str, out: &mut impl Write) -> Result<()
             continue;
         }
         if let Some((hash, rest)) = line.split_once(|c: char| c.is_ascii_whitespace()) {
-            let path = rest.trim_start_matches(|c: char| c.is_ascii_whitespace())
-                          .trim_start_matches('*');
+            let path = rest
+                .trim_start_matches(|c: char| c.is_ascii_whitespace())
+                .trim_start_matches('*');
             let hash = hash.trim();
             if !path.is_empty() && !hash.is_empty() {
                 writeln!(out, "{algo}  {hash}  {path}")?;
