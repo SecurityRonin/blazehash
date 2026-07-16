@@ -162,7 +162,7 @@ impl Update for Adler32Digest {
 
 impl FixedOutput for Adler32Digest {
     fn finalize_into(self, out: &mut Output<Self>) {
-        use adler::Adler32;
+        use adler2::Adler32;
         let mut h = Adler32::new();
         h.write_slice(&self.0);
         out.copy_from_slice(&h.checksum().to_be_bytes());

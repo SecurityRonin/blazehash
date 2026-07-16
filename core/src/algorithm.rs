@@ -81,7 +81,10 @@ impl Algorithm {
     }
 
     pub fn is_non_cryptographic(&self) -> bool {
-        matches!(self, Algorithm::Crc32c | Algorithm::Xxh3 | Algorithm::Adler32 | Algorithm::Crc64)
+        matches!(
+            self,
+            Algorithm::Crc32c | Algorithm::Xxh3 | Algorithm::Adler32 | Algorithm::Crc64
+        )
     }
 
     /// Returns true for algorithms that require reading the full file into memory
@@ -198,7 +201,7 @@ pub fn hash_bytes(algo: Algorithm, data: &[u8]) -> String {
             hex::encode(out)
         }
         Algorithm::Adler32 => {
-            use adler::Adler32;
+            use adler2::Adler32;
             let mut h = Adler32::new();
             h.write_slice(data);
             format!("{:08x}", h.checksum())

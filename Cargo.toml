@@ -23,7 +23,7 @@ ripemd = "0.1"
 tiny-keccak = { version = "2", features = ["k12"] }
 crc = "3"
 crc32c = "0.6"
-adler = "1"
+adler2 = "2"
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tlsh2 = { version = "0.4", features = ["diff"] }
 
@@ -101,7 +101,7 @@ sm3 = { workspace = true }
 streebog = { workspace = true }
 ripemd = { workspace = true }
 tiny-keccak = { workspace = true }
-adler = { workspace = true }
+adler2 = { workspace = true }
 # nilsimsa = "0.2"  # requires nightly: uses #![feature()] — skipped
 globset = "0.4"
 chrono = { version = "0.4", default-features = false, features = ["std"] }
@@ -130,7 +130,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"], optional = tr
 notify = "6"
 ureq = { version = "2", features = ["json"] }
 bincode = "1"
-indicatif = "0.17"
+indicatif = "0.18"
 clap_complete = "4"
 clap_mangen = "0.2"
 uuid = { version = "1", features = ["v5"] }

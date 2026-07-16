@@ -1,6 +1,6 @@
 [package]
 name = "blazehash-core"
-version = "0.2.4"
+version = "0.2.5"
 edition = "2021"
 rust-version = "1.88"
 authors = ["Albert Hui <albert@securityronin.com>"]
@@ -35,7 +35,7 @@ ripemd = { workspace = true }
 tiny-keccak = { workspace = true }
 crc = { workspace = true }
 crc32c = { workspace = true }
-adler = { workspace = true }
+adler2 = { workspace = true }
 xxhash-rust = { workspace = true }
 tlsh2 = { workspace = true }
 
