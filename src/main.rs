@@ -3,7 +3,10 @@ mod commands;
 mod handlers;
 mod mcp;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
+// `Context` is only used by the yara-gated rule-compilation path below.
+#[cfg(feature = "yara")]
+use anyhow::Context as _;
 use clap::Parser;
 use cli::{Cli, Mode};
 use commands::merge::MergeArgs;

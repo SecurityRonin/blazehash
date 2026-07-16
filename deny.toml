@@ -1,6 +1,30 @@
 [graph]
 targets = []
-all-features = true
+# The `remote` feature (opendal cloud/object-storage stack) is a genuinely-optional
+# heavy subsystem — opt-in, NOT default (see Cargo.toml [features]). It drags in a
+# vulnerable transitive tree (hickory DNS RUSTSEC-2026-0118/0119, quick-xml
+# RUSTSEC-2026-0194/0195, plus sqlx/tikv/rustls chains) that no hashing workload
+# exercises. Rather than blanket-ignore all of those advisories, we keep opendal
+# out of the audited graph entirely: check every OTHER feature, never `remote`
+# (or `rocksdb-storage`, which pulls it in). `cargo deny check` therefore audits
+# exactly what a default `cargo build` ships.
+all-features = false
+features = [
+    "forensic-image",
+    "gpu",
+    "sqlite",
+    "hashdb",
+    "yara",
+    "report",
+    "parquet-output",
+    "docker",
+    "archive",
+    "duckdb-output",
+    "tui",
+    "ots",
+    "pq",
+    "qr",
+]
 
 [advisories]
 version = 2
@@ -13,34 +37,20 @@ ignore = [
     # for the bloomfilter crate's serde output. Will migrate when bloomfilter updates.
     "RUSTSEC-2025-0141",
 
-    # adler v1 unmaintained — we directly use it for the Adler32 hash algorithm.
-    # Will migrate to adler2 when the ecosystem stabilises.
-    "RUSTSEC-2025-0056",
-    # fxhash unmaintained — transitive dep via yara-x/opendal.
+    # fxhash unmaintained — transitive dep via yara-x.
     "RUSTSEC-2025-0046",
-    # instant unmaintained — transitive dep via indicatif/opendal.
-    "RUSTSEC-2024-0384",
-    # number_prefix unmaintained — transitive dep via indicatif.
-    "RUSTSEC-2025-0119",
-    # rustls-pemfile unmaintained — transitive dep via opendal/sqlx.
+    # rustls-pemfile unmaintained — transitive dep via yara-x.
     "RUSTSEC-2026-0098",
-    # rustls 0.21 cert validation bugs — transitive dep via opendal/tikv-client.
+    # rustls 0.21 cert validation bugs — transitive dep via yara-x.
     "RUSTSEC-2026-0099",
-    # RSA Marvin Attack / timing side-channel — transitive via yara-x/opendal/sqlx.
+    # RSA Marvin Attack / timing side-channel — transitive via yara-x.
     # No direct key-recovery risk in our hashing workload (we never do RSA decryption).
     "RUSTSEC-2023-0071",
-    # sled / parking_lot advisories — transitive via opendal services-sled.
-    "RUSTSEC-2025-0057",
-    # tonic advisory — transitive via opendal/tikv-client.
+    # tonic advisory — transitive via yara-x.
     "RUSTSEC-2025-0118",
-    # sqlx advisory — transitive via opendal SQL services.
-    "RUSTSEC-2025-0134",
-    # indicatif number_prefix — transitive dep.
-    "RUSTSEC-2024-0363",
 
-    # rustls-webpki CRL parsing panic — transitive via opendal/tikv-client/tonic.
+    # rustls-webpki CRL parsing panic — transitive via yara-x.
     # No CRL parsing performed in blazehash; only hash computation paths are used.
-    # Will resolve when opendal/tikv-client upgrades rustls-webpki.
     "RUSTSEC-2026-0104",
 
     # Wasmtime vulnerabilities — all transitive via yara-x → wasmtime.

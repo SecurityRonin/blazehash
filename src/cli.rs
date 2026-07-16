@@ -476,6 +476,7 @@ pub enum Mode {
     UniqueHash,
     Balance,
     Interleave,
+    #[cfg(feature = "remote")]
     GDriveCollect,
     Hash,
 }
@@ -684,7 +685,7 @@ impl Cli {
                     #[cfg(not(feature = "ots"))]
                     return Mode::Hash;
                 }
-                _ => return Mode::Hash,
+                _ => Mode::Hash,
             }
         } else if self.paths.first().map(|p| p.as_os_str()) == Some(std::ffi::OsStr::new("info")) {
             Mode::Info

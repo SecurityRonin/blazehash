@@ -51,7 +51,7 @@ cast_precision_loss = { level = "allow", priority = 1 }
 
 [package]
 name = "blazehash"
-version = "0.2.5"
+version = "0.2.6"
 edition = "2021"
 rust-version = "1.88"
 authors = ["Albert Hui <albert@securityronin.com>"]
@@ -228,8 +228,11 @@ libc = "0.2"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2"
-# monoiofs depends on monoio (io_uring) which only compiles on Linux
-opendal = { version = "0.55.0", features = ["services-monoiofs"] }
+# monoiofs depends on monoio (io_uring) which only compiles on Linux.
+# Optional + gated behind the `remote` feature (same as the main opendal dep):
+# the default build must not pull the opendal cloud stack (and its vulnerable
+# DNS / quick-xml transitive tree) on Linux either.
+opendal = { version = "0.55.0", features = ["services-monoiofs"], optional = true }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows-sys = { version = "0.59", features = [
@@ -244,7 +247,13 @@ windows-sys = { version = "0.59", features = [
 tokio = { version = "1", features = ["rt-multi-thread", "fs", "sync", "macros"] }
 
 [features]
-default = ["forensic-image", "gpu", "sqlite", "parquet-output", "duckdb-output", "pq", "qr", "archive", "remote"]
+# `remote` (opendal cloud/object-storage backends) is a heavy, rarely-needed
+# subsystem that drags in a vulnerable DNS (hickory) + quick-xml transitive tree.
+# Per the fleet "batteries-included EXCEPT a genuinely-optional heavy subsystem
+# MAY be a named non-default feature" rule, it is opt-in: build with
+# `--features remote` (release binaries enable it). The default build — and
+# therefore `cargo deny` — stays opendal-free.
+default = ["forensic-image", "gpu", "sqlite", "parquet-output", "duckdb-output", "pq", "qr", "archive"]
 forensic-image = ["dep:ewf"]
 gpu = ["dep:wgpu", "dep:pollster"]
 sqlite = ["dep:rusqlite"]
