@@ -91,9 +91,6 @@ jobs:
 
   vet:
     runs-on: ubuntu-latest
-    # cargo-vet exemptions are maintained on macOS; Linux-specific transitive deps
-    # may not be covered. Vet is advisory-only — deny covers the critical checks.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
@@ -104,4 +101,4 @@ jobs:
       - name: Fetch dependencies
         run: cargo fetch
       - name: Check supply chain
-        run: cargo vet check
+        run: cargo vet --locked
