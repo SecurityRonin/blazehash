@@ -59,5 +59,8 @@ nav:
 plugins:
   - search
 
-extra_files:
-  - google3e0f2daf020975a1.html
+
+exclude_docs: |
+  PRD.md
+  decisions/
+  plans/
