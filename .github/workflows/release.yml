@@ -142,9 +142,12 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
-      - name: Publish to crates.io
+      # Publish ONLY the `blazehash` app crate. `blazehash-core` is owned by
+      # release-plz (release-plz.yml, on merge to main) — scoping to `-p blazehash`
+      # keeps the tag pipeline from re-publishing (colliding with) the lib.
+      - name: Publish blazehash to crates.io
         run: |
-          output=$(cargo publish --allow-dirty 2>&1) && echo "$output" || {
+          output=$(cargo publish -p blazehash --allow-dirty 2>&1) && echo "$output" || {
             echo "$output"
             echo "$output" | grep -q "already exists on crates.io" || exit 1
             echo "Version already published to crates.io, skipping"
