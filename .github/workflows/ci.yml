@@ -37,6 +37,17 @@ jobs:
       - name: Install protoc (Windows)
         if: runner.os == 'Windows'
         run: choco install protoc --no-progress
+      # blazehash links ~800 crates + bundled C++ (duckdb/rocksdb/wasmtime/yara-x) into
+      # each of ~100 integration-test binaries. With full debuginfo, rustc and link.exe
+      # exhaust the runner's RAM (rustc handle_alloc_error + LNK1102: out of memory).
+      # Dropping debug info for the dev/test profiles removes the CodeView tables that
+      # drive that memory blowup. Windows-only; the Linux leg uses mold for the same class.
+      - name: Reduce debuginfo to avoid linker/compiler OOM (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          echo "CARGO_PROFILE_DEV_DEBUG=0" >> "$GITHUB_ENV"
+          echo "CARGO_PROFILE_TEST_DEBUG=0" >> "$GITHUB_ENV"
       - run: cargo test --all-features
       - run: cargo test --features hashdb
       - run: cargo test --features yara
