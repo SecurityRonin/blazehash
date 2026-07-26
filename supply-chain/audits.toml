@@ -2,3 +2,39 @@
 # cargo-vet audits file
 
 [audits]
+
+[[trusted.comfy-table]]
+criteria = "safe-to-deploy"
+user-id = 70603 # Arne  Christian Beer (Nukesor)
+start = "2020-01-19"
+end = "2027-07-26"
+
+[[trusted.duckdb]]
+criteria = "safe-to-deploy"
+user-id = 105137 # Mark (Mytherin)
+start = "2025-02-12"
+end = "2027-07-26"
+
+[[trusted.libduckdb-sys]]
+criteria = "safe-to-deploy"
+user-id = 105137 # Mark (Mytherin)
+start = "2025-02-12"
+end = "2027-07-26"
+
+[[trusted.ureq]]
+criteria = "safe-to-deploy"
+user-id = 5441 # Martin Algesten (algesten)
+start = "2019-03-30"
+end = "2027-07-26"
+
+[[trusted.ureq-proto]]
+criteria = "safe-to-deploy"
+user-id = 5441 # Martin Algesten (algesten)
+start = "2024-11-06"
+end = "2027-07-26"
+
+[[trusted.utf8-zero]]
+criteria = "safe-to-deploy"
+user-id = 5441 # Martin Algesten (algesten)
+start = "2026-02-28"
+end = "2027-07-26"
