@@ -17,21 +17,18 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
       - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
-      # etcd-client (opendal services-etcd) requires protoc at build time
-      # mold linker is ~3x faster and far more memory-efficient than lld on Linux —
-      # prevents SIGBUS OOM crashes when linking large binaries on 7 GB runners
-      - name: Install protoc + mold (Linux)
+      # etcd-client (opendal services-etcd) requires protoc at build time.
+      # The Linux test leg links with the default `ld`: mold was suspected of a
+      # link-time deadlock that hung this job for hours on x86_64 (never reproduced
+      # on aarch64), so it is not used here. Re-add it only for release builds if needed.
+      - name: Install protoc (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update -qq && sudo apt-get install -y protobuf-compiler clang mold
-      - name: Use mold linker (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          mkdir -p ~/.cargo
-          printf '[target.x86_64-unknown-linux-gnu]\nlinker = "clang"\nrustflags = ["-C", "link-arg=-fuse-ld=mold"]\n' >> ~/.cargo/config.toml
+        run: sudo apt-get update -qq && sudo apt-get install -y protobuf-compiler
       - name: Install protoc (macOS)
         if: runner.os == 'macOS'
         run: brew install protobuf
