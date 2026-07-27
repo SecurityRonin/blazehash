@@ -3,7 +3,7 @@
 *Reverse-written from the shipped code, README, and git history (2026-07-24). Every
 current-state claim is grounded in a same-session read of `Cargo.toml`, `src/`, and
 `docs/`. The load-bearing engineering decisions live as ADRs
-[0001](decisions/0001-lean-core-full-app-split.md)–[0009](decisions/0009-embed-attack-table-drop-forensicnomicon-dep.md)
+[0001](decisions/0001-lean-core-full-app-split.md)–[0011](decisions/0011-duckdb-msvc-fmt-floor.md)
 under [`docs/decisions/`](decisions/). Product tier: blazehash ships a binary an
 examiner runs (the `blazehash` CLI, plus a `tui` mode and an `mcp` server), so it
 carries a full PRD per the fleet PRD & ADR standard.*
@@ -58,7 +58,8 @@ custody.
 Grounded in `src/` and `src/cli.rs`:
 
 - **Recursive, parallel hashing** with memory-mapped and direct (uncached) I/O
-  (`src/hash.rs`), across 25+ algorithms — BLAKE3 (default), the SHA-1/2/3,
+  (`src/hash.rs`), across 25+ algorithms — BLAKE3 (default,
+  [ADR 0010](decisions/0010-blake3-default-hashdeep-superset.md)), the SHA-1/2/3,
   MD5, Tiger, Whirlpool, BLAKE2, SM3, Streebog, RIPEMD, K12, checksums
   (CRC/CRC32C/Adler), fast hashes (xxh3), and fuzzy/similarity hashes (ssdeep,
   TLSH) — the last two in `blazehash-core::fuzzy`.
@@ -75,8 +76,10 @@ Grounded in `src/` and `src/cli.rs`:
   Shannon entropy, and VirusTotal batch lookup (`src/vt.rs`).
 - **Forensic-image and device input:** EWF/E01 verification (`src/forensic_image/`,
   `forensic-image` feature) and raw block-device sizing (`src/device.rs`).
-- **Output formats:** the hashdeep text formats plus SQLite, Parquet, DuckDB,
-  JSON/JSONL, STIX 2.1, and ECS NDJSON (`src/format/`, `src/output.rs`).
+- **Output formats:** the hashdeep text formats plus SQLite, Parquet, DuckDB
+  (`duckdb-output`, bundled engine floored for the MSVC toolchain —
+  [ADR 0011](decisions/0011-duckdb-msvc-fmt-floor.md)), JSON/JSONL, STIX 2.1, and
+  ECS NDJSON (`src/format/`, `src/output.rs`).
 - **Remote storage:** S3/GCS/Azure and other object stores via opendal, plus HDFS, SQL, FTP/SFTP, and
   Google Drive hash-without-download (`src/remote/`, `remote` feature —
   [ADR 0002](decisions/0002-batteries-included-remote-opt-in.md)).
@@ -152,3 +155,5 @@ Grounded in `src/` and `src/cli.rs`:
 | [0007](decisions/0007-dual-release-pipeline.md) | release-plz for the library, `v[0-9]*` tag for the binary |
 | [0008](decisions/0008-pure-rust-zip-forensic-core.md) | Pure-Rust `zip-forensic-core` reader; dev-only `zip` for fixtures |
 | [0009](decisions/0009-embed-attack-table-drop-forensicnomicon-dep.md) | Embed the ATT&CK table; no compile-time forensicnomicon dep |
+| [0010](decisions/0010-blake3-default-hashdeep-superset.md) | BLAKE3 is the default algorithm; hashdeep flags still select the rest |
+| [0011](decisions/0011-duckdb-msvc-fmt-floor.md) | Floor `duckdb-output` at DuckDB 1.5.5 (crate 1.10505.0) for the MSVC 14.51 fmt break |
