@@ -271,11 +271,9 @@ fn parse_record(buf: &[u8]) -> Option<RawRecord> {
                     }
                 }
             }
-            MFT_ATTR_DATA => {
-                // Only the first unnamed $DATA stream holds the file content size
-                if data_size.is_none() && buf[off + 9] == 0 {
-                    data_size = parse_data_size(buf, off);
-                }
+            // Only the first unnamed $DATA stream holds the file content size
+            MFT_ATTR_DATA if data_size.is_none() && buf[off + 9] == 0 => {
+                data_size = parse_data_size(buf, off);
             }
             _ => {}
         }
