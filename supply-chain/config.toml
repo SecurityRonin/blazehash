@@ -485,10 +485,6 @@ criteria = "safe-to-deploy"
 version = "4.6.7"
 criteria = "safe-to-deploy"
 
-[[exemptions.comfy-table]]
-version = "7.2.2"
-criteria = "safe-to-deploy"
-
 [[exemptions.compact_str]]
 version = "0.8.1"
 criteria = "safe-to-deploy"
@@ -787,10 +783,6 @@ criteria = "safe-to-deploy"
 
 [[exemptions.dsa]]
 version = "0.6.3"
-criteria = "safe-to-deploy"
-
-[[exemptions.duckdb]]
-version = "1.10501.0"
 criteria = "safe-to-deploy"
 
 [[exemptions.ecdsa]]
@@ -1391,10 +1383,6 @@ criteria = "safe-to-deploy"
 
 [[exemptions.libc]]
 version = "0.2.184"
-criteria = "safe-to-deploy"
-
-[[exemptions.libduckdb-sys]]
-version = "1.10501.0"
 criteria = "safe-to-deploy"
 
 [[exemptions.libloading]]
@@ -2759,10 +2747,6 @@ criteria = "safe-to-deploy"
 
 [[exemptions.untrusted]]
 version = "0.9.0"
-criteria = "safe-to-deploy"
-
-[[exemptions.ureq]]
-version = "2.12.1"
 criteria = "safe-to-deploy"
 
 [[exemptions.url]]
