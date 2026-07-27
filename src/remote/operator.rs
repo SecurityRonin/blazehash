@@ -678,4 +678,57 @@ mod tests {
             "webhdfs:// should be supported"
         );
     }
+
+    // ── ADR-0010: dropped OpenDAL backends must be unsupported ────────────────
+    // These schemes were removed from the `remote` OpenDAL service set. Each must
+    // fall through to the `other =>` arm and report "unsupported URI scheme".
+    fn assert_unsupported(uri: &str) {
+        let err = operator_for_uri(uri)
+            .expect_err("dropped scheme must return an error")
+            .to_string();
+        assert!(
+            err.contains("unsupported URI scheme"),
+            "expected unsupported-scheme error for {uri:?}, got: {err}"
+        );
+    }
+
+    #[test]
+    fn dropped_mongodb_is_unsupported() {
+        assert_unsupported("mongodb://host/db/coll/key");
+    }
+
+    #[test]
+    fn dropped_redis_is_unsupported() {
+        assert_unsupported("redis://host:6379/key");
+    }
+
+    #[test]
+    fn dropped_rocksdb_is_unsupported() {
+        assert_unsupported("rocksdb:///var/lib/db/key");
+    }
+
+    #[test]
+    fn dropped_ipfs_is_unsupported() {
+        assert_unsupported("ipfs://QmHash/path");
+    }
+
+    #[test]
+    fn dropped_onedrive_is_unsupported() {
+        assert_unsupported("onedrive://Documents/file.pdf");
+    }
+
+    #[test]
+    fn dropped_github_is_unsupported() {
+        assert_unsupported("github://owner/repo/path");
+    }
+
+    #[test]
+    fn dropped_compfs_is_unsupported() {
+        assert_unsupported("compfs:///tmp/evidence/file");
+    }
+
+    #[test]
+    fn dropped_etcd_is_unsupported() {
+        assert_unsupported("etcd://host:2379/key");
+    }
 }
