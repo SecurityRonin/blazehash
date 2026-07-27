@@ -1,17 +1,27 @@
 # Remote Storage
 
-blazehash speaks **50+ storage protocols** natively via [Apache OpenDAL](https://opendal.apache.org/). Any URI that resolves to file-like data is a valid input path or `-o` output target — no plugins, no adapters, no staging.
+blazehash reads and writes evidence directly from remote storage via
+[Apache OpenDAL](https://opendal.apache.org/), scoped to the backends where
+forensic evidence actually lives and where DFIR collectors (Velociraptor, KAPE)
+deposit it: object storage, SFTP/FTP, Hadoop, SQL stores, and WebDAV/HTTP. Any
+URI that resolves to file-like data is a valid input path or `-o` output target —
+no plugins, no adapters, no staging.
 
 ```bash
 # Read from remote, write manifest to remote — entirely off-disk
 blazehash s3://dfir-bucket/case-001/ -o gcs://evidence-archive/case-001.hash
 ```
 
+The remote stack is an opt-in build feature (`--features remote`); the release
+binaries enable it. ADR-0002 records why it is opt-in and ADR-0010 why the
+backend set is scoped to evidence-transfer targets (both in the project's
+`docs/decisions/`).
+
 ---
 
 ## Cloud Object Storage
 
-These are the most common backends for evidence archiving.
+The most common backends for evidence archiving.
 
 | Scheme | Backend | Auth env vars |
 |--------|---------|---------------|
@@ -25,7 +35,6 @@ These are the most common backends for evidence archiving.
 | `obs://bucket/key` | Huawei Cloud OBS | `HUAWEI_ACCESS_KEY_ID`, `HUAWEI_SECRET_ACCESS_KEY`, `HUAWEI_REGION` |
 | `oss://bucket/key` | Alibaba Cloud OSS | `ALIBABA_CLOUD_ACCESS_KEY_ID`, `ALIBABA_CLOUD_ACCESS_KEY_SECRET`, `ALIBABA_CLOUD_REGION` |
 | `swift://container/path` | OpenStack Swift | `SWIFT_ENDPOINT`, `SWIFT_TOKEN` |
-| `upyun://bucket/key` | Upyun CDN storage | `UPYUN_OPERATOR`, `UPYUN_PASSWORD` |
 
 ### S3-compatible endpoints
 
@@ -47,24 +56,13 @@ blazehash s3://my-bucket/evidence/
 
 ---
 
-## Cloud Drives
+## Google Drive
 
-Consumer and enterprise cloud drives — useful when evidence is a file shared from a suspect's or custodian's account.
+Useful when evidence is a file shared from a suspect's or custodian's account. blazehash uses the Drive API to hash without staging the file locally:
 
 | Scheme | Backend | Auth |
 |--------|---------|------|
-| `gdrive://file-id` | Google Drive | Run `blazehash gdrive auth login` once to cache OAuth2 token |
-| `onedrive://path` | Microsoft OneDrive | `ONEDRIVE_ACCESS_TOKEN` |
-| `dropbox://path` | Dropbox | `DROPBOX_ACCESS_TOKEN` |
-| `aliyun-drive://path` | Aliyun Drive (Alibaba) | `ALIYUN_DRIVE_ACCESS_TOKEN` |
-| `yandex-disk://path` | Yandex Disk | `YANDEX_DISK_ACCESS_TOKEN` |
-| `pcloud://path` | pCloud | `PCLOUD_USERNAME`, `PCLOUD_PASSWORD`, `PCLOUD_ENDPOINT` |
-| `koofr://path` | Koofr | `KOOFR_EMAIL`, `KOOFR_PASSWORD`, `KOOFR_ENDPOINT` |
-| `seafile://server/repo/path` | Seafile | `SEAFILE_USERNAME`, `SEAFILE_PASSWORD` |
-
-### Google Drive without downloading
-
-blazehash uses the Drive API to hash without staging the file locally:
+| `gdrive://file-id` | Google Drive | Run `blazehash gdrive auth login` once to cache the OAuth2 token |
 
 ```bash
 # By file ID
@@ -77,39 +75,16 @@ blazehash https://drive.google.com/file/d/1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0/view
 blazehash gdrive auth login
 ```
 
-### OneDrive / SharePoint
-
-```bash
-export ONEDRIVE_ACCESS_TOKEN=$(az account get-access-token --resource https://graph.microsoft.com -o tsv --query accessToken)
-blazehash onedrive://Documents/CaseFiles/image.dd
-```
-
 ---
 
-## Developer / ML / Infra
+## Hadoop / HDFS
 
-| Scheme | Backend | Auth |
-|--------|---------|------|
-| `github://owner/repo/path` | GitHub (raw file access) | `GITHUB_TOKEN` |
-| `huggingface://owner/repo/path` | HuggingFace datasets and models | `HUGGINGFACE_TOKEN` |
-| `vercel-blob://key` | Vercel Blob storage | `BLOB_READ_WRITE_TOKEN` |
-| `vercel-artifacts://key` | Vercel build artifact cache | `VERCEL_ARTIFACTS_TOKEN` |
-| `ghac://key` | GitHub Actions Cache | Set in GitHub Actions environment |
-| `dbfs://path` | Databricks DBFS | `DATABRICKS_HOST`, `DATABRICKS_TOKEN` |
-| `alluxio://host:port/path` | Alluxio data orchestration | — |
-| `webhdfs://host:port/path` | WebHDFS REST (Hadoop — no JVM required) | `WEBHDFS_USER` |
-| `lakefs://repo/branch/path` | LakeFS data versioning | `LAKEFS_ACCESS_KEY_ID`, `LAKEFS_SECRET_ACCESS_KEY`, `LAKEFS_ENDPOINT` |
-| `ipfs://CID/path` | IPFS content-addressed storage | `IPFS_GATEWAY` (default: `http://127.0.0.1:8080`) |
-| `ipmfs:///path` | IPFS Mutable File System | `IPFS_ENDPOINT` (default: `http://127.0.0.1:5001`) |
-
-### Hadoop / HDFS
-
-Two schemes are available depending on your cluster setup:
+Two schemes, depending on your cluster setup — both pure-Rust, no JVM and no `libhdfs`:
 
 | Scheme | Backend | Notes |
 |--------|---------|-------|
-| `hdfs://namenode:port/path` | HDFS (pure-Rust native client) | No JVM, no `libhdfs` — uses `hdfs-native` crate speaking Hadoop RPC |
-| `webhdfs://namenode:port/path` | WebHDFS REST API | No JVM, works with any Hadoop 2.x+ namenode |
+| `hdfs://namenode:port/path` | HDFS (pure-Rust native client) | Speaks Hadoop RPC via the `hdfs-native` crate |
+| `webhdfs://host:port/path` | WebHDFS REST API | Works with any Hadoop 2.x+ namenode; `WEBHDFS_USER` for the user name |
 
 ```bash
 # Pure-Rust HDFS native client (no Java required)
@@ -121,41 +96,21 @@ blazehash webhdfs://namenode.corp:50070/user/evidence/case-001/
 
 `hdfs://` is preferred when the cluster exposes the native Hadoop RPC port (default 8020/9000). `webhdfs://` is the fallback when only the HTTP REST endpoint is reachable.
 
-### GitHub (code forensics)
-
-Hash the exact state of a repository path at HEAD (or any ref via the API):
-
-```bash
-export GITHUB_TOKEN=ghp_...
-blazehash github://octocat/Hello-World/README
-```
-
 ---
 
-## Network KV / Databases
+## SQL Databases
 
 Useful when evidence artifacts are stored in operational datastores rather than file systems.
 
 | Scheme | Backend | Auth / connection |
 |--------|---------|-------------------|
-| `redis://host/key` | Redis | Standard Redis URL (supports `redis://[:password@]host:port`) |
-| `memcached://host/key` | Memcached | `tcp://host:port` |
-| `etcd://host/key` | etcd (gRPC) | `ETCD_USERNAME`, `ETCD_PASSWORD` |
-| `tikv://pd-host/key` | TiKV distributed KV | PD endpoint |
-| `mongodb://host/db/collection/key` | MongoDB | Standard MongoDB connection string |
-| `gridfs://host/db/bucket/key` | MongoDB GridFS | Standard MongoDB connection string |
 | `mysql://host/db/key` | MySQL / MariaDB | Standard DSN |
 | `postgresql://host/db/key` | PostgreSQL | Standard DSN |
 | `sqlite://path/to.db/key` | SQLite (file on disk) | File path |
-| `cloudflare-kv://namespace/key` | Cloudflare Workers KV | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` |
-| `d1://database-id/key` | Cloudflare D1 (SQLite via REST) | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` |
 
 ```bash
-# Hash a value stored in Redis
-blazehash redis://localhost/evidence:case-001:image
-
-# Hash a MongoDB document field
-blazehash mongodb://localhost/forensics/artifacts/abc123
+# Hash a value stored in a PostgreSQL row
+blazehash postgresql://user:pass@localhost/forensics/artifacts
 ```
 
 ---
@@ -194,51 +149,7 @@ blazehash sftp://admin@192.168.1.10/evidence/disk.dd
 | Scheme | Backend | Notes |
 |--------|---------|-------|
 | `mem://bucket/key` | In-process memory | Ephemeral; useful in tests and pipeline stages |
-| `redis://...` | Redis (plaintext) | Also serves as fast shared cache between pipeline stages |
-| `rediss://host:port/key` | Redis with TLS | Same as `redis://` but over an encrypted connection |
-| `sqlite://path/db/key` | SQLite file | Lightweight embedded KV; good for offline pipelines |
-| `rocksdb:///path/to/db/key` | RocksDB embedded KV | Requires `--features rocksdb-storage` (compile-time opt-in) |
-
-### Redis TLS (`rediss://`)
-
-The `rediss://` scheme (double-s) connects to Redis over TLS — useful when your Redis instance requires encrypted connections (e.g. Redis Cloud, Upstash, or self-hosted with TLS).
-
-```bash
-# Hash a value stored in Redis over TLS
-blazehash rediss://redis.cloud.example.com:6380/evidence:case-001:hash
-```
-
-### RocksDB (`rocksdb://`)
-
-RocksDB support is an optional compile-time feature — it pulls in the RocksDB C++ library at build time. Not included in the default binary; build with:
-
-```bash
-cargo install blazehash --features rocksdb-storage
-```
-
-```bash
-# Hash a value stored in a local RocksDB database
-blazehash rocksdb:///var/lib/evidence/casedb/artifact-001
-```
-
-## Compio / Monoio Async Filesystems
-
-These backends replace the standard OS filesystem (`file://`) with alternative async I/O runtimes for workloads where kernel-level async matters.
-
-| Scheme | Backend | Platform |
-|--------|---------|----------|
-| `compfs:///abs/path/file` | compio filesystem | macOS, Linux, Windows (io_uring / kqueue / IOCP) |
-| `monoiofs:///abs/path/file` | monoio filesystem | Linux only (io_uring) |
-
-```bash
-# Hash via compio (cross-platform async I/O)
-blazehash compfs:///mnt/evidence/disk.dd
-
-# Hash via monoio (Linux io_uring — lower overhead for large sequential reads)
-blazehash monoiofs:///mnt/evidence/disk.dd
-```
-
-In practice, for most forensic workloads the default filesystem is sufficient. These backends are relevant when integrating blazehash into a compio or monoio async pipeline.
+| `sqlite://path/db/key` | SQLite file | Lightweight embedded store; good for offline pipelines |
 
 ---
 
@@ -283,31 +194,6 @@ blazehash -a -k s3://dfir-bucket/case-001.hash -r /mnt/evidence
 | `ALIBABA_CLOUD_REGION` | oss |
 | `SWIFT_ENDPOINT` | swift |
 | `SWIFT_TOKEN` | swift |
-| `UPYUN_OPERATOR` | upyun |
-| `UPYUN_PASSWORD` | upyun |
-| `ONEDRIVE_ACCESS_TOKEN` | onedrive |
-| `DROPBOX_ACCESS_TOKEN` | dropbox |
-| `ALIYUN_DRIVE_ACCESS_TOKEN` | aliyun-drive |
-| `YANDEX_DISK_ACCESS_TOKEN` | yandex-disk |
-| `PCLOUD_USERNAME` / `PCLOUD_PASSWORD` | pcloud |
-| `PCLOUD_ENDPOINT` | pcloud (default: `https://api.pcloud.com`) |
-| `KOOFR_EMAIL` / `KOOFR_PASSWORD` | koofr |
-| `KOOFR_ENDPOINT` | koofr (default: `https://app.koofr.net`) |
-| `SEAFILE_USERNAME` / `SEAFILE_PASSWORD` | seafile |
-| `SEAFILE_REPO` | seafile (repo name, default: `My Library`) |
-| `GITHUB_TOKEN` | github |
-| `HUGGINGFACE_TOKEN` | huggingface |
-| `BLOB_READ_WRITE_TOKEN` | vercel-blob |
-| `VERCEL_ARTIFACTS_TOKEN` | vercel-artifacts |
-| `DATABRICKS_HOST` | dbfs |
-| `DATABRICKS_TOKEN` | dbfs |
 | `WEBHDFS_USER` | webhdfs |
-| `LAKEFS_ACCESS_KEY_ID` | lakefs |
-| `LAKEFS_SECRET_ACCESS_KEY` | lakefs |
-| `LAKEFS_ENDPOINT` | lakefs (default: `http://localhost:8000`) |
-| `IPFS_GATEWAY` | ipfs (default: `http://127.0.0.1:8080`) |
-| `IPFS_ENDPOINT` | ipmfs (default: `http://127.0.0.1:5001`) |
-| `CLOUDFLARE_ACCOUNT_ID` | cloudflare-kv, d1 |
-| `CLOUDFLARE_API_TOKEN` | cloudflare-kv, d1 |
 | `BLAZEHASH_SFTP_KEY_PATH` | sftp |
 | `BLAZEHASH_SFTP_KNOWN_HOSTS_STRATEGY` | sftp (`add` \| `strict` \| `accept_new`) |

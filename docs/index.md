@@ -4,7 +4,7 @@
 
 The only open-source forensic hashing tool that answers every question a court asks about digital evidence — *what* changed, *who* handled it, *when* it was sealed, and *in what context* — in a single binary that's drop-in compatible with hashdeep.
 
-Now with **50+ remote storage backends** built in via Apache OpenDAL: hash from S3, GCS, Azure Blob, WebDAV, SFTP, and more — no extra flags required. Hash Google Drive files in memory via `gdrive://` URI — no local copy needed.
+Read and write evidence directly from **remote storage** via Apache OpenDAL — S3, GCS, Azure Blob, WebDAV, SFTP, HDFS, and SQL stores, the targets DFIR collectors actually use — built into the release binaries, no flag at runtime. Hash Google Drive files in memory via a `gdrive://` URI, no local copy needed.
 
 ```bash
 # Acquire evidence with chain-of-custody metadata
