@@ -17,19 +17,42 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
-      # mold linker is ~3x faster and far more memory-efficient than lld on Linux —
-      # prevents SIGBUS OOM crashes when linking large binaries on 7 GB runners
-      - name: Install mold (Linux)
+      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          # The heavy bundled-C++ build risks never warming the cache: rust-cache
+          # saves only on job success, so a run that fails at a later step (e.g. the
+          # hashdb leg) discards the already-built all-features artifacts and the next
+          # run pays the full cold build again. Persist on failure to break that trap.
+          cache-on-failure: true
+      # Linux linker: neither mold nor the default GNU ld can link the ~100 huge
+      # bundled-C++ test binaries on the 7 GB runner — mold DEADLOCKS (6 h hang) and
+      # GNU ld SIGBUSes (collect2: ld terminated with signal 7, core dumped, proven in
+      # CI logs). Use lld, which links these large binaries memory-efficiently without
+      # mold's deadlock; the debuginfo reduction below removes the actual memory driver.
+      - name: Install lld (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update -qq && sudo apt-get install -y clang mold
-      - name: Use mold linker (Linux)
+        run: sudo apt-get update -qq && sudo apt-get install -y clang lld
+      - name: Use lld linker (Linux)
         if: runner.os == 'Linux'
         run: |
           mkdir -p ~/.cargo
-          printf '[target.x86_64-unknown-linux-gnu]\nlinker = "clang"\nrustflags = ["-C", "link-arg=-fuse-ld=mold"]\n' >> ~/.cargo/config.toml
+          printf '[target.x86_64-unknown-linux-gnu]\nlinker = "clang"\nrustflags = ["-C", "link-arg=-fuse-ld=lld"]\n' >> ~/.cargo/config.toml
+      # blazehash links ~800 crates + bundled C++ (duckdb/rocksdb/wasmtime/yara-x) into
+      # each of ~100 integration-test binaries. With full debuginfo (debuginfo=2) the
+      # linker exhausts the runner's RAM: link.exe LNK1102 on Windows, and collect2/ld
+      # SIGBUS (signal 7, core dumped) on Linux. Dropping debug info for the dev/test
+      # profiles removes the CodeView/DWARF tables that drive that memory blowup — the
+      # root-cause fix on both OSes (paired with lld on Linux above).
+      - name: Reduce debuginfo to avoid linker OOM (Windows + Linux)
+        if: runner.os == 'Windows' || runner.os == 'Linux'
+        shell: bash
+        run: |
+          echo "CARGO_PROFILE_DEV_DEBUG=0" >> "$GITHUB_ENV"
+          echo "CARGO_PROFILE_TEST_DEBUG=0" >> "$GITHUB_ENV"
       - run: cargo test --all-features
       - run: cargo test --features hashdb
       - run: cargo test --features yara
@@ -47,6 +70,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
+      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
         with:
           components: llvm-tools-preview
       - uses: taiki-e/install-action@a402910a723481c4c80d006d75298c796a9c8695 # cargo-llvm-cov
@@ -64,6 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: dtolnay/rust-toolchain@1.88.0
+      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
       - run: cargo check --all-features
 
   deny:
