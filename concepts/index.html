@@ -1,0 +1,1623 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://securityronin.github.io/blazehash/concepts/">
+      
+      
+        <link rel="prev" href="../cli-reference/">
+      
+      
+        <link rel="next" href="../mcp/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Concepts - blazehash</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#concepts" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="blazehash" class="md-header__button md-logo" aria-label="blazehash" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            blazehash
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Concepts
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SecurityRonin/blazehash" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SecurityRonin/blazehash
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../acquire/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Acquire Evidence
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../custody/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Build Court-Ready Evidence
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../hunt/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hunt Threats
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../siem/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SIEM & Analytics
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cookbook/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Cookbook
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../remote/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Remote Storage
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cli-reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CLI Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Concepts
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../mcp/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  MCP Server
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../privacy/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Privacy Policy
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../terms/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Terms of Service
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="blazehash" class="md-nav__button md-logo" aria-label="blazehash" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    blazehash
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SecurityRonin/blazehash" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SecurityRonin/blazehash
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acquire/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acquire Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custody/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Build Court-Ready Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hunt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hunt Threats
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../siem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SIEM & Analytics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remote/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-forensic-hashing-and-why-it-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is forensic hashing and why it matters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chain-of-custody" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chain of custody
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#blake3-vs-sha-256-vs-md5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BLAKE3 vs SHA-256 vs MD5
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cryptographic-vs-fuzzy-hashing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cryptographic vs fuzzy hashing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-nsrl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is NSRL
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ntfs-alternate-data-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NTFS Alternate Data Streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#forensic-disk-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forensic disk images
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Forensic disk images">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#e01-ewf-encase-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E01 / EWF (EnCase format)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raw-dd-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raw / DD images
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-tamper-evidence-works-seal-file-proof-verify-proof" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How tamper evidence works (seal / file-proof / verify-proof)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How tamper evidence works (seal / file-proof / verify-proof)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem-a-manifest-is-just-a-text-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem: a manifest is just a text file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-seal-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What seal does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-file-proof-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What file-proof does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-verify-proof-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What verify-proof does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-disclose-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What disclose does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../privacy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Privacy Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terms of Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-forensic-hashing-and-why-it-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is forensic hashing and why it matters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chain-of-custody" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chain of custody
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#blake3-vs-sha-256-vs-md5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BLAKE3 vs SHA-256 vs MD5
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cryptographic-vs-fuzzy-hashing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cryptographic vs fuzzy hashing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-nsrl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is NSRL
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ntfs-alternate-data-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NTFS Alternate Data Streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#forensic-disk-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forensic disk images
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Forensic disk images">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#e01-ewf-encase-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E01 / EWF (EnCase format)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raw-dd-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raw / DD images
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-tamper-evidence-works-seal-file-proof-verify-proof" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How tamper evidence works (seal / file-proof / verify-proof)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How tamper evidence works (seal / file-proof / verify-proof)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem-a-manifest-is-just-a-text-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem: a manifest is just a text file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-seal-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What seal does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-file-proof-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What file-proof does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-verify-proof-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What verify-proof does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-disclose-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What disclose does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="concepts">Concepts<a class="headerlink" href="#concepts" title="Permanent link">&para;</a></h1>
+<p>Fundamentals of forensic hashing for people new to DFIR (Digital Forensics and Incident Response).</p>
+<hr />
+<h2 id="what-is-forensic-hashing-and-why-it-matters">What is forensic hashing and why it matters<a class="headerlink" href="#what-is-forensic-hashing-and-why-it-matters" title="Permanent link">&para;</a></h2>
+<p>A hash function takes any input — a file, a disk image, a stream of bytes — and produces a fixed-length fingerprint. If the input changes by even one bit, the fingerprint changes completely.</p>
+<p>In forensic work, hashing proves that evidence has not been altered. You hash a file when you collect it. Later, you hash it again. If the hashes match, the file is identical. If they don't, something changed.</p>
+<p>Courts, regulators, and opposing counsel accept hash-based integrity verification because the math is unambiguous: two files with the same SHA-256 hash are, for all practical purposes, identical.</p>
+<hr />
+<h2 id="chain-of-custody">Chain of custody<a class="headerlink" href="#chain-of-custody" title="Permanent link">&para;</a></h2>
+<p>Chain of custody is the documented trail showing who handled evidence, when, and what they did with it. A break in the chain — evidence left unattended, transferred without verification — can get evidence excluded.</p>
+<p>Hash manifests strengthen chain of custody by recording the exact state of every file at a specific point in time. Signing the manifest with Ed25519 adds a cryptographic seal: the signature proves who created the manifest and that nobody altered it afterward.</p>
+<p>A strong workflow:</p>
+<ol>
+<li>Hash all files at collection time</li>
+<li>Sign the manifest</li>
+<li>Record the public key separately (case notes, case management system)</li>
+<li>At every handoff, verify the signature and re-audit the files</li>
+<li>Any tampering between handoffs is immediately detected</li>
+</ol>
+<p>Without signing, a manifest is just a text file — anyone could edit it. With signing, altering the manifest invalidates the signature.</p>
+<hr />
+<h2 id="blake3-vs-sha-256-vs-md5">BLAKE3 vs SHA-256 vs MD5<a class="headerlink" href="#blake3-vs-sha-256-vs-md5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>BLAKE3</th>
+<th>SHA-256</th>
+<th>MD5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Output size</td>
+<td>256 bits</td>
+<td>256 bits</td>
+<td>128 bits</td>
+</tr>
+<tr>
+<td>Speed (single-threaded)</td>
+<td>~3 GiB/s</td>
+<td>~500 MiB/s</td>
+<td>~700 MiB/s</td>
+</tr>
+<tr>
+<td>Parallelizable</td>
+<td>Yes (Merkle tree)</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Collision resistance</td>
+<td>Full</td>
+<td>Full</td>
+<td><strong>Broken</strong> since 2004</td>
+</tr>
+<tr>
+<td>Court acceptance</td>
+<td>Growing</td>
+<td>Universal</td>
+<td>Legacy — still accepted but weakening</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When to use BLAKE3:</strong> Default choice. Fastest secure hash available. Use it for speed-critical workflows and as a second algorithm alongside SHA-256.</p>
+<p><strong>When to use SHA-256:</strong> Court submissions, regulatory compliance, interoperability with existing tools and procedures. SHA-256 is the universally accepted standard.</p>
+<p><strong>When to use MD5:</strong> Only for backward compatibility with existing manifests, NSRL lookups, or hashdeep interop. MD5 collisions are <a href="https://www.mscs.dal.ca/~selMDnger/md5collision/">trivial to produce</a>. Never rely on MD5 alone for evidence integrity.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>SHA-1 is also broken. Google published a <a href="https://shattered.io/">practical collision</a> in 2017. Use SHA-1 only for hashdeep compatibility, never as your sole integrity hash.</p>
+</div>
+<hr />
+<h2 id="cryptographic-vs-fuzzy-hashing">Cryptographic vs fuzzy hashing<a class="headerlink" href="#cryptographic-vs-fuzzy-hashing" title="Permanent link">&para;</a></h2>
+<p><strong>Cryptographic hashing</strong> (BLAKE3, SHA-256, MD5) produces an exact fingerprint. Change one bit, and the hash is completely different. This is what you want for integrity verification: "is this file identical to the original?"</p>
+<p><strong>Fuzzy hashing</strong> (ssdeep, tlsh) produces a similarity score. Two files that share large sections of content will have similar fuzzy hashes, even if they aren't identical. This answers a different question: "is this file similar to something I've seen before?"</p>
+<p>Use cases for fuzzy hashing:</p>
+<ul>
+<li><strong>Malware variants.</strong> An attacker recompiles malware with minor changes. Cryptographic hashes miss the connection. Fuzzy hashing catches it.</li>
+<li><strong>Modified documents.</strong> A suspect edits a Word document. The SHA-256 is completely different, but the ssdeep hash shows 90%+ similarity.</li>
+<li><strong>File fragments.</strong> Partial file recovery from damaged media. The fragment won't match any cryptographic hash, but fuzzy hashing can identify what it came from.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Strength</th>
+<th>Minimum file size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ssdeep</td>
+<td>Near-duplicates, fragments, document variants</td>
+<td>Any</td>
+</tr>
+<tr>
+<td>tlsh</td>
+<td>Larger files, better locality sensitivity</td>
+<td>~50 bytes</td>
+</tr>
+</tbody>
+</table>
+<p>Fuzzy hashes are not cryptographically secure. They don't prove integrity. Use them alongside (not instead of) a cryptographic hash.</p>
+<hr />
+<h2 id="what-is-nsrl">What is NSRL<a class="headerlink" href="#what-is-nsrl" title="Permanent link">&para;</a></h2>
+<p>The <a href="https://www.nist.gov/itl/ssd/software-quality-group/national-software-reference-library-nsrl">National Software Reference Library</a> (NSRL) is maintained by NIST. It contains hashes of known software — operating systems, applications, drivers, updates — cataloged from legitimate distribution media.</p>
+<p>In forensic analysis, NSRL helps you separate known-good files from everything else. A typical Windows installation contains tens of thousands of system files. NSRL filtering removes them from your analysis queue so you can focus on files that actually matter.</p>
+<p>blazehash supports two NSRL formats:</p>
+<ul>
+<li><strong>SQLite database</strong> — exact lookups, zero false positives, larger file size</li>
+<li><strong>Bloom filter</strong> — probabilistic lookups, ~0.1% false positive rate, much smaller file size</li>
+</ul>
+<p>Use the SQLite database when excluding files from output (<code>--nsrl-exclude</code>). Use the bloom filter for annotation (<code>--nsrl</code> without <code>--nsrl-exclude</code>) where a rare false positive is acceptable.</p>
+<hr />
+<h2 id="ntfs-alternate-data-streams">NTFS Alternate Data Streams<a class="headerlink" href="#ntfs-alternate-data-streams" title="Permanent link">&para;</a></h2>
+<p>On NTFS (the Windows file system), every file can have multiple data streams. The default stream is what you see in Explorer — the file's normal content. But additional named streams can be attached to any file, invisible to most tools.</p>
+<p>Alternate Data Streams (ADS) have been used to:</p>
+<ul>
+<li>Hide malware alongside legitimate files</li>
+<li>Store metadata without modifying the visible file</li>
+<li>Exfiltrate data in streams attached to ordinary documents</li>
+</ul>
+<p>blazehash's <code>--ads</code> flag hashes these hidden streams alongside the main file content. An ADS entry appears as <code>filename:stream_name</code> in the output.</p>
+<p>ADS is a Windows/NTFS feature. The <code>--ads</code> flag is silently ignored on macOS and Linux.</p>
+<hr />
+<h2 id="forensic-disk-images">Forensic disk images<a class="headerlink" href="#forensic-disk-images" title="Permanent link">&para;</a></h2>
+<p>A forensic disk image is a bit-for-bit copy of a storage device. Two common formats:</p>
+<h3 id="e01-ewf-encase-format">E01 / EWF (EnCase format)<a class="headerlink" href="#e01-ewf-encase-format" title="Permanent link">&para;</a></h3>
+<p>The Expert Witness Format (EWF) is the most widely used forensic image format. E01 files store:</p>
+<ul>
+<li>Compressed disk data in 32 KiB chunks</li>
+<li>Embedded MD5 and/or SHA-1 checksums</li>
+<li>Case metadata (examiner, case number, notes)</li>
+<li>Segment splitting for large images (<code>.E01</code>, <code>.E02</code>, <code>.E03</code>, ...)</li>
+</ul>
+<p>blazehash verifies E01 images by decompressing each segment and recomputing the stored checksums. Supported variants: E01, Ex01, L01, Lx01.</p>
+<h3 id="raw-dd-images">Raw / DD images<a class="headerlink" href="#raw-dd-images" title="Permanent link">&para;</a></h3>
+<p>A raw image is an uncompressed, byte-for-byte copy of the disk. Tools like <code>dd</code>, <code>dc3dd</code>, and FTK Imager write raw images. Because the format has no built-in integrity checking, examiners typically create sidecar hash files (<code>.md5</code>, <code>.sha256</code>, <code>.sha512</code>) alongside the image.</p>
+<p>blazehash automatically detects and verifies sidecar hash files when you run <code>--verify-image</code> on a raw image.</p>
+<hr />
+<h2 id="how-tamper-evidence-works-seal-file-proof-verify-proof">How tamper evidence works (<code>seal</code> / <code>file-proof</code> / <code>verify-proof</code>)<a class="headerlink" href="#how-tamper-evidence-works-seal-file-proof-verify-proof" title="Permanent link">&para;</a></h2>
+<h3 id="the-problem-a-manifest-is-just-a-text-file">The problem: a manifest is just a text file<a class="headerlink" href="#the-problem-a-manifest-is-just-a-text-file" title="Permanent link">&para;</a></h3>
+<p>A SHA-256 manifest proves each file's integrity, but it doesn't prove the manifest itself is intact. Anyone who can edit the manifest can remove entries, change hashes, or swap paths — and unless you kept the original, you can't tell.</p>
+<p>Signing the manifest (Ed25519) is the standard fix. But signatures are binary — you can't verify a single entry without the full manifest and the public key.</p>
+<h3 id="what-seal-does">What <code>seal</code> does<a class="headerlink" href="#what-seal-does" title="Permanent link">&para;</a></h3>
+<p><code>blazehash seal</code> builds a <a href="https://en.wikipedia.org/wiki/Merkle_tree">Merkle tree</a> over every entry in the manifest:</p>
+<ol>
+<li><strong>Leaf hashing</strong> — each entry <code>(path, hash_value)</code> is serialised and SHA-256 hashed to produce a leaf node.</li>
+<li><strong>Tree construction</strong> — leaf nodes are pairwise-hashed bottom-up: <code>parent = SHA-256(left_child || right_child)</code>. If a level has an odd number of nodes, the last node is duplicated.</li>
+<li><strong>Root commitment</strong> — the single root hash at the top of the tree commits to every entry simultaneously. Change any leaf (path, hash, or order) and the root changes completely.</li>
+</ol>
+<p>The root hash is a short, publishable value — 64 hex characters. You can put it in an email, a court filing, a blockchain transaction, or a notebook. Anyone who later sees the same manifest can recompute the root and verify it matches.</p>
+<h3 id="what-file-proof-does">What <code>file-proof</code> does<a class="headerlink" href="#what-file-proof-does" title="Permanent link">&para;</a></h3>
+<p><code>blazehash file-proof</code> generates an <strong>inclusion proof</strong> for one file:</p>
+<ol>
+<li>Find the file's leaf node in the Merkle tree.</li>
+<li>Walk up the tree, recording the <strong>sibling hash</strong> at each level.</li>
+<li>Output the root hash and the ordered list of sibling hashes (the "proof path").</li>
+</ol>
+<p>The proof is a compact JSON array — O(log n) hashes for a manifest of n files. For 10,000 files, that's ~13 hashes, ~416 bytes. The proof reveals nothing about any other file in the manifest.</p>
+<h3 id="what-verify-proof-does">What <code>verify-proof</code> does<a class="headerlink" href="#what-verify-proof-does" title="Permanent link">&para;</a></h3>
+<p><code>blazehash verify-proof</code> recomputes the path from leaf to root using only:</p>
+<ul>
+<li>The file being verified (to recompute its leaf hash)</li>
+<li>The proof path (sibling hashes)</li>
+<li>The expected root hash</li>
+</ul>
+<p>It hashes the file's entry to get the leaf, then applies each sibling hash in sequence to climb the tree. If the recomputed root matches the provided root, the file was present in the manifest when it was sealed — provably, without access to the original manifest or the other files.</p>
+<h3 id="what-disclose-does">What <code>disclose</code> does<a class="headerlink" href="#what-disclose-does" title="Permanent link">&para;</a></h3>
+<p><code>blazehash disclose</code> produces a redacted copy of the manifest that contains only the files you choose, but includes their Merkle proof paths. A recipient can verify each disclosed file against the same root hash. Undisclosed files remain completely private — their hashes are never transmitted.</p>
+<h3 id="security-properties">Security properties<a class="headerlink" href="#security-properties" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Guarantee</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tamper detection</td>
+<td>Any change to any entry changes the root hash</td>
+</tr>
+<tr>
+<td>Selective disclosure</td>
+<td>Proof reveals nothing about undisclosed entries</td>
+</tr>
+<tr>
+<td>Offline verification</td>
+<td><code>verify-proof</code> needs no access to the original manifest</td>
+</tr>
+<tr>
+<td>Compact proofs</td>
+<td>O(log n) hashes; ~400 bytes for 10,000-file manifests</td>
+</tr>
+</tbody>
+</table>
+<p>The underlying algorithm is the same one used by <a href="https://certificate.transparency.dev/">Certificate Transparency</a> logs and <a href="https://git-scm.com/book/en/v2/Git-Internals-Git-Objects">Git's object graph</a> — a well-understood construction with no known attacks when SHA-256 is used as the node hash function.</p>
+<hr />
+<h2 id="further-reading">Further reading<a class="headerlink" href="#further-reading" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://csrc.nist.gov/pubs/sp/800/86/final">NIST SP 800-86: Guide to Integrating Forensic Techniques</a> — NIST guide to digital forensics</li>
+<li><a href="https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf">BLAKE3 paper</a> — the hash function specification</li>
+<li><a href="https://ssdeep-project.github.io/ssdeep/">ssdeep documentation</a> — context-triggered piecewise hashing</li>
+<li><a href="https://github.com/trendmicro/tlsh/blob/master/TLSH_CTC_final.pdf">TLSH paper</a> — trend locality-sensitive hashing</li>
+<li><a href="https://shattered.io/">SHAttered</a> — SHA-1 collision (Stevens et al., 2017)</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.tabs", "navigation.sections", "navigation.top", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

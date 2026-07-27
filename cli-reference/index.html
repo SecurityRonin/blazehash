@@ -1,0 +1,4774 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://securityronin.github.io/blazehash/cli-reference/">
+      
+      
+        <link rel="prev" href="../remote/">
+      
+      
+        <link rel="next" href="../concepts/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>CLI Reference - blazehash</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cli-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="blazehash" class="md-header__button md-logo" aria-label="blazehash" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            blazehash
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CLI Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SecurityRonin/blazehash" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SecurityRonin/blazehash
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../acquire/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Acquire Evidence
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../custody/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Build Court-Ready Evidence
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../hunt/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hunt Threats
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../siem/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SIEM & Analytics
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cookbook/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Cookbook
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../remote/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Remote Storage
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CLI Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Concepts
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../mcp/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  MCP Server
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../privacy/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Privacy Policy
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../terms/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Terms of Service
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="blazehash" class="md-nav__button md-logo" aria-label="blazehash" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    blazehash
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SecurityRonin/blazehash" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SecurityRonin/blazehash
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acquire/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acquire Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custody/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Build Court-Ready Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hunt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hunt Threats
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../siem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SIEM & Analytics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remote/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#positional-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Positional arguments
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Positional arguments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global flags
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Global flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-c-compute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -c, --compute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-r-recursive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -r, --recursive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-o-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -o, --output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-b-bare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -b, --bare
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-s-size-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -s, --size-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-sign" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --sign
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-stdin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --stdin
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering flags
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtering flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-min-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --min-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-max-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --max-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-newer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --newer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-include" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --include
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --exclude
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit flags
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Audit flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-a-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -a, --audit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-k-known" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -k, --known
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-fuzzy-threshold" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --fuzzy-threshold
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-fuzzy-top" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --fuzzy-top
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-expected-pubkey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --expected-pubkey
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-ignore-sig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --ignore-sig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-fail-on-unknown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --fail-on-unknown
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#subcommands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subcommands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Subcommands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acquisition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acquisition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Acquisition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#watch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        watch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#archive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        archive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#google-drive-hashing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google Drive hashing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gdrive-auth-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gdrive auth login
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gdrive-auth-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gdrive auth status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chain-of-custody-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chain of Custody &amp; Signing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chain of Custody &amp; Signing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sign" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sign
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-sig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verify-sig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cosign" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cosign
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-msig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verify-msig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pq-sign" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pq-sign
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pq-verify-sig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pq-verify-sig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ots-stamp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ots stamp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ots-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ots verify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stamp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stamp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#report" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        report
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#qr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        qr
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tamper-evidence-selective-disclosure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tamper Evidence &amp; Selective Disclosure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tamper Evidence &amp; Selective Disclosure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#seal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        seal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-proof" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        file-proof
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-proof" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verify-proof
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disclose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        disclose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        check-file
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integrity-threat-intel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integrity &amp; Threat Intel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integrity &amp; Threat Intel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selfcheck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        selfcheck
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manifest-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manifest Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        diff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sym-diff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sym-diff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        info
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        count
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tally
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#missing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        missing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manifest-filtering-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest Filtering &amp; Selection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manifest Filtering &amp; Selection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        search
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        grep
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        filter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#head-tail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        head / tail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        slice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sample
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        contains
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intersect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        intersect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subtract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        subtract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        exclude
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        path-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hash-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hash-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manifest-transformation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest Transformation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manifest Transformation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#merge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        merge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sort
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        split
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#balance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        balance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interleave" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        interleave
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reverse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reverse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shuffle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        shuffle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalize
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        repair
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rename" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rename
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tag
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        annotate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pivot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pivot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apply-patch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        apply-patch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deduplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deduplication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deduplication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dedup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dedup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#duplicates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        duplicates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unique-hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unique-hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uniq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uniq
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        first
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#format-conversion-importexport" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Format Conversion &amp; Import/Export
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Format Conversion &amp; Import/Export">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#convert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        convert
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        export
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checksum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        checksum
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#redact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        redact
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utilities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nsrl-build-bloom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nsrl build-bloom
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bench" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bench
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tui
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mcp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#completions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        completions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remote-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remote storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nsrl-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NSRL flags
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="NSRL flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-nsrl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --nsrl
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-nsrl-hsh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --nsrl-hsh
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-nsrl-exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --nsrl-exclude
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced flags
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-entropy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --entropy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-yara" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --yara
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-yara-max-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --yara-max-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-no-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --no-cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-no-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --no-gpu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-ads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --ads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-resume" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --resume
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-p-piecewise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -p, --piecewise
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-verify-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --verify-image
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../privacy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Privacy Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terms of Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#positional-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Positional arguments
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Positional arguments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global flags
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Global flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-c-compute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -c, --compute
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-r-recursive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -r, --recursive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-o-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -o, --output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-b-bare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -b, --bare
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-s-size-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -s, --size-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-sign" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --sign
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-stdin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --stdin
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering flags
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtering flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-min-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --min-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-max-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --max-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-newer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --newer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-include" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --include
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --exclude
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit flags
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Audit flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-a-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -a, --audit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-k-known" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -k, --known
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-fuzzy-threshold" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --fuzzy-threshold
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-fuzzy-top" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --fuzzy-top
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-expected-pubkey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --expected-pubkey
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-ignore-sig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --ignore-sig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-fail-on-unknown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --fail-on-unknown
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#subcommands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subcommands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Subcommands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acquisition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acquisition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Acquisition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#watch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        watch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#archive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        archive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#google-drive-hashing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google Drive hashing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gdrive-auth-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gdrive auth login
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gdrive-auth-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gdrive auth status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chain-of-custody-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chain of Custody &amp; Signing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chain of Custody &amp; Signing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sign" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sign
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-sig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verify-sig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cosign" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cosign
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-msig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verify-msig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pq-sign" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pq-sign
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pq-verify-sig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pq-verify-sig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ots-stamp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ots stamp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ots-verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ots verify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stamp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stamp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#report" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        report
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#qr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        qr
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tamper-evidence-selective-disclosure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tamper Evidence &amp; Selective Disclosure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tamper Evidence &amp; Selective Disclosure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#seal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        seal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-proof" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        file-proof
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-proof" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verify-proof
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disclose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        disclose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        check-file
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integrity-threat-intel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integrity &amp; Threat Intel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integrity &amp; Threat Intel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selfcheck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        selfcheck
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manifest-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manifest Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        diff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sym-diff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sym-diff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#info" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        info
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        count
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tally
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#missing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        missing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manifest-filtering-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest Filtering &amp; Selection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manifest Filtering &amp; Selection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        search
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        grep
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        filter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#head-tail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        head / tail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        slice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sample
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        contains
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intersect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        intersect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subtract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        subtract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        exclude
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        path-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hash-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hash-only
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manifest-transformation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manifest Transformation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manifest Transformation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#merge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        merge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sort
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        split
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#balance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        balance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interleave" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        interleave
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reverse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reverse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shuffle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        shuffle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalize
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        repair
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rename" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rename
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tag
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        annotate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pivot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pivot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apply-patch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        apply-patch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deduplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deduplication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deduplication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dedup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dedup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#duplicates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        duplicates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unique-hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        unique-hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uniq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uniq
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        first
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#format-conversion-importexport" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Format Conversion &amp; Import/Export
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Format Conversion &amp; Import/Export">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#convert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        convert
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        export
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checksum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        checksum
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#redact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        redact
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utilities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nsrl-build-bloom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nsrl build-bloom
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bench" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bench
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tui
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mcp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#completions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        completions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remote-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remote storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nsrl-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NSRL flags
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="NSRL flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-nsrl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --nsrl
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-nsrl-hsh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --nsrl-hsh
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-nsrl-exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --nsrl-exclude
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced flags
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced flags">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-entropy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --entropy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-yara" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --yara
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-yara-max-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --yara-max-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-no-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --no-cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-no-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --no-gpu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-ads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --ads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-resume" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --resume
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-p-piecewise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        -p, --piecewise
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-verify-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --verify-image
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="cli-reference">CLI Reference<a class="headerlink" href="#cli-reference" title="Permanent link">&para;</a></h1>
+<p>Complete reference for every blazehash flag and subcommand. Flags are organized by category.</p>
+<hr />
+<h2 id="positional-arguments">Positional arguments<a class="headerlink" href="#positional-arguments" title="Permanent link">&para;</a></h2>
+<h3 id="paths"><code>paths</code><a class="headerlink" href="#paths" title="Permanent link">&para;</a></h3>
+<p>Files or directories to hash.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>blazehash<span class="w"> </span>file1.txt<span class="w"> </span>file2.txt<span class="w"> </span>/mnt/evidence
+</code></pre></div>
+<p>When no paths are given, blazehash reads from the current directory (or stdin with <code>--stdin</code>).</p>
+<hr />
+<h2 id="global-flags">Global flags<a class="headerlink" href="#global-flags" title="Permanent link">&para;</a></h2>
+<h3 id="-c-compute"><code>-c</code>, <code>--compute</code><a class="headerlink" href="#-c-compute" title="Permanent link">&para;</a></h3>
+<p>Hash algorithms, comma-separated. Default: <code>blake3</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-c<span class="w"> </span>blake3,sha256,md5
+</code></pre></div>
+<p>Available algorithms:</p>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>blake3</code></td>
+<td>Cryptographic</td>
+<td>Default</td>
+</tr>
+<tr>
+<td><code>blake2b</code></td>
+<td>Cryptographic</td>
+<td>512-bit output</td>
+</tr>
+<tr>
+<td><code>blake2s</code></td>
+<td>Cryptographic</td>
+<td>256-bit output</td>
+</tr>
+<tr>
+<td><code>sha256</code></td>
+<td>Cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>sha512</code></td>
+<td>Cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>sha512-256</code></td>
+<td>Cryptographic</td>
+<td>SHA-512 truncated to 256 bits</td>
+</tr>
+<tr>
+<td><code>sha512-224</code></td>
+<td>Cryptographic</td>
+<td>SHA-512 truncated to 224 bits</td>
+</tr>
+<tr>
+<td><code>sha3-256</code></td>
+<td>Cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>sha1</code></td>
+<td>Cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>md5</code></td>
+<td>Cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>tiger</code></td>
+<td>Cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>whirlpool</code></td>
+<td>Cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>sm3</code></td>
+<td>Cryptographic</td>
+<td>Chinese national standard (GB/T 32905)</td>
+</tr>
+<tr>
+<td><code>streebog-256</code></td>
+<td>Cryptographic</td>
+<td>GOST R 34.11-2012, 256-bit</td>
+</tr>
+<tr>
+<td><code>streebog-512</code></td>
+<td>Cryptographic</td>
+<td>GOST R 34.11-2012, 512-bit</td>
+</tr>
+<tr>
+<td><code>ripemd160</code></td>
+<td>Cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>k12</code></td>
+<td>Cryptographic</td>
+<td>KangarooTwelve (parallel SHA-3 variant)</td>
+</tr>
+<tr>
+<td><code>shake128</code></td>
+<td>Cryptographic</td>
+<td>Extendable output</td>
+</tr>
+<tr>
+<td><code>shake256</code></td>
+<td>Cryptographic</td>
+<td>Extendable output</td>
+</tr>
+<tr>
+<td><code>crc32c</code></td>
+<td>Non-cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>crc64</code></td>
+<td>Non-cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>adler32</code></td>
+<td>Non-cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>xxh3</code></td>
+<td>Non-cryptographic</td>
+<td></td>
+</tr>
+<tr>
+<td><code>ssdeep</code></td>
+<td>Fuzzy</td>
+<td></td>
+</tr>
+<tr>
+<td><code>tlsh</code></td>
+<td>Fuzzy</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="-r-recursive"><code>-r</code>, <code>--recursive</code><a class="headerlink" href="#-r-recursive" title="Permanent link">&para;</a></h3>
+<p>Recurse into directories.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence
+</code></pre></div>
+<h3 id="-o-output"><code>-o</code>, <code>--output</code><a class="headerlink" href="#-o-output" title="Permanent link">&para;</a></h3>
+<p>Write output to a file instead of stdout. Accepts local paths and remote storage URIs (requires <code>--features remote</code>, on by default).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Local file</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-o<span class="w"> </span>manifest.hash
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># AWS S3</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-o<span class="w"> </span>s3://dfir-bucket/case-001.hash
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># Google Cloud Storage</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-o<span class="w"> </span>gcs://dfir-bucket/case-001.hash
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1"># Azure Blob Storage</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-o<span class="w"> </span>azblob://dfir-container/case-001.hash
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="c1"># WebDAV (Nextcloud, Box, SharePoint)</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-o<span class="w"> </span>webdav://files.example.com/dfir/case-001.hash
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="c1"># HTTP/S PUT endpoint</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-o<span class="w"> </span>https://ingest.example.com/upload/case-001.hash
+</code></pre></div>
+<h3 id="-b-bare"><code>-b</code>, <code>--bare</code><a class="headerlink" href="#-b-bare" title="Permanent link">&para;</a></h3>
+<p>Bare output — no header comments, no metadata lines. Just the hash entries.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-b
+</code></pre></div>
+<h3 id="-s-size-only"><code>-s</code>, <code>--size-only</code><a class="headerlink" href="#-s-size-only" title="Permanent link">&para;</a></h3>
+<p>List files with sizes only. No hashing. Useful for a quick inventory before committing to a full hash run.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-s
+</code></pre></div>
+<h3 id="-format"><code>--format</code><a class="headerlink" href="#-format" title="Permanent link">&para;</a></h3>
+<p>Output format. Default: <code>hashdeep</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>--format<span class="w"> </span>dfxml<span class="w"> </span>-o<span class="w"> </span>report.xml
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Description</th>
+<th>Feature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hashdeep</code></td>
+<td>hashdeep-compatible manifest (HASHDEEP-1.0 or BLAZEHASH-1.0 header)</td>
+<td>default</td>
+</tr>
+<tr>
+<td><code>dfxml</code></td>
+<td>Digital Forensics XML — Autopsy/Sleuth Kit compatible</td>
+<td>default</td>
+</tr>
+<tr>
+<td><code>sha256sum</code></td>
+<td>Compatible with <code>sha256sum(1)</code> and <code>md5sum(1)</code></td>
+<td>default</td>
+</tr>
+<tr>
+<td><code>csv</code></td>
+<td>Comma-separated values</td>
+<td>default</td>
+</tr>
+<tr>
+<td><code>json</code></td>
+<td>JSON array</td>
+<td>default</td>
+</tr>
+<tr>
+<td><code>jsonl</code></td>
+<td>Newline-delimited JSON (one object per line)</td>
+<td>default</td>
+</tr>
+<tr>
+<td><code>ecs</code></td>
+<td>NDJSON in Elastic Common Schema (ECS) format</td>
+<td>default</td>
+</tr>
+<tr>
+<td><code>stix</code></td>
+<td>STIX 2.1 bundle (JSON)</td>
+<td>default</td>
+</tr>
+<tr>
+<td><code>sqlite</code></td>
+<td>SQLite database</td>
+<td><code>sqlite</code> (default-on)</td>
+</tr>
+<tr>
+<td><code>parquet</code></td>
+<td>Apache Parquet columnar file</td>
+<td><code>parquet-output</code> (default-on)</td>
+</tr>
+<tr>
+<td><code>duckdb</code></td>
+<td>DuckDB database file</td>
+<td><code>duckdb-output</code> (default-on)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="-sign"><code>--sign</code><a class="headerlink" href="#-sign" title="Permanent link">&para;</a></h3>
+<p>Sign the manifest after writing. Requires <code>--output</code>. You will be prompted for a password, or set <code>BLAZEHASH_SIGN_PASSWORD</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-o<span class="w"> </span>manifest.hash<span class="w"> </span>--sign
+</code></pre></div>
+<h3 id="-stdin"><code>--stdin</code><a class="headerlink" href="#-stdin" title="Permanent link">&para;</a></h3>
+<p>Hash data from stdin instead of files.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>cat<span class="w"> </span>suspicious.bin<span class="w"> </span><span class="p">|</span><span class="w"> </span>blazehash<span class="w"> </span>--stdin<span class="w"> </span>-c<span class="w"> </span>sha256,md5
+</code></pre></div>
+<hr />
+<h2 id="filtering-flags">Filtering flags<a class="headerlink" href="#filtering-flags" title="Permanent link">&para;</a></h2>
+<h3 id="-min-size"><code>--min-size</code><a class="headerlink" href="#-min-size" title="Permanent link">&para;</a></h3>
+<p>Only hash files larger than this size. Accepts suffixes: <code>K</code>, <code>M</code>, <code>G</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>--min-size<span class="w"> </span>1M
+</code></pre></div>
+<h3 id="-max-size"><code>--max-size</code><a class="headerlink" href="#-max-size" title="Permanent link">&para;</a></h3>
+<p>Only hash files smaller than this size.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>--max-size<span class="w"> </span>100M
+</code></pre></div>
+<h3 id="-newer"><code>--newer</code><a class="headerlink" href="#-newer" title="Permanent link">&para;</a></h3>
+<p>Only hash files modified after a date. Format: <code>YYYY-MM-DD</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>--newer<span class="w"> </span><span class="m">2024</span>-01-01
+</code></pre></div>
+<h3 id="-include"><code>--include</code><a class="headerlink" href="#-include" title="Permanent link">&para;</a></h3>
+<p>Include only files matching a glob pattern. Repeatable.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>--include<span class="w"> </span><span class="s2">&quot;*.exe&quot;</span><span class="w"> </span>--include<span class="w"> </span><span class="s2">&quot;*.dll&quot;</span>
+</code></pre></div>
+<p>Supports <code>**</code> for recursive matching.</p>
+<h3 id="-exclude"><code>--exclude</code><a class="headerlink" href="#-exclude" title="Permanent link">&para;</a></h3>
+<p>Exclude files matching a glob pattern. Repeatable. Overrides <code>--include</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>--exclude<span class="w"> </span><span class="s2">&quot;*.log&quot;</span><span class="w"> </span>--exclude<span class="w"> </span><span class="s2">&quot;**/.tmp/*&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="audit-flags">Audit flags<a class="headerlink" href="#audit-flags" title="Permanent link">&para;</a></h2>
+<h3 id="-a-audit"><code>-a</code>, <code>--audit</code><a class="headerlink" href="#-a-audit" title="Permanent link">&para;</a></h3>
+<p>Enable audit mode. Re-hashes files and compares against a known manifest.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-a<span class="w"> </span>-k<span class="w"> </span>manifest.hash
+</code></pre></div>
+<p>Exit code <code>0</code> = all files match. Exit code <code>1</code> = mismatches found.</p>
+<h3 id="-k-known"><code>-k</code>, <code>--known</code><a class="headerlink" href="#-k-known" title="Permanent link">&para;</a></h3>
+<p>Path to known hash manifest(s) for audit mode. Repeatable.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-a<span class="w"> </span>-k<span class="w"> </span>manifest1.hash<span class="w"> </span>-k<span class="w"> </span>manifest2.hash
+</code></pre></div>
+<p>When omitted in audit mode, blazehash looks for <code>*.hash</code> files in the current directory.</p>
+<h3 id="-fuzzy-threshold"><code>--fuzzy-threshold</code><a class="headerlink" href="#-fuzzy-threshold" title="Permanent link">&para;</a></h3>
+<p>Minimum similarity percentage (0-100) to report a fuzzy match. Default: <code>50</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/evidence<span class="w"> </span>-a<span class="w"> </span>-k<span class="w"> </span>known.hash<span class="w"> </span>-c<span class="w"> </span>ssdeep<span class="w"> </span>--fuzzy-threshold<span class="w"> </span><span class="m">70</span>
+</code></pre></div>
+<h3 id="-fuzzy-top"><code>--fuzzy-top</code><a class="headerlink" href="#-fuzzy-top" title="Permanent link">&para;</a></h3>
+<p>Show the top N fuzzy matches per file. Default: <code>5</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/evidence<span class="w"> </span>-a<span class="w"> </span>-k<span class="w"> </span>known.hash<span class="w"> </span>-c<span class="w"> </span>ssdeep<span class="w"> </span>--fuzzy-top<span class="w"> </span><span class="m">3</span>
+</code></pre></div>
+<h3 id="-expected-pubkey"><code>--expected-pubkey</code><a class="headerlink" href="#-expected-pubkey" title="Permanent link">&para;</a></h3>
+<p>Expected public key hex for signature verification. Used with <code>verify-sig</code> or audit auto-verification.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-a<span class="w"> </span>-k<span class="w"> </span>manifest.hash<span class="w"> </span>--expected-pubkey<span class="w"> </span>a3f8e2c1d4b7...
+</code></pre></div>
+<p>When provided during audit, blazehash checks the manifest signature before comparing hashes. Invalid signature aborts the audit.</p>
+<h3 id="-ignore-sig"><code>--ignore-sig</code><a class="headerlink" href="#-ignore-sig" title="Permanent link">&para;</a></h3>
+<p>Skip automatic signature verification during audit, even when a <code>.sig</code> file exists.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-a<span class="w"> </span>-k<span class="w"> </span>manifest.hash<span class="w"> </span>--ignore-sig
+</code></pre></div>
+<h3 id="-fail-on-unknown"><code>--fail-on-unknown</code><a class="headerlink" href="#-fail-on-unknown" title="Permanent link">&para;</a></h3>
+<p>Exit non-zero if any file on disk has no corresponding entry in the manifest (unknown files). Unknown files are logged with a <code>[?]</code> prefix; if any are found the process exits with code <code>1</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-a<span class="w"> </span>-k<span class="w"> </span>manifest.hash<span class="w"> </span>--fail-on-unknown
+</code></pre></div>
+<p>Useful in sealed-environment audits where every file must be accounted for in the known manifest.</p>
+<hr />
+<h2 id="subcommands">Subcommands<a class="headerlink" href="#subcommands" title="Permanent link">&para;</a></h2>
+<h3 id="acquisition">Acquisition<a class="headerlink" href="#acquisition" title="Permanent link">&para;</a></h3>
+<h4 id="watch"><code>watch</code><a class="headerlink" href="#watch" title="Permanent link">&para;</a></h4>
+<p>Live monitoring: continuously hash a path and alert on changes against a baseline manifest.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>blazehash<span class="w"> </span>watch<span class="w"> </span>/path/to/folder<span class="w"> </span>-k<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="archive"><code>archive</code><a class="headerlink" href="#archive" title="Permanent link">&para;</a></h4>
+<p>Hash all files inside a ZIP or TAR archive without extracting. Requires <code>--features archive</code> (default-on).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>blazehash<span class="w"> </span>archive<span class="w"> </span>collection.zip<span class="w"> </span>-c<span class="w"> </span>blake3,sha256
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>blazehash<span class="w"> </span>archive<span class="w"> </span>evidence.tar.gz<span class="w"> </span>-c<span class="w"> </span>sha256
+</code></pre></div>
+<h4 id="image"><code>image</code><a class="headerlink" href="#image" title="Permanent link">&para;</a></h4>
+<p>Hash the layers of an OCI/Docker container image. Requires <code>--features docker</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>blazehash<span class="w"> </span>image<span class="w"> </span>nginx:latest
+</code></pre></div>
+<h4 id="google-drive-hashing">Google Drive hashing<a class="headerlink" href="#google-drive-hashing" title="Permanent link">&para;</a></h4>
+<p>Hash a Google Drive file without downloading it to disk. Pass a <code>gdrive://</code> URI or a full Drive share URL directly as the path argument.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>blazehash<span class="w"> </span>gdrive://FILE_ID
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>blazehash<span class="w"> </span>https://drive.google.com/file/d/FILE_ID/view
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>&lt;hash&gt;  gdrive://&lt;file-id&gt;
+</code></pre></div>
+<p>Auth: uses a cached OAuth token from <code>~/.config/blazehash/gdrive_token.json</code> if present, otherwise falls back to a public (unauthenticated) download. Run <code>blazehash gdrive auth login</code> once to authenticate.</p>
+<h4 id="gdrive-auth-login"><code>gdrive auth login</code><a class="headerlink" href="#gdrive-auth-login" title="Permanent link">&para;</a></h4>
+<p>Open a browser OAuth consent flow and cache the resulting Google token.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>blazehash<span class="w"> </span>gdrive<span class="w"> </span>auth<span class="w"> </span>login
+</code></pre></div>
+<h4 id="gdrive-auth-status"><code>gdrive auth status</code><a class="headerlink" href="#gdrive-auth-status" title="Permanent link">&para;</a></h4>
+<p>Check whether a valid cached token exists.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>blazehash<span class="w"> </span>gdrive<span class="w"> </span>auth<span class="w"> </span>status
+</code></pre></div>
+<hr />
+<h3 id="chain-of-custody-signing">Chain of Custody &amp; Signing<a class="headerlink" href="#chain-of-custody-signing" title="Permanent link">&para;</a></h3>
+<h4 id="sign"><code>sign</code><a class="headerlink" href="#sign" title="Permanent link">&para;</a></h4>
+<p>Sign a manifest file with a password-derived Ed25519 key.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>blazehash<span class="w"> </span>sign<span class="w"> </span>manifest.hash
+</code></pre></div>
+<p>Set <code>BLAZEHASH_SIGN_PASSWORD</code> to skip the interactive prompt:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="nv">BLAZEHASH_SIGN_PASSWORD</span><span class="o">=</span>secret<span class="w"> </span>blazehash<span class="w"> </span>sign<span class="w"> </span>manifest.hash
+</code></pre></div>
+<p>The password is fed through Argon2id with a fixed application salt to produce a deterministic Ed25519 key. Same password = same key on any machine.</p>
+<h4 id="verify-sig"><code>verify-sig</code><a class="headerlink" href="#verify-sig" title="Permanent link">&para;</a></h4>
+<p>Verify a manifest signature against an expected public key.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>blazehash<span class="w"> </span>verify-sig<span class="w"> </span>manifest.hash<span class="w"> </span>--expected-pubkey<span class="w"> </span>a3f8e2c1d4b7...
+</code></pre></div>
+<p>Exit code <code>0</code> = valid. Exit code <code>1</code> = tampered or wrong key.</p>
+<h4 id="cosign"><code>cosign</code><a class="headerlink" href="#cosign" title="Permanent link">&para;</a></h4>
+<p>Add a co-signature to a manifest. Each examiner runs this with their own password; N-of-M signatures are required before <code>verify-msig</code> passes.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>blazehash<span class="w"> </span>cosign<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="verify-msig"><code>verify-msig</code><a class="headerlink" href="#verify-msig" title="Permanent link">&para;</a></h4>
+<p>Verify that a manifest has reached the required N-of-M cosignature threshold.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>blazehash<span class="w"> </span>verify-msig<span class="w"> </span>manifest.hash<span class="w"> </span>--threshold<span class="w"> </span><span class="m">2</span>
+</code></pre></div>
+<h4 id="pq-sign"><code>pq-sign</code><a class="headerlink" href="#pq-sign" title="Permanent link">&para;</a></h4>
+<p>Sign a manifest with a CRYSTALS-Dilithium (ML-DSA) post-quantum key. Requires <code>--features pq</code> (default-on).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>blazehash<span class="w"> </span>pq-sign<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="pq-verify-sig"><code>pq-verify-sig</code><a class="headerlink" href="#pq-verify-sig" title="Permanent link">&para;</a></h4>
+<p>Verify a post-quantum ML-DSA signature. Requires <code>--features pq</code> (default-on).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>blazehash<span class="w"> </span>pq-verify-sig<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="ots-stamp"><code>ots stamp</code><a class="headerlink" href="#ots-stamp" title="Permanent link">&para;</a></h4>
+<p>Anchor a manifest to the Bitcoin blockchain via OpenTimestamps. Creates <code>manifest.hash.ots</code>. Requires <code>--features ots</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>blazehash<span class="w"> </span>ots<span class="w"> </span>stamp<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="ots-verify"><code>ots verify</code><a class="headerlink" href="#ots-verify" title="Permanent link">&para;</a></h4>
+<p>Verify a previously created OpenTimestamps proof. Requires <code>--features ots</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>blazehash<span class="w"> </span>ots<span class="w"> </span>verify<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="stamp"><code>stamp</code><a class="headerlink" href="#stamp" title="Permanent link">&para;</a></h4>
+<p>Add or update the <code>## timestamp:</code> header in a manifest to the current UTC time.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>blazehash<span class="w"> </span>stamp<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="report"><code>report</code><a class="headerlink" href="#report" title="Permanent link">&para;</a></h4>
+<p>Generate an HTML chain-of-custody report from a manifest. Requires <code>--features report</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>blazehash<span class="w"> </span>report<span class="w"> </span>manifest.hash<span class="w"> </span>--examiner<span class="w"> </span><span class="s2">&quot;Jane Smith&quot;</span><span class="w"> </span>--case<span class="w"> </span><span class="s2">&quot;CASE-2026-001&quot;</span><span class="w"> </span>-o<span class="w"> </span>report.html
+</code></pre></div>
+<h4 id="qr"><code>qr</code><a class="headerlink" href="#qr" title="Permanent link">&para;</a></h4>
+<p>Generate a QR code image from a manifest's root hash. Requires <code>--features qr</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>blazehash<span class="w"> </span>qr<span class="w"> </span>manifest.hash<span class="w"> </span>-o<span class="w"> </span>manifest-qr.png
+</code></pre></div>
+<hr />
+<h3 id="tamper-evidence-selective-disclosure">Tamper Evidence &amp; Selective Disclosure<a class="headerlink" href="#tamper-evidence-selective-disclosure" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p><strong>How it works</strong> — see <a href="../concepts/#how-tamper-evidence-works-seal--file-proof--verify-proof">Tamper Evidence mechanics</a> in Concepts for a full explanation of Merkle tree construction, inclusion proofs, and the security properties of each subcommand.</p>
+</blockquote>
+<h4 id="seal"><code>seal</code><a class="headerlink" href="#seal" title="Permanent link">&para;</a></h4>
+<p>Seal a manifest with a single tamper-evident root hash. Any change to any entry changes the root — you can publish just the root hash to prove the full set was sealed at a specific point in time.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>blazehash<span class="w"> </span>seal<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="file-proof"><code>file-proof</code><a class="headerlink" href="#file-proof" title="Permanent link">&para;</a></h4>
+<p>Prove that a specific file was part of a sealed manifest without revealing any other entries. Share only the proof and root hash — the other files stay private.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>blazehash<span class="w"> </span>file-proof<span class="w"> </span>manifest.hash<span class="w"> </span>--path<span class="w"> </span>/evidence/file.dd
+</code></pre></div>
+<h4 id="verify-proof"><code>verify-proof</code><a class="headerlink" href="#verify-proof" title="Permanent link">&para;</a></h4>
+<p>Confirm that a file was present when the manifest was sealed. Verifies offline against the root hash — no access to the original manifest required.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>blazehash<span class="w"> </span>verify-proof<span class="w"> </span>--root<span class="w"> </span>&lt;hex&gt;<span class="w"> </span>--path<span class="w"> </span>/evidence/file.dd<span class="w"> </span>--proof<span class="w"> </span>&lt;hex&gt;
+</code></pre></div>
+<h4 id="disclose"><code>disclose</code><a class="headerlink" href="#disclose" title="Permanent link">&para;</a></h4>
+<p>Produce a redacted copy that reveals only the files you choose while proving they belong to the original sealed manifest. Useful when you need to share partial evidence without exposing the full case file.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>blazehash<span class="w"> </span>disclose<span class="w"> </span>manifest.hash<span class="w"> </span>--paths<span class="w"> </span>/evidence/critical.dd<span class="w"> </span>-o<span class="w"> </span>disclosed.hash
+</code></pre></div>
+<h4 id="check-file"><code>check-file</code><a class="headerlink" href="#check-file" title="Permanent link">&para;</a></h4>
+<p>Assert that a specific file exists in a manifest — exits <code>0</code> if present, <code>1</code> if not. Useful in automated pipelines that need to verify a file was captured.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>blazehash<span class="w"> </span>check-file<span class="w"> </span>manifest.hash<span class="w"> </span>--path<span class="w"> </span>/evidence/file.dd
+</code></pre></div>
+<hr />
+<h3 id="integrity-threat-intel">Integrity &amp; Threat Intel<a class="headerlink" href="#integrity-threat-intel" title="Permanent link">&para;</a></h3>
+<h4 id="verify"><code>verify</code><a class="headerlink" href="#verify" title="Permanent link">&para;</a></h4>
+<p>Re-hash every file listed in a manifest and report mismatches (alias for audit mode without requiring <code>-a</code>).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>blazehash<span class="w"> </span>verify<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="vt"><code>vt</code><a class="headerlink" href="#vt" title="Permanent link">&para;</a></h4>
+<p>Batch VirusTotal lookup for all hashes in a manifest. Requires a VT API key via <code>--api-key</code> or <code>VT_API_KEY</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>blazehash<span class="w"> </span>vt<span class="w"> </span>manifest.hash<span class="w"> </span>--api-key<span class="w"> </span>YOUR_KEY
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a><span class="nv">VT_API_KEY</span><span class="o">=</span>YOUR_KEY<span class="w"> </span>blazehash<span class="w"> </span>vt<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="selfcheck"><code>selfcheck</code><a class="headerlink" href="#selfcheck" title="Permanent link">&para;</a></h4>
+<p>Verify the integrity of the blazehash binary itself.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>blazehash<span class="w"> </span>selfcheck
+</code></pre></div>
+<hr />
+<h3 id="manifest-analysis">Manifest Analysis<a class="headerlink" href="#manifest-analysis" title="Permanent link">&para;</a></h3>
+<h4 id="diff"><code>diff</code><a class="headerlink" href="#diff" title="Permanent link">&para;</a></h4>
+<p>Compare two manifests and report changes. Output uses <code>[+]</code>, <code>[-]</code>, <code>[!]</code>, <code>[*]</code> prefixes. Exit code <code>0</code> = identical, <code>1</code> = differences.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>blazehash<span class="w"> </span>diff<span class="w"> </span>before.hash<span class="w"> </span>after.hash
+</code></pre></div>
+<h4 id="sym-diff"><code>sym-diff</code><a class="headerlink" href="#sym-diff" title="Permanent link">&para;</a></h4>
+<p>Find files that changed between two evidence snapshots — entries that appear in one manifest but not the other. Useful for pinpointing what was added or removed between two collection points.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>blazehash<span class="w"> </span>sym-diff<span class="w"> </span>before.hash<span class="w"> </span>after.hash<span class="w"> </span>-o<span class="w"> </span>changes.hash
+</code></pre></div>
+<h4 id="info"><code>info</code><a class="headerlink" href="#info" title="Permanent link">&para;</a></h4>
+<p>Print manifest header metadata: version, algorithm list, case ID, examiner, timestamp.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>blazehash<span class="w"> </span>info<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="stats"><code>stats</code><a class="headerlink" href="#stats" title="Permanent link">&para;</a></h4>
+<p>Print per-algorithm statistics: entry count, total size, unique hash count.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>blazehash<span class="w"> </span>stats<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="count"><code>count</code><a class="headerlink" href="#count" title="Permanent link">&para;</a></h4>
+<p>Print the number of entries in a manifest.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>blazehash<span class="w"> </span>count<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="timeline"><code>timeline</code><a class="headerlink" href="#timeline" title="Permanent link">&para;</a></h4>
+<p>Generate a chronological timeline of file activity from a manifest.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>blazehash<span class="w"> </span>timeline<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="tally"><code>tally</code><a class="headerlink" href="#tally" title="Permanent link">&para;</a></h4>
+<p>Count entries grouped by extension, directory, or algorithm.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>blazehash<span class="w"> </span>tally<span class="w"> </span>manifest.hash<span class="w"> </span>--tally-by<span class="w"> </span>ext
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>blazehash<span class="w"> </span>tally<span class="w"> </span>manifest.hash<span class="w"> </span>--tally-by<span class="w"> </span>dir
+</code></pre></div>
+<h4 id="missing"><code>missing</code><a class="headerlink" href="#missing" title="Permanent link">&para;</a></h4>
+<p>List files in the manifest that do not exist on disk.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>blazehash<span class="w"> </span>missing<span class="w"> </span>manifest.hash
+</code></pre></div>
+<hr />
+<h3 id="manifest-filtering-selection">Manifest Filtering &amp; Selection<a class="headerlink" href="#manifest-filtering-selection" title="Permanent link">&para;</a></h3>
+<h4 id="search"><code>search</code><a class="headerlink" href="#search" title="Permanent link">&para;</a></h4>
+<p>Search entries by path substring or exact hash value.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>blazehash<span class="w"> </span>search<span class="w"> </span>manifest.hash<span class="w"> </span>--search-path<span class="w"> </span><span class="s2">&quot;suspicious&quot;</span>
+<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>blazehash<span class="w"> </span>search<span class="w"> </span>manifest.hash<span class="w"> </span>--search-hash<span class="w"> </span><span class="s2">&quot;a3f8e2c1...&quot;</span>
+</code></pre></div>
+<h4 id="grep"><code>grep</code><a class="headerlink" href="#grep" title="Permanent link">&para;</a></h4>
+<p>Filter entries whose path matches a regular expression.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>blazehash<span class="w"> </span>grep<span class="w"> </span>manifest.hash<span class="w"> </span>--pattern<span class="w"> </span><span class="s2">&quot;\.exe</span>$<span class="s2">&quot;</span><span class="w"> </span>-o<span class="w"> </span>executables.hash
+</code></pre></div>
+<h4 id="filter"><code>filter</code><a class="headerlink" href="#filter" title="Permanent link">&para;</a></h4>
+<p>Keep only entries computed with a specific algorithm.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>blazehash<span class="w"> </span>filter<span class="w"> </span>manifest.hash<span class="w"> </span>--filter-algo<span class="w"> </span>sha256<span class="w"> </span>-o<span class="w"> </span>sha256-only.hash
+</code></pre></div>
+<h4 id="head-tail"><code>head</code> / <code>tail</code><a class="headerlink" href="#head-tail" title="Permanent link">&para;</a></h4>
+<p>Print the first or last N entries.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>blazehash<span class="w"> </span>head<span class="w"> </span>manifest.hash<span class="w"> </span>--count<span class="w"> </span><span class="m">10</span>
+<a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>blazehash<span class="w"> </span>tail<span class="w"> </span>manifest.hash<span class="w"> </span>--count<span class="w"> </span><span class="m">10</span>
+</code></pre></div>
+<h4 id="slice"><code>slice</code><a class="headerlink" href="#slice" title="Permanent link">&para;</a></h4>
+<p>Extract a range of entries by offset and count.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>blazehash<span class="w"> </span>slice<span class="w"> </span>manifest.hash<span class="w"> </span>--offset<span class="w"> </span><span class="m">100</span><span class="w"> </span>--count<span class="w"> </span><span class="m">50</span><span class="w"> </span>-o<span class="w"> </span>page2.hash
+</code></pre></div>
+<h4 id="sample"><code>sample</code><a class="headerlink" href="#sample" title="Permanent link">&para;</a></h4>
+<p>Select N random entries.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>blazehash<span class="w"> </span>sample<span class="w"> </span>manifest.hash<span class="w"> </span>--count<span class="w"> </span><span class="m">100</span><span class="w"> </span>-o<span class="w"> </span>sample.hash
+</code></pre></div>
+<h4 id="contains"><code>contains</code><a class="headerlink" href="#contains" title="Permanent link">&para;</a></h4>
+<p>Exit 0 if a path or hash exists in the manifest, exit 1 otherwise. Useful in shell scripts.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>blazehash<span class="w"> </span>contains<span class="w"> </span>manifest.hash<span class="w"> </span>--search-hash<span class="w"> </span><span class="s2">&quot;a3f8e2c1...&quot;</span>
+</code></pre></div>
+<h4 id="intersect"><code>intersect</code><a class="headerlink" href="#intersect" title="Permanent link">&para;</a></h4>
+<p>Keep only entries whose path appears in both manifests (set intersection).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>blazehash<span class="w"> </span>intersect<span class="w"> </span>a.hash<span class="w"> </span>b.hash<span class="w"> </span>-o<span class="w"> </span>common.hash
+</code></pre></div>
+<h4 id="subtract"><code>subtract</code><a class="headerlink" href="#subtract" title="Permanent link">&para;</a></h4>
+<p>Remove entries from manifest A whose path appears in manifest B (set difference).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>blazehash<span class="w"> </span>subtract<span class="w"> </span>a.hash<span class="w"> </span>b.hash<span class="w"> </span>-o<span class="w"> </span>diff.hash
+</code></pre></div>
+<h4 id="exclude"><code>exclude</code><a class="headerlink" href="#exclude" title="Permanent link">&para;</a></h4>
+<p>Remove entries matching a path pattern.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>blazehash<span class="w"> </span>exclude<span class="w"> </span>manifest.hash<span class="w"> </span>--exclude-pattern<span class="w"> </span><span class="s2">&quot;*.log&quot;</span><span class="w"> </span>-o<span class="w"> </span>filtered.hash
+</code></pre></div>
+<h4 id="path-only"><code>path-only</code><a class="headerlink" href="#path-only" title="Permanent link">&para;</a></h4>
+<p>Print only the file paths (strips hashes and metadata).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>blazehash<span class="w"> </span>path-only<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="hash-only"><code>hash-only</code><a class="headerlink" href="#hash-only" title="Permanent link">&para;</a></h4>
+<p>Print only the hash values (strips paths and metadata).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>blazehash<span class="w"> </span>hash-only<span class="w"> </span>manifest.hash<span class="w"> </span>--hash-only-algo<span class="w"> </span>blake3
+</code></pre></div>
+<hr />
+<h3 id="manifest-transformation">Manifest Transformation<a class="headerlink" href="#manifest-transformation" title="Permanent link">&para;</a></h3>
+<h4 id="merge"><code>merge</code><a class="headerlink" href="#merge" title="Permanent link">&para;</a></h4>
+<p>Combine two or more manifests into one. Last-write-wins on duplicate paths.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>blazehash<span class="w"> </span>merge<span class="w"> </span>a.hash<span class="w"> </span>b.hash<span class="w"> </span>-o<span class="w"> </span>merged.hash
+</code></pre></div>
+<h4 id="update"><code>update</code><a class="headerlink" href="#update" title="Permanent link">&para;</a></h4>
+<p>Incrementally rehash only changed or new files against an existing manifest.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>blazehash<span class="w"> </span>update<span class="w"> </span>manifest.hash<span class="w"> </span>/path/to/folder
+</code></pre></div>
+<h4 id="cat"><code>cat</code><a class="headerlink" href="#cat" title="Permanent link">&para;</a></h4>
+<p>Concatenate two or more manifests. Like <code>merge</code> but preserves duplicate path entries.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>blazehash<span class="w"> </span>cat<span class="w"> </span>a.hash<span class="w"> </span>b.hash<span class="w"> </span>c.hash<span class="w"> </span>-o<span class="w"> </span>combined.hash
+</code></pre></div>
+<h4 id="sort"><code>sort</code><a class="headerlink" href="#sort" title="Permanent link">&para;</a></h4>
+<p>Sort entries by path, size, or hash.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>blazehash<span class="w"> </span>sort<span class="w"> </span>manifest.hash<span class="w"> </span>--sort-by<span class="w"> </span>path<span class="w"> </span>-o<span class="w"> </span>sorted.hash
+<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>blazehash<span class="w"> </span>sort<span class="w"> </span>manifest.hash<span class="w"> </span>--sort-by<span class="w"> </span>size<span class="w"> </span>-o<span class="w"> </span>sorted.hash
+</code></pre></div>
+<h4 id="split"><code>split</code><a class="headerlink" href="#split" title="Permanent link">&para;</a></h4>
+<p>Split a manifest into N parts by entry count.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>blazehash<span class="w"> </span>split<span class="w"> </span>manifest.hash<span class="w"> </span>--parts<span class="w"> </span><span class="m">4</span>
+<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a><span class="c1"># → manifest_part001.hash ... manifest_part004.hash</span>
+</code></pre></div>
+<h4 id="balance"><code>balance</code><a class="headerlink" href="#balance" title="Permanent link">&para;</a></h4>
+<p>Split a manifest into N parts of roughly equal total file size — useful when distributing hashing work across multiple machines or verifiers.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>blazehash<span class="w"> </span>balance<span class="w"> </span>manifest.hash<span class="w"> </span>--parts<span class="w"> </span><span class="m">4</span>
+</code></pre></div>
+<h4 id="interleave"><code>interleave</code><a class="headerlink" href="#interleave" title="Permanent link">&para;</a></h4>
+<p>Combine two manifests by alternating their entries (A, B, A, B, …). Useful for interlacing two partial collections into a single ordered pass before hashing or processing.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>blazehash<span class="w"> </span>interleave<span class="w"> </span>part-a.hash<span class="w"> </span>part-b.hash<span class="w"> </span>-o<span class="w"> </span>interleaved.hash
+</code></pre></div>
+<h4 id="reverse"><code>reverse</code><a class="headerlink" href="#reverse" title="Permanent link">&para;</a></h4>
+<p>Reverse the entry order of a manifest.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>blazehash<span class="w"> </span>reverse<span class="w"> </span>manifest.hash<span class="w"> </span>-o<span class="w"> </span>reversed.hash
+</code></pre></div>
+<h4 id="shuffle"><code>shuffle</code><a class="headerlink" href="#shuffle" title="Permanent link">&para;</a></h4>
+<p>Randomly reorder entries. Use <code>--seed</code> for reproducible output.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>blazehash<span class="w"> </span>shuffle<span class="w"> </span>manifest.hash<span class="w"> </span>--seed<span class="w"> </span><span class="m">42</span><span class="w"> </span>-o<span class="w"> </span>shuffled.hash
+</code></pre></div>
+<h4 id="normalize"><code>normalize</code><a class="headerlink" href="#normalize" title="Permanent link">&para;</a></h4>
+<p>Normalize a manifest: remove blank lines, fix spacing, sort entries, deduplicate.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>blazehash<span class="w"> </span>normalize<span class="w"> </span>manifest.hash<span class="w"> </span>-o<span class="w"> </span>clean.hash
+</code></pre></div>
+<h4 id="repair"><code>repair</code><a class="headerlink" href="#repair" title="Permanent link">&para;</a></h4>
+<p>Minimal formatting fix: strip blank lines, normalize separators, drop malformed lines. Less aggressive than <code>normalize</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>blazehash<span class="w"> </span>repair<span class="w"> </span>manifest.hash<span class="w"> </span>-o<span class="w"> </span>clean.hash
+</code></pre></div>
+<h4 id="rename"><code>rename</code><a class="headerlink" href="#rename" title="Permanent link">&para;</a></h4>
+<p>Rewrite path prefixes across all manifest entries.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>blazehash<span class="w"> </span>rename<span class="w"> </span>manifest.hash<span class="w"> </span>--rename-from<span class="w"> </span>/mnt/evidence<span class="w"> </span>--rename-to<span class="w"> </span>/evidence
+</code></pre></div>
+<h4 id="tag"><code>tag</code><a class="headerlink" href="#tag" title="Permanent link">&para;</a></h4>
+<p>Add or update header metadata fields in a manifest.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>blazehash<span class="w"> </span>tag<span class="w"> </span>manifest.hash<span class="w"> </span>--set<span class="w"> </span><span class="nv">case_id</span><span class="o">=</span><span class="s2">&quot;CASE-2026-002&quot;</span>
+<a id="__codelineno-80-2" name="__codelineno-80-2" href="#__codelineno-80-2"></a>blazehash<span class="w"> </span>tag<span class="w"> </span>manifest.hash<span class="w"> </span>--unset<span class="w"> </span>examiner
+</code></pre></div>
+<h4 id="annotate"><code>annotate</code><a class="headerlink" href="#annotate" title="Permanent link">&para;</a></h4>
+<p>Add or replace a <code>## note:</code> header in a manifest.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>blazehash<span class="w"> </span>annotate<span class="w"> </span>manifest.hash<span class="w"> </span>--note<span class="w"> </span><span class="s2">&quot;Reviewed by Jane Smith&quot;</span>
+</code></pre></div>
+<h4 id="pivot"><code>pivot</code><a class="headerlink" href="#pivot" title="Permanent link">&para;</a></h4>
+<p>Produce a copy of a manifest keyed by a different algorithm — useful when you need to cross-reference a BLAKE3 manifest against a legacy SHA-256 database or hand it to a tool that only understands one algorithm.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>blazehash<span class="w"> </span>pivot<span class="w"> </span>manifest.hash<span class="w"> </span>--pivot-algo<span class="w"> </span>sha256<span class="w"> </span>-o<span class="w"> </span>sha256-keyed.hash
+</code></pre></div>
+<h4 id="apply-patch"><code>apply-patch</code><a class="headerlink" href="#apply-patch" title="Permanent link">&para;</a></h4>
+<p>Apply a unified diff patch to a manifest.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>blazehash<span class="w"> </span>apply-patch<span class="w"> </span>base.hash<span class="w"> </span>patch.diff<span class="w"> </span>-o<span class="w"> </span>updated.hash
+</code></pre></div>
+<hr />
+<h3 id="deduplication">Deduplication<a class="headerlink" href="#deduplication" title="Permanent link">&para;</a></h3>
+<h4 id="dedup"><code>dedup</code><a class="headerlink" href="#dedup" title="Permanent link">&para;</a></h4>
+<p>Find duplicate files in a directory or manifest. Exit code <code>0</code> = no duplicates, <code>1</code> = duplicates found.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a>blazehash<span class="w"> </span>dedup<span class="w"> </span>/mnt/evidence
+<a id="__codelineno-84-2" name="__codelineno-84-2" href="#__codelineno-84-2"></a>blazehash<span class="w"> </span>dedup<span class="w"> </span>manifest.hash
+<a id="__codelineno-84-3" name="__codelineno-84-3" href="#__codelineno-84-3"></a>blazehash<span class="w"> </span>dedup<span class="w"> </span>/mnt/evidence<span class="w"> </span>--dedup-unique<span class="w">   </span><span class="c1"># one representative per group</span>
+<a id="__codelineno-84-4" name="__codelineno-84-4" href="#__codelineno-84-4"></a>blazehash<span class="w"> </span>dedup<span class="w"> </span>/mnt/evidence<span class="w"> </span>--dedup-dupes<span class="w">    </span><span class="c1"># only the redundant copies</span>
+</code></pre></div>
+<h4 id="duplicates"><code>duplicates</code><a class="headerlink" href="#duplicates" title="Permanent link">&para;</a></h4>
+<p>Emit all manifest entries whose hash appears more than once.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>blazehash<span class="w"> </span>duplicates<span class="w"> </span>manifest.hash<span class="w"> </span>-o<span class="w"> </span>dupes.hash
+</code></pre></div>
+<h4 id="unique-hash"><code>unique-hash</code><a class="headerlink" href="#unique-hash" title="Permanent link">&para;</a></h4>
+<p>Keep only the first entry per unique hash — complement to <code>duplicates</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-86-1" name="__codelineno-86-1" href="#__codelineno-86-1"></a>blazehash<span class="w"> </span>unique-hash<span class="w"> </span>manifest.hash<span class="w"> </span>-o<span class="w"> </span>deduped.hash
+</code></pre></div>
+<h4 id="uniq"><code>uniq</code><a class="headerlink" href="#uniq" title="Permanent link">&para;</a></h4>
+<p>Deduplicate entries by path — keep the last occurrence of each path.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-87-1" name="__codelineno-87-1" href="#__codelineno-87-1"></a>blazehash<span class="w"> </span>uniq<span class="w"> </span>manifest.hash<span class="w"> </span>-o<span class="w"> </span>deduped.hash
+</code></pre></div>
+<h4 id="first"><code>first</code><a class="headerlink" href="#first" title="Permanent link">&para;</a></h4>
+<p>Keep the first occurrence of each path — complement to <code>uniq</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-88-1" name="__codelineno-88-1" href="#__codelineno-88-1"></a>blazehash<span class="w"> </span>first<span class="w"> </span>manifest.hash<span class="w"> </span>-o<span class="w"> </span>first.hash
+</code></pre></div>
+<hr />
+<h3 id="format-conversion-importexport">Format Conversion &amp; Import/Export<a class="headerlink" href="#format-conversion-importexport" title="Permanent link">&para;</a></h3>
+<h4 id="convert"><code>convert</code><a class="headerlink" href="#convert" title="Permanent link">&para;</a></h4>
+<p>Import a foreign manifest format (md5sum, sha256sum, hashdeep, SFV) and convert to blazehash format.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-89-1" name="__codelineno-89-1" href="#__codelineno-89-1"></a>blazehash<span class="w"> </span>convert<span class="w"> </span>md5sums.txt<span class="w"> </span>-o<span class="w"> </span>manifest.hash
+<a id="__codelineno-89-2" name="__codelineno-89-2" href="#__codelineno-89-2"></a>blazehash<span class="w"> </span>convert<span class="w"> </span>hashes.sfv<span class="w"> </span>-o<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="export"><code>export</code><a class="headerlink" href="#export" title="Permanent link">&para;</a></h4>
+<p>Export a manifest to CSV, JSONL, or TSV.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-90-1" name="__codelineno-90-1" href="#__codelineno-90-1"></a>blazehash<span class="w"> </span><span class="nb">export</span><span class="w"> </span>manifest.hash<span class="w"> </span>--export-format<span class="w"> </span>csv<span class="w"> </span>-o<span class="w"> </span>hashes.csv
+<a id="__codelineno-90-2" name="__codelineno-90-2" href="#__codelineno-90-2"></a>blazehash<span class="w"> </span><span class="nb">export</span><span class="w"> </span>manifest.hash<span class="w"> </span>--export-format<span class="w"> </span>jsonl<span class="w"> </span>-o<span class="w"> </span>hashes.jsonl
+</code></pre></div>
+<h4 id="checksum"><code>checksum</code><a class="headerlink" href="#checksum" title="Permanent link">&para;</a></h4>
+<p>Convert a DFXML manifest to a sha256sum-compatible flat file.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-91-1" name="__codelineno-91-1" href="#__codelineno-91-1"></a>blazehash<span class="w"> </span>checksum<span class="w"> </span>manifest.dfxml<span class="w"> </span>-o<span class="w"> </span>hashes.sha256
+</code></pre></div>
+<h4 id="lint"><code>lint</code><a class="headerlink" href="#lint" title="Permanent link">&para;</a></h4>
+<p>Validate a manifest for formatting errors, duplicate paths, or missing fields.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a>blazehash<span class="w"> </span>lint<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="redact"><code>redact</code><a class="headerlink" href="#redact" title="Permanent link">&para;</a></h4>
+<p>Remove selected entries from a manifest (privacy redaction / selective disclosure).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-93-1" name="__codelineno-93-1" href="#__codelineno-93-1"></a>blazehash<span class="w"> </span>redact<span class="w"> </span>manifest.hash<span class="w"> </span>--exclude-pattern<span class="w"> </span><span class="s2">&quot;*.pii&quot;</span><span class="w"> </span>-o<span class="w"> </span>redacted.hash
+</code></pre></div>
+<hr />
+<h3 id="utilities">Utilities<a class="headerlink" href="#utilities" title="Permanent link">&para;</a></h3>
+<h4 id="nsrl-build-bloom"><code>nsrl build-bloom</code><a class="headerlink" href="#nsrl-build-bloom" title="Permanent link">&para;</a></h4>
+<p>Build a bloom filter from an NSRL SQLite database for faster lookups.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-94-1" name="__codelineno-94-1" href="#__codelineno-94-1"></a>blazehash<span class="w"> </span>nsrl<span class="w"> </span>build-bloom<span class="w"> </span>NSRL.db<span class="w"> </span>--output<span class="w"> </span>nsrl.bloom
+</code></pre></div>
+<h4 id="bench"><code>bench</code><a class="headerlink" href="#bench" title="Permanent link">&para;</a></h4>
+<p>Run benchmarks and GPU calibration.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-95-1" name="__codelineno-95-1" href="#__codelineno-95-1"></a>blazehash<span class="w"> </span>bench<span class="w"> </span>--gpu<span class="w">              </span><span class="c1"># measure GPU vs CPU crossover, write config</span>
+<a id="__codelineno-95-2" name="__codelineno-95-2" href="#__codelineno-95-2"></a>blazehash<span class="w"> </span>bench<span class="w"> </span>--gpu<span class="w"> </span>--no-calibrate<span class="w">  </span><span class="c1"># use conservative defaults, no config write</span>
+</code></pre></div>
+<h4 id="tui"><code>tui</code><a class="headerlink" href="#tui" title="Permanent link">&para;</a></h4>
+<p>Launch the interactive terminal dashboard. Requires <code>--features tui</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-96-1" name="__codelineno-96-1" href="#__codelineno-96-1"></a>blazehash<span class="w"> </span>tui<span class="w"> </span>manifest.hash
+</code></pre></div>
+<h4 id="mcp"><code>mcp</code><a class="headerlink" href="#mcp" title="Permanent link">&para;</a></h4>
+<p>Start the MCP (Model Context Protocol) server for AI-assisted forensic hashing. See <a href="../mcp/">MCP Server</a> for details.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-97-1" name="__codelineno-97-1" href="#__codelineno-97-1"></a>blazehash<span class="w"> </span>mcp
+</code></pre></div>
+<h4 id="completions"><code>completions</code><a class="headerlink" href="#completions" title="Permanent link">&para;</a></h4>
+<p>Generate shell completion scripts or a man page. Output goes to stdout.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-98-1" name="__codelineno-98-1" href="#__codelineno-98-1"></a>blazehash<span class="w"> </span>completions<span class="w"> </span>bash<span class="w">   </span>&gt;<span class="w"> </span>/etc/bash_completion.d/blazehash
+<a id="__codelineno-98-2" name="__codelineno-98-2" href="#__codelineno-98-2"></a>blazehash<span class="w"> </span>completions<span class="w"> </span>zsh<span class="w">    </span>&gt;<span class="w"> </span>~/.zsh/completions/_blazehash
+<a id="__codelineno-98-3" name="__codelineno-98-3" href="#__codelineno-98-3"></a>blazehash<span class="w"> </span>completions<span class="w"> </span>fish<span class="w">   </span>&gt;<span class="w"> </span>~/.config/fish/completions/blazehash.fish
+<a id="__codelineno-98-4" name="__codelineno-98-4" href="#__codelineno-98-4"></a>blazehash<span class="w"> </span>completions<span class="w"> </span>powershell<span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="nv">$PROFILE</span>
+<a id="__codelineno-98-5" name="__codelineno-98-5" href="#__codelineno-98-5"></a>blazehash<span class="w"> </span>completions<span class="w"> </span>man<span class="w">    </span>&gt;<span class="w"> </span>blazehash.1<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>man<span class="w"> </span>./blazehash.1
+</code></pre></div>
+<hr />
+<h2 id="remote-storage">Remote storage<a class="headerlink" href="#remote-storage" title="Permanent link">&para;</a></h2>
+<p>blazehash accepts remote URIs for both input paths and <code>-o</code> output — object stores, HDFS, SQL, SFTP/FTP, and WebDAV/HTTP.</p>
+<p><strong>Full protocol reference:</strong> <a href="../remote/">Remote Storage →</a></p>
+<p>Common examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-99-1" name="__codelineno-99-1" href="#__codelineno-99-1"></a><span class="c1"># Hash an S3 prefix</span>
+<a id="__codelineno-99-2" name="__codelineno-99-2" href="#__codelineno-99-2"></a>blazehash<span class="w"> </span>s3://dfir-bucket/case-001/
+<a id="__codelineno-99-3" name="__codelineno-99-3" href="#__codelineno-99-3"></a>
+<a id="__codelineno-99-4" name="__codelineno-99-4" href="#__codelineno-99-4"></a><span class="c1"># Write manifest to S3</span>
+<a id="__codelineno-99-5" name="__codelineno-99-5" href="#__codelineno-99-5"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-o<span class="w"> </span>s3://dfir-bucket/case-001.hash
+<a id="__codelineno-99-6" name="__codelineno-99-6" href="#__codelineno-99-6"></a>
+<a id="__codelineno-99-7" name="__codelineno-99-7" href="#__codelineno-99-7"></a><span class="c1"># Audit against a remote manifest</span>
+<a id="__codelineno-99-8" name="__codelineno-99-8" href="#__codelineno-99-8"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-a<span class="w"> </span>-k<span class="w"> </span>s3://dfir-bucket/case-001.hash
+<a id="__codelineno-99-9" name="__codelineno-99-9" href="#__codelineno-99-9"></a>
+<a id="__codelineno-99-10" name="__codelineno-99-10" href="#__codelineno-99-10"></a><span class="c1"># Hash a Google Drive file</span>
+<a id="__codelineno-99-11" name="__codelineno-99-11" href="#__codelineno-99-11"></a>blazehash<span class="w"> </span>gdrive://1ABCdef...
+<a id="__codelineno-99-12" name="__codelineno-99-12" href="#__codelineno-99-12"></a>
+<a id="__codelineno-99-13" name="__codelineno-99-13" href="#__codelineno-99-13"></a><span class="c1"># Hash over SFTP</span>
+<a id="__codelineno-99-14" name="__codelineno-99-14" href="#__codelineno-99-14"></a>blazehash<span class="w"> </span>sftp://admin@192.168.1.10/evidence/disk.dd
+</code></pre></div>
+<p>Supported schemes: <code>s3</code>, <code>gcs</code>, <code>azblob</code>, <code>azdls</code>, <code>azfile</code>, <code>b2</code>, <code>cos</code>, <code>obs</code>, <code>oss</code>,
+<code>swift</code>, <code>gdrive</code>, <code>hdfs</code>, <code>webhdfs</code>, <code>mysql</code>, <code>postgresql</code>, <code>sqlite</code>, <code>sftp</code>, <code>ftp</code>, <code>ftps</code>,
+<code>webdav</code>, <code>http</code>, <code>https</code>, <code>file</code>, <code>mem</code>.</p>
+<hr />
+<h2 id="nsrl-flags">NSRL flags<a class="headerlink" href="#nsrl-flags" title="Permanent link">&para;</a></h2>
+<h3 id="-nsrl"><code>--nsrl</code><a class="headerlink" href="#-nsrl" title="Permanent link">&para;</a></h3>
+<p>Path to an NSRL database (<code>.db</code> SQLite) or bloom filter (<code>.bloom</code>) file. Annotates known-good files with <code>[K]</code> in output.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-100-1" name="__codelineno-100-1" href="#__codelineno-100-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-c<span class="w"> </span>sha256<span class="w"> </span>--nsrl<span class="w"> </span>NSRL.db
+</code></pre></div>
+<h3 id="-nsrl-hsh"><code>--nsrl-hsh</code><a class="headerlink" href="#-nsrl-hsh" title="Permanent link">&para;</a></h3>
+<p>Path to a NIST NSRL flat <code>.hsh</code> hashset file (alternative to the SQLite <code>--nsrl</code> database).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-101-1" name="__codelineno-101-1" href="#__codelineno-101-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-c<span class="w"> </span>sha256<span class="w"> </span>--nsrl-hsh<span class="w"> </span>NSRLFile.hsh
+</code></pre></div>
+<h3 id="-nsrl-exclude"><code>--nsrl-exclude</code><a class="headerlink" href="#-nsrl-exclude" title="Permanent link">&para;</a></h3>
+<p>Suppress known-good files from output entirely. Requires <code>--nsrl</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-102-1" name="__codelineno-102-1" href="#__codelineno-102-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-c<span class="w"> </span>sha256<span class="w"> </span>--nsrl<span class="w"> </span>NSRL.db<span class="w"> </span>--nsrl-exclude
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using <code>--nsrl-exclude</code> with a bloom filter, a small number of files may be suppressed due to false positives (~0.1%). Use the SQLite database for exclusion in production environments.</p>
+</div>
+<hr />
+<h2 id="advanced-flags">Advanced flags<a class="headerlink" href="#advanced-flags" title="Permanent link">&para;</a></h2>
+<h3 id="-entropy"><code>--entropy</code><a class="headerlink" href="#-entropy" title="Permanent link">&para;</a></h3>
+<p>Compute and display the Shannon entropy of each file alongside its hash. Values range 0.0–8.0; scores above 7.2 suggest encrypted, compressed, or packed content.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-103-1" name="__codelineno-103-1" href="#__codelineno-103-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>--entropy
+</code></pre></div>
+<h3 id="-yara"><code>--yara</code><a class="headerlink" href="#-yara" title="Permanent link">&para;</a></h3>
+<p>Run YARA rule matching during the directory walk. Requires <code>--features yara</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-104-1" name="__codelineno-104-1" href="#__codelineno-104-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>--yara<span class="w"> </span>rules.yar
+</code></pre></div>
+<h3 id="-yara-max-size"><code>--yara-max-size</code><a class="headerlink" href="#-yara-max-size" title="Permanent link">&para;</a></h3>
+<p>Maximum file size (in MiB) for YARA scanning. Default: <code>256</code>. Files larger than this threshold are still hashed but the YARA scan is skipped and a warning is written to stderr.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-105-1" name="__codelineno-105-1" href="#__codelineno-105-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>--yara<span class="w"> </span>rules.yar<span class="w"> </span>--yara-max-size<span class="w"> </span><span class="m">512</span>
+</code></pre></div>
+<h3 id="-no-cache"><code>--no-cache</code><a class="headerlink" href="#-no-cache" title="Permanent link">&para;</a></h3>
+<p>Bypass the OS page cache. Reads directly from disk using platform-specific direct I/O (<code>F_NOCACHE</code> on macOS, <code>O_DIRECT</code> on Linux, <code>FILE_FLAG_NO_BUFFERING</code> on Windows).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-106-1" name="__codelineno-106-1" href="#__codelineno-106-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>--no-cache
+</code></pre></div>
+<p>Use this when hashing a live system without disturbing in-memory evidence.</p>
+<h3 id="-no-gpu"><code>--no-gpu</code><a class="headerlink" href="#-no-gpu" title="Permanent link">&para;</a></h3>
+<p>Force CPU-only hashing, even when a GPU is available.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-107-1" name="__codelineno-107-1" href="#__codelineno-107-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-c<span class="w"> </span>sha256<span class="w"> </span>--no-gpu
+</code></pre></div>
+<h3 id="-ads"><code>--ads</code><a class="headerlink" href="#-ads" title="Permanent link">&para;</a></h3>
+<p>Hash NTFS Alternate Data Streams alongside main file content. Windows only; no-op on other platforms.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-108-1" name="__codelineno-108-1" href="#__codelineno-108-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>C:<span class="se">\E</span>vidence<span class="w"> </span>--ads
+</code></pre></div>
+<h3 id="-resume"><code>--resume</code><a class="headerlink" href="#-resume" title="Permanent link">&para;</a></h3>
+<p>Resume from a partial manifest. Reads the existing output file, skips already-hashed files, and continues where it left off.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-109-1" name="__codelineno-109-1" href="#__codelineno-109-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-o<span class="w"> </span>manifest.hash<span class="w"> </span>--resume
+</code></pre></div>
+<h3 id="-p-piecewise"><code>-p</code>, <code>--piecewise</code><a class="headerlink" href="#-p-piecewise" title="Permanent link">&para;</a></h3>
+<p>Piecewise (chunk) hashing. Each file produces one hash entry per chunk. Accepts size suffixes: <code>K</code>, <code>M</code>, <code>G</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-110-1" name="__codelineno-110-1" href="#__codelineno-110-1"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-p<span class="w"> </span>1G
+</code></pre></div>
+<h3 id="-verify-image"><code>--verify-image</code><a class="headerlink" href="#-verify-image" title="Permanent link">&para;</a></h3>
+<p>Verify a forensic disk image. Supports E01/EWF (EnCase) images and raw/DD images with sidecar hash files.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-111-1" name="__codelineno-111-1" href="#__codelineno-111-1"></a>blazehash<span class="w"> </span>--verify-image<span class="w"> </span><span class="k">case</span>.E01
+<a id="__codelineno-111-2" name="__codelineno-111-2" href="#__codelineno-111-2"></a>blazehash<span class="w"> </span>--verify-image<span class="w"> </span>disk.raw
+</code></pre></div>
+<p>For E01 images, blazehash verifies the stored hashes against recomputed values. Multi-segment images (<code>.E01</code>, <code>.E02</code>, ...) are detected automatically.</p>
+<p>For raw images, blazehash looks for sidecar files (<code>.md5</code>, <code>.sha256</code>, <code>.sha512</code>, <code>.blake3</code>) alongside the image.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.tabs", "navigation.sections", "navigation.top", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

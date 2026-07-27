@@ -1,0 +1,1644 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://securityronin.github.io/blazehash/remote/">
+      
+      
+        <link rel="prev" href="../cookbook/">
+      
+      
+        <link rel="next" href="../cli-reference/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Remote Storage - blazehash</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#remote-storage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="blazehash" class="md-header__button md-logo" aria-label="blazehash" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            blazehash
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Remote Storage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SecurityRonin/blazehash" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SecurityRonin/blazehash
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../acquire/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Acquire Evidence
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../custody/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Build Court-Ready Evidence
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../hunt/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hunt Threats
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../siem/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SIEM & Analytics
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cookbook/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Cookbook
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Remote Storage
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cli-reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CLI Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Concepts
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../mcp/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  MCP Server
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../privacy/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Privacy Policy
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../terms/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Terms of Service
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="blazehash" class="md-nav__button md-logo" aria-label="blazehash" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    blazehash
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SecurityRonin/blazehash" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SecurityRonin/blazehash
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acquire/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acquire Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custody/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Build Court-Ready Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hunt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hunt Threats
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../siem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SIEM & Analytics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Storage
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-object-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Object Storage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cloud Object Storage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#s3-compatible-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        S3-compatible endpoints
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#google-drive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google Drive
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hadoop-hdfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hadoop / HDFS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sql-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SQL Databases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filesystem-protocols" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filesystem &amp; Protocols
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filesystem &amp; Protocols">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sftp-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SFTP usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#in-memory-embedded-testing-pipelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In-Memory / Embedded (testing &amp; pipelines)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-manifests-to-remote-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing manifests to remote storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variable-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variable reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../privacy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Privacy Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terms of Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-object-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Object Storage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cloud Object Storage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#s3-compatible-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        S3-compatible endpoints
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#google-drive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google Drive
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hadoop-hdfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hadoop / HDFS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sql-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SQL Databases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filesystem-protocols" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filesystem &amp; Protocols
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filesystem &amp; Protocols">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sftp-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SFTP usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#in-memory-embedded-testing-pipelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In-Memory / Embedded (testing &amp; pipelines)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-manifests-to-remote-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing manifests to remote storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variable-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variable reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="remote-storage">Remote Storage<a class="headerlink" href="#remote-storage" title="Permanent link">&para;</a></h1>
+<p>blazehash reads and writes evidence directly from remote storage via
+<a href="https://opendal.apache.org/">Apache OpenDAL</a>, scoped to the backends where
+forensic evidence actually lives and where DFIR collectors (Velociraptor, KAPE)
+deposit it: object storage, SFTP/FTP, Hadoop, SQL stores, and WebDAV/HTTP. Any
+URI that resolves to file-like data is a valid input path or <code>-o</code> output target —
+no plugins, no adapters, no staging.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Read from remote, write manifest to remote — entirely off-disk</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>blazehash<span class="w"> </span>s3://dfir-bucket/case-001/<span class="w"> </span>-o<span class="w"> </span>gcs://evidence-archive/case-001.hash
+</code></pre></div>
+<p>The remote stack is an opt-in build feature (<code>--features remote</code>); the release
+binaries enable it. ADR-0002 records why it is opt-in and ADR-0012 why the
+backend set is scoped to evidence-transfer targets (both in the project's
+<code>docs/decisions/</code>).</p>
+<hr />
+<h2 id="cloud-object-storage">Cloud Object Storage<a class="headerlink" href="#cloud-object-storage" title="Permanent link">&para;</a></h2>
+<p>The most common backends for evidence archiving.</p>
+<table>
+<thead>
+<tr>
+<th>Scheme</th>
+<th>Backend</th>
+<th>Auth env vars</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>s3://bucket/key</code></td>
+<td>AWS S3, MinIO, Cloudflare R2, Wasabi, Backblaze B2 (S3-compat)</td>
+<td><code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>, <code>AWS_DEFAULT_REGION</code></td>
+</tr>
+<tr>
+<td><code>gcs://bucket/key</code></td>
+<td>Google Cloud Storage</td>
+<td><code>GOOGLE_APPLICATION_CREDENTIALS</code></td>
+</tr>
+<tr>
+<td><code>azblob://container/key</code></td>
+<td>Azure Blob Storage</td>
+<td><code>AZURE_STORAGE_ACCOUNT</code>, <code>AZURE_STORAGE_ACCESS_KEY</code></td>
+</tr>
+<tr>
+<td><code>azdls://filesystem/path</code></td>
+<td>Azure Data Lake Storage Gen2</td>
+<td><code>AZURE_STORAGE_ACCOUNT</code>, <code>AZURE_STORAGE_ACCESS_KEY</code></td>
+</tr>
+<tr>
+<td><code>azfile://share/path</code></td>
+<td>Azure Files</td>
+<td><code>AZURE_STORAGE_ACCOUNT</code>, <code>AZURE_STORAGE_ACCESS_KEY</code></td>
+</tr>
+<tr>
+<td><code>b2://bucket/key</code></td>
+<td>Backblaze B2 (native API, not S3-compat)</td>
+<td><code>BACKBLAZE_APPLICATION_KEY_ID</code>, <code>BACKBLAZE_APPLICATION_KEY</code></td>
+</tr>
+<tr>
+<td><code>cos://bucket/key</code></td>
+<td>Tencent Cloud COS</td>
+<td><code>TENCENTCLOUD_SECRET_ID</code>, <code>TENCENTCLOUD_SECRET_KEY</code>, <code>TENCENTCLOUD_REGION</code></td>
+</tr>
+<tr>
+<td><code>obs://bucket/key</code></td>
+<td>Huawei Cloud OBS</td>
+<td><code>HUAWEI_ACCESS_KEY_ID</code>, <code>HUAWEI_SECRET_ACCESS_KEY</code>, <code>HUAWEI_REGION</code></td>
+</tr>
+<tr>
+<td><code>oss://bucket/key</code></td>
+<td>Alibaba Cloud OSS</td>
+<td><code>ALIBABA_CLOUD_ACCESS_KEY_ID</code>, <code>ALIBABA_CLOUD_ACCESS_KEY_SECRET</code>, <code>ALIBABA_CLOUD_REGION</code></td>
+</tr>
+<tr>
+<td><code>swift://container/path</code></td>
+<td>OpenStack Swift</td>
+<td><code>SWIFT_ENDPOINT</code>, <code>SWIFT_TOKEN</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="s3-compatible-endpoints">S3-compatible endpoints<a class="headerlink" href="#s3-compatible-endpoints" title="Permanent link">&para;</a></h3>
+<p>MinIO, Cloudflare R2, Wasabi, and Backblaze B2 (S3-compat mode) all use <code>s3://</code>. Point to the right endpoint via <code>AWS_ENDPOINT_URL</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># MinIO</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ENDPOINT_URL</span><span class="o">=</span>http://localhost:9000
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>blazehash<span class="w"> </span>s3://evidence-bucket/case-001/
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Cloudflare R2</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ENDPOINT_URL</span><span class="o">=</span>https://&lt;account&gt;.r2.cloudflarestorage.com
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>blazehash<span class="w"> </span>s3://dfir-bucket/image.dd
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Backblaze B2 (S3-compat)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ENDPOINT_URL</span><span class="o">=</span>https://s3.us-west-004.backblazeb2.com
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>blazehash<span class="w"> </span>s3://my-bucket/evidence/
+</code></pre></div>
+<hr />
+<h2 id="google-drive">Google Drive<a class="headerlink" href="#google-drive" title="Permanent link">&para;</a></h2>
+<p>Useful when evidence is a file shared from a suspect's or custodian's account. blazehash uses the Drive API to hash without staging the file locally:</p>
+<table>
+<thead>
+<tr>
+<th>Scheme</th>
+<th>Backend</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gdrive://file-id</code></td>
+<td>Google Drive</td>
+<td>Run <code>blazehash gdrive auth login</code> once to cache the OAuth2 token</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># By file ID</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>blazehash<span class="w"> </span>gdrive://1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># By share URL</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>blazehash<span class="w"> </span>https://drive.google.com/file/d/1Ykbd9fDXxWnD1-MTag_-8-Wh_Wnd28q0/view
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># First-time auth (browser OAuth2 flow, token cached in ~/.config/blazehash/)</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>blazehash<span class="w"> </span>gdrive<span class="w"> </span>auth<span class="w"> </span>login
+</code></pre></div>
+<hr />
+<h2 id="hadoop-hdfs">Hadoop / HDFS<a class="headerlink" href="#hadoop-hdfs" title="Permanent link">&para;</a></h2>
+<p>Two schemes, depending on your cluster setup — both pure-Rust, no JVM and no <code>libhdfs</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Scheme</th>
+<th>Backend</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hdfs://namenode:port/path</code></td>
+<td>HDFS (pure-Rust native client)</td>
+<td>Speaks Hadoop RPC via the <code>hdfs-native</code> crate</td>
+</tr>
+<tr>
+<td><code>webhdfs://host:port/path</code></td>
+<td>WebHDFS REST API</td>
+<td>Works with any Hadoop 2.x+ namenode; <code>WEBHDFS_USER</code> for the user name</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Pure-Rust HDFS native client (no Java required)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>blazehash<span class="w"> </span>hdfs://namenode.corp:8020/user/evidence/case-001/
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># WebHDFS REST (also no Java required)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>blazehash<span class="w"> </span>webhdfs://namenode.corp:50070/user/evidence/case-001/
+</code></pre></div>
+<p><code>hdfs://</code> is preferred when the cluster exposes the native Hadoop RPC port (default 8020/9000). <code>webhdfs://</code> is the fallback when only the HTTP REST endpoint is reachable.</p>
+<hr />
+<h2 id="sql-databases">SQL Databases<a class="headerlink" href="#sql-databases" title="Permanent link">&para;</a></h2>
+<p>Useful when evidence artifacts are stored in operational datastores rather than file systems.</p>
+<table>
+<thead>
+<tr>
+<th>Scheme</th>
+<th>Backend</th>
+<th>Auth / connection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mysql://host/db/key</code></td>
+<td>MySQL / MariaDB</td>
+<td>Standard DSN</td>
+</tr>
+<tr>
+<td><code>postgresql://host/db/key</code></td>
+<td>PostgreSQL</td>
+<td>Standard DSN</td>
+</tr>
+<tr>
+<td><code>sqlite://path/to.db/key</code></td>
+<td>SQLite (file on disk)</td>
+<td>File path</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Hash a value stored in a PostgreSQL row</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>blazehash<span class="w"> </span>postgresql://user:pass@localhost/forensics/artifacts
+</code></pre></div>
+<hr />
+<h2 id="filesystem-protocols">Filesystem &amp; Protocols<a class="headerlink" href="#filesystem-protocols" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Scheme</th>
+<th>Backend</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sftp://user@host/path</code></td>
+<td>SFTP / SSH</td>
+<td>SSH agent, <code>BLAZEHASH_SFTP_KEY_PATH</code>, or <code>BLAZEHASH_SFTP_KNOWN_HOSTS_STRATEGY</code></td>
+</tr>
+<tr>
+<td><code>ftp://user:pass@host/path</code></td>
+<td>FTP</td>
+<td>Credentials in URI</td>
+</tr>
+<tr>
+<td><code>ftps://user:pass@host/path</code></td>
+<td>FTPS (FTP over TLS)</td>
+<td>Credentials in URI</td>
+</tr>
+<tr>
+<td><code>webdav://host/path</code></td>
+<td>WebDAV (Nextcloud, Box, SharePoint on-prem)</td>
+<td>Server-specific</td>
+</tr>
+<tr>
+<td><code>http://host/path</code></td>
+<td>HTTP (read-only)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>https://host/path</code></td>
+<td>HTTPS (read-only)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>file:///abs/path</code></td>
+<td>Explicit local filesystem</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sftp-usage">SFTP usage<a class="headerlink" href="#sftp-usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># SSH agent (default — no config needed if your key is loaded)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>blazehash<span class="w"> </span>sftp://admin@192.168.1.10/evidence/disk.dd
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Explicit key file</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">BLAZEHASH_SFTP_KEY_PATH</span><span class="o">=</span>~/.ssh/forensic_rsa
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>blazehash<span class="w"> </span>sftp://admin@192.168.1.10/evidence/disk.dd
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="c1"># Known hosts strategy (add | strict | accept_new)</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="nb">export</span><span class="w"> </span><span class="nv">BLAZEHASH_SFTP_KNOWN_HOSTS_STRATEGY</span><span class="o">=</span>strict
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>blazehash<span class="w"> </span>sftp://admin@192.168.1.10/evidence/disk.dd
+</code></pre></div>
+<hr />
+<h2 id="in-memory-embedded-testing-pipelines">In-Memory / Embedded (testing &amp; pipelines)<a class="headerlink" href="#in-memory-embedded-testing-pipelines" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Scheme</th>
+<th>Backend</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mem://bucket/key</code></td>
+<td>In-process memory</td>
+<td>Ephemeral; useful in tests and pipeline stages</td>
+</tr>
+<tr>
+<td><code>sqlite://path/db/key</code></td>
+<td>SQLite file</td>
+<td>Lightweight embedded store; good for offline pipelines</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="writing-manifests-to-remote-storage">Writing manifests to remote storage<a class="headerlink" href="#writing-manifests-to-remote-storage" title="Permanent link">&para;</a></h2>
+<p>Any <code>-o</code> output path accepts a remote URI:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Write manifest to S3</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>blazehash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence<span class="w"> </span>-c<span class="w"> </span>blake3,sha256<span class="w"> </span>-o<span class="w"> </span>s3://dfir-bucket/case-001.hash
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Sign a remote manifest in-place</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>blazehash<span class="w"> </span>sign<span class="w"> </span>s3://dfir-bucket/case-001.hash
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Audit remotely — no local copy of the manifest needed</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>blazehash<span class="w"> </span>-a<span class="w"> </span>-k<span class="w"> </span>s3://dfir-bucket/case-001.hash<span class="w"> </span>-r<span class="w"> </span>/mnt/evidence
+</code></pre></div>
+<hr />
+<h2 id="environment-variable-reference">Environment variable reference<a class="headerlink" href="#environment-variable-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AWS_ACCESS_KEY_ID</code></td>
+<td>S3</td>
+</tr>
+<tr>
+<td><code>AWS_SECRET_ACCESS_KEY</code></td>
+<td>S3</td>
+</tr>
+<tr>
+<td><code>AWS_DEFAULT_REGION</code></td>
+<td>S3</td>
+</tr>
+<tr>
+<td><code>AWS_ENDPOINT_URL</code></td>
+<td>S3 (custom endpoints: MinIO, R2, Wasabi, etc.)</td>
+</tr>
+<tr>
+<td><code>GOOGLE_APPLICATION_CREDENTIALS</code></td>
+<td>GCS</td>
+</tr>
+<tr>
+<td><code>AZURE_STORAGE_ACCOUNT</code></td>
+<td>azblob, azdls, azfile</td>
+</tr>
+<tr>
+<td><code>AZURE_STORAGE_ACCESS_KEY</code></td>
+<td>azblob, azdls, azfile</td>
+</tr>
+<tr>
+<td><code>BACKBLAZE_APPLICATION_KEY_ID</code></td>
+<td>b2</td>
+</tr>
+<tr>
+<td><code>BACKBLAZE_APPLICATION_KEY</code></td>
+<td>b2</td>
+</tr>
+<tr>
+<td><code>TENCENTCLOUD_SECRET_ID</code></td>
+<td>cos</td>
+</tr>
+<tr>
+<td><code>TENCENTCLOUD_SECRET_KEY</code></td>
+<td>cos</td>
+</tr>
+<tr>
+<td><code>TENCENTCLOUD_REGION</code></td>
+<td>cos</td>
+</tr>
+<tr>
+<td><code>HUAWEI_ACCESS_KEY_ID</code></td>
+<td>obs</td>
+</tr>
+<tr>
+<td><code>HUAWEI_SECRET_ACCESS_KEY</code></td>
+<td>obs</td>
+</tr>
+<tr>
+<td><code>HUAWEI_REGION</code></td>
+<td>obs</td>
+</tr>
+<tr>
+<td><code>ALIBABA_CLOUD_ACCESS_KEY_ID</code></td>
+<td>oss</td>
+</tr>
+<tr>
+<td><code>ALIBABA_CLOUD_ACCESS_KEY_SECRET</code></td>
+<td>oss</td>
+</tr>
+<tr>
+<td><code>ALIBABA_CLOUD_REGION</code></td>
+<td>oss</td>
+</tr>
+<tr>
+<td><code>SWIFT_ENDPOINT</code></td>
+<td>swift</td>
+</tr>
+<tr>
+<td><code>SWIFT_TOKEN</code></td>
+<td>swift</td>
+</tr>
+<tr>
+<td><code>WEBHDFS_USER</code></td>
+<td>webhdfs</td>
+</tr>
+<tr>
+<td><code>BLAZEHASH_SFTP_KEY_PATH</code></td>
+<td>sftp</td>
+</tr>
+<tr>
+<td><code>BLAZEHASH_SFTP_KNOWN_HOSTS_STRATEGY</code></td>
+<td>sftp (<code>add</code> | <code>strict</code> | <code>accept_new</code>)</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.tabs", "navigation.sections", "navigation.top", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

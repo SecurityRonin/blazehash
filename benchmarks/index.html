@@ -1,0 +1,1578 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://securityronin.github.io/blazehash/benchmarks/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Blazehash Performance Benchmarks - blazehash</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#blazehash-performance-benchmarks" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="blazehash" class="md-header__button md-logo" aria-label="blazehash" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            blazehash
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Blazehash Performance Benchmarks
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-orange" data-md-color-accent="orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SecurityRonin/blazehash" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SecurityRonin/blazehash
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../acquire/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Acquire Evidence
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../custody/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Build Court-Ready Evidence
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../hunt/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hunt Threats
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../siem/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SIEM & Analytics
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cookbook/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Cookbook
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../remote/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Remote Storage
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cli-reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CLI Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Concepts
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../mcp/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  MCP Server
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../privacy/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Privacy Policy
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../terms/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Terms of Service
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="blazehash" class="md-nav__button md-logo" aria-label="blazehash" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    blazehash
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SecurityRonin/blazehash" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SecurityRonin/blazehash
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../acquire/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Acquire Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custody/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Build Court-Ready Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hunt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hunt Threats
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../siem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SIEM & Analytics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remote/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../privacy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Privacy Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terms of Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#abstract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Abstract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methodology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methodology
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#correctness-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correctness Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#experiment-1-single-large-file-throughput" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Experiment 1 — Single Large File Throughput
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Experiment 1 — Single Large File Throughput">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sha-256" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SHA-256
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#md5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MD5
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sha-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SHA-1
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#blake3-blazehash-only-not-in-hashdeep-44" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BLAKE3 (blazehash only — not in hashdeep 4.4)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#charts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Charts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#experiment-2-many-small-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Experiment 2 — Many Small Files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#experiment-3-multi-algorithm-hashing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Experiment 3 — Multi-Algorithm Hashing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extrapolation-to-1-tib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extrapolation to 1 TiB
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#capability-gap-ewfe01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capability Gap: EWF/E01
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproducing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="blazehash-performance-benchmarks">Blazehash Performance Benchmarks<a class="headerlink" href="#blazehash-performance-benchmarks" title="Permanent link">&para;</a></h1>
+<p><strong>Measured against hashdeep 4.4 — Apple M4 Pro — April 2026</strong></p>
+<blockquote>
+<p>All numbers on this page are real measurements from actual hardware.
+Methodology, raw timing data, and reproduction instructions follow.</p>
+</blockquote>
+<hr />
+<h2 id="abstract">Abstract<a class="headerlink" href="#abstract" title="Permanent link">&para;</a></h2>
+<p>We present a systematic performance comparison of <strong>blazehash 0.2.2</strong> against
+<strong>hashdeep 4.4</strong> across three experimental conditions: (1) single large-file
+throughput at four file sizes and four hash algorithms; (2) per-file latency
+for many small files; and (3) simultaneous multi-algorithm hashing.
+Results are reported as mean wall-clock time with 95% confidence intervals
+derived from a <em>t</em>-distribution (df = n − 1).</p>
+<p>Key findings:</p>
+<ul>
+<li>blazehash is <strong>1.05–2.05× faster</strong> on large files (64 MiB – 1 GiB).
+  SHA-1 shows the largest gain (2×) due to ARM NEON hardware instructions.
+  SHA-256 shows a more modest 1.14× at 1 GiB.</li>
+<li>blazehash is <strong>1.3–2× slower</strong> on small-file batches (100–10,000 × 2 KiB)
+  due to Rayon thread-pool dispatch overhead per file. An adaptive 64 KiB
+  threshold (<code>parallel_threshold_bytes</code>) falls back to sequential I/O for
+  small files; run <code>blazehash bench calibrate</code> to tune it to your hardware.</li>
+<li>BLAKE3 (blazehash-only) achieves <strong>1,640 MB/s</strong> at 1 GiB — hashdeep has
+  no BLAKE3 implementation. Compared to hashdeep's fastest algorithm
+  (SHA-1 at 595 MB/s), BLAKE3 is 2.8× faster.</li>
+<li>Correctness: <strong>15/15</strong> hash vectors match byte-for-byte across all tested
+  sizes and algorithms.</li>
+</ul>
+<hr />
+<h2 id="test-environment">Test Environment<a class="headerlink" href="#test-environment" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Machine</strong></td>
+<td>Apple MacBook Pro, M4 Pro (14-core)</td>
+</tr>
+<tr>
+<td><strong>OS</strong></td>
+<td>macOS 15.7.5 (Sequoia)</td>
+</tr>
+<tr>
+<td><strong>Filesystem</strong></td>
+<td>APFS, NVMe internal storage</td>
+</tr>
+<tr>
+<td><strong>RAM</strong></td>
+<td>24 GiB unified memory</td>
+</tr>
+<tr>
+<td><strong>blazehash</strong></td>
+<td>0.2.2 (<code>cargo build --release</code>, Rust 1.88.0)</td>
+</tr>
+<tr>
+<td><strong>hashdeep</strong></td>
+<td>4.4 (Homebrew)</td>
+</tr>
+<tr>
+<td><strong>Rust toolchain</strong></td>
+<td>rustc 1.88.0 (2025-06-23)</td>
+</tr>
+<tr>
+<td><strong>Python (bench harness)</strong></td>
+<td>3.13.x</td>
+</tr>
+<tr>
+<td><strong>Run date</strong></td>
+<td>2026-04-10</td>
+</tr>
+</tbody>
+</table>
+<p>All test files were generated deterministically from a Lehmer LCG seeded at 42
+and read from <strong>warm cache</strong> (one discarded warm-up run before each timed series).</p>
+<hr />
+<h2 id="methodology">Methodology<a class="headerlink" href="#methodology" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>n = 7</strong> runs per condition (Experiment 1); <strong>n = 5</strong> (Experiment 2).</li>
+<li>Confidence interval: 95% CI via <em>t</em>-distribution,
+  <em>t</em>(0.025, df) × (sd / √n). Critical values: df=6 → <em>t</em> = 2.447; df=4 → <em>t</em> = 2.776.</li>
+<li>Throughput: <code>size_bytes / mean_seconds / 1 000 000</code> MB/s.</li>
+<li>Speedup: <code>hd_mean / bh_mean</code> (&gt;1 means blazehash is faster).</li>
+<li>Tool invocations: <code>blazehash --bare -c &lt;algo&gt; &lt;file&gt;</code> vs <code>hashdeep -c &lt;algo&gt; &lt;file&gt;</code>.</li>
+</ul>
+<hr />
+<h2 id="correctness-verification">Correctness Verification<a class="headerlink" href="#correctness-verification" title="Permanent link">&para;</a></h2>
+<p>15/15 hash vectors match byte-for-byte across 5 file sizes (0 B – 1 MiB)
+and 3 algorithms (MD5, SHA-1, SHA-256). Full digest table in
+<a href="../bench/results.json"><code>docs/bench/results.json</code></a>.</p>
+<hr />
+<h2 id="experiment-1-single-large-file-throughput">Experiment 1 — Single Large File Throughput<a class="headerlink" href="#experiment-1-single-large-file-throughput" title="Permanent link">&para;</a></h2>
+<h3 id="sha-256">SHA-256<a class="headerlink" href="#sha-256" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Size</th>
+<th>blazehash (s)</th>
+<th>hashdeep (s)</th>
+<th>Speedup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>64 MiB</td>
+<td>0.145 ± 0.002</td>
+<td>0.140 ± 0.003</td>
+<td>0.97x</td>
+</tr>
+<tr>
+<td>256 MiB</td>
+<td>0.519 ± 0.002</td>
+<td>0.545 ± 0.008</td>
+<td>1.05x</td>
+</tr>
+<tr>
+<td>512 MiB</td>
+<td>1.022 ± 0.008</td>
+<td>1.154 ± 0.070</td>
+<td>1.13x</td>
+</tr>
+<tr>
+<td><strong>1 GiB</strong></td>
+<td><strong>2.182 ± 0.148</strong></td>
+<td><strong>2.485 ± 0.230</strong></td>
+<td><strong>1.14x</strong></td>
+</tr>
+</tbody>
+</table>
+<p>SHA-256 speedup is modest but consistent at larger file sizes where
+startup overhead is amortised. The variance at 1 GiB is higher than at 512 MiB — both tools
+show OS scheduler jitter over multi-second runs.</p>
+<h3 id="md5">MD5<a class="headerlink" href="#md5" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Size</th>
+<th>blazehash (s)</th>
+<th>hashdeep (s)</th>
+<th>Speedup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>64 MiB</td>
+<td>0.111 ± 0.002</td>
+<td>0.134 ± 0.013</td>
+<td>1.21x</td>
+</tr>
+<tr>
+<td>256 MiB</td>
+<td>0.402 ± 0.042</td>
+<td>0.525 ± 0.045</td>
+<td>1.31x</td>
+</tr>
+<tr>
+<td>512 MiB</td>
+<td>0.750 ± 0.039</td>
+<td>0.962 ± 0.065</td>
+<td>1.28x</td>
+</tr>
+<tr>
+<td><strong>1 GiB</strong></td>
+<td><strong>1.447 ± 0.032</strong></td>
+<td><strong>2.135 ± 0.405</strong></td>
+<td><strong>1.48x</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="sha-1">SHA-1<a class="headerlink" href="#sha-1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Size</th>
+<th>blazehash (s)</th>
+<th>hashdeep (s)</th>
+<th>Speedup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>64 MiB</td>
+<td>0.075 ± 0.007</td>
+<td>0.116 ± 0.006</td>
+<td>1.55x</td>
+</tr>
+<tr>
+<td>256 MiB</td>
+<td>0.237 ± 0.009</td>
+<td>0.442 ± 0.015</td>
+<td>1.86x</td>
+</tr>
+<tr>
+<td>512 MiB</td>
+<td>0.455 ± 0.005</td>
+<td>0.906 ± 0.042</td>
+<td>1.99x</td>
+</tr>
+<tr>
+<td><strong>1 GiB</strong></td>
+<td><strong>0.879 ± 0.006</strong></td>
+<td><strong>1.803 ± 0.136</strong></td>
+<td><strong>2.05x</strong></td>
+</tr>
+</tbody>
+</table>
+<p>SHA-1 advantage is driven by ARM NEON hardware instructions (<code>sha1c</code>,
+<code>sha1p</code>, <code>sha1m</code>, <code>sha1h</code>) on the M4 Pro. The Rust <code>sha1</code> crate generates
+these automatically via LLVM; the Homebrew hashdeep binary is compiled without <code>-march=native</code> and does not use them.
+<strong>This 2× speedup is ARM-specific and will not reproduce on x86-64.</strong></p>
+<h3 id="blake3-blazehash-only-not-in-hashdeep-44">BLAKE3 (blazehash only — not in hashdeep 4.4)<a class="headerlink" href="#blake3-blazehash-only-not-in-hashdeep-44" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Size</th>
+<th>blazehash (s)</th>
+<th>Throughput</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>64 MiB</td>
+<td>0.053 ± 0.002</td>
+<td>1,278 MB/s</td>
+</tr>
+<tr>
+<td>256 MiB</td>
+<td>0.155 ± 0.002</td>
+<td>1,728 MB/s</td>
+</tr>
+<tr>
+<td>512 MiB</td>
+<td>0.302 ± 0.008</td>
+<td>1,780 MB/s</td>
+</tr>
+<tr>
+<td><strong>1 GiB</strong></td>
+<td><strong>0.655 ± 0.110</strong></td>
+<td><strong>1,640 MB/s</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Compared to hashdeep's fastest supported algorithm (SHA-1 at 595 MB/s),
+BLAKE3 is <strong>2.8× faster</strong> on this hardware.</p>
+<h3 id="charts">Charts<a class="headerlink" href="#charts" title="Permanent link">&para;</a></h3>
+<p><img alt="Figure 1 — Single-file throughput at 1 GiB" src="../charts/fig1_throughput_1gib.png" /></p>
+<p><em>Figure 1. Throughput (MB/s) at 1 GiB. Error bars: 95% CI.</em></p>
+<p><img alt="Figure 2 — Throughput scaling" src="../charts/fig2_throughput_scaling.png" /></p>
+<p><em>Figure 2. Throughput vs file size. Shaded bands: 95% CI.</em></p>
+<p><img alt="Figure 4 — Algorithm comparison" src="../charts/fig4_algo_comparison_1gib.png" /></p>
+<p><em>Figure 4. All algorithms at 1 GiB.</em></p>
+<hr />
+<h2 id="experiment-2-many-small-files">Experiment 2 — Many Small Files<a class="headerlink" href="#experiment-2-many-small-files" title="Permanent link">&para;</a></h2>
+<p>10,000 × 2 KiB files, SHA-256, n = 5 runs each.</p>
+<table>
+<thead>
+<tr>
+<th>File count</th>
+<th>blazehash (µs/file)</th>
+<th>hashdeep (µs/file)</th>
+<th>Speedup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100</td>
+<td>268</td>
+<td>137</td>
+<td><strong>0.51x</strong></td>
+</tr>
+<tr>
+<td>1,000</td>
+<td>70</td>
+<td>51</td>
+<td><strong>0.73x</strong></td>
+</tr>
+<tr>
+<td>5,000</td>
+<td>49</td>
+<td>39</td>
+<td><strong>0.78x</strong></td>
+</tr>
+<tr>
+<td>10,000</td>
+<td>65</td>
+<td>42</td>
+<td><strong>0.65x</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>blazehash is slower on small-file workloads.</strong> Rayon's per-file dispatch
+overhead (~20-40 µs) is significant relative to hashing 2 KiB of data (~4 µs).
+hashdeep uses a single-threaded loop with minimal per-file overhead in C.</p>
+<p>The gap shrinks with file count (268 µs at 100 files → 49–65 µs at 5,000+)
+as the thread pool amortises across more work. The 10,000-file result shows
+higher variance due to OS file-descriptor pressure.</p>
+<p>For small-file forensic triage (malware analysis, live evidence collection),
+hashdeep or a sequential tool remains faster. blazehash's advantage is
+correctness, audit mode, signing, fuzzy matching, and large-file throughput.</p>
+<p><img alt="Figure 3 — Small files benchmark" src="../charts/fig3_small_files.png" /></p>
+<p><em>Figure 3. Per-file latency and speedup ratios. Values below 1.0 mean
+hashdeep is faster.</em></p>
+<hr />
+<h2 id="experiment-3-multi-algorithm-hashing">Experiment 3 — Multi-Algorithm Hashing<a class="headerlink" href="#experiment-3-multi-algorithm-hashing" title="Permanent link">&para;</a></h2>
+<p>256 MiB file, n = 7 runs.</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Algorithms</th>
+<th>Wall-clock (s)</th>
+<th>Throughput</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>blazehash 5 algos</td>
+<td>md5, sha1, sha256, tiger, whirlpool</td>
+<td>1.988 ± 0.015</td>
+<td>135 MB/s</td>
+</tr>
+<tr>
+<td>hashdeep 3 algos</td>
+<td>md5, sha1, sha256 (default)</td>
+<td>0.960 ± 0.011</td>
+<td>280 MB/s</td>
+</tr>
+</tbody>
+</table>
+<p>Not a fair direct comparison — different algorithm sets. Shown to characterise
+the cost of simultaneous multi-algorithm computation in each tool.</p>
+<hr />
+<h2 id="extrapolation-to-1-tib">Extrapolation to 1 TiB<a class="headerlink" href="#extrapolation-to-1-tib" title="Permanent link">&para;</a></h2>
+<p>Two scenarios are relevant for forensic work:</p>
+<p><strong>Cached (file fits in RAM)</strong> — measured at 1 GiB warm cache, CPU-bound:</p>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>blazehash</th>
+<th>hashdeep</th>
+<th>blazehash 1 TiB est.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BLAKE3</td>
+<td>~1,640 MB/s</td>
+<td>N/A</td>
+<td>~10 min</td>
+</tr>
+<tr>
+<td>SHA-1</td>
+<td>~1,222 MB/s</td>
+<td>~595 MB/s</td>
+<td>~14 min</td>
+</tr>
+<tr>
+<td>SHA-256</td>
+<td>~492 MB/s</td>
+<td>~432 MB/s</td>
+<td>~35 min</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Disk-bound (forensic scale, &gt; available RAM)</strong> — measured at 20 GiB with
+random data on this test machine (Apple M-series, NVMe internal SSD):</p>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>blazehash measured</th>
+<th>1 TiB est.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BLAKE3</td>
+<td>~331 MB/s</td>
+<td>~53 min</td>
+</tr>
+<tr>
+<td>SHA-1</td>
+<td>~289 MB/s</td>
+<td>~60 min</td>
+</tr>
+<tr>
+<td>SHA-256</td>
+<td>~228 MB/s</td>
+<td>~77 min</td>
+</tr>
+</tbody>
+</table>
+<p>At forensic scale (evidence images that exceed available RAM), throughput is
+limited by memory bandwidth and page-cache pressure rather than the CPU.
+Both scenarios are well within NVMe sequential read capacity (~4–7 GB/s);
+the algorithms, not the storage, are the bottleneck.</p>
+<hr />
+<h2 id="capability-gap-ewfe01">Capability Gap: EWF/E01<a class="headerlink" href="#capability-gap-ewfe01" title="Permanent link">&para;</a></h2>
+<p>EWF image processing is outside hashdeep's scope. blazehash
+<code>--verify-image</code> handles E01/Ex01/L01/Lx01 via the bundled libewf backend,
+with embedded hash verification against the image's stored digests.</p>
+<hr />
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Single hardware platform (Apple M4 Pro).</strong> SHA-1 2× speedup is
+   ARM-specific (NEON <code>sha1c/sha1p/sha1m</code>). x86-64 results will differ.</li>
+<li><strong>Warm-cache measurements only.</strong> Cold-cache throughput is bounded by
+   storage I/O speed, not CPU.</li>
+<li><strong>Small files: hashdeep is faster.</strong> Rayon thread dispatch overhead
+   dominates for sub-64 KiB files. blazehash mitigates this with an
+   adaptive 64 KiB threshold (<code>parallel_threshold_bytes</code>): files below
+   the threshold are hashed sequentially, matching hashdeep's overhead
+   profile. Run <code>blazehash bench calibrate</code> to tune this to your hardware.</li>
+<li><strong>hashdeep compiled without <code>-march=native</code>.</strong> Homebrew binaries use
+   generic flags; a hand-compiled hashdeep may close part of the gap.</li>
+<li><strong>n = 7 runs.</strong> Adequate for consistent conditions; background system
+   activity introduces variance on multi-second runs.</li>
+</ol>
+<hr />
+<h2 id="reproducing">Reproducing<a class="headerlink" href="#reproducing" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>cargo<span class="w"> </span>build<span class="w"> </span>--release
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python3<span class="w"> </span>docs/bench/run_benchmarks.py<span class="w">   </span><span class="c1"># ~15 min</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>python3<span class="w"> </span>docs/bench/generate_charts.py
+</code></pre></div>
+<p>Raw data: <a href="../bench/results.json"><code>docs/bench/results.json</code></a> (2026-04-10).
+Charts: <a href="../charts/"><code>docs/charts/</code></a> — matplotlib 3.x, 150 DPI, 95% CI bars.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.tabs", "navigation.sections", "navigation.top", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
