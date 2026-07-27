@@ -29,12 +29,19 @@ jobs:
           # run pays the full cold build again. Persist on failure to break that trap.
           cache-on-failure: true
       # etcd-client (opendal services-etcd) requires protoc at build time.
-      # The Linux test leg links with the default `ld`: mold was suspected of a
-      # link-time deadlock that hung this job for hours on x86_64 (never reproduced
-      # on aarch64), so it is not used here. Re-add it only for release builds if needed.
-      - name: Install protoc (Linux)
+      # Linux linker: neither mold nor the default GNU ld can link the ~100 huge
+      # bundled-C++ test binaries on the 7 GB runner — mold DEADLOCKS (6 h hang) and
+      # GNU ld SIGBUSes (collect2: ld terminated with signal 7, core dumped, proven in
+      # CI logs). Use lld, which links these large binaries memory-efficiently without
+      # mold's deadlock; the debuginfo reduction below removes the actual memory driver.
+      - name: Install protoc + lld (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update -qq && sudo apt-get install -y protobuf-compiler
+        run: sudo apt-get update -qq && sudo apt-get install -y protobuf-compiler clang lld
+      - name: Use lld linker (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p ~/.cargo
+          printf '[target.x86_64-unknown-linux-gnu]\nlinker = "clang"\nrustflags = ["-C", "link-arg=-fuse-ld=lld"]\n' >> ~/.cargo/config.toml
       - name: Install protoc (macOS)
         if: runner.os == 'macOS'
         run: brew install protobuf
@@ -42,33 +49,19 @@ jobs:
         if: runner.os == 'Windows'
         run: choco install protoc --no-progress
       # blazehash links ~800 crates + bundled C++ (duckdb/rocksdb/wasmtime/yara-x) into
-      # each of ~100 integration-test binaries. With full debuginfo, rustc and link.exe
-      # exhaust the runner's RAM (rustc handle_alloc_error + LNK1102: out of memory).
-      # Dropping debug info for the dev/test profiles removes the CodeView tables that
-      # drive that memory blowup. Windows-only; the Linux leg links with the default ld.
-      - name: Reduce debuginfo to avoid linker/compiler OOM (Windows)
-        if: runner.os == 'Windows'
+      # each of ~100 integration-test binaries. With full debuginfo (debuginfo=2) the
+      # linker exhausts the runner's RAM: link.exe LNK1102 on Windows, and collect2/ld
+      # SIGBUS (signal 7, core dumped) on Linux. Dropping debug info for the dev/test
+      # profiles removes the CodeView/DWARF tables that drive that memory blowup — the
+      # root-cause fix on both OSes (paired with lld on Linux above).
+      - name: Reduce debuginfo to avoid linker OOM (Windows + Linux)
+        if: runner.os == 'Windows' || runner.os == 'Linux'
         shell: bash
         run: |
           echo "CARGO_PROFILE_DEV_DEBUG=0" >> "$GITHUB_ENV"
           echo "CARGO_PROFILE_TEST_DEBUG=0" >> "$GITHUB_ENV"
       - run: cargo test --all-features
-      # DIAGNOSTIC: `cargo test --features hashdb` hangs only on x86_64-linux with the
-      # hashdb-only feature set (aarch64, Windows, and the linux --all-features leg all
-      # pass). A job-level timeout cancellation discards the log, so split link from run
-      # and bound each with `timeout`: a hang now fails the STEP with a preserved log,
-      # and --no-run vs run pinpoints whether it is the relink or a runtime test. The
-      # last "Compiling"/"Running tests/…" line names the culprit.
-      - name: hashdb tests (Linux — bounded, log-preserving)
-        if: runner.os == 'Linux'
-        run: |
-          echo "== link phase (--no-run) =="
-          timeout --verbose 2400 cargo test --features hashdb --no-run --verbose
-          echo "== run phase =="
-          timeout --verbose 1200 cargo test --features hashdb -- --nocapture
-      - name: hashdb tests
-        if: runner.os != 'Linux'
-        run: cargo test --features hashdb
+      - run: cargo test --features hashdb
       - run: cargo test --features yara
       - run: cargo test --features report
       - run: cargo test --features docker
