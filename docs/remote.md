@@ -13,7 +13,7 @@ blazehash s3://dfir-bucket/case-001/ -o gcs://evidence-archive/case-001.hash
 ```
 
 The remote stack is an opt-in build feature (`--features remote`); the release
-binaries enable it. ADR-0002 records why it is opt-in and ADR-0010 why the
+binaries enable it. ADR-0002 records why it is opt-in and ADR-0012 why the
 backend set is scoped to evidence-transfer targets (both in the project's
 `docs/decisions/`).
 

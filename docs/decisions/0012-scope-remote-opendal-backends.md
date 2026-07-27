@@ -1,4 +1,4 @@
-# 10. Scope the `remote` OpenDAL backend set to forensically-relevant evidence-transfer targets
+# 12. Scope the `remote` OpenDAL backend set to forensically-relevant evidence-transfer targets
 
 Date: 2026-07-27
 Status: Accepted
