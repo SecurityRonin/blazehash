@@ -32,6 +32,16 @@ ignore = [
     # paste v1 is unmaintained but is a transitive dep of metal (wgpu-hal, GPU feature).
     # No action available until wgpu updates its metal dependency.
     "RUSTSEC-2024-0436",
+    # instant v0.1.13 is unmaintained (author recommends web-time) — an
+    # unmaintained-ONLY advisory, not a vulnerability, with no reachable defect in a
+    # hashing workload. In the audited graph it is reachable solely via the GPU
+    # feature (wgpu 22 -> parking_lot 0.11.2 -> instant); parking_lot is held on the
+    # 0.11 line by sled (opendal/remote stack, which is excluded from this audit).
+    # No safe upgrade exists (instant is abandoned; parking_lot 0.12 dropped it), and
+    # the only removals — a wgpu major bump (rewrites the GPU backend) or updating the
+    # excluded opendal/sled remote tree — are out of scope for this change. Remove
+    # this ignore when wgpu updates its parking_lot dependency off the 0.11 line.
+    "RUSTSEC-2024-0384",
     # bincode v1 is unmaintained (RUSTSEC-2025-0141) but is only used by the optional
     # `nsrl` feature for bloom filter serialization. No drop-in v2 replacement exists
     # for the bloomfilter crate's serde output. Will migrate when bloomfilter updates.
