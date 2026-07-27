@@ -17,11 +17,17 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
       - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          # The heavy bundled-C++ build risks never warming the cache: rust-cache
+          # saves only on job success, so a run that fails at a later step (e.g. the
+          # hashdb leg) discards the already-built all-features artifacts and the next
+          # run pays the full cold build again. Persist on failure to break that trap.
+          cache-on-failure: true
       # etcd-client (opendal services-etcd) requires protoc at build time.
       # The Linux test leg links with the default `ld`: mold was suspected of a
       # link-time deadlock that hung this job for hours on x86_64 (never reproduced
@@ -39,7 +45,7 @@ jobs:
       # each of ~100 integration-test binaries. With full debuginfo, rustc and link.exe
       # exhaust the runner's RAM (rustc handle_alloc_error + LNK1102: out of memory).
       # Dropping debug info for the dev/test profiles removes the CodeView tables that
-      # drive that memory blowup. Windows-only; the Linux leg uses mold for the same class.
+      # drive that memory blowup. Windows-only; the Linux leg links with the default ld.
       - name: Reduce debuginfo to avoid linker/compiler OOM (Windows)
         if: runner.os == 'Windows'
         shell: bash
@@ -47,7 +53,22 @@ jobs:
           echo "CARGO_PROFILE_DEV_DEBUG=0" >> "$GITHUB_ENV"
           echo "CARGO_PROFILE_TEST_DEBUG=0" >> "$GITHUB_ENV"
       - run: cargo test --all-features
-      - run: cargo test --features hashdb
+      # DIAGNOSTIC: `cargo test --features hashdb` hangs only on x86_64-linux with the
+      # hashdb-only feature set (aarch64, Windows, and the linux --all-features leg all
+      # pass). A job-level timeout cancellation discards the log, so split link from run
+      # and bound each with `timeout`: a hang now fails the STEP with a preserved log,
+      # and --no-run vs run pinpoints whether it is the relink or a runtime test. The
+      # last "Compiling"/"Running tests/…" line names the culprit.
+      - name: hashdb tests (Linux — bounded, log-preserving)
+        if: runner.os == 'Linux'
+        run: |
+          echo "== link phase (--no-run) =="
+          timeout --verbose 2400 cargo test --features hashdb --no-run --verbose
+          echo "== run phase =="
+          timeout --verbose 1200 cargo test --features hashdb -- --nocapture
+      - name: hashdb tests
+        if: runner.os != 'Linux'
+        run: cargo test --features hashdb
       - run: cargo test --features yara
       - run: cargo test --features report
       - run: cargo test --features docker
