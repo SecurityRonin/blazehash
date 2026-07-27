@@ -110,7 +110,7 @@ Every hashdeep flag works. Your existing scripts keep working. These are the add
 | Duplicate detection | Y | — |
 | Manifest diff / merge / update | Y | — |
 | Live monitoring (watch) | Y | — |
-| Remote storage (S3/GCS/Azure/WebDAV/60+ protocols) | Y | — |
+| Remote storage (S3/GCS/Azure/SFTP/WebDAV/HDFS/SQL) | Y | — |
 | Google Drive hash-without-download | Y | — |
 | GPU-accelerated SHA-256/MD5 | Y | — |
 | MCP server (AI-assisted workflows) | Y | — |
@@ -137,7 +137,7 @@ BLAKE3 runs at **1,640–1,780 MB/s** — 2.8x faster than hashdeep's best algor
 
 ## Remote Storage
 
-Evidence doesn't live only on disk. blazehash speaks 50+ storage protocols natively — the same command works whether the data is local, on S3, in Google Drive, or on an SFTP server.
+Evidence doesn't live only on disk. blazehash reads and writes remote storage natively — the same command works whether the data is local, on S3, in Google Drive, or on an SFTP server.
 
 ```bash
 # Hash an S3 prefix directly
@@ -160,7 +160,7 @@ blazehash sftp://admin@192.168.1.10/cases/image.dd
 
 Credentials come from standard environment variables — `AWS_ACCESS_KEY_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, `AZURE_STORAGE_ACCOUNT` — so existing tooling and CI secrets work without changes. For Google Drive, run `blazehash gdrive auth login` once.
 
-Supported: S3, GCS, Azure Blob/Files/ADLS, Backblaze B2, Tencent COS, Huawei OBS, Alibaba OSS, OpenStack Swift, OneDrive, Dropbox, Google Drive, pCloud, Yandex Disk, SFTP, FTP, WebDAV, WebHDFS, Redis, MongoDB, PostgreSQL, and [30+ more →](https://securityronin.github.io/blazehash/remote/)
+Supported: S3, GCS, Azure Blob/Files/ADLS, Backblaze B2, Tencent COS, Huawei OBS, Alibaba OSS, OpenStack Swift, Google Drive, HDFS/WebHDFS, MySQL, PostgreSQL, SQLite, SFTP, FTP/FTPS, WebDAV, and HTTP — [full reference →](https://securityronin.github.io/blazehash/remote/)
 
 ---
 
@@ -174,7 +174,7 @@ cargo install blazehash --all-features
 
 | Flag | Default | Enables |
 |------|:-------:|---------|
-| `remote` | on | Remote storage (S3/GCS/Azure/SFTP/GDrive/60+ protocols) |
+| `remote` | on | Remote storage (S3/GCS/Azure/SFTP/GDrive, HDFS, SQL) |
 | `sqlite` | on | `--format sqlite` output + NSRL SQLite database |
 | `parquet-output` | on | `--format parquet` output |
 | `duckdb-output` | on | `--format duckdb` output |

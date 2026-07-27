@@ -146,6 +146,10 @@ signature = "2"
 qrcode = { version = "0.14", optional = true }
 image = { version = "0.25", optional = true, default-features = false, features = ["png"] }
 regex = "1"
+# Scoped to forensically-relevant evidence-transfer targets — the stores DFIR
+# collectors (Velociraptor, KAPE) read case evidence from and write collections
+# back to. Native DB/KV engines, caches, dev/ML/CI-cache, decentralized and
+# consumer-drive backends are intentionally excluded (see ADR-0010).
 opendal = { version = "0.55.0", optional = true, features = [
     # Cloud object storage
     "services-s3",          # AWS S3, MinIO, R2, Wasabi, Backblaze B2 (S3-compat)
@@ -158,66 +162,24 @@ opendal = { version = "0.55.0", optional = true, features = [
     "services-obs",         # Huawei Cloud OBS
     "services-oss",         # Alibaba Cloud OSS
     "services-swift",       # OpenStack Swift
-    "services-upyun",       # Upyun CDN storage
-    # Consumer / enterprise cloud drives
+    # Cloud drive (the one drive with dedicated wiring in src/remote/gdrive/)
     "services-gdrive",      # Google Drive
-    "services-onedrive",    # Microsoft OneDrive
-    "services-dropbox",     # Dropbox
-    "services-aliyun-drive",# Aliyun Drive (Alibaba)
-    "services-yandex-disk", # Yandex Disk
-    "services-pcloud",      # pCloud
-    "services-koofr",       # Koofr
-    "services-seafile",     # Seafile
-    # Developer / ML / infra
-    "services-github",      # GitHub (code forensics)
-    "services-huggingface", # HuggingFace datasets/models
-    "services-vercel-artifacts", # Vercel build cache
-    "services-vercel-blob", # Vercel Blob
-    # Distributed / big data
-    "services-alluxio",     # Alluxio data orchestration
+    # Hadoop
     "services-webhdfs",     # WebHDFS REST (no JVM needed)
-    "services-lakefs",      # LakeFS data versioning
-    "services-dbfs",        # Databricks DBFS
-    "services-ghac",        # GitHub Actions Cache (useful in CI forensics)
-    # Decentralized
-    "services-ipfs",        # IPFS (content-addressed, prost dep is pure Rust)
-    "services-ipmfs",       # IPFS Mutable File System
-    # In-memory / embedded (useful for testing + pipeline)
-    "services-memory",
-    "services-dashmap",     # Concurrent in-memory map
-    "services-mini-moka",   # Bounded in-memory cache
-    "services-moka",        # Full-featured in-memory cache with TTL
-    "services-redb",        # Embedded key-value (pure Rust, ACID)
-    "services-sled",        # Embedded key-value (pure Rust)
-    "services-cacache",     # Content-addressable disk cache
-    # Network key-value / databases
-    "services-redis",       # Redis
-    "services-redis-native-tls", # Redis with TLS (rediss://)
-    "services-memcached",   # Memcached
-    "services-etcd",        # etcd (gRPC, pure Rust)
-    "services-tikv",        # TiKV distributed KV
-    "services-mongodb",     # MongoDB (pure Rust driver)
-    "services-gridfs",      # MongoDB GridFS
-    "services-mysql",       # MySQL / MariaDB (sqlx, pure Rust)
-    "services-postgresql",  # PostgreSQL (sqlx, pure Rust)
-    "services-sqlite",      # SQLite (sqlx, pure Rust)
-    # "services-surrealdb" — excluded: pulls async-graphql@7.2.1 which requires rustc 1.89
-    "services-persy",       # Persy embedded (pure Rust)
-    # Misc
-    "services-cloudflare-kv",   # Cloudflare KV (via REST)
-    "services-d1",          # Cloudflare D1 SQLite (via REST)
-    # Filesystem
+    "services-hdfs-native", # HDFS pure-Rust native client (no Java/libhdfs required)
+    # SQL (sqlx, pure Rust)
+    "services-mysql",       # MySQL / MariaDB
+    "services-postgresql",  # PostgreSQL (README-advertised)
+    "services-sqlite",      # SQLite
+    # Filesystem / protocol
     "services-fs",
     "services-http",
     "services-webdav",
-        # services-sftp intentionally omitted: openssh Rust crate is Unix-only.
+    "services-memory",      # in-memory (useful for testing + pipeline)
+    # services-sftp intentionally omitted: openssh Rust crate is Unix-only.
     # SFTP is handled via ssh2 (libssh2 vendored, cross-platform) in src/remote/sftp.rs.
     # services-ftp intentionally omitted: async-tls/tokio-rustls conflict.
     # FTP/FTPS is handled via suppaftp (blocking + rustls) instead.
-    "services-hdfs-native", # HDFS pure-Rust native client (no Java/libhdfs required)
-    "services-compfs",  # compio-based async filesystem
-    # services-monoiofs intentionally omitted from main features: monoio requires Linux io_uring.
-    # Added via [target.'cfg(target_os = "linux")'.dependencies] below.
     "blocking",
 ] }
 
@@ -231,11 +193,6 @@ libc = "0.2"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2"
-# monoiofs depends on monoio (io_uring) which only compiles on Linux.
-# Optional + gated behind the `remote` feature (same as the main opendal dep):
-# the default build must not pull the opendal cloud stack (and its vulnerable
-# DNS / quick-xml transitive tree) on Linux either.
-opendal = { version = "0.55.0", features = ["services-monoiofs"], optional = true }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows-sys = { version = "0.59", features = [
@@ -272,7 +229,6 @@ ots = []
 pq  = []
 qr  = ["dep:qrcode", "dep:image"]
 remote = ["dep:opendal", "dep:tokio", "dep:suppaftp", "dep:ssh2"]
-rocksdb-storage = ["remote", "opendal/services-rocksdb"]
 
 [package.metadata.deb]
 maintainer = "SecurityRonin <security-ronin@users.noreply.github.com>"

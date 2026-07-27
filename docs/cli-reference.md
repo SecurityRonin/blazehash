@@ -951,7 +951,7 @@ blazehash completions man    > blazehash.1 && man ./blazehash.1
 
 ## Remote storage
 
-blazehash accepts remote URIs for both input paths and `-o` output — 50+ protocols supported.
+blazehash accepts remote URIs for both input paths and `-o` output — object stores, HDFS, SQL, SFTP/FTP, and WebDAV/HTTP.
 
 **Full protocol reference:** [Remote Storage →](remote.md)
 
@@ -974,12 +974,9 @@ blazehash gdrive://1ABCdef...
 blazehash sftp://admin@192.168.1.10/evidence/disk.dd
 ```
 
-Supported schemes include: `s3`, `gcs`, `azblob`, `azdls`, `azfile`, `b2`, `cos`, `obs`, `oss`,
-`swift`, `upyun`, `gdrive`, `onedrive`, `dropbox`, `aliyun-drive`, `yandex-disk`, `pcloud`,
-`koofr`, `seafile`, `github`, `huggingface`, `vercel-blob`, `alluxio`, `hdfs`, `webhdfs`, `lakefs`,
-`ipfs`, `ipmfs`, `redis`, `rediss`, `memcached`, `etcd`, `tikv`, `mongodb`, `mysql`, `postgresql`,
-`sqlite`, `rocksdb` (opt-in), `cloudflare-kv`, `d1`, `sftp`, `ftp`, `ftps`, `webdav`, `http`,
-`https`, `compfs`, `monoiofs` (Linux), `file`, `mem`.
+Supported schemes: `s3`, `gcs`, `azblob`, `azdls`, `azfile`, `b2`, `cos`, `obs`, `oss`,
+`swift`, `gdrive`, `hdfs`, `webhdfs`, `mysql`, `postgresql`, `sqlite`, `sftp`, `ftp`, `ftps`,
+`webdav`, `http`, `https`, `file`, `mem`.
 
 ---
 

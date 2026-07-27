@@ -80,7 +80,7 @@ Grounded in `src/` and `src/cli.rs`:
   (`duckdb-output`, bundled engine floored for the MSVC toolchain —
   [ADR 0011](decisions/0011-duckdb-msvc-fmt-floor.md)), JSON/JSONL, STIX 2.1, and
   ECS NDJSON (`src/format/`, `src/output.rs`).
-- **Remote storage:** S3/GCS/Azure/60+ backends via opendal, plus FTP/SFTP, and
+- **Remote storage:** S3/GCS/Azure and other object stores via opendal, plus HDFS, SQL, FTP/SFTP, and
   Google Drive hash-without-download (`src/remote/`, `remote` feature —
   [ADR 0002](decisions/0002-batteries-included-remote-opt-in.md)).
 - **Interfaces:** the `blazehash` CLI, an interactive `tui` dashboard
