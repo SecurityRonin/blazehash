@@ -96,8 +96,6 @@ pub enum UriScheme {
     PostgreSQL,
     SQLite,
     SurrealDB,
-    #[cfg(feature = "rocksdb-storage")]
-    RocksDb,
     // Misc
     CloudflareKv,
     D1,
@@ -163,8 +161,6 @@ impl UriScheme {
             "postgresql" => Some(Self::PostgreSQL),
             "sqlite" => Some(Self::SQLite),
             "surrealdb" => Some(Self::SurrealDB),
-            #[cfg(feature = "rocksdb-storage")]
-            "rocksdb" => Some(Self::RocksDb),
             "cloudflare-kv" => Some(Self::CloudflareKv),
             "d1" => Some(Self::D1),
             "http" => Some(Self::Http),

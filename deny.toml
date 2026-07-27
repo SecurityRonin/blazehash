@@ -3,11 +3,10 @@ targets = []
 # The `remote` feature (opendal cloud/object-storage stack) is a genuinely-optional
 # heavy subsystem — opt-in, NOT default (see Cargo.toml [features]). It drags in a
 # vulnerable transitive tree (hickory DNS RUSTSEC-2026-0118/0119, quick-xml
-# RUSTSEC-2026-0194/0195, plus sqlx/tikv/rustls chains) that no hashing workload
+# RUSTSEC-2026-0194/0195, plus sqlx/rustls chains) that no hashing workload
 # exercises. Rather than blanket-ignore all of those advisories, we keep opendal
-# out of the audited graph entirely: check every OTHER feature, never `remote`
-# (or `rocksdb-storage`, which pulls it in). `cargo deny check` therefore audits
-# exactly what a default `cargo build` ships.
+# out of the audited graph entirely: check every OTHER feature, never `remote`.
+# `cargo deny check` therefore audits exactly what a default `cargo build` ships.
 all-features = false
 features = [
     "forensic-image",

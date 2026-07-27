@@ -411,23 +411,6 @@ fn scheme_detect_vercel_blob() {
     );
 }
 
-// ── RocksDB (optional feature: rocksdb-storage) ───────────────────────────────
-
-#[cfg(feature = "rocksdb-storage")]
-#[test]
-fn rocksdb_uri_is_detected() {
-    assert!(is_remote_uri("rocksdb:///var/lib/rocksdb/evidence"));
-}
-
-#[cfg(feature = "rocksdb-storage")]
-#[test]
-fn scheme_detect_rocksdb() {
-    assert_eq!(
-        UriScheme::detect("rocksdb:///path/to/db"),
-        Some(UriScheme::RocksDb)
-    );
-}
-
 // ── Monoio filesystem (monoiofs, Linux only) ──────────────────────────────────
 
 #[cfg(target_os = "linux")]
@@ -513,16 +496,6 @@ mod operator_tests {
     }
 
     #[test]
-    fn operator_onedrive_not_unsupported() {
-        assert_not_unsupported("onedrive://Documents/file.pdf");
-    }
-
-    #[test]
-    fn operator_dropbox_not_unsupported() {
-        assert_not_unsupported("dropbox://path/file");
-    }
-
-    #[test]
     fn operator_b2_not_unsupported() {
         assert_not_unsupported("b2://bucket/key");
     }
@@ -558,73 +531,8 @@ mod operator_tests {
     }
 
     #[test]
-    fn operator_github_not_unsupported() {
-        assert_not_unsupported("github://owner/repo/path");
-    }
-
-    #[test]
-    fn operator_ipfs_not_unsupported() {
-        assert_not_unsupported("ipfs://QmHash/path");
-    }
-
-    #[test]
-    fn operator_ipmfs_not_unsupported() {
-        assert_not_unsupported("ipmfs:///path");
-    }
-
-    #[test]
     fn operator_webhdfs_not_unsupported() {
         assert_not_unsupported("webhdfs://host:50070/path");
-    }
-
-    #[test]
-    fn operator_alluxio_not_unsupported() {
-        assert_not_unsupported("alluxio://master:19998/path");
-    }
-
-    #[test]
-    fn operator_lakefs_not_unsupported() {
-        assert_not_unsupported("lakefs://repo/main/file");
-    }
-
-    #[test]
-    fn operator_seafile_not_unsupported() {
-        assert_not_unsupported("seafile://server/repo/file");
-    }
-
-    #[test]
-    fn operator_pcloud_not_unsupported() {
-        assert_not_unsupported("pcloud://path/file");
-    }
-
-    #[test]
-    fn operator_koofr_not_unsupported() {
-        assert_not_unsupported("koofr://path/file");
-    }
-
-    #[test]
-    fn operator_yandex_disk_not_unsupported() {
-        assert_not_unsupported("yandex-disk://path/file");
-    }
-
-    #[test]
-    fn operator_huggingface_not_unsupported() {
-        assert_not_unsupported("huggingface://owner/repo/file");
-    }
-
-    #[test]
-    fn operator_upyun_not_unsupported() {
-        assert_not_unsupported("upyun://bucket/key");
-    }
-
-    #[test]
-    fn operator_aliyun_drive_not_unsupported() {
-        assert_not_unsupported("aliyun-drive://path/file");
-    }
-
-    #[test]
-    fn operator_vercel_blob_not_unsupported() {
-        assert_not_unsupported("vercel-blob://key");
     }
 
     // ── sftp path extraction (via parse_sftp_uri — cross-platform ssh2/libssh2) ──
@@ -681,67 +589,6 @@ mod operator_tests {
             err.contains("fetch_ftp_bytes") || err.contains("ftps://"),
             "ftps:// should give a redirect message, got: {err}"
         );
-    }
-
-    // ── rocksdb:// (optional feature: rocksdb-storage) ────────────────────────
-
-    #[cfg(feature = "rocksdb-storage")]
-    #[test]
-    fn operator_rocksdb_not_unsupported() {
-        assert_not_unsupported("rocksdb:///tmp/bh-rocksdb-test-a/evidence/manifest");
-    }
-
-    #[cfg(feature = "rocksdb-storage")]
-    #[test]
-    fn rocksdb_path_extracted_correctly() {
-        let (_, key) = operator_for_uri("rocksdb:///tmp/bh-rocksdb-test-b/evidence/case-001")
-            .expect("rocksdb:// should be supported with rocksdb-storage feature");
-        assert_eq!(key, "case-001");
-    }
-
-    // ── monoiofs:// (monoio filesystem, Linux only) ───────────────────────────
-
-    #[cfg(target_os = "linux")]
-    #[test]
-    fn operator_monoiofs_not_unsupported() {
-        assert_not_unsupported("monoiofs:///tmp/evidence");
-    }
-
-    #[cfg(target_os = "linux")]
-    #[test]
-    fn monoiofs_path_extracted_correctly() {
-        // Use /tmp so the operator can create its root dir without needing root
-        let (_, path) = operator_for_uri("monoiofs:///tmp/blazehash-test-monoiofs/disk.dd")
-            .expect("monoiofs:// should be supported");
-        assert_eq!(path, "disk.dd");
-    }
-
-    // ── compfs:// (compio filesystem) ─────────────────────────────────────────
-
-    #[test]
-    fn operator_compfs_not_unsupported() {
-        assert_not_unsupported("compfs:///tmp/evidence");
-    }
-
-    #[test]
-    fn compfs_path_extracted_correctly() {
-        let (_, path) = operator_for_uri("compfs:///tmp/evidence/disk.dd")
-            .expect("compfs:// should be supported");
-        assert_eq!(path, "disk.dd");
-    }
-
-    // ── rediss:// (Redis with TLS) ─────────────────────────────────────────────
-
-    #[test]
-    fn operator_rediss_not_unsupported() {
-        assert_not_unsupported("rediss://host:6380/mykey");
-    }
-
-    #[test]
-    fn rediss_path_extracted_correctly() {
-        let (_, key) = operator_for_uri("rediss://localhost:6380/cache:evidence:hash")
-            .expect("rediss:// should be supported");
-        assert_eq!(key, "cache:evidence:hash");
     }
 
     // ── HDFS native path extraction (TDD) ─────────────────────────────────────

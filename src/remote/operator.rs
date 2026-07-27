@@ -3,31 +3,25 @@ use opendal::{services, Operator};
 
 /// Build an [`Operator`] and return `(Operator, relative_path)` from a remote URI.
 ///
-/// Supported schemes:
+/// The OpenDAL service set is scoped to forensically-relevant evidence-transfer
+/// targets (see ADR-0010). Supported schemes:
 ///
 /// **Cloud object storage**
-/// `s3`, `gcs`, `azblob`, `azdls`, `azfile`, `b2`, `cos`, `obs`, `oss`, `swift`, `upyun`
+/// `s3`, `gcs`, `azblob`, `azdls`, `azfile`, `b2`, `cos`, `obs`, `oss`, `swift`
 ///
-/// **Cloud drives**
-/// `gdrive`, `onedrive`, `dropbox`, `aliyun-drive`, `yandex-disk`, `pcloud`, `koofr`, `seafile`
+/// **Cloud drive**
+/// `gdrive`
 ///
-/// **Developer / ML / infra**
-/// `github`, `huggingface`, `vercel-blob`, `vercel-artifacts`, `ghac`, `dbfs`
+/// **Hadoop**
+/// `webhdfs`, `hdfs`
 ///
-/// **Distributed / big data**
-/// `alluxio`, `webhdfs`, `lakefs`
-///
-/// **Decentralized**
-/// `ipfs`, `ipmfs`
-///
-/// **Network KV / databases**
-/// `redis`, `memcached`, `etcd`, `tikv`, `mongodb`, `gridfs`, `mysql`, `postgresql`, `sqlite`,
-/// `surrealdb`, `cloudflare-kv`, `d1`
+/// **SQL**
+/// `mysql`, `postgresql`, `sqlite`
 ///
 /// **Filesystem / network protocols**
 /// `file`, `http`, `https`, `webdav`, `sftp`, `ftp`, `ftps`
 ///
-/// **In-memory / embedded**
+/// **In-memory**
 /// `mem`
 ///
 /// Auth is read from standard environment variables; refer to each backend's documentation
@@ -172,189 +166,7 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             let op = Operator::new(builder)?.finish();
             Ok((op, path.to_string()))
         }
-        "upyun" => {
-            // upyun://bucket/key — creds from UPYUN_OPERATOR / UPYUN_PASSWORD
-            let (bucket, key) = rest.split_once('/').unwrap_or((rest, ""));
-            let operator_name = std::env::var("UPYUN_OPERATOR").unwrap_or_default();
-            let password = std::env::var("UPYUN_PASSWORD").unwrap_or_default();
-            let builder = services::Upyun::default()
-                .bucket(bucket)
-                .operator(&operator_name)
-                .password(&password);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, key.to_string()))
-        }
-
-        // ── Consumer / enterprise cloud drives ───────────────────────────────
-        "onedrive" => {
-            // onedrive://path — token from ONEDRIVE_ACCESS_TOKEN
-            let token = std::env::var("ONEDRIVE_ACCESS_TOKEN").unwrap_or_default();
-            let builder = services::Onedrive::default().root("/").access_token(&token);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-        "dropbox" => {
-            // dropbox://path — token from DROPBOX_ACCESS_TOKEN
-            let token = std::env::var("DROPBOX_ACCESS_TOKEN").unwrap_or_default();
-            let builder = services::Dropbox::default().root("/").access_token(&token);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-        "aliyun-drive" => {
-            // aliyun-drive://path — token from ALIYUN_DRIVE_ACCESS_TOKEN
-            let token = std::env::var("ALIYUN_DRIVE_ACCESS_TOKEN").unwrap_or_default();
-            let builder = services::AliyunDrive::default()
-                .root("/")
-                .access_token(&token);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-        "yandex-disk" => {
-            // yandex-disk://path — token from YANDEX_DISK_ACCESS_TOKEN
-            let token = std::env::var("YANDEX_DISK_ACCESS_TOKEN").unwrap_or_default();
-            let builder = services::YandexDisk::default()
-                .root("/")
-                .access_token(&token);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-        "pcloud" => {
-            // pcloud://path — creds from PCLOUD_USERNAME / PCLOUD_PASSWORD
-            let endpoint = std::env::var("PCLOUD_ENDPOINT")
-                .unwrap_or_else(|_| "https://api.pcloud.com".into());
-            let username = std::env::var("PCLOUD_USERNAME").unwrap_or_default();
-            let password = std::env::var("PCLOUD_PASSWORD").unwrap_or_default();
-            let builder = services::Pcloud::default()
-                .root("/")
-                .endpoint(&endpoint)
-                .username(&username)
-                .password(&password);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-        "koofr" => {
-            // koofr://path — creds from KOOFR_EMAIL / KOOFR_PASSWORD
-            let endpoint =
-                std::env::var("KOOFR_ENDPOINT").unwrap_or_else(|_| "https://app.koofr.net".into());
-            let email = std::env::var("KOOFR_EMAIL").unwrap_or_default();
-            let password = std::env::var("KOOFR_PASSWORD").unwrap_or_default();
-            let builder = services::Koofr::default()
-                .root("/")
-                .endpoint(&endpoint)
-                .email(&email)
-                .password(&password);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-        "seafile" => {
-            // seafile://server/repo/path — creds from SEAFILE_USERNAME / SEAFILE_PASSWORD
-            let (server, rest_path) = rest.split_once('/').unwrap_or((rest, ""));
-            let (repo, path) = rest_path.split_once('/').unwrap_or((rest_path, ""));
-            let endpoint = format!("https://{server}");
-            let username = std::env::var("SEAFILE_USERNAME").unwrap_or_default();
-            let password = std::env::var("SEAFILE_PASSWORD").unwrap_or_default();
-            let repo_name = if repo.is_empty() {
-                std::env::var("SEAFILE_REPO").unwrap_or_else(|_| "My Library".into())
-            } else {
-                repo.to_string()
-            };
-            let builder = services::Seafile::default()
-                .endpoint(&endpoint)
-                .username(&username)
-                .password(&password)
-                .repo_name(&repo_name);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
-
-        // ── Developer / ML / infra ───────────────────────────────────────────
-        "github" => {
-            // github://owner/repo/path — token from GITHUB_TOKEN
-            let mut parts = rest.splitn(3, '/');
-            let owner = parts.next().unwrap_or("");
-            let repo = parts.next().unwrap_or("");
-            let path = parts.next().unwrap_or("").to_string();
-            let token = std::env::var("GITHUB_TOKEN").unwrap_or_default();
-            let builder = services::Github::default()
-                .token(&token)
-                .owner(owner)
-                .repo(repo);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path))
-        }
-        "huggingface" => {
-            // huggingface://owner/repo/path — token from HUGGINGFACE_TOKEN
-            let (repo_id, path) = rest
-                .split_once('/')
-                .map(|(a, b)| {
-                    // repo_id is "owner/name", path is the rest
-                    let full = format!("{a}/{b}");
-                    if let Some(idx) = full.find('/') {
-                        let second = full[idx + 1..].find('/');
-                        if let Some(second_idx) = second {
-                            let split_at = idx + 1 + second_idx;
-                            (
-                                full[..split_at].to_string(),
-                                full[split_at + 1..].to_string(),
-                            )
-                        } else {
-                            (full, String::new())
-                        }
-                    } else {
-                        (full, String::new())
-                    }
-                })
-                .unwrap_or((rest.to_string(), String::new()));
-            let token = std::env::var("HUGGINGFACE_TOKEN").unwrap_or_default();
-            let builder = services::Huggingface::default()
-                .repo_id(&repo_id)
-                .token(&token);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path))
-        }
-        "vercel-blob" => {
-            // vercel-blob://key — token from BLOB_READ_WRITE_TOKEN
-            let token = std::env::var("BLOB_READ_WRITE_TOKEN").unwrap_or_default();
-            let builder = services::VercelBlob::default().token(&token);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-        "vercel-artifacts" => {
-            // vercel-artifacts://key — token from VERCEL_ARTIFACTS_TOKEN
-            let token = std::env::var("VERCEL_ARTIFACTS_TOKEN").unwrap_or_default();
-            let builder = services::VercelArtifacts::default().access_token(&token);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-        "ghac" => {
-            // ghac://key — for GitHub Actions Cache (useful in CI forensics)
-            let version = std::env::var("GHAC_VERSION").unwrap_or_else(|_| "v1".into());
-            let builder = services::Ghac::default().version(&version);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-        "dbfs" => {
-            // dbfs://path — Databricks DBFS; creds from DATABRICKS_HOST + DATABRICKS_TOKEN
-            let endpoint = std::env::var("DATABRICKS_HOST")
-                .unwrap_or_else(|_| "https://adb-example.azuredatabricks.net".into());
-            let token = std::env::var("DATABRICKS_TOKEN").unwrap_or_default();
-            let builder = services::Dbfs::default()
-                .root("/")
-                .endpoint(&endpoint)
-                .token(&token);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-
-        // ── Distributed / big data ───────────────────────────────────────────
-        "alluxio" => {
-            // alluxio://host:port/path
-            let (hostport, path) = rest.split_once('/').unwrap_or((rest, ""));
-            let endpoint = format!("http://{hostport}");
-            let builder = services::Alluxio::default().root("/").endpoint(&endpoint);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
+        // ── Hadoop ───────────────────────────────────────────────────────────
         "webhdfs" => {
             // webhdfs://host:port/path — user from WEBHDFS_USER
             let (hostport, path) = rest.split_once('/').unwrap_or((rest, ""));
@@ -378,123 +190,7 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             let op = Operator::new(builder)?.finish();
             Ok((op, path.to_string()))
         }
-        "lakefs" => {
-            // lakefs://repo/branch/path — creds from LAKEFS_ACCESS_KEY_ID / LAKEFS_SECRET_ACCESS_KEY
-            let mut parts = rest.splitn(3, '/');
-            let repo = parts.next().unwrap_or("").to_string();
-            let branch = parts.next().unwrap_or("main").to_string();
-            let path = parts.next().unwrap_or("").to_string();
-            let endpoint =
-                std::env::var("LAKEFS_ENDPOINT").unwrap_or_else(|_| "http://localhost:8000".into());
-            let username = std::env::var("LAKEFS_ACCESS_KEY_ID").unwrap_or_default();
-            let password = std::env::var("LAKEFS_SECRET_ACCESS_KEY").unwrap_or_default();
-            let builder = services::Lakefs::default()
-                .endpoint(&endpoint)
-                .username(&username)
-                .password(&password)
-                .repository(&repo)
-                .branch(&branch);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path))
-        }
-
-        // ── Decentralized ────────────────────────────────────────────────────
-        "ipfs" => {
-            // ipfs://CID/path — gateway from IPFS_GATEWAY (default: local node)
-            let gateway =
-                std::env::var("IPFS_GATEWAY").unwrap_or_else(|_| "http://127.0.0.1:8080".into());
-            let builder = services::Ipfs::default().root("/").endpoint(&gateway);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-        "ipmfs" => {
-            // ipmfs:///path — IPFS MFS via local node
-            let endpoint =
-                std::env::var("IPFS_ENDPOINT").unwrap_or_else(|_| "http://127.0.0.1:5001".into());
-            let builder = services::Ipmfs::default().endpoint(&endpoint);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, rest.to_string()))
-        }
-
-        // ── Network KV / databases ────────────────────────────────────────────
-        #[cfg(feature = "rocksdb-storage")]
-        "rocksdb" => {
-            // rocksdb:///path/to/db/key — RocksDB embedded KV
-            // split_once("://") on "rocksdb:///path/to/db/key" gives rest="/path/to/db/key"
-            let (db_path, key) = rest.rsplit_once('/').unwrap_or((rest, ""));
-            let builder = services::Rocksdb::default().datadir(db_path);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, key.to_string()))
-        }
-        "rediss" => {
-            // rediss://host:port/key — Redis with TLS
-            let (hostport, key) = rest.split_once('/').unwrap_or((rest, ""));
-            let redis_url = format!("rediss://{hostport}");
-            let builder = services::Redis::default().endpoint(&redis_url);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, key.to_string()))
-        }
-        "redis" => {
-            // redis://[user:pass@]host:port/key — path after the host:port is the key
-            let (conn, path) = rest.split_once('/').unwrap_or((rest, ""));
-            let redis_url = format!("redis://{conn}");
-            let builder = services::Redis::default().endpoint(&redis_url);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
-        "memcached" => {
-            // memcached://host:port/key
-            let (hostport, path) = rest.split_once('/').unwrap_or((rest, ""));
-            let endpoint = format!("tcp://{hostport}");
-            let builder = services::Memcached::default().endpoint(&endpoint);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
-        "etcd" => {
-            // etcd://host:port/key
-            let (hostport, path) = rest.split_once('/').unwrap_or((rest, ""));
-            let endpoint = format!("http://{hostport}");
-            let builder = services::Etcd::default().endpoints(&endpoint);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
-        "tikv" => {
-            // tikv://pd-host:port/key
-            let (hostport, path) = rest.split_once('/').unwrap_or((rest, ""));
-            let builder = services::Tikv::default().endpoints(vec![hostport.to_string()]);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
-        "mongodb" => {
-            // mongodb://[user:pass@]host/db/collection/key
-            let conn_str = format!("mongodb://{rest}");
-            let mut parts = rest.splitn(3, '/');
-            let _ = parts.next(); // host
-            let database = parts.next().unwrap_or("blazehash");
-            let rest_path = parts.next().unwrap_or("");
-            let (collection, path) = rest_path.split_once('/').unwrap_or((rest_path, ""));
-            let builder = services::Mongodb::default()
-                .connection_string(&conn_str)
-                .database(database)
-                .collection(collection);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
-        "gridfs" => {
-            // gridfs://[user:pass@]host/db/bucket/key
-            let conn_str = format!("mongodb://{rest}");
-            let mut parts = rest.splitn(3, '/');
-            let _ = parts.next(); // host[:port]
-            let database = parts.next().unwrap_or("blazehash");
-            let rest_path = parts.next().unwrap_or("");
-            let (bucket, path) = rest_path.split_once('/').unwrap_or((rest_path, ""));
-            let builder = services::Gridfs::default()
-                .connection_string(&conn_str)
-                .database(database)
-                .bucket(bucket);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, path.to_string()))
-        }
+        // ── SQL (sqlx, pure Rust) ─────────────────────────────────────────────
         "mysql" => {
             // mysql://[user:pass@]host/db/key
             let conn_str = format!("mysql://{rest}");
@@ -526,32 +222,6 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
             let op = Operator::new(builder)?.finish();
             Ok((op, key.to_string()))
         }
-        // "surrealdb" — not wired: pulls async-graphql@7.2.1 (requires rustc 1.89 > our MSRV 1.85)
-        "cloudflare-kv" => {
-            // cloudflare-kv://namespace-id/key
-            let (namespace, key) = rest.split_once('/').unwrap_or((rest, ""));
-            let account_id = std::env::var("CLOUDFLARE_ACCOUNT_ID").unwrap_or_default();
-            let token = std::env::var("CLOUDFLARE_API_TOKEN").unwrap_or_default();
-            let builder = services::CloudflareKv::default()
-                .account_id(&account_id)
-                .api_token(&token)
-                .namespace_id(namespace);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, key.to_string()))
-        }
-        "d1" => {
-            // d1://database-id/key — Cloudflare D1 (SQLite via REST)
-            let (db_id, key) = rest.split_once('/').unwrap_or((rest, ""));
-            let account_id = std::env::var("CLOUDFLARE_ACCOUNT_ID").unwrap_or_default();
-            let token = std::env::var("CLOUDFLARE_API_TOKEN").unwrap_or_default();
-            let builder = services::D1::default()
-                .account_id(&account_id)
-                .token(&token)
-                .database_id(db_id);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, key.to_string()))
-        }
-
         // ── Filesystem / network protocols ───────────────────────────────────
         "webdav" => {
             let host = rest.split('/').next().unwrap_or("");
@@ -587,31 +257,6 @@ pub fn operator_for_uri(uri: &str) -> Result<(Operator, String)> {
                 "ftp:// and ftps:// URIs must be fetched with \
                  crate::remote::ftp::fetch_ftp_bytes(), not operator_for_uri()"
             )
-        }
-        "monoiofs" => {
-            // monoiofs:///abs/path — monoio-based async fs (Linux io_uring only)
-            let full = format!("/{rest}");
-            let (dir, file) = full.rsplit_once('/').unwrap_or(("/", &full));
-            #[cfg(target_os = "linux")]
-            {
-                let builder = services::Monoiofs::default().root(dir);
-                let op = Operator::new(builder)?.finish();
-                Ok((op, file.to_string()))
-            }
-            #[cfg(not(target_os = "linux"))]
-            {
-                let _ = (dir, file);
-                bail!("monoiofs:// is only supported on Linux (io_uring required)")
-            }
-        }
-        "compfs" => {
-            // compfs:///abs/path/to/dir — compio-based async filesystem
-            // rest = "/abs/path/to/dir/file" → root="/abs/path/to/dir", path="file"
-            let full = format!("/{rest}"); // restore leading slash stripped by split_once("://")
-            let (dir, file) = full.rsplit_once('/').unwrap_or(("/", &full));
-            let builder = services::Compfs::default().root(dir);
-            let op = Operator::new(builder)?.finish();
-            Ok((op, file.to_string()))
         }
         "file" => {
             let (dir, file) = rest.rsplit_once('/').unwrap_or(("/", rest));

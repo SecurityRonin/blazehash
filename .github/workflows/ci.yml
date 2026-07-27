@@ -20,23 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
-      # etcd-client (opendal services-etcd) requires protoc at build time
       # mold linker is ~3x faster and far more memory-efficient than lld on Linux —
       # prevents SIGBUS OOM crashes when linking large binaries on 7 GB runners
-      - name: Install protoc + mold (Linux)
+      - name: Install mold (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update -qq && sudo apt-get install -y protobuf-compiler clang mold
+        run: sudo apt-get update -qq && sudo apt-get install -y clang mold
       - name: Use mold linker (Linux)
         if: runner.os == 'Linux'
         run: |
           mkdir -p ~/.cargo
           printf '[target.x86_64-unknown-linux-gnu]\nlinker = "clang"\nrustflags = ["-C", "link-arg=-fuse-ld=mold"]\n' >> ~/.cargo/config.toml
-      - name: Install protoc (macOS)
-        if: runner.os == 'macOS'
-        run: brew install protobuf
-      - name: Install protoc (Windows)
-        if: runner.os == 'Windows'
-        run: choco install protoc --no-progress
       - run: cargo test --all-features
       - run: cargo test --features hashdb
       - run: cargo test --features yara
@@ -57,8 +50,6 @@ jobs:
         with:
           components: llvm-tools-preview
       - uses: taiki-e/install-action@a402910a723481c4c80d006d75298c796a9c8695 # cargo-llvm-cov
-      - name: Install protoc
-        run: sudo apt-get update -qq && sudo apt-get install -y protobuf-compiler
       - name: Generate coverage
         run: cargo llvm-cov --all-features --lcov --output-path lcov.info
       - name: Upload to Codecov
@@ -73,8 +64,6 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: dtolnay/rust-toolchain@1.88.0
-      - name: Install protoc
-        run: sudo apt-get update -qq && sudo apt-get install -y protobuf-compiler
       - run: cargo check --all-features
 
   deny:
