@@ -24,6 +24,50 @@ fn sample_result() -> FileHashResult {
     }
 }
 
+/// A filename is chosen by whoever wrote the file, not by the examiner. Run
+/// over a directory (`blazehash *`), the path renders relative, so a file named
+/// `=cmd|…` puts the formula lead-in at the start of the cell and it executes
+/// the moment the examiner opens the CSV in a spreadsheet.
+#[test]
+fn csv_filename_neutralizes_formula_lead_ins() {
+    for lead in ['=', '+', '-', '@'] {
+        let mut r = sample_result();
+        r.path = PathBuf::from(format!("{lead}cmd|'-c calc'!A1.txt"));
+        let algos = vec![Algorithm::Blake3];
+        let mut buf = Vec::new();
+        write_csv(&mut buf, &[r], &algos).unwrap();
+        let output = String::from_utf8(buf).unwrap();
+        let row = output.lines().nth(1).unwrap();
+        let filename = row.rsplit(',').next().unwrap();
+        assert!(
+            !filename.starts_with(lead),
+            "unguarded formula filename {filename:?} in row: {row}"
+        );
+    }
+}
+
+/// A filename may legally contain a comma or a quote on every platform the tool
+/// runs on. Emitted raw, it silently shifts every later column.
+#[test]
+fn csv_filename_with_comma_stays_one_field() {
+    let mut r = sample_result();
+    r.path = PathBuf::from("/evidence/report,final.txt");
+    let algos = vec![Algorithm::Blake3];
+    let mut buf = Vec::new();
+    write_csv(&mut buf, &[r], &algos).unwrap();
+    let output = String::from_utf8(buf).unwrap();
+    let row = output.lines().nth(1).unwrap();
+    let quoted = "\"/evidence/report,final.txt\"";
+    let prefix = row.strip_suffix(quoted).unwrap_or_else(|| {
+        panic!("comma-bearing filename must be quoted as {quoted}: {row}");
+    });
+    assert_eq!(
+        prefix.matches(',').count(),
+        2,
+        "only the two column delimiters may precede the filename field: {row}"
+    );
+}
+
 #[test]
 fn csv_output_has_headers() {
     let results = vec![sample_result()];
