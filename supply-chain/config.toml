@@ -22,9 +22,6 @@ audit-as-crates-io = false
 [policy.blazehash-core]
 audit-as-crates-io = false
 
-[policy.ewf]
-audit-as-crates-io = false
-
 [[exemptions.aes]]
 version = "0.8.4"
 criteria = "safe-to-deploy"
@@ -835,10 +832,6 @@ criteria = "safe-to-deploy"
 
 [[exemptions.event-listener-strategy]]
 version = "0.5.4"
-criteria = "safe-to-deploy"
-
-[[exemptions.ewf]]
-version = "0.2.3"
 criteria = "safe-to-deploy"
 
 [[exemptions.fail]]
