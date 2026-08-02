@@ -8,7 +8,7 @@
 
 ## Licence
 
-blazehash is released under the [MIT Licence](https://github.com/SecurityRonin/blazehash/blob/main/LICENSE). You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, subject to the licence terms.
+blazehash is released under the [Apache License 2.0](https://github.com/SecurityRonin/blazehash/blob/main/LICENSE). You may use, modify, and distribute it subject to the terms of that licence.
 
 ---
 
