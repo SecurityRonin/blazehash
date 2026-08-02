@@ -111,8 +111,8 @@ user-login = "Mytherin"
 user-name = "Mark"
 
 [[publisher.ewf]]
-version = "0.2.3"
-when = "2026-06-26"
+version = "0.4.7"
+when = "2026-07-25"
 user-id = 347968
 user-login = "h4x0r"
 user-name = "Albert Hui"
