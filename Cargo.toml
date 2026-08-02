@@ -112,7 +112,7 @@ ed25519-dalek = { version = "2", features = ["rand_core"] }
 rand = "0.8"
 argon2 = "0.5"
 rpassword = "6"
-ewf = { version = "0.2", optional = true }
+ewf = { version = "0.4", optional = true }
 wgpu = { version = "22", optional = true }
 pollster = { version = "0.3", optional = true }
 toml = "0.8"
