@@ -117,6 +117,13 @@ user-id = 105137
 user-login = "Mytherin"
 user-name = "Mark"
 
+[[publisher.jsonguard]]
+version = "0.2.4"
+when = "2026-07-25"
+user-id = 347968
+user-login = "h4x0r"
+user-name = "Albert Hui"
+
 [[publisher.libduckdb-sys]]
 version = "1.10505.0"
 when = "2026-07-22"
