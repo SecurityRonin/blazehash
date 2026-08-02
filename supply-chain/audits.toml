@@ -15,6 +15,12 @@ user-id = 105137 # Mark (Mytherin)
 start = "2025-02-12"
 end = "2027-07-26"
 
+[[trusted.jsonguard]]
+criteria = "safe-to-deploy"
+user-id = 347968 # Albert Hui (h4x0r)
+start = "2026-05-21"
+end = "2027-08-02"
+
 [[trusted.libduckdb-sys]]
 criteria = "safe-to-deploy"
 user-id = 105137 # Mark (Mytherin)
