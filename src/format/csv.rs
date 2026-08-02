@@ -36,7 +36,11 @@ pub fn write_csv<W: Write>(
                 None => write!(w, ",")?,
             }
         }
-        writeln!(w, ",{}", result.path.display())?;
+        // The only attacker-chosen column: a filename may carry a delimiter, a
+        // quote, or a spreadsheet formula lead-in. `jsonguard` owns both the
+        // RFC 4180 quoting and the formula guard for the whole fleet.
+        let filename = jsonguard::csv_field(result.path.display().to_string().as_str());
+        writeln!(w, ",{}", filename.value)?;
     }
 
     Ok(())

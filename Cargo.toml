@@ -7,6 +7,8 @@ resolver = "2"
 # here, members write `<dep>.workspace = true`.
 [workspace.dependencies]
 anyhow = "1"
+# Output sanitization: RFC 4180 CSV quoting + spreadsheet formula guard.
+jsonguard = "0.2"
 digest = "0.10"
 hex = "0.4"
 blake3 = "1"
@@ -81,6 +83,7 @@ blake3 = { workspace = true }
 clap = { version = "4", features = ["derive"] }
 digest = { workspace = true }
 hex = { workspace = true }
+jsonguard = { workspace = true }
 md-5 = { workspace = true }
 memmap2 = "0.9"
 rayon = "1"
