@@ -28,6 +28,21 @@ features = [
 [advisories]
 version = 2
 ignore = [
+    # RUSTSEC-2026-0222 (wasmtime, "Stores can mix up type indices between engines").
+    # Reached only through yara-x, which compiles YARA rules to WASM internally;
+    # blazehash never executes untrusted WASM itself.
+    #
+    #   resolved:      wasmtime 25.0.3  <- yara-x 0.9.0
+    #   patched:       >=24.0.12,<25 | >=36.0.13,<37 | >=46.0.2,<47 | >=47.0.3
+    #   latest yara-x 1.19.0 requires wasmtime ^43.0.2 — not a patched line
+    #
+    # So no yara-x release resolves to a patched wasmtime, and upgrading yara-x
+    # does not clear this. Pinning to issen's wasmtime does not help either: that
+    # is 26.0.1, equally outside every patched range.
+    # CVSS AV:L/AC:H/PR:H/UI:R — local, high complexity, high privilege, user
+    # interaction.
+    # REMOVE WHEN: yara-x depends on wasmtime >= 46.0.2 (or >= 47.0.3).
+    { id = "RUSTSEC-2026-0222", reason = "wasmtime via yara-x; no yara-x release resolves to a patched wasmtime line (latest 1.19.0 needs ^43.0.2; patched are 24.0.12+/36.0.13+/46.0.2+/47.0.3+)" },
     # paste v1 is unmaintained but is a transitive dep of metal (wgpu-hal, GPU feature).
     # No action available until wgpu updates its metal dependency.
     "RUSTSEC-2024-0436",
