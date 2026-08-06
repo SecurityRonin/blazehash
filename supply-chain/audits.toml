@@ -3,6 +3,12 @@
 
 [audits]
 
+[[trusted.blazehash-core]]
+criteria = "safe-to-deploy"
+user-id = 347968 # Albert Hui (h4x0r)
+start = "2026-06-16"
+end = "2027-08-06"
+
 [[trusted.comfy-table]]
 criteria = "safe-to-deploy"
 user-id = 70603 # Arne  Christian Beer (Nukesor)
@@ -19,7 +25,25 @@ end = "2027-07-26"
 criteria = "safe-to-deploy"
 user-id = 347968 # Albert Hui (h4x0r)
 start = "2026-03-05"
-end = "2027-08-02"
+end = "2027-08-06"
+
+[[trusted.forensicnomicon]]
+criteria = "safe-to-deploy"
+user-id = 347968 # Albert Hui (h4x0r)
+start = "2026-06-05"
+end = "2027-08-06"
+
+[[trusted.forensicnomicon-core]]
+criteria = "safe-to-deploy"
+user-id = 347968 # Albert Hui (h4x0r)
+start = "2026-06-28"
+end = "2027-08-06"
+
+[[trusted.forensicnomicon-data]]
+criteria = "safe-to-deploy"
+user-id = 347968 # Albert Hui (h4x0r)
+start = "2026-06-28"
+end = "2027-08-06"
 
 [[trusted.jsonguard]]
 criteria = "safe-to-deploy"
@@ -32,6 +56,12 @@ criteria = "safe-to-deploy"
 user-id = 105137 # Mark (Mytherin)
 start = "2025-02-12"
 end = "2027-07-26"
+
+[[trusted.safe-read]]
+criteria = "safe-to-deploy"
+user-id = 347968 # Albert Hui (h4x0r)
+start = "2026-07-15"
+end = "2027-08-06"
 
 [[trusted.ureq]]
 criteria = "safe-to-deploy"
