@@ -115,9 +115,16 @@ user-id = 105137
 user-login = "Mytherin"
 user-name = "Mark"
 
+[[publisher.euclid]]
+version = "0.22.14"
+when = "2026-03-18"
+user-id = 1281
+user-login = "nical"
+user-name = "Nicolas Silva"
+
 [[publisher.ewf]]
-version = "0.4.7"
-when = "2026-07-25"
+version = "0.4.9"
+when = "2026-08-06"
 user-id = 347968
 user-login = "h4x0r"
 user-name = "Albert Hui"
@@ -158,6 +165,13 @@ when = "2025-05-07"
 user-id = 3726
 user-login = "cfallin"
 user-name = "Chris Fallin"
+
+[[publisher.safe-read]]
+version = "0.2.2"
+when = "2026-08-06"
+user-id = 347968
+user-login = "h4x0r"
+user-name = "Albert Hui"
 
 [[publisher.unicode-normalization]]
 version = "0.1.25"
@@ -852,6 +866,16 @@ notes = """
 This major version update has a few minor breaking changes but everything
 this crate has to do with iterators and `Result` and such. No `unsafe` or
 anything like that, all looks good.
+"""
+
+[[audits.bytecode-alliance.audits.fixedbitset]]
+who = "Nick Fitzgerald <fitzgen@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.4.2"
+notes = """
+No ambient I/O. Uses some `unsafe`, but the uses look good and are guarded by
+relevant assertions, although could use some comments and some slight
+refactoring into helpers to dedupe unsafe blocks in my personal opinion.
 """
 
 [[audits.bytecode-alliance.audits.foldhash]]
@@ -1788,28 +1812,6 @@ Previously reviewed during security review and the audit is grandparented in.
 """
 aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
 
-[[audits.google.audits.strum]]
-who = "danakj@chromium.org"
-criteria = "safe-to-deploy"
-version = "0.25.0"
-notes = """
-Reviewed in https://crrev.com/c/5171063
-
-Previously reviewed during security review and the audit is grandparented in.
-"""
-aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
-
-[[audits.google.audits.strum_macros]]
-who = "danakj@chromium.org"
-criteria = "safe-to-deploy"
-version = "0.25.3"
-notes = """
-Reviewed in https://crrev.com/c/5171063
-
-Previously reviewed during security review and the audit is grandparented in.
-"""
-aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
-
 [[audits.google.audits.synstructure]]
 who = "Manish Goregaokar <manishearth@google.com>"
 criteria = "safe-to-deploy"
@@ -1861,6 +1863,15 @@ start = "2020-07-20"
 end = "2023-05-04"
 renew = false
 notes = "I've reviewed every source contribution that was neither authored nor reviewed by Mozilla."
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
+[[audits.mozilla.wildcard-audits.euclid]]
+who = "Nicolas Silva <nical@fastmail.com>"
+criteria = "safe-to-deploy"
+user-id = 1281 # Nicolas Silva (nical)
+start = "2019-03-14"
+end = "2027-01-15"
+notes = "I wrote most of the commits in the euclid reprository and review every change that is not produced by me."
 aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
 
 [[audits.mozilla.wildcard-audits.unicode-normalization]]
@@ -2073,6 +2084,12 @@ who = "Bobby Holley <bobbyholley@gmail.com>"
 criteria = "safe-to-deploy"
 version = "1.0.7"
 notes = "Simple hasher implementation with no unsafe code."
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.foldhash]]
+who = "Erich Gubler <erichdongubler@gmail.com>"
+criteria = "safe-to-deploy"
+delta = "0.1.5 -> 0.2.0"
 aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
 
 [[audits.mozilla.audits.foreign-types]]
@@ -2311,6 +2328,47 @@ criteria = "safe-to-deploy"
 delta = "0.28.0 -> 0.29.0"
 aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
 
+[[audits.mozilla.audits.nix]]
+who = "Gabriele Svelto <gsvelto@mozilla.com>"
+criteria = "safe-to-deploy"
+delta = "0.15.0 -> 0.25.0"
+notes = "Plenty of new bindings but also several important bug fixes (including buffer overflows). New unsafe sections are restricted to wrappers and are no more dangerous than calling the C functions."
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.nix]]
+who = "Mike Hommey <mh+mozilla@glandium.org>"
+criteria = "safe-to-deploy"
+delta = "0.25.0 -> 0.25.1"
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.nix]]
+who = "Mike Hommey <mh+mozilla@glandium.org>"
+criteria = "safe-to-deploy"
+delta = "0.25.1 -> 0.26.2"
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.nix]]
+who = "Gabriele Svelto <gsvelto@mozilla.com>"
+criteria = "safe-to-deploy"
+delta = "0.26.2 -> 0.27.1"
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.nix]]
+who = "Alex Franchuk <afranchuk@mozilla.com>"
+criteria = "safe-to-deploy"
+delta = "0.27.1 -> 0.28.0"
+notes = """
+Many new features and bugfixes. Obviously there's a lot of unsafe code calling
+libc, but the usage looks correct.
+"""
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.nix]]
+who = "Alex Franchuk <afranchuk@mozilla.com>"
+criteria = "safe-to-deploy"
+delta = "0.28.0 -> 0.29.0"
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
 [[audits.mozilla.audits.num-conv]]
 who = "Alex Franchuk <afranchuk@mozilla.com>"
 criteria = "safe-to-deploy"
@@ -2485,18 +2543,6 @@ aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-ch
 who = "Ben Dean-Kawamura <bdk@mozilla.com>"
 criteria = "safe-to-deploy"
 delta = "0.10.0 -> 0.11.1"
-aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
-
-[[audits.mozilla.audits.strum]]
-who = "Teodor Tanasoaia <ttanasoaia@mozilla.com>"
-criteria = "safe-to-deploy"
-delta = "0.25.0 -> 0.26.3"
-aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
-
-[[audits.mozilla.audits.strum_macros]]
-who = "Teodor Tanasoaia <ttanasoaia@mozilla.com>"
-criteria = "safe-to-deploy"
-delta = "0.25.3 -> 0.26.4"
 aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
 
 [[audits.mozilla.audits.synstructure]]

@@ -28,6 +28,31 @@ features = [
 [advisories]
 version = 2
 ignore = [
+    # RUSTSEC-2026-0222 (wasmtime, "Stores can mix up type indices between engines").
+    #
+    # NOT EXPOSED — the precondition is structurally unreachable here, which is a
+    # stronger claim than "we cannot upgrade" and is the reason this is ignored.
+    #
+    # The advisory states the bug "is not triggerable by guest WebAssembly
+    # programs. It requires the embedder to create two `Engine`s and mix objects
+    # between them." blazehash is not the embedder — yara-x is, and it holds a
+    # single process-wide engine:
+    #
+    #     src/wasm/mod.rs:726
+    #     pub(crate) static ref ENGINE: Engine = Engine::new(&CONFIG).unwrap();
+    #
+    # One lazy_static Engine means there is no second Engine to mix objects with,
+    # so the cross-engine index confusion cannot occur. (Identical in yara-x
+    # 0.12.0, which issen resolves.) blazehash also never executes untrusted
+    # WASM; wasmtime is present only because yara-x compiles YARA rules to WASM.
+    #
+    # Upgrading is separately unavailable: resolved wasmtime is 25.0.3 via yara-x
+    # 0.9.0, patched lines are 24.0.12+/36.0.13+/46.0.2+/47.0.3+, and the latest
+    # yara-x (1.19.0) requires ^43.0.2 — also not a patched line.
+    # CVSS 3.8 Low, AV:L/AC:H/PR:H/UI:R.
+    # REMOVE WHEN: yara-x depends on wasmtime >= 46.0.2, or yara-x gains a second
+    # Engine (which would make the precondition reachable and this reason void).
+    { id = "RUSTSEC-2026-0222", reason = "wasmtime via yara-x; NOT EXPOSED — advisory needs two Engines mixed, yara-x holds one lazy_static singleton; upgrade also unavailable (no yara-x release reaches a patched line)" },
     # paste v1 is unmaintained but is a transitive dep of metal (wgpu-hal, GPU feature).
     # No action available until wgpu updates its metal dependency.
     "RUSTSEC-2024-0436",
