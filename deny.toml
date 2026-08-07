@@ -31,23 +31,11 @@ ignore = [
     # paste v1 is unmaintained but is a transitive dep of metal (wgpu-hal, GPU feature).
     # No action available until wgpu updates its metal dependency.
     "RUSTSEC-2024-0436",
-    # instant v0.1.13 is unmaintained (author recommends web-time) — an
-    # unmaintained-ONLY advisory, not a vulnerability, with no reachable defect in a
-    # hashing workload. In the audited graph it is reachable solely via the GPU
-    # feature (wgpu 22 -> parking_lot 0.11.2 -> instant); parking_lot is held on the
-    # 0.11 line by sled (opendal/remote stack, which is excluded from this audit).
-    # No safe upgrade exists (instant is abandoned; parking_lot 0.12 dropped it), and
-    # the only removals — a wgpu major bump (rewrites the GPU backend) or updating the
-    # excluded opendal/sled remote tree — are out of scope for this change. Remove
-    # this ignore when wgpu updates its parking_lot dependency off the 0.11 line.
-    "RUSTSEC-2024-0384",
     # bincode v1 is unmaintained (RUSTSEC-2025-0141) but is only used by the optional
     # `nsrl` feature for bloom filter serialization. No drop-in v2 replacement exists
     # for the bloomfilter crate's serde output. Will migrate when bloomfilter updates.
     "RUSTSEC-2025-0141",
 
-    # fxhash unmaintained — transitive dep via yara-x.
-    "RUSTSEC-2025-0046",
     # rustls-pemfile unmaintained — transitive dep via yara-x.
     "RUSTSEC-2026-0098",
     # rustls 0.21 cert validation bugs — transitive dep via yara-x.
@@ -55,29 +43,21 @@ ignore = [
     # RSA Marvin Attack / timing side-channel — transitive via yara-x.
     # No direct key-recovery risk in our hashing workload (we never do RSA decryption).
     "RUSTSEC-2023-0071",
-    # tonic advisory — transitive via yara-x.
-    "RUSTSEC-2025-0118",
 
     # rustls-webpki CRL parsing panic — transitive via yara-x.
     # No CRL parsing performed in blazehash; only hash computation paths are used.
     "RUSTSEC-2026-0104",
 
-    # Wasmtime vulnerabilities — all transitive via yara-x → wasmtime.
-    # We do not run untrusted Wasm; only YARA rules execute in the Cranelift sandbox.
-    # Will resolve when yara-x upgrades its wasmtime dependency.
-    "RUSTSEC-2026-0020",
-    "RUSTSEC-2026-0021",
-    "RUSTSEC-2026-0085",
-    "RUSTSEC-2026-0086",
-    "RUSTSEC-2026-0087",
-    "RUSTSEC-2026-0088",
-    "RUSTSEC-2026-0089",
-    "RUSTSEC-2026-0091",
-    "RUSTSEC-2026-0092",
-    "RUSTSEC-2026-0093",
-    "RUSTSEC-2026-0094",
-    "RUSTSEC-2026-0095",
-    "RUSTSEC-2026-0096",
+    # NOTE: the thirteen Wasmtime ignores that used to live here
+    # (RUSTSEC-2026-0020/0021/0085/0086/0087/0088/0089/0091/0092/0093/0094/0095/0096)
+    # said "will resolve when yara-x upgrades its wasmtime dependency". That has now
+    # happened — yara-x ~1.7 puts us on wasmtime 36.0.13, a patched release — so the
+    # ignores were deleted rather than carried forward. Same for the fxhash
+    # (RUSTSEC-2025-0046) and tonic (RUSTSEC-2025-0118) ignores, whose crates left
+    # the audited graph in that upgrade, and the instant ignore (RUSTSEC-2024-0384),
+    # which cargo-deny had already been reporting as advisory-not-detected before
+    # this change. cargo-deny confirms every remaining entry above is still
+    # encountered; none of them is a stale rubber stamp.
 ]
 
 [licenses]
@@ -99,6 +79,14 @@ allow = [
     "Apache-2.0 WITH LLVM-exception",
     # Used by Substrait/Arrow ecosystem crates pulled in by yara-x
     "CDLA-Permissive-2.0",
+    # libbz2-rs-sys (the pure-Rust bzip2 implementation), reached as
+    # yara-x -> zip -> bzip2 -> libbz2-rs-sys. bzip2-1.0.6 is the original
+    # bzip2/libbzip2 licence: a BSD-style permissive licence — attribution and
+    # a no-misrepresentation clause, no copyleft and no source-disclosure
+    # obligation — so it sits in the same class as the BSD-2/3-Clause and Zlib
+    # entries already allowed above. FSF-recognised as a free, GPL-compatible
+    # licence. Arrived with the yara-x 0.9 -> 1.7 upgrade in this change.
+    "bzip2-1.0.6",
 ]
 
 [bans]
