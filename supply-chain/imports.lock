@@ -123,8 +123,8 @@ user-login = "nical"
 user-name = "Nicolas Silva"
 
 [[publisher.ewf]]
-version = "0.4.9"
-when = "2026-08-06"
+version = "0.4.7"
+when = "2026-07-25"
 user-id = 347968
 user-login = "h4x0r"
 user-name = "Albert Hui"
@@ -165,13 +165,6 @@ when = "2025-05-07"
 user-id = 3726
 user-login = "cfallin"
 user-name = "Chris Fallin"
-
-[[publisher.safe-read]]
-version = "0.2.2"
-when = "2026-08-06"
-user-id = 347968
-user-login = "h4x0r"
-user-name = "Albert Hui"
 
 [[publisher.unicode-normalization]]
 version = "0.1.25"
