@@ -119,7 +119,7 @@ toml = "0.8"
 dirs = "5"
 rusqlite = { version = "0.31", optional = true, features = ["bundled"] }
 bloomfilter = { version = "1", optional = true, features = ["serde"] }
-yara-x = { version = "0.9", optional = true }
+yara-x = { version = "~1.7", optional = true }
 minijinja = { version = "2", optional = true }
 parquet = { version = "54", optional = true }
 arrow = { version = "54", optional = true }
