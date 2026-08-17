@@ -2292,17 +2292,18 @@ dependencies = [
 
 [[package]]
 name = "ewf"
-version = "0.4.7"
+version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9f0aae36d49a5b16a1353b4b80f7d0090666ca19dd910aed7b0ab1d35bf8f60"
+checksum = "d28735206fd9d022cc1fba6a686f9c8a64f2561f4e5ae8b7f08da3528bf7594d"
 dependencies = [
  "adler2",
  "flate2",
  "glob",
  "log",
- "lru 0.12.5",
+ "lru",
  "md-5",
  "rayon",
+ "safe-read",
  "sha-1",
  "thiserror 2.0.18",
 ]
@@ -2916,8 +2917,6 @@ version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1"
 dependencies = [
- "allocator-api2",
- "equivalent",
  "foldhash 0.1.5",
  "serde",
 ]
@@ -4011,15 +4010,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "605d9697bcd5ef3a42d38efc51541aa3d6a4a25f7ab6d1ed0da5ac632a26b470"
 dependencies = [
  "logos-codegen",
-]
-
-[[package]]
-name = "lru"
-version = "0.12.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "234cf4f4a04dc1f57e24b96cc0cd600cf2af460d4161ac5ecdd0af8e1f3b2a38"
-dependencies = [
- "hashbrown 0.15.5",
 ]
 
 [[package]]
@@ -5559,7 +5549,7 @@ dependencies = [
  "hashbrown 0.17.0",
  "itertools",
  "kasuari",
- "lru 0.18.2",
+ "lru",
  "palette",
  "serde",
  "strum 0.28.0",
@@ -6077,6 +6067,12 @@ name = "ryu"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f"
+
+[[package]]
+name = "safe-read"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67fa5cb4ac7edaf64ee1843699d72fb9c72b52411d4ec5e7142340be61ce6c09"
 
 [[package]]
 name = "salsa20"
